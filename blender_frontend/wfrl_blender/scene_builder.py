@@ -23,8 +23,13 @@ def _link(collection, obj):
 def _finish(obj, bevel: float = 0.0, smooth: bool = False):
     """Apply small presentation modifiers without baking the mesh."""
     if smooth and hasattr(obj.data, "polygons"):
-        for polygon in obj.data.polygons:
-            polygon.use_smooth = len(polygon.vertices) <= 4
+        import numpy as np
+
+        # Quads and triangles shade smooth; larger end caps stay flat.
+        polygons = obj.data.polygons
+        sides = np.empty(len(polygons), dtype=np.int32)
+        polygons.foreach_get("loop_total", sides)
+        polygons.foreach_set("use_smooth", sides <= 4)
     if bevel:
         modifier = obj.modifiers.new("WFRL.EdgeSoftening", "BEVEL")
         modifier.width = bevel

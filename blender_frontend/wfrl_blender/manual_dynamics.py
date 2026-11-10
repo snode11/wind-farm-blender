@@ -349,12 +349,11 @@ def start(scene, job, turbine, seed=None):
     job['dynamics_seed'] = random.randrange(1 << 30) if seed is None else int(seed)
     entry = next(e for e in scene.wfrl_manual_turbines if e.turbine_id == turbine)
     job['dynamics_signals'] = make_signals(job['dynamics_seed'], [turbine])
-    job['dynamics'] = {}
     job['dynamics_rig'] = dict(turbine=turbine, rig=_attach(entry, _bake(entry.blade1_object)))
 
 
 def apply(scene, job, frame, poses):
-    """Pose bends and tower lean for ``frame``. ``poses`` maps turbine id to (rpm, azimuth, pitches)."""
+    """Apply blade bends and tower lean and return the frame's sample."""
     state = job.get('dynamics_rig')
     if not state:
         return
@@ -363,7 +362,7 @@ def apply(scene, job, frame, poses):
     rpm, azimuth, pitches = poses[tid]
     tips, tower = sample(job['dynamics_signals'][tid], rpm, azimuth, pitches, frame / job['plan']['fps'])
     _pose(entry, state['rig'], tips, tower)
-    job['dynamics'][frame] = {tid: dict(tip_flap_m=[round(v, 4) for v in tips], tower_top_m=round(tower, 4))}
+    return {tid: dict(tip_flap_m=[round(v, 4) for v in tips], tower_top_m=round(tower, 4))}
 
 
 def end(job):
@@ -375,7 +374,7 @@ def end(job):
 
 
 def sidecar(job, data):
-    """Record the model and per-frame values in a video sidecar."""
+    """Record the structural motion model and seed in the sidecar header."""
     if 'dynamics_seed' not in job:
         return
     data['structural_motion'] = dict(
@@ -389,10 +388,6 @@ def sidecar(job, data):
                'load * (common + %.2f cos(azimuth_b + %.0f deg) + blade imbalance + per-blade term); bend shape '
                '(3 s^2 - s^3) / 2 along the span; azimuth_b 0 = blade up' % (SHEAR_TIP_M, SHEAR_PHASE_DEG)),
         tower='rigid lean of the whole turbine about the tower base giving the tower-top fore-aft deviation')
-    for row in data['samples']:
-        values = job['dynamics'].get(row['frame'])
-        if values:
-            row['structural_motion'] = values
 
 
 # Live viewport: every turbine on the manual-control clock ---------------------------------------

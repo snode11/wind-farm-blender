@@ -30,7 +30,7 @@ description: Use when developing, debugging, testing, or documenting Wind Farm B
 - 区分工作区源码、构建 ZIP、公开附件与实际安装；按所测对象确认模块来源和载荷身份。版本号、源码同步或其他载荷的通过记录不代替当前对象核对，具体入口见[运行来源](references/verification.md#运行来源)。
 - 场景与消费者保留各自归属，运动、读数和统计按对应时钟工作；数据缺失、无效或过期时保留其状态。手动运动、合成外形与缺陷、显示增强的能力按专题说明，不推定物理变化、新观测或实体安全效果。
 - 软件合同、后台脚本、可见窗口、真实输入、安装载荷、完整媒体、科学精度与现场效果分别判定。源采样、显示时间轴和实际 FPS 分开；`POST_PIXEL` 只证明视口绘制，理想射线与瞬时成像不证明硬件采样、曝光或保护延迟。
-- 扩展源码的文本读写显式使用 UTF-8，JSON 结果与状态文件经 `atomic_json.write_json` 原子写入，不另写局部实现；约定与守卫测试见[实现说明](../../../blender_frontend/README.md#修改安装与验证)。
+- 扩展源码的文本读写显式使用 UTF-8。JSON 结果与状态文件使用 `atomic_json.write_json`，流式数组使用同模块的 `write_json_array`，共用原子写入逻辑。约定与守卫测试见[实现说明](../../../blender_frontend/README.md#修改安装与验证)。
 - 功能开发与修复按[验证入口](references/verification.md)选择与改动直接相关的必要检查，报告实际对象、环境、结果及未覆盖范围。纯文档与 skill 只做静态检查；普通发布遵守 [AGENTS.md 的默认范围](../../../AGENTS.md#普通发布的默认范围)，不因源码修改或缺少新版验证记录追加回归、隔离安装或 CI 等待。
 - 需要查看、点击或输入应用／浏览器界面时，遵循适用的 Computer Use 默认委派规则；可用的专用工具、连接器或 API 优先。
 

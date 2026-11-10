@@ -5,7 +5,7 @@ frame numbers, so every frame is reproducible and independent of the viewport
 timer. Turbine motion is rigid; with structural motion enabled, manual_dynamics
 adds an illustrative blade bend and tower lean to each exported frame.
 """
-import json
+from contextlib import ExitStack, contextmanager
 import math
 import os
 from pathlib import Path
@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import time
 
 import bpy
 from bpy.app.handlers import persistent
@@ -22,7 +23,7 @@ from bpy_extras.io_utils import ExportHelper
 from mathutils import Matrix, Vector
 import numpy as np
 
-from . import cameras, manual_control, manual_dynamics, video_output
+from . import atomic_json, cameras, manual_control, manual_dynamics, video_output
 from .preferences import get_preferences
 from .manual_motion import pitch_at
 from .turbine_geometry import DEFAULT_MODEL, MODELS, blade_mesh
@@ -140,7 +141,8 @@ def _side_camera_name(scene, turbine, side):
 
 def _shaft_frame(entry):
     """Hub point and unit shaft axis in YawRoot-local coordinates."""
-    local = _world(entry.yaw_object).inverted() @ _world(entry.rotor_object)
+    rotor = entry.rotor_object
+    local = rotor.matrix_parent_inverse @ rotor.matrix_basis
     return local.translation.copy(), local.to_3x3().col[0].normalized()
 
 
@@ -510,13 +512,13 @@ def _tip_local(blade):
     return _TIPS[key]
 
 
-def min_shake_tilt(camera, entry):
+def min_shake_tilt(camera, entry, *, camera_world=None):
     """Smallest tilt (deg) that keeps every tip near the frame below the image midline.
 
     Tilting a camera about its local X by t shifts the vertical view angle
     psi = atan2(y, -z) of every point by exactly -t, and a pan about local Y
     leaves the sign of y unchanged, so the bound is max(psi_tip) + margin."""
-    inverse = _world(camera).inverted()
+    inverse = (_world(camera) if camera_world is None else camera_world).inverted()
     half = math.tan(camera.data.angle_x / 2) * 1.15
     bound = -math.inf
     for index in range(1, 4):
@@ -528,33 +530,46 @@ def min_shake_tilt(camera, entry):
     return bound
 
 
-def apply_shake(scene, job, frame):
+def apply_shake(scene, job, frame, rpm):
     """Pose the export cameras for ``frame``: base pose turned by the clamped shake."""
     rig = job.get('rig')
     if not rig:
-        return
+        return 0., 0.
     entry = _entry(scene, job['turbine'])
-    tilt, pan = shake_signal(entry.rpm, frame / job['plan']['fps'], job['shake_seed'])
-    for camera, base in rig:
+    tilt, pan = shake_signal(rpm, frame / job['plan']['fps'], job['shake_seed'])
+    for camera, base, _transform in rig:
         camera.matrix_basis = base
-    tilt = max([tilt, *(min_shake_tilt(camera, entry) for camera, _base in rig)])
+    center = rig[0][0]
+    yaw_world = _world(entry.yaw_object)
+    tilt = max(tilt, min_shake_tilt(center, entry),
+               *(min_shake_tilt(center, entry, camera_world=yaw_world @ side_pose)
+                 for side_pose in job['shake_side_poses']))
     turn = Matrix.Rotation(math.radians(tilt), 4, 'X') @ Matrix.Rotation(math.radians(pan), 4, 'Y')
-    for camera, base in rig:
+    for camera, base, _transform in rig:
         camera.matrix_basis = base @ turn
-    job['shake'][frame] = (round(tilt, 6), round(pan, 6))
+    return round(tilt, 6), round(pan, 6)
 
 
-def _start_shake(job, turbine, cameras_list, seed=None):
-    job['turbine'] = turbine
-    job['rig'] = [(camera, camera.matrix_basis.copy()) for camera in cameras_list]
+def _start_shake(job, entry, cameras_list, seed=None):
+    job['turbine'] = entry.turbine_id
+    rig = job['rig'] = []
+    for camera in cameras_list:
+        rotation = {'QUATERNION': 'rotation_quaternion', 'AXIS_ANGLE': 'rotation_axis_angle'}.get(
+            camera.rotation_mode, 'rotation_euler')
+        # Native transform components allow exact restoration after posing the camera.
+        transform = {name: tuple(getattr(camera, name)) for name in ('location', rotation, 'scale')}
+        rig.append((camera, camera.matrix_basis.copy(), transform))
+    # All export layouts use the same three reference poses for the shared tilt bound.
+    center = cameras_list[0]
+    job['shake_side_poses'] = tuple(side_camera_matrix(center, entry, side) for side in ('Left', 'Right'))
     job['shake_seed'] = random.randrange(1 << 30) if seed is None else int(seed)
-    job['shake'] = {}
 
 
 def _end_shake(job):
-    for camera, base in job.pop('rig', None) or ():
+    for camera, _base, transform in job.pop('rig', None) or ():
         try:
-            camera.matrix_basis = base
+            for name, value in transform.items():
+                setattr(camera, name, value)
         except ReferenceError:
             pass
 
@@ -689,8 +704,6 @@ def _shake_sidecar(job, sidecar):
         tip_margin_deg=SHAKE_TIP_MARGIN_DEG,
         convention='tilt about camera local X, then pan about camera local Y, applied to every '
                    'camera of the rig; tilt clamped so blade tips stay below the image midline')
-    for row in sidecar['samples']:
-        row['camera_shake_deg'] = list(job['shake'].get(row['frame'], (0.0, 0.0)))
 
 
 def _plan(scene, fps, frames, from_start):
@@ -716,24 +729,33 @@ def pose_at(item, time_s):
 
 def apply_frame(scene, plan, time_s, *, labels=True):
     """Pose every turbine at ``time_s`` of ``plan`` and refresh the blade-number box."""
+    poses = {}
     for item in plan['turbines']:
-        entry = _entry(scene, item['turbine'])
+        turbine = item['turbine']
+        entry = _entry(scene, turbine)
         azimuth, pitches = pose_at(item, time_s)
         entry.rotor_object.rotation_mode = 'XYZ'
         entry.rotor_object.rotation_euler.x = math.radians(azimuth)
         manual_control.apply_pitch(entry, pitches)
+        poses[turbine] = item['rpm'], azimuth, pitches
     update_labels(scene, visible=labels)
+    return poses
 
 
 def apply_motion(scene, job, frame):
-    """Rotor and pitch, optional structural motion, then camera shake for ``frame``."""
+    """Apply the export pose and return the corresponding sidecar sample."""
     plan = job['plan']
     time_s = frame / plan['fps']
-    apply_frame(scene, plan, time_s, labels=job['labels'])
-    if job.get('dynamics_rig'):
-        poses = {item['turbine']: (item['rpm'], *pose_at(item, time_s)) for item in plan['turbines']}
-        manual_dynamics.apply(scene, job, frame, poses)
-    apply_shake(scene, job, frame)
+    poses = apply_frame(scene, plan, time_s, labels=job['labels'])
+    structure = manual_dynamics.apply(scene, job, frame, poses)
+    shake = apply_shake(scene, job, frame, poses[job['turbine']][0])
+    sample = dict(frame=frame, time_s=round(time_s, 6))
+    for turbine, (_, azimuth, pitches) in poses.items():
+        sample[turbine] = dict(azimuth_deg=round(azimuth, 6), pitch_deg=[round(p, 6) for p in pitches])
+    sample['camera_shake_deg'] = shake
+    if structure is not None:
+        sample['structural_motion'] = structure
+    return sample
 
 
 # Mesh deformation changes the blade geometry every frame. Blender releases the
@@ -752,7 +774,7 @@ def _start_motion(scene, job, turbine, cameras_list, dynamics, seed=None):
     # The live bend would freeze while exporting; exports start from the rigid pose.
     manual_dynamics.live_detach(scene)
     live_shake_stop(scene)
-    _start_shake(job, turbine, cameras_list, seed)
+    _start_shake(job, _entry(scene, turbine), cameras_list, seed)
     if dynamics:
         manual_dynamics.start(scene, job, turbine, seed)
 
@@ -762,14 +784,67 @@ def _end_motion(job):
     manual_dynamics.end(job)
 
 
+def _begin_samples(job, metadata):
+    _shake_sidecar(job, metadata)
+    manual_dynamics.sidecar(job, metadata)
+    stream = job['sample_stream'] = ExitStack()
+    job['sample_path'] = job['temp'] / 'samples.json'
+    job['append_sample'] = stream.enter_context(atomic_json.write_json_array(job['sample_path'], metadata, 'samples'))
+    job['frames_written'] = 0
+
+
+def _end_samples(job, *, complete):
+    stream = job.pop('sample_stream', None)
+    if stream is not None:
+        if complete:
+            stream.close()
+        else:
+            stream.__exit__(GeneratorExit, GeneratorExit(), None)
+
+
+def _append_frame(job, frame, sample):
+    if (frame != job['frames_written'] or frame >= job['plan']['frames']
+            or sample is None or sample['frame'] != frame):
+        raise RuntimeError(f'Down 视频缺少或乱序的帧样本：{frame + 1}')
+    job['append_sample'](sample)
+    job['frames_written'] += 1
+
+
 def _frame_handler(scene, _depsgraph=None):
     job = _EXPORT.get(scene.as_pointer())
-    if job is None:
+    if job is None or not job.get('frame_events') or job.get('frame_error'):
         return
-    frame = scene.frame_current - scene.frame_start
-    apply_motion(scene, job, frame)
-    if job.get('progress'):
-        bpy.context.window_manager.progress_update(frame)
+    frame = scene.frame_current - job['frame_start']
+    written = job['frames_written']
+    if written == job['plan']['frames'] or frame < written:
+        # Native renders and render.opengl can reset the timeline before returning.
+        # render_write still validates the order of frames actually written to the
+        # video; the pending render.opengl sample stays for _finish to record.
+        return
+    try:
+        pending = job.get('pending_sample')
+        if job['frame_events'] == 'OPENGL' and pending is not None and pending['frame'] != frame:
+            # render.opengl does not emit render_write. Advancing to the next frame
+            # leaves the previous pose ready to record, with the final row on success.
+            _append_frame(job, frame - 1, pending)
+        if frame != job['frames_written']:
+            raise RuntimeError(f'预期帧 {job["frames_written"] + 1}，收到帧 {frame + 1}')
+        job['pending_sample'] = apply_motion(scene, job, frame)
+        if job.get('progress'):
+            bpy.context.window_manager.progress_update(frame)
+    except Exception as exc:
+        job['frame_error'] = f'Down 视频第 {frame + 1} 帧姿态更新失败：{exc}'
+
+
+def _write_frame_handler(scene, _depsgraph=None):
+    job = _EXPORT.get(scene.as_pointer())
+    if job is None or job.get('frame_events') != 'NATIVE' or job.get('frame_error'):
+        return
+    frame = scene.frame_current - job['frame_start']
+    try:
+        _append_frame(job, frame, job.pop('pending_sample', None))
+    except Exception as exc:
+        job['frame_error'] = f'Down 视频第 {frame + 1} 帧样本写入失败：{exc}'
 
 
 def gpu_renderer():
@@ -786,14 +861,6 @@ def is_integrated_gpu(renderer):
 
 
 def _sidecar(plan, turbine, camera, scene, video_name, *, render_mode=None, labels=False, dynamics=False):
-    rows = []
-    for frame in range(plan['frames']):
-        time_s = frame / plan['fps']
-        row = dict(frame=frame, time_s=round(time_s, 6))
-        for item in plan['turbines']:
-            azimuth, pitches = pose_at(item, time_s)
-            row[item['turbine']] = dict(azimuth_deg=round(azimuth, 6), pitch_deg=[round(p, 6) for p in pitches])
-        rows.append(row)
     data = camera.data
     render = scene.render
     return dict(
@@ -808,7 +875,7 @@ def _sidecar(plan, turbine, camera, scene, video_name, *, render_mode=None, labe
                     lens_distortion='none'),
         azimuth_convention='Rotor rotation about the shaft; blade 1 points up at 0 deg',
         pitch_convention='Blade rotation about its pitch axis, same sign as the 风机控制 panel',
-        turbines=plan['turbines'], samples=rows,
+        turbines=plan['turbines'],
         scope='Manual rigid scene: constant rotor speed and rate-limited pitch; no prebend, '
               'aerodynamics, motion blur or lens distortion. '
               + ('Blade flapwise bend and tower lean follow the illustrative structural_motion signal, '
@@ -819,17 +886,19 @@ def _sidecar(plan, turbine, camera, scene, video_name, *, render_mode=None, labe
 
 _SAVED_RENDER = ('engine', 'resolution_x', 'resolution_y', 'resolution_percentage', 'pixel_aspect_x',
                  'pixel_aspect_y', 'fps', 'fps_base', 'filepath', 'use_lock_interface', 'use_file_extension',
-                 'dither_intensity', 'use_compositing', 'use_sequencer')
+                 'dither_intensity', 'use_compositing', 'use_sequencer', 'use_multiview',
+                 'use_border', 'use_crop_to_border')
+_SAVED_IMAGE = ('media_type', 'file_format', 'color_mode', 'color_depth')
 _SAVED_FFMPEG = ('format', 'codec', 'constant_rate_factor', 'ffmpeg_preset', 'gopsize', 'audio_codec')
 
 
 def _snapshot(scene):
     render = scene.render
     return dict(
-        camera=scene.camera, frame=(scene.frame_start, scene.frame_end, scene.frame_current),
+        camera=scene.camera, frame=(scene.frame_start, scene.frame_end, scene.frame_step,
+                                    scene.frame_current, scene.frame_subframe),
         render={name: getattr(render, name) for name in _SAVED_RENDER},
-        image=(render.image_settings.media_type, render.image_settings.file_format,
-               render.image_settings.color_mode),
+        image={name: getattr(render.image_settings, name) for name in _SAVED_IMAGE},
         ffmpeg={name: getattr(render.ffmpeg, name) for name in _SAVED_FFMPEG},
         view=(scene.view_settings.view_transform, scene.view_settings.look),
         eevee=(scene.eevee.taa_samples, scene.eevee.taa_render_samples), render_aa=scene.display.render_aa,
@@ -858,10 +927,8 @@ def _restore_marker_cameras(scene, saved):
 
 def _restore(scene, saved):
     render = scene.render
-    image = render.image_settings
-    image.media_type = saved['image'][0]
-    image.file_format = saved['image'][1]
-    image.color_mode = saved['image'][2]
+    for name, value in saved['image'].items():
+        setattr(render.image_settings, name, value)
     for name, value in saved['ffmpeg'].items():
         try:
             setattr(render.ffmpeg, name, value)
@@ -873,9 +940,11 @@ def _restore(scene, saved):
     scene.eevee.taa_samples, scene.eevee.taa_render_samples = saved['eevee']
     scene.display.render_aa = saved['render_aa']
     _restore_marker_cameras(scene, saved['markers'])
+    start, end, step, frame, subframe = saved['frame']
+    scene.frame_start, scene.frame_end, scene.frame_step = start, end, step
+    scene.frame_set(frame, subframe=subframe)
+    # Frame changes evaluate marker cameras; restore the active camera after evaluating the frame.
     scene.camera = saved['camera']
-    scene.frame_start, scene.frame_end = saved['frame'][:2]
-    scene.frame_set(saved['frame'][2])
 
 
 def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO_SIZE, samples=None):
@@ -886,11 +955,14 @@ def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO
         marker.camera = None
     scene.camera = camera
     # Every engine writes the camera image itself, never a sequencer or compositor result.
-    render.use_compositing = render.use_sequencer = False
+    render.use_compositing = render.use_sequencer = render.use_multiview = False
+    render.use_border = render.use_crop_to_border = False
     if engine == 'WORKBENCH':
         render.engine = 'BLENDER_WORKBENCH'
-    if engine == 'SCENE' and samples:
-        scene.eevee.taa_render_samples = int(samples)
+    if engine == 'SCENE':
+        render.engine = 'BLENDER_EEVEE'
+        if samples:
+            scene.eevee.taa_render_samples = int(samples)
     if engine in VIEWPORT_ENGINES:
         # The viewport path is bounded by per-frame colour processing, so the
         # export uses the plain sRGB transform without dithering.
@@ -902,7 +974,7 @@ def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO
     render.resolution_percentage = 100
     render.pixel_aspect_x = render.pixel_aspect_y = 1
     render.fps, render.fps_base = fps, 1.0
-    scene.frame_start, scene.frame_end = 1, frames
+    scene.frame_start, scene.frame_end, scene.frame_step = 1, frames, 1
     render.image_settings.media_type = 'VIDEO'
     render.image_settings.file_format = 'FFMPEG'
     render.image_settings.color_mode = 'RGB'
@@ -917,8 +989,17 @@ def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO
     render.filepath = filepath
 
 
+def _restore_manual_pose(scene):
+    scene['wfrl_manual_exporting'] = False
+    manual_control.hold_pitch_clock(scene)
+    for entry in scene.wfrl_manual_turbines:
+        manual_control._apply_entry(entry)
+    _apply_pending_blade_model(scene)
+    update_labels(scene)
+
+
 def _finish(scene, *, completed):
-    """Move the rendered movie into place and restore the scene; returns the report."""
+    """Restore the scene and publish a complete set of movies and their sidecar."""
     job = _EXPORT.pop(scene.as_pointer(), None)
     if job is None:
         return None
@@ -926,59 +1007,63 @@ def _finish(scene, *, completed):
     try:
         if not _EXPORT:
             for handlers, function in ((bpy.app.handlers.frame_change_pre, _frame_handler),
+                                       (bpy.app.handlers.render_write, _write_frame_handler),
                                        (bpy.app.handlers.render_complete, _render_complete),
                                        (bpy.app.handlers.render_cancel, _render_cancel)):
                 if function in handlers:
                     handlers.remove(function)
-        if job.get('progress'):
-            bpy.context.window_manager.progress_end()
-        try:
-            _end_motion(job)
-            _restore(scene, job['saved'])
+        with ExitStack() as restore:
+            if job.get('progress'):
+                restore.callback(bpy.context.window_manager.progress_end)
+            restore.callback(_restore_manual_pose, scene)
             if job.get('view') is not None:
-                _restore_view(*job['view'])
-        finally:
-            scene['wfrl_manual_exporting'] = False
-            manual_control.hold_pitch_clock(scene)
-            for entry in scene.wfrl_manual_turbines:
-                manual_control._apply_entry(entry)
-            _apply_pending_blade_model(scene)
-            update_labels(scene)
+                restore.callback(_restore_view, *job['view'])
+            restore.callback(_restore, scene, job['saved'])
+            _end_motion(job)
+        if job.get('frame_error'):
+            raise RuntimeError(job['frame_error'])
         if completed:
-            produced = sorted(Path(job['temp']).glob('*.mp4'))
-            if not produced:
-                raise RuntimeError('未生成 MP4 文件')
-            target = Path(job['target'])
-            _shake_sidecar(job, job['sidecar'])
-            manual_dynamics.sidecar(job, job['sidecar'])
-            video_output.publish_staged([(produced[0], target)], target.with_suffix('.json'), job['sidecar'],
-                                        'Down 视频')
-            report = str(target)
+            expected = job['plan']['frames']
+            if job.get('frame_events') == 'OPENGL':
+                _append_frame(job, expected - 1, job.pop('pending_sample', None))
+            if job['frames_written'] != expected:
+                raise RuntimeError(f'Down 视频帧样本不完整：{job["frames_written"]}/{expected}')
+            publish_targets = job['publish_targets']
+            targets, sidecar = publish_targets[:-1], publish_targets[-1]
+            produced = job.get('movies') or sorted(Path(job['temp']).glob('*.mp4'))
+            if len(produced) != len(targets) or any(not path.is_file() or path.stat().st_size == 0 for path in produced):
+                raise RuntimeError('未生成完整的 Down MP4 文件')
+            _end_samples(job, complete=True)
+            label = 'Down 视频' if len(targets) == 1 else '三路 Down 视频'
+            video_output.publish_staged([(source, target.requested) for source, target in zip(produced, targets)],
+                                        sidecar.requested, job['sample_path'], label, preflight=publish_targets)
+            report = str(targets[0].path)
     finally:
-        shutil.rmtree(job['temp'], ignore_errors=True)
-        scene['wfrl_manual_last_video'] = report or ''
+        try:
+            _end_samples(job, complete=False)
+        finally:
+            shutil.rmtree(job['temp'], ignore_errors=True)
+            scene['wfrl_manual_last_video'] = report or ''
     return report
 
 
-@bpy.app.handlers.persistent
+def _end_render(scene, *, completed):
+    try:
+        _finish(scene, completed=completed)
+    except Exception as exc:
+        # Interactive render results are displayed by the manual and home panels.
+        scene['wfrl_manual_error'] = f'Down 视频导出失败：{exc}'
+        print('WFRL Down video export failed:', exc)
+
+
+@persistent
 def _render_complete(scene, _unused=None):
-    for key in list(_EXPORT):
-        job = _EXPORT.get(key)
-        if job and job['scene'] == scene:
-            try:
-                _finish(scene, completed=True)
-            except Exception as exc:
-                # No operator is waiting on an interactive render; the panels show this error.
-                scene['wfrl_manual_error'] = f'Down 视频导出失败：{exc}'
-                print('WFRL Down video export failed:', exc)
+    _end_render(scene, completed=True)
 
 
-@bpy.app.handlers.persistent
+@persistent
 def _render_cancel(scene, _unused=None):
-    for key in list(_EXPORT):
-        job = _EXPORT.get(key)
-        if job and job['scene'] == scene:
-            _finish(scene, completed=False)
+    _end_render(scene, completed=False)
 
 
 def ffmpeg_executable(context=None):
@@ -991,152 +1076,175 @@ def ffmpeg_executable(context=None):
         return None
 
 
-def _draw_offscreen(scene, job, view, camera, ffmpeg, output):
-    """Draw each frame of the 3D view offscreen and pipe raw RGBA to FFmpeg.
+_ENCODER_TIMEOUT_S = 30.0
+_ENCODER_EXIT_GRACE_S = 5.0
+_ENCODER_LOG_TAIL = 600
 
-    Skips Blender's render pipeline and movie writer; drawing, read-back and
-    encoding overlap, which keeps 1080p near 0.02 s per frame on a discrete GPU."""
-    import gpu
-    window, area, region = view
-    render, plan = scene.render, job['plan']
-    width, height = render.resolution_x, render.resolution_y
-    command = [ffmpeg, '-y', '-hide_banner', '-loglevel', 'error', '-nostdin',
-               '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', f'{width}x{height}', '-r', str(plan['fps']), '-i', '-',
-               '-vf', 'vflip', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p',
-               '-g', str(plan['fps']), '-an', '-movflags', '+faststart', output]
-    log = tempfile.TemporaryFile()
+
+def _encoder_error(code, log, failures):
+    """Failure carrying FFmpeg's exit code and log tail; the pipe error stands in for an empty log."""
+    size = log.seek(0, os.SEEK_END)
+    log.seek(max(0, size - _ENCODER_LOG_TAIL))
+    message = log.read().decode('utf-8', errors='replace').strip()
+    detail = message or '；'.join(map(str, failures))
+    return RuntimeError(f'FFmpeg 编码失败（{code}）' + (f'：{detail}' if detail else ''))
+
+
+@contextmanager
+def _offscreen_encoder(command):
+    """Own an FFmpeg process and its writer until input and encoding have finished.
+
+    An input failure waits briefly for FFmpeg to exit, killing it otherwise, so the raised
+    error carries the exit code and the end of FFmpeg's log.
+    """
     options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
-    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, **options)
-    frames, failure = queue.Queue(maxsize=4), []
-
-    def write():
-        try:
-            while (data := frames.get()) is not None:
-                process.stdin.write(data)
-        except OSError as exc:
-            failure.append(exc)
-            while frames.get() is not None:
-                pass
-        finally:
-            try:
-                process.stdin.close()
-            except OSError:
-                pass
-
-    writer = threading.Thread(target=write, daemon=True)
-    writer.start()
-    offscreen = gpu.types.GPUOffScreen(width, height, format='RGBA8')
-    try:
-        with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
-            space, layer = area.spaces.active, bpy.context.view_layer
-            depsgraph = bpy.context.evaluated_depsgraph_get()
-            projection = camera.calc_matrix_camera(depsgraph, x=width, y=height)
-            for frame in range(plan['frames']):
-                if failure:
-                    break
-                apply_motion(scene, job, frame)
-                depsgraph.update()
-                view_matrix = camera.evaluated_get(depsgraph).matrix_world.inverted()
-                offscreen.draw_view3d(scene, layer, space, region, view_matrix, projection,
-                                      do_color_management=True)
-                pixels = offscreen.texture_color.read()
-                pixels.dimensions = width * height * 4
-                frames.put(np.asarray(pixels, dtype=np.uint8).tobytes())
-                _release_gpu(job, frame)
-                bpy.context.window_manager.progress_update(frame)
-    finally:
-        frames.put(None)
-        writer.join()
-        offscreen.free()
-        code = process.wait()
-        log.seek(0)
-        message = log.read().decode('utf-8', errors='replace')[-600:]
-        log.close()
-    if failure or code:
-        raise RuntimeError(f'FFmpeg 编码失败（{code}）：{message or failure}')
-
-
-def _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, outputs):
-    """Draw each frame from multiple cameras and pipe raw RGBA to parallel FFmpeg processes.
-
-    All cameras render in lock-step so the resulting MP4 files share identical
-    frame timestamps.  The offscreen buffer is re-used across cameras each frame."""
-    import gpu
-    window, area, region = view
-    render, plan = scene.render, job['plan']
-    width, height = render.resolution_x, render.resolution_y
-    fps = plan['fps']
-
-    def _make_pipe(output):
-        command = [ffmpeg, '-y', '-hide_banner', '-loglevel', 'error', '-nostdin',
-                   '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', f'{width}x{height}', '-r', str(fps), '-i', '-',
-                   '-vf', 'vflip', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18',
-                   '-pix_fmt', 'yuv420p', '-g', str(fps), '-an', '-movflags', '+faststart', output]
-        options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
-        log = tempfile.TemporaryFile()
-        proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, **options)
-        q = queue.Queue(maxsize=4)
-        failure = []
+    pending, failures = queue.Queue(maxsize=4), []
+    stopping = threading.Event()
+    with tempfile.TemporaryFile() as log:
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, **options)
 
         def write():
             try:
-                while (data := q.get()) is not None:
-                    proc.stdin.write(data)
+                with process.stdin as stream:
+                    while not stopping.is_set():
+                        try:
+                            data = pending.get(timeout=.1)
+                        except queue.Empty:
+                            continue
+                        if data is None:
+                            return
+                        stream.write(data)
             except OSError as exc:
-                failure.append(exc)
-                while q.get() is not None:
-                    pass
-            finally:
+                failures.append(exc)
+
+        def send(data):
+            deadline = time.monotonic() + _ENCODER_TIMEOUT_S
+            while not failures:
                 try:
-                    proc.stdin.close()
-                except OSError:
-                    pass
+                    pending.put(data, timeout=.1)
+                    return
+                except queue.Full:
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError('FFmpeg 写帧超时') from None
+            try:
+                code = process.wait(timeout=_ENCODER_EXIT_GRACE_S)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                code = process.wait(timeout=_ENCODER_EXIT_GRACE_S)
+            raise _encoder_error(code, log, failures) from failures[0]
 
-        thread = threading.Thread(target=write, daemon=True)
-        thread.start()
-        return proc, q, thread, log, failure
+        writer = None
+        try:
+            writer = threading.Thread(target=write, name='wfrl-down-encoder', daemon=True)
+            writer.start()
+            yield send
+            send(None)
+            writer.join(timeout=_ENCODER_TIMEOUT_S)
+            if writer.is_alive():
+                raise RuntimeError('等待 FFmpeg 写帧结束超时')
+            code = process.wait(timeout=_ENCODER_TIMEOUT_S)
+            if code or failures:
+                raise _encoder_error(code, log, failures)
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError('等待 FFmpeg 编码结束超时') from exc
+        finally:
+            stopping.set()
+            try:
+                if process.poll() is None:
+                    process.kill()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired as exc:
+                        raise RuntimeError('FFmpeg 进程未能结束') from exc
+            finally:
+                if writer is not None and writer.ident is not None:
+                    writer.join(timeout=5)
+                else:
+                    process.stdin.close()
 
-    pipes = [_make_pipe(out) for out in outputs]
-    offscreen = gpu.types.GPUOffScreen(width, height, format='RGBA8')
-    try:
+
+def _draw_offscreen(scene, job, view, camera, ffmpeg, output):
+    _draw_offscreen_multi(scene, job, view, (camera,), ffmpeg, (output,))
+
+
+def _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, outputs):
+    """Draw every camera at each frame and encode in parallel using a shared GPU buffer."""
+    import gpu
+    window, area, region = view
+    render, plan = scene.render, job['plan']
+    width, height = render.resolution_x, render.resolution_y
+    fps = str(plan['fps'])
+    command = [ffmpeg, '-y', '-hide_banner', '-loglevel', 'error', '-nostdin',
+               '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', f'{width}x{height}', '-r', fps, '-i', '-',
+               '-vf', 'vflip', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p',
+               '-g', fps, '-an', '-movflags', '+faststart']
+    with ExitStack() as resources:
+        offscreen = gpu.types.GPUOffScreen(width, height, format='RGBA8')
+        resources.callback(offscreen.free)
+        writers = [resources.enter_context(_offscreen_encoder([*command, str(path)])) for path in outputs]
         with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
+            scene.frame_set(scene.frame_start)
             space, layer = area.spaces.active, bpy.context.view_layer
             depsgraph = bpy.context.evaluated_depsgraph_get()
-            # Pre-compute projection matrices (identical for all cameras: same FOV and aspect).
             projections = [cam.calc_matrix_camera(depsgraph, x=width, y=height) for cam in cameras_list]
             for frame in range(plan['frames']):
-                if any(p[4] for p in pipes):  # any failure list non-empty
-                    break
-                apply_motion(scene, job, frame)
+                sample = apply_motion(scene, job, frame)
                 depsgraph.update()
-                for cam_idx, cam in enumerate(cameras_list):
-                    proc, q, thread, log, failure = pipes[cam_idx]
-                    if failure:
-                        continue
-                    view_matrix = cam.evaluated_get(depsgraph).matrix_world.inverted()
-                    offscreen.draw_view3d(scene, layer, space, region, view_matrix, projections[cam_idx],
-                                         do_color_management=True)
+                for camera, projection, write in zip(cameras_list, projections, writers):
+                    view_matrix = camera.evaluated_get(depsgraph).matrix_world.inverted()
+                    offscreen.draw_view3d(scene, layer, space, region, view_matrix, projection,
+                                          do_color_management=True)
                     pixels = offscreen.texture_color.read()
                     pixels.dimensions = width * height * 4
-                    q.put(np.asarray(pixels, dtype=np.uint8).tobytes())
+                    write(np.asarray(pixels, dtype=np.uint8).tobytes())
+                _append_frame(job, frame, sample)
                 _release_gpu(job, frame)
                 bpy.context.window_manager.progress_update(frame)
-    finally:
-        for _proc, q, thread, _log, _failure in pipes:
-            q.put(None)
-        for _proc, _q, thread, _log, _failure in pipes:
-            thread.join()
-        offscreen.free()
-        errors = []
-        for i, (proc, _q, _thread, log, failure) in enumerate(pipes):
-            code = proc.wait()
-            log.seek(0)
-            message = log.read().decode('utf-8', errors='replace')[-400:]
-            log.close()
-            if failure or code:
-                errors.append(f'camera {i}: FFmpeg({code}) {message or failure}')
-        if errors:
-            raise RuntimeError('FFmpeg 编码失败：' + '; '.join(errors))
+
+
+def _mp4_target(filepath):
+    path = Path(bpy.path.abspath(str(filepath)))
+    return (path if path.suffix.lower() == '.mp4' else path.with_suffix('.mp4')).absolute()
+
+
+def _has_animation(data):
+    animation = data.animation_data
+    return animation is not None and bool(animation.action or animation.drivers or animation.nla_tracks)
+
+
+def _validate_export(scene, turbine, targets):
+    valid, reason = manual_control.validate_scene(scene)
+    if not valid:
+        raise ValueError(reason)
+    if scene.as_pointer() in _EXPORT:
+        raise ValueError('该场景正在导出视频')
+    publish_targets = video_output.validate_publish_targets((*targets, targets[0].with_suffix('.json')))
+    if bpy.app.is_job_running('RENDER'):
+        raise ValueError('请等待当前 Blender 渲染结束后再导出 Down 视频')
+
+    _entry(scene, turbine)
+    controlled = [getattr(entry, field) for entry in scene.wfrl_manual_turbines
+                  for field in manual_control._POINTER_FIELDS]
+    names = [_camera_name(scene, turbine)]
+    if len(targets) == 3:
+        names.extend(_side_camera_name(scene, turbine, side) for side in ('Left', 'Right'))
+    for name in names:
+        camera = scene.objects.get(name)
+        if camera is None:
+            continue
+        if camera.type != 'CAMERA':
+            raise ValueError(f'{name} 不是有效的 Down 相机')
+        if _has_animation(camera.data):
+            raise ValueError(f'{camera.data.name} 含动画或驱动，无法保证导出镜头参数一致')
+        controlled.append(camera)
+    checked = set()
+    for obj in controlled:
+        while obj is not None and obj not in checked:
+            if obj.constraints or _has_animation(obj):
+                raise ValueError(f'{obj.name} 含约束、动画或驱动，无法保证 Down 视频与逐帧姿态一致')
+            checked.add(obj)
+            obj = obj.parent
+    return publish_targets
 
 
 def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=25, frames=None,
@@ -1151,11 +1259,10 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
     Returns a tuple of the three written paths."""
     if engine not in VIEWPORT_ENGINES:
         raise ValueError('三路视频导出仅支持视口渲染方式（视口材质或视口实体）')
-    valid, reason = manual_control.validate_scene(scene)
-    if not valid:
-        raise ValueError(reason)
-    if scene.as_pointer() in _EXPORT:
-        raise ValueError('该场景正在导出视频')
+    targets = tuple(_mp4_target(path) for path in filepaths)
+    if len(targets) != 3:
+        raise ValueError('请选择中心、左侧和右侧三个 MP4 目标路径')
+    publish_targets = _validate_export(scene, turbine, targets)
     if bpy.app.background:
         raise ValueError('视口渲染需要 Blender 窗口；后台请选择 EEVEE 或 Workbench')
     fps = int(fps)
@@ -1163,8 +1270,9 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
     if fps < 1 or frames < 1:
         raise ValueError('帧数与帧率须大于 0')
     labels_flag = scene.wfrl_manual_blade_labels if labels is None else bool(labels)
-    targets = [Path(bpy.path.abspath(str(p))) for p in filepaths]
-    targets = [t if t.suffix.lower() == '.mp4' else t.with_suffix('.mp4') for t in targets]
+    ffmpeg = ffmpeg_executable(context)
+    if not ffmpeg:
+        raise ValueError('三路视频导出需要 FFmpeg；请在扩展偏好设置中配置 FFmpeg 路径')
     view = _view_area(context or bpy.context)
     manual_control.pause_scene(scene)
     center_cam = ensure_down_camera(scene, turbine)
@@ -1172,9 +1280,11 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
     cameras_list = [center_cam, side_cams['Left'], side_cams['Right']]
     plan = _plan(scene, fps, frames, from_start)
     saved = _snapshot(scene)
-    temp = tempfile.mkdtemp(prefix='wfrl_triple_')
-    job = dict(scene=scene, plan=plan, saved=saved, temp=temp,
-               target=str(targets[0]), labels=labels_flag, view=None)
+    temp = Path(tempfile.mkdtemp(prefix='wfrl_triple_'))
+    out_paths = [temp / f'triple_{i}.mp4' for i in range(3)]
+    job = dict(plan=plan, saved=saved, temp=temp, publish_targets=publish_targets,
+               movies=out_paths, labels=labels_flag)
+    scene['wfrl_manual_error'] = ''
     _EXPORT[scene.as_pointer()] = job
     scene['wfrl_manual_exporting'] = True
     try:
@@ -1191,46 +1301,17 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
             yawroot_matrix={name: [list(row) for row in cam.matrix_basis]
                             for name, cam in zip(('center', 'left', 'right'), cameras_list)})
         _start_motion(scene, job, turbine, cameras_list, dynamics, seed)
-        ffmpeg = ffmpeg_executable(context)
-        if not ffmpeg:
-            raise ValueError('三路视频导出需要 FFmpeg；请在扩展偏好设置中配置 FFmpeg 路径')
-        window, area, region = view
+        _begin_samples(job, sidecar)
+        _, area, _ = view
         job['view'] = _prepare_view(area, center_cam, VIEWPORT_ENGINES[engine])
         bpy.context.window_manager.progress_begin(0, frames)
         job['progress'] = True
-        out_paths = [os.path.join(temp, f'triple_{i}.mp4') for i in range(3)]
         _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, out_paths)
-    except Exception:
+    except BaseException:
         _finish(scene, completed=False)
         raise
-    # Move files into place manually (bypass _finish which moves only one file).
-    try:
-        _end_motion(job)
-        _restore(scene, saved)
-        if job.get('view') is not None:
-            _restore_view(*job['view'])
-    finally:
-        scene['wfrl_manual_exporting'] = False
-        manual_control.hold_pitch_clock(scene)
-        for entry in scene.wfrl_manual_turbines:
-            manual_control._apply_entry(entry)
-        _apply_pending_blade_model(scene)
-        update_labels(scene)
-    if job.get('progress'):
-        bpy.context.window_manager.progress_end()
-    _EXPORT.pop(scene.as_pointer(), None)
-    try:
-        _shake_sidecar(job, sidecar)
-        manual_dynamics.sidecar(job, sidecar)
-        video_output.publish_staged([(Path(src), target) for src, target in zip(out_paths, targets)],
-                                    targets[0].with_suffix('.json'), sidecar, '三路视频')
-    except RuntimeError:
-        scene['wfrl_manual_last_video'] = ''
-        raise
-    finally:
-        shutil.rmtree(temp, ignore_errors=True)
-    scene['wfrl_manual_last_video'] = str(targets[0])
-    return tuple(str(target) for target in targets)
+    _finish(scene, completed=True)
+    return tuple(str(output.path) for output in publish_targets[:-1])
 
 
 def _view_area(context):
@@ -1248,17 +1329,23 @@ def _view_area(context):
 
 def _prepare_view(area, camera, shading):
     space = area.spaces.active
+    region = space.region_3d
     saved = (space, dict(type=space.shading.type, world=space.shading.use_scene_world,
                          lights=space.shading.use_scene_lights, overlays=space.overlay.show_overlays,
                          camera=space.camera, local=space.use_local_camera,
-                         perspective=space.region_3d.view_perspective))
-    space.use_local_camera = True
-    space.camera = camera
-    space.region_3d.view_perspective = 'CAMERA'
-    space.shading.type = shading
-    if shading == 'MATERIAL':
-        space.shading.use_scene_world = space.shading.use_scene_lights = True
-    space.overlay.show_overlays = False
+                         perspective=region.view_perspective, zoom=region.view_camera_zoom,
+                         offset=tuple(region.view_camera_offset)))
+    try:
+        space.use_local_camera = True
+        space.camera = camera
+        region.view_perspective = 'CAMERA'
+        space.shading.type = shading
+        if shading == 'MATERIAL':
+            space.shading.use_scene_world = space.shading.use_scene_lights = True
+        space.overlay.show_overlays = False
+    except Exception:
+        _restore_view(*saved)
+        raise
     return saved
 
 
@@ -1268,9 +1355,11 @@ def _restore_view(space, saved):
         space.shading.use_scene_world = saved['world']
         space.shading.use_scene_lights = saved['lights']
         space.overlay.show_overlays = saved['overlays']
-        space.camera = saved['camera']
         space.use_local_camera = saved['local']
-        space.region_3d.view_perspective = saved['perspective']
+        space.camera = saved['camera']
+        region = space.region_3d
+        region.view_perspective = saved['perspective']
+        region.view_camera_zoom, region.view_camera_offset = saved['zoom'], saved['offset']
     except ReferenceError:
         pass
 
@@ -1286,13 +1375,10 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
     movie. EEVEE renders in a window run as a
     cancellable render job and finish through the render completion handlers.
     Blocking renders return the written path; interactive renders return None."""
-    valid, reason = manual_control.validate_scene(scene)
-    if not valid:
-        raise ValueError(reason)
-    if scene.as_pointer() in _EXPORT:
-        raise ValueError('该场景正在导出视频')
     if engine not in ENGINES:
         raise ValueError('未知渲染方式')
+    target = _mp4_target(filepath)
+    publish_targets = _validate_export(scene, turbine, (target,))
     viewport = engine in VIEWPORT_ENGINES
     if viewport and bpy.app.background:
         raise ValueError('视口渲染需要 Blender 窗口；后台请选择 EEVEE 或 Workbench')
@@ -1301,53 +1387,71 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
     if fps < 1 or frames < 1:
         raise ValueError('帧数与帧率须大于 0')
     labels = scene.wfrl_manual_blade_labels if labels is None else bool(labels)
-    target = Path(bpy.path.abspath(filepath))
-    if target.suffix.lower() != '.mp4':
-        target = target.with_suffix('.mp4')
     blocking = True if viewport else (bpy.app.background if blocking is None else blocking)
     view = _view_area(context or bpy.context) if viewport else None
     manual_control.pause_scene(scene)
     camera = ensure_down_camera(scene, turbine)
     plan = _plan(scene, fps, frames, from_start)
-    scene['wfrl_manual_error'] = ''
-    temp = tempfile.mkdtemp(prefix='wfrl_down_')
     saved = _snapshot(scene)
-    job = dict(scene=scene, plan=plan, saved=saved, temp=temp, target=str(target), labels=labels, view=None)
+    temp = Path(tempfile.mkdtemp(prefix='wfrl_down_'))
+    job = dict(plan=plan, saved=saved, temp=temp, publish_targets=publish_targets, labels=labels)
+    scene['wfrl_manual_error'] = ''
     _EXPORT[scene.as_pointer()] = job
     scene['wfrl_manual_exporting'] = True
     try:
         _configure_video(scene, camera, fps, frames, engine, os.path.join(temp, 'down_'),
                          size=size, samples=samples)
-        job['sidecar'] = _sidecar(plan, turbine, camera, scene, target.name, render_mode=engine, labels=labels,
-                                  dynamics=dynamics)
+        sidecar = _sidecar(plan, turbine, camera, scene, target.name, render_mode=engine, labels=labels,
+                           dynamics=dynamics)
+        ffmpeg = ffmpeg_executable(context) if viewport else None
+        if viewport:
+            sidecar['encoder'] = 'ffmpeg libx264 (offscreen)' if ffmpeg else 'blender ffmpeg (render.opengl)'
         _start_motion(scene, job, turbine, [camera], dynamics, seed)
+        _begin_samples(job, sidecar)
+        if viewport:
+            window, area, region = view
+            job['view'] = _prepare_view(area, camera, VIEWPORT_ENGINES[engine])
+            bpy.context.window_manager.progress_begin(0, frames)
+            job['progress'] = True
+            if ffmpeg:
+                output = temp / 'down.mp4'
+                job['movies'] = (output,)
+                _draw_offscreen(scene, job, view, camera, ffmpeg, output)
+                return _finish(scene, completed=True)
+        job['frame_events'] = 'OPENGL' if viewport else 'NATIVE'
+        job['frame_start'] = scene.frame_start
         hooks = [(bpy.app.handlers.frame_change_pre, _frame_handler)]
+        if not viewport:
+            hooks.append((bpy.app.handlers.render_write, _write_frame_handler))
         if not blocking:
             hooks += [(bpy.app.handlers.render_complete, _render_complete),
                       (bpy.app.handlers.render_cancel, _render_cancel)]
         for handlers, function in hooks:
             if function not in handlers:
                 handlers.append(function)
+        # Evaluate the first pose and its visibility on the calling thread before
+        # a native render can enter its worker. A render callback confirms the sample.
         scene.frame_set(scene.frame_start)
+        if job.get('frame_error'):
+            raise RuntimeError(job['frame_error'])
         if viewport:
-            window, area, region = view
-            job['view'] = _prepare_view(area, camera, VIEWPORT_ENGINES[engine])
-            bpy.context.window_manager.progress_begin(0, frames)
-            job['progress'] = True
-            ffmpeg = ffmpeg_executable(context)
-            job['sidecar']['encoder'] = 'ffmpeg libx264 (offscreen)' if ffmpeg else 'blender ffmpeg (render.opengl)'
-            if ffmpeg:
-                _draw_offscreen(scene, job, view, camera, ffmpeg, os.path.join(temp, 'down.mp4'))
-            else:
-                with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
-                    bpy.ops.render.opengl(animation=True, view_context=True)
+            with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
+                result = bpy.ops.render.opengl(animation=True, view_context=True)
+        elif blocking:
+            result = bpy.ops.render.render(animation=True, scene=scene.name)
+        else:
+            result = bpy.ops.render.render('INVOKE_DEFAULT', animation=True, scene=scene.name)
+            if 'RUNNING_MODAL' in result:
+                return None
+        if 'FINISHED' not in result:
+            raise RuntimeError('Blender 未能完成 Down 视频渲染')
+        if scene.as_pointer() in _EXPORT:
             return _finish(scene, completed=True)
-        if blocking:
-            bpy.ops.render.render(animation=True, scene=scene.name)
-            return _finish(scene, completed=True)
-        bpy.ops.render.render('INVOKE_DEFAULT', animation=True, scene=scene.name)
-        return None
-    except Exception:
+        # An interactive invocation may complete synchronously and run its handler before returning.
+        if scene.get('wfrl_manual_error'):
+            raise RuntimeError(scene['wfrl_manual_error'])
+        return scene.get('wfrl_manual_last_video') or None
+    except BaseException:
         _finish(scene, completed=False)
         raise
 
@@ -1586,18 +1690,15 @@ class WFRL_OT_ManualTripleDownVideo(bpy.types.Operator, ExportHelper):
         return ExportHelper.invoke(self, context, event)
 
     def execute(self, context):
-        center = Path(bpy.path.abspath(self.filepath))
-        if center.suffix.lower() != '.mp4':
-            center = center.with_suffix('.mp4')
-        stem = center.stem
-        # Strip an existing _center / _down suffix so the side names are clean.
-        for tail in ('_down', '_center'):
-            if stem.lower().endswith(tail):
-                stem = stem[: -len(tail)]
-                break
-        left = center.with_name(f'{stem}_left.mp4')
-        right = center.with_name(f'{stem}_right.mp4')
         try:
+            center = _mp4_target(self.filepath)
+            stem = center.stem
+            for tail in ('_down', '_center'):
+                if stem.lower().endswith(tail):
+                    stem = stem[: -len(tail)]
+                    break
+            left = center.with_name(f'{stem}_left.mp4')
+            right = center.with_name(f'{stem}_right.mp4')
             written = export_triple_down_video(
                 context.scene, self.turbine, [center, left, right], frames=self._frames(), fps=self.fps,
                 engine=self.engine, from_start=self.from_start, size=VIDEO_SIZES[self.resolution],

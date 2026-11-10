@@ -1,15 +1,40 @@
 """Atomic JSON and text formatting, publication, cleanup and parent-directory contracts."""
+import json
 import os
 from pathlib import Path
 import stat
-import subprocess
-import sys
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 
 from wfrl_blender import atomic_json
+
+
+def test_streamed_array_is_committed_only_after_its_last_item(tmp_path):
+    target = tmp_path / 'samples.json'
+    target.write_text('{"previous": true}', encoding='utf-8')
+    with atomic_json.write_json_array(target, {'camera': '下视'}, 'samples') as append:
+        for frame in range(500):
+            append({'frame': frame, 'azimuth_deg': frame / 10})
+        assert target.read_text(encoding='utf-8') == '{"previous": true}'
+        temporary, = set(tmp_path.iterdir()) - {target}
+        assert temporary.stat().st_size > 0
+    data = json.loads(target.read_text(encoding='utf-8'))
+    assert data['camera'] == '下视'
+    assert data['samples'] == [{'frame': frame, 'azimuth_deg': frame / 10} for frame in range(500)]
+    assert set(tmp_path.iterdir()) == {target}
+
+
+def test_failed_streamed_row_preserves_target_and_discards_staging(tmp_path):
+    target = tmp_path / 'samples.json'
+    target.write_bytes(b'previous')
+    with pytest.raises(ValueError, match='Out of range'):
+        with atomic_json.write_json_array(target, {'fps': 25}, 'samples') as append:
+            append({'frame': 0})
+            append({'frame': 1, 'pitch': float('nan')})
+    assert target.read_bytes() == b'previous'
+    assert set(tmp_path.iterdir()) == {target}
 
 
 @pytest.mark.skipif(os.name != 'posix', reason='POSIX permission bits require a POSIX filesystem')

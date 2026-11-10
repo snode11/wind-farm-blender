@@ -1,6 +1,12 @@
 """Passage detection ranking, geometric controls and mechanical installation constraints."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
 import numpy as np
 import pytest
+from scripts.radar_x100 import optimize_mount
 from wfrl.radar_x100 import installation
 from scripts.radar_x100.coverage import passages, runs
 
@@ -35,8 +41,7 @@ def test_worst_blade_beats_large_unbalanced_cloud_and_unknown_disqualifies():
     assert [r['id'] for r in rows] == ['balanced', 'unbalanced', 'unknown']
     assert rows[0]['score'][:3] == (.9, -1/30, 1.)
     assert rows[-1]['score'] is None
-    report = dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry',
-        sampling_method='AREA', sampling_algorithm=installation.AREA_ALGORITHM, winner_id='balanced', candidates=rows)
+    report = search_report(rows[0]) | dict(candidates=rows)
     assert installation.selected_installation(report, 'source', 'geometry')[1] == [0,82.5,180]
     with pytest.raises(ValueError, match='来源'):
         installation.selected_installation(report, 'different', 'geometry')
@@ -66,9 +71,7 @@ def test_empty_geometric_control_does_not_override_complete_detection_evidence()
     coverage = winner['profiles'][0]['geometric_coverage']
     for row in coverage['passages']:
         row.pop('evaluation')
-    report = dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry',
-        sampling_method='AREA', sampling_algorithm=installation.AREA_ALGORITHM,
-        winner_id=winner['id'], candidates=[winner])
+    report = search_report(winner)
     assert installation.selected_installation(report, 'source', 'geometry')
     coverage['passages'].append({key: value for key, value in empty.items() if key != 'evaluation'})
     assert installation.selected_installation(report, 'source', 'geometry')
@@ -193,8 +196,7 @@ def test_geometric_success_cannot_override_mechanics_or_missing_detection_eviden
     else:
         row['detection_profiles'] = []
     assert installation.rank([row])[0]['score'] is None
-    report = dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry',
-        sampling_method='AREA', sampling_algorithm=installation.AREA_ALGORITHM, winner_id='winner', candidates=[row])
+    report = search_report(row)
     with pytest.raises(ValueError) as exc:
         installation.selected_installation(report, 'source', 'geometry')
     assert reason in str(exc.value)
@@ -229,8 +231,7 @@ def test_incomplete_v2_evidence_names_the_missing_fields(missing):
         profile = row['detection_profiles'][0]
         (profile if missing == 'simulated_detection_support' else profile['simulated_detection_support']).pop(missing)
         reason = '缺少检测证据（simulated_detection_support 的 status 和 support_fraction）'
-    report = dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry',
-        sampling_method='AREA', sampling_algorithm=installation.AREA_ALGORITHM, winner_id='winner', candidates=[row])
+    report = search_report(row)
     with pytest.raises(ValueError) as exc:
         installation.selected_installation(report, 'source', 'geometry')
     assert str(exc.value) == ('安装搜索推荐不可应用：' + reason
@@ -383,15 +384,230 @@ def test_all_source_support_without_passage_evidence_cannot_be_imported():
     row = candidate('aggregate-only', np.full((10, 3), 20))
     row['detection_profiles'][0].pop('passage_detection_support')
     assert installation.rank([row])[0]['score'] is None
-    report = dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry', sampling_method='AREA',
-        sampling_algorithm=installation.AREA_ALGORITHM, winner_id=row['id'], candidates=[row])
+    report = search_report(row)
     with pytest.raises(ValueError, match='缺少叶片经过检测证据'):
         installation.selected_installation(report, 'source', 'geometry')
 
 
 def search_report(row):
     return dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry', sampling_method='AREA',
-                sampling_algorithm=installation.AREA_ALGORITHM, winner_id=row['id'], candidates=[row])
+                sampling_algorithm=installation.AREA_ALGORITHM, winner_id=row['id'], candidates=[row],
+                **installation.profile_metadata())
+
+
+def test_search_writes_importable_companion_for_oversized_evidence(tmp_path):
+    best = candidate('best', np.full((10, 3), 4))
+    runner_counts = np.full((10, 3), 8)
+    runner_counts[0] = 0
+    runner = candidate('runner', runner_counts)
+    runner['location_m'] = [-3.5, -2.7, -2]
+    rejected = candidate('rejected', np.full((10, 3), 6))
+    profile = rejected['detection_profiles'][0]
+    profile['errors'] = [dict(source_time_s=.1, reason='Unknown synthetic frame')]
+    limit = 16 * 1024 * 1024
+    best['detection_profiles'][0]['frames'] = [dict(source_time_s=0., diagnostics='x' * limit)]
+    report = search_report(best) | dict(candidates=installation.rank([best, runner, rejected]))
+    output = tmp_path / 'search.json'
+
+    optimize_mount.write_search_reports(output, report)
+
+    full_bytes = output.read_bytes()
+    assert len(full_bytes) > limit
+    full = json.loads(full_bytes)
+    assert full['candidates'][0]['detection_profiles'][0]['frames'] == best['detection_profiles'][0]['frames']
+    companion = tmp_path / 'search.summary.json'
+    assert companion.stat().st_size < 128 * 1024
+    summary = json.loads(companion.read_bytes())
+    assert summary['schema'] == full['schema']
+    assert summary['evidence_report'] == dict(name='search.json', sha256=hashlib.sha256(full_bytes).hexdigest())
+    assert installation.selected_installation(summary, 'source', 'geometry') == ([-3.5, -1.7, -2], [0, 82.5, 180])
+    assert [(row['id'], row['score'], row['geometric_score']) for row in installation.rank(summary['candidates'])] == [
+        (row['id'], row['score'], row['geometric_score']) for row in installation.rank(full['candidates'])]
+    assert installation.rank(summary['candidates'])[-1]['score'] is None
+    for field, value in [('source_id', 'other'), ('geometry_id', 'other'), ('mechanical_policy', {})]:
+        with pytest.raises(ValueError, match=field):
+            installation.selected_installation(summary | {field: value}, 'source', 'geometry')
+    with pytest.raises(ValueError, match='排名不一致'):
+        installation.selected_installation(summary | dict(winner_id='runner'), 'source', 'geometry')
+
+
+def test_search_does_not_overwrite_occupied_companion(tmp_path):
+    report = search_report(candidate('winner', np.full((10, 3), 4)))
+    output = tmp_path / 'search.json'
+    companion = tmp_path / 'search.summary.json'
+    companion.write_bytes(b'existing result')
+
+    with pytest.raises(FileExistsError):
+        optimize_mount.write_search_reports(output, report)
+
+    assert not output.exists()
+    assert companion.read_bytes() == b'existing result'
+
+
+def test_search_streams_full_checkpoint_evidence_in_rank_order(tmp_path):
+    from wfrl_blender import atomic_json
+
+    best = candidate('best', np.full((10, 3), 8))
+    runner_counts = np.full((10, 3), 8)
+    runner_counts[0] = 0
+    runner = candidate('runner', runner_counts)
+    rejected = candidate('rejected', np.full((10, 3), 8))
+    rejected['detection_profiles'][0]['errors'] = [dict(source_time_s=.1, reason='Unknown frame')]
+    rows = [runner, rejected, best]
+    checkpoints = {}
+    for row in rows:
+        row['detection_profiles'][0]['frames'] = [dict(frame=0, evidence=row['id'])]
+        path = checkpoints[row['id']] = tmp_path / (row['id'] + '.json')
+        atomic_json.write_json(path, row)
+
+    ranked = installation.rank(installation.candidate_summary(row) for row in rows)
+    report = search_report(best) | dict(candidates=ranked)
+    output = tmp_path / 'search.json'
+    companion = optimize_mount.write_search_reports(output, report, candidate_paths=checkpoints)
+
+    full_bytes = output.read_bytes()
+    full = json.loads(full_bytes)
+    expected = report | dict(candidates=installation.rank(rows))
+    assert full == json.loads(json.dumps(expected))
+    summary = json.loads(companion.read_bytes())
+    assert summary.pop('evidence_report') == dict(name=output.name, sha256=hashlib.sha256(full_bytes).hexdigest())
+    assert summary == json.loads(json.dumps(installation.import_summary(full)))
+
+
+def test_search_does_not_publish_if_checkpoint_no_longer_matches_ranking(tmp_path):
+    from wfrl_blender import atomic_json
+
+    row = candidate('winner', np.full((10, 3), 4))
+    report = search_report(row) | dict(candidates=installation.rank([installation.candidate_summary(row)]))
+    checkpoint = tmp_path / 'candidate-001.json'
+    atomic_json.write_json(checkpoint, row | dict(rotation_deg=[0, 70, 180]))
+    output = tmp_path / 'search.json'
+
+    with pytest.raises(ValueError, match='候选检查点'):
+        optimize_mount.write_search_reports(output, report, candidate_paths={'winner': checkpoint})
+
+    assert list(tmp_path.iterdir()) == [checkpoint]
+
+
+def test_search_preserves_full_evidence_if_summary_write_fails(tmp_path, monkeypatch):
+    from wfrl_blender import atomic_json
+
+    report = search_report(candidate('winner', np.full((10, 3), 4)))
+    output = tmp_path / 'search.json'
+    write_json = atomic_json.write_json
+
+    def fail_summary(path, value, **kwargs):
+        if 'evidence_report' in value:
+            raise OSError('Injected summary write failure')
+        return write_json(path, value, **kwargs)
+
+    monkeypatch.setattr(atomic_json, 'write_json', fail_summary)
+    with pytest.raises(RuntimeError, match='完整报告已保留') as raised:
+        optimize_mount.write_search_reports(output, report)
+
+    assert str(output) in str(raised.value)
+    full = json.loads(output.read_bytes())
+    assert installation.selected_installation(full, 'source', 'geometry')[0] == [-3.5, -1.7, -2]
+    assert list(tmp_path.iterdir()) == [output]
+
+
+def test_search_writes_only_full_report_without_an_applicable_winner(tmp_path):
+    report = search_report(candidate('screened', np.full((10, 3), 4))) | dict(
+        winner_id=None, evaluation_scope='FIRST_COMPLETE_PASSAGES_SCREENING_ONLY', passages_per_blade=1)
+    output = tmp_path / 'search.json'
+
+    optimize_mount.write_search_reports(output, report)
+
+    full = json.loads(output.read_bytes())
+    assert full['winner_id'] is None
+    assert list(tmp_path.iterdir()) == [output]
+
+
+def test_extract_mount_summary_cli_preserves_full_bytes_and_rejects_incompatible_inputs(tmp_path):
+    script = Path(optimize_mount.__file__).with_name('extract_mount_summary.py')
+    evidence = tmp_path / 'stored search.json'
+    companion = tmp_path / 'stored search.summary.json'
+    report = search_report(candidate('winner', np.full((10, 3), 4)))
+    raw = (json.dumps(report, ensure_ascii=False, indent=1) + '\n\n').encode('utf-8')
+    evidence.write_bytes(raw)
+    command = [sys.executable, str(script), str(evidence)]
+
+    def extract(*args):
+        return subprocess.run([*command, *args], cwd=tmp_path, capture_output=True, encoding='utf-8')
+
+    result = extract()
+    assert result.returncode == 0, result.stderr
+    assert evidence.read_bytes() == raw
+    companion_bytes = companion.read_bytes()
+    summary = json.loads(companion_bytes)
+    assert summary['evidence_report'] == dict(name=evidence.name, sha256=hashlib.sha256(raw).hexdigest())
+    assert installation.selected_installation(summary, 'source', 'geometry') == ([-3.5, -1.7, -2], [0, 82.5, 180])
+    assert len(companion_bytes) < installation.SEARCH_REPORT_MAX_BYTES
+    assert extract().returncode != 0 and companion.read_bytes() == companion_bytes
+
+    report['mechanical_policy'].pop('unit_envelope')
+    evidence.write_bytes(json.dumps(report).encode('utf-8'))
+    rejected = tmp_path / 'rejected.summary.json'
+    result = extract('--output', str(rejected))
+    assert result.returncode != 0 and not rejected.exists()
+    assert 'mechanical_policy.unit_envelope' in result.stderr and 'optimize_mount.py' in result.stderr
+
+
+def test_import_summary_checks_size_before_publication(tmp_path, monkeypatch):
+    monkeypatch.setattr(installation, 'SEARCH_REPORT_MAX_BYTES', 128)
+    output = tmp_path / 'search.summary.json'
+    report = search_report(candidate('winner', np.full((10, 3), 4)))
+    with pytest.raises(ValueError, match='大小上限'):
+        optimize_mount.write_import_summary(output, report, evidence='search.json', sha256='0' * 64)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_v2_search_report_screened_with_datasheet_housing_requires_regeneration(monkeypatch):
+    location, rotation = [1.07, 0., 0.], [0., 0., 0.]
+    matrix, shell = pose(location), [[-1., -1., -1.], [1., 1., 1.]]
+    with monkeypatch.context() as legacy:
+        legacy.setitem(installation.UNIT_ENVELOPE, 'dimensions_whd_m', [.095, .120, .040])
+        mechanics = installation.static_constraints(matrix, shell, .07)
+    assert mechanics['status'] == 'PASS_RESEARCH'
+    current = installation.static_constraints(matrix, shell, .07)
+    assert current['status'] == 'REJECTED' and not current['checks']['shell_exterior']
+
+    row = candidate('winner', np.full((10, 3), 4))
+    mechanics['motion_clearance'] = row['mechanical']['motion_clearance']
+    row.update(location_m=location, rotation_deg=rotation, mechanical=mechanics)
+    report = search_report(row)
+    report['mechanical_policy'].pop('unit_envelope')
+    with pytest.raises(ValueError, match=r'mechanical_policy\.unit_envelope\.dimensions_whd_m.*请重新运行 .*optimize_mount\.py'):
+        installation.selected_installation(report, 'source', 'geometry')
+
+
+@pytest.mark.parametrize('path,value', [
+    (('unit_envelope', 'dimensions_whd_m'), [.095, .120, .040]),
+    (('unit_envelope', 'dimensions_whd_m'), [.173, .2025, .175600001]),
+    (('unit_envelope', 'dimensions_whd_m'), [.173, .2025, np.nan]),
+    (('unit_envelope', 'dimensions_whd_m'), [.173, .2025, '.1756']),
+    (('parameters', 'service_clearance_m', 'value'), .01),
+    (('parameters', 'motion_clearance_m', 'value'), np.inf),
+    (('parameters', 'maximum_bracket_reach_m', 'unit'), 'cm'),
+    (('housing_axes',), 'X=width, Y=depth, Z=height'),
+    (('opening_policy',), 'SHELL_CUT_ALLOWED'),
+    (('physical_installation_approved',), True),
+])
+def test_v2_search_report_rejects_incompatible_mechanical_policy(path, value):
+    report = search_report(candidate('winner', np.full((10, 3), 4)))
+    policy = report['mechanical_policy']
+    for key in path[:-1]:
+        policy = policy[key]
+    policy[path[-1]] = value
+    with pytest.raises(ValueError, match=rf'mechanical_policy\.{path[0]}.*请重新运行 .*optimize_mount\.py'):
+        installation.selected_installation(report, 'source', 'geometry')
+
+
+def test_v2_search_report_requires_mechanical_policy():
+    report = search_report(candidate('winner', np.full((10, 3), 4)))
+    report.pop('mechanical_policy')
+    with pytest.raises(ValueError, match=r'mechanical_policy.*请重新运行 .*optimize_mount\.py'):
+        installation.selected_installation(report, 'source', 'geometry')
 
 
 def test_containment_includes_vertices_edges_and_faces_in_either_winding():

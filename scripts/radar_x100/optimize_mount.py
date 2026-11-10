@@ -2,9 +2,95 @@
 import argparse
 from dataclasses import replace
 import hashlib
+import json
+import os
 from pathlib import Path
+import shutil
 import sys
+import tempfile
 import numpy as np
+
+
+def _report_paths(output):
+    from wfrl.radar_x100 import installation
+
+    output = Path(output)
+    companion = output.with_suffix(installation.SEARCH_SUMMARY_SUFFIX)
+    for path in (output, companion):
+        if os.path.lexists(path):
+            raise FileExistsError(path)
+    return output, companion
+
+
+def write_import_summary(destination, report, *, evidence, sha256):
+    """Project and exclusively publish an import summary for the supplied evidence bytes."""
+    from wfrl.camera_video.publication import commit_exclusive
+    from wfrl.radar_x100 import installation
+    from wfrl_blender import atomic_json
+
+    destination = Path(destination)
+    if os.path.lexists(destination):
+        raise FileExistsError(destination)
+    summary = installation.import_summary(report)
+    summary['evidence_report'] = dict(name=Path(evidence).name, sha256=sha256)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.wfrl-x100-summary-', dir=destination.parent) as directory:
+        staged = Path(directory) / 'summary.json'
+        atomic_json.write_json(staged, summary)
+        if staged.stat().st_size > installation.SEARCH_REPORT_MAX_BYTES:
+            raise ValueError('摘要超过 Blender 的导入大小上限')
+        commit_exclusive(staged, destination)
+    return destination
+
+
+def _write_checkpoint_evidence(path, report, candidate_paths):
+    from wfrl.radar_x100 import installation
+    from wfrl_blender import atomic_json
+
+    metadata = {key: value for key, value in report.items() if key != 'candidates'}
+    with atomic_json.write_json_array(path, metadata, 'candidates') as append:
+        for ranked in report['candidates']:
+            checkpoint = candidate_paths[ranked['id']]
+            row = json.loads(checkpoint.read_bytes())
+            if not isinstance(row, dict):
+                raise ValueError(f'无效的安装搜索候选检查点：{checkpoint}')
+            # Compare the serialized ranking inputs so tuples and JSON arrays agree.
+            actual = json.dumps(installation.candidate_summary(row), sort_keys=True)
+            expected = json.dumps(installation.candidate_summary(ranked), sort_keys=True)
+            if actual != expected:
+                raise ValueError(f'安装搜索候选检查点与排名依据不一致：{checkpoint}')
+            row.update(score=ranked['score'], detection_score=ranked['detection_score'],
+                       geometric_score=ranked['geometric_score'])
+            append(row)
+            del row
+
+
+def write_search_reports(output, report, *, candidate_paths=None):
+    """Publish full evidence, optionally from checkpoints keyed by ranked candidate ID."""
+    from wfrl.camera_video.publication import commit_exclusive
+    from wfrl_blender import atomic_json
+
+    output, companion = _report_paths(output)
+    has_winner = report.get('winner_id') is not None
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.wfrl-x100-report-', dir=output.parent) as directory:
+        staging = Path(directory)
+        evidence = staging / 'evidence.json'
+        if candidate_paths is None:
+            atomic_json.write_json(evidence, report)
+        else:
+            _write_checkpoint_evidence(evidence, report, candidate_paths)
+        sha256 = None
+        if has_winner:
+            with evidence.open('rb') as stream:
+                sha256 = hashlib.file_digest(stream, 'sha256').hexdigest()
+        commit_exclusive(evidence, output)
+    if not has_winner:
+        return None
+    try:
+        return write_import_summary(companion, report, evidence=output, sha256=sha256)
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f'安装搜索摘要写出失败，完整报告已保留于 {output}。{exc}') from exc
 
 
 def main():
@@ -14,7 +100,8 @@ def main():
                                              detection_configuration, evaluate_detection_grid)
     from wfrl.radar_x100 import installation, simulation, sampling, detection
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True,
+                        help='New full-evidence JSON path; an applicable winner also produces <stem>.summary.json')
     parser.add_argument('--package', type=Path)
     parser.add_argument('--roll', type=float, nargs='+', default=[0.], help='XYZ Euler angles for additional --location entries')
     parser.add_argument('--pitch', type=float, nargs='+', default=[70., 76., 90.])
@@ -33,11 +120,12 @@ def main():
                         help='Nacelle-local analysis bounds: xmin ymin zmin xmax ymax zmax')
     add_detection_arguments(parser)
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else None)
-    if (args.output.exists() or not all(1 <= n <= 4096 for n in args.budgets)
+    output, _ = _report_paths(args.output.absolute())
+    if (not all(1 <= n <= 4096 for n in args.budgets)
             or len(args.budgets) * len(args.seeds) > 32 or any(s < 0 for s in args.seeds)
             or args.minimum_points < 3 or len(args.seeds) * len(args.noise_seeds) > 32 or not 0 < args.distal_span < 1
             or not 0 < args.half_window_deg < 180 or args.passages_per_blade < 0):
-        raise ValueError('Invalid search profile or output already exists')
+        raise ValueError('Invalid search profile')
     config = detection_configuration(args)
     metadata = installation.profile_metadata(args.roi)
     import bpy
@@ -45,6 +133,8 @@ def main():
     from wfrl_blender import farm_flex, atomic_json
     from wfrl_blender.radar_x100.scene import SceneSampler, installation_matrix, installation_catalog
     from scripts.radar_x100.export_simulation import sample_times
+    checkpoints = None
+    complete = False
     addon.register()
     try:
         source_files = [Path(__file__), Path(simulation.__file__), Path(sampling.__file__), Path(detection.__file__),
@@ -53,6 +143,10 @@ def main():
         code_identity = {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
         addon.load_demo_scene(args.package or farm_flex.default_package())
         sampler = SceneSampler(farm_flex.active_for(bpy.context.scene), mount_from_sensor=np.eye(4))
+        provenance = dict(source_id=sampler.source_id, geometry_id=sampler.geometry_id, **metadata,
+            sampling_method='AREA', sampling_algorithm=sampling.AREA_ALGORITHM, code_identity=code_identity,
+            evaluation_scope='ALL_COMPLETE_PASSAGES' if not args.passages_per_blade else 'FIRST_COMPLETE_PASSAGES_SCREENING_ONLY',
+            passages_per_blade=args.passages_per_blade)
         options = dict(lateral_offsets=args.lateral_offsets)
         if args.tilt:
             options['tilts'] = args.tilt
@@ -64,6 +158,15 @@ def main():
             if set(args.candidate_ids) - {c['id'] for c in choices}:
                 raise ValueError('Candidate IDs are not in the declared search catalog')
             choices = [c for c in choices if c['id'] in args.candidate_ids]
+        output.parent.mkdir(parents=True, exist_ok=True)
+        checkpoints = Path(tempfile.mkdtemp(prefix='.wfrl-x100-search-', dir=output.parent))
+        print('X100_SEARCH_CHECKPOINTS', str(checkpoints), flush=True)
+        atomic_json.write_json(checkpoints / 'metadata.json', dict(**provenance,
+            full_report=output.name, planned_candidate_ids=[choice['id'] for choice in choices],
+            budgets=args.budgets, seeds=args.seeds, noise_seeds=args.noise_seeds,
+            integration_budget=args.integration_budget, output_point_limit=args.output_point_limit,
+            minimum_points=args.minimum_points, detection_min_points=args.detection_min_points,
+            distal_span=args.distal_span, half_window_deg=args.half_window_deg))
         poses = [installation_matrix(c['location_m'], c['rotation_deg']) for c in choices]
         mechanics = [sampler.installation_constraints(pose) for pose in poses]
         motion = [[] for _ in choices]
@@ -129,7 +232,7 @@ def main():
                 errors.append(dict(source_time_s=float(stamp), reason=str(exc)))
             if source_index % 300 == 0:
                 print(f'X100_SEARCH_GEOMETRY {source_index + 1}/{len(source_times)}', flush=True)
-        rows = []
+        summaries, candidate_paths = [], {}
         truth_cache = {}
         for c, choice in enumerate(choices):
             variants = [dict(seed=seed, budget=budget, geometric_coverage=installation.summarize(counts[c, p], windows, args.minimum_points),
@@ -150,23 +253,23 @@ def main():
                 session_id='installation-' + choice['id'], passage_windows=windows, source_indices=source_indices,
                 distal_span=args.distal_span, truth_cache=truth_cache)
                 for seed in dict.fromkeys(args.seeds) for noise_seed in dict.fromkeys(args.noise_seeds)] if evaluate else []
-            rows.append(choice | dict(profiles=variants, mechanical=mechanics[c], detection_profiles=detection_profiles,
-                detection_evaluation='EVALUATED' if evaluate else 'NOT_EVALUATED_MECHANICAL_CONSTRAINTS'))
-            atomic_json.write_json(args.output.with_suffix('.partial.json'), dict(completed_candidates=rows,
-                total_candidates=len(choices)), mkdir=True)
-        ranked = installation.rank(rows)
+            row = choice | dict(profiles=variants, mechanical=mechanics[c], detection_profiles=detection_profiles,
+                detection_evaluation='EVALUATED' if evaluate else 'NOT_EVALUATED_MECHANICAL_CONSTRAINTS')
+            checkpoint = candidate_paths[row['id']] = checkpoints / f'candidate-{c + 1:03d}.json'
+            atomic_json.write_json(checkpoint, row)
+            summaries.append(installation.candidate_summary(row))
+            del row, variants, detection_profiles
+        ranked = installation.rank(summaries)
         best = ranked[0] if ranked[0]['score'] is not None else None
         winner = best['id'] if best and not errors and not args.passages_per_blade else None
         continuous = bool(winner and all(p['passage_detection_support']['continuous_support'] for p in best['detection_profiles']))
-        report = dict(schema=installation.SCHEMA, source_id=sampler.source_id, geometry_id=sampler.geometry_id,
-            **metadata, original_assessment=catalog['original_assessment'], shell_geometry=catalog['shell_geometry'],
+        report = dict(schema=installation.SCHEMA, **provenance,
+            original_assessment=catalog['original_assessment'], shell_geometry=catalog['shell_geometry'],
             peer_placement_references=catalog['peer_placement_references'],
-            sampling_method='AREA', reference_time_s=sampler.interval[0], source_interval_s=sampler.interval,
-            sampling_algorithm=sampling.AREA_ALGORITHM, code_identity=code_identity,
+            reference_time_s=sampler.interval[0], source_interval_s=sampler.interval,
             source_grid_hz=30, source_frames=len(source_times), grid_times_s=source_times.tolist(),
             evaluation_grid_times_s=times.tolist(), evaluation_source_indices=source_indices, passage_windows=windows,
-            evaluation_scope='ALL_COMPLETE_PASSAGES' if not args.passages_per_blade else 'FIRST_COMPLETE_PASSAGES_SCREENING_ONLY',
-            passages_per_blade=args.passages_per_blade, minimum_points=args.minimum_points,
+            minimum_points=args.minimum_points,
             distal_span=args.distal_span, half_window_deg=args.half_window_deg,
             sampling_plans={str(seed): plan.identity for seed, plan in plans.items()},
             ranking=['mechanical research checks and known passage detection/tower-error evidence required',
@@ -180,14 +283,21 @@ def main():
             default_mode_basis='Every complete passage grid frame and exact nadir has support across all evaluated profiles'
                 if continuous else 'Continuous detection support over every complete source passage and exact nadir is not established',
             candidates=ranked)
-        if args.output.exists():
-            raise FileExistsError(args.output)
-        atomic_json.write_json(args.output, report, mkdir=True)
-        print('X100_SEARCH_COMPLETE', str(args.output), 'winner', winner, flush=True)
+        summary_path = write_search_reports(output, report, candidate_paths=candidate_paths)
+        print('X100_SEARCH_COMPLETE', str(output), 'winner', winner,
+              'import_summary', str(summary_path) if summary_path is not None else 'none', flush=True)
         if errors:
             raise RuntimeError('Coverage contains unknown frames; no installation is accepted')
+        complete = True
     finally:
-        addon.unregister()
+        try:
+            if checkpoints is not None:
+                if complete:
+                    shutil.rmtree(checkpoints, ignore_errors=True)
+                else:
+                    print('X100_SEARCH_PARTIAL', str(checkpoints), file=sys.stderr, flush=True)
+        finally:
+            addon.unregister()
 
 
 if __name__ == '__main__':

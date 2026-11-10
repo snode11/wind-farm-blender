@@ -8,11 +8,14 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 import threading
 import time
+from typing import NamedTuple
+import unicodedata
 
 
 def video_path(value):
@@ -215,33 +218,213 @@ class Stream:
         self._settle_stop()
 
 
-def _staged(path):
-    return path.with_name(f'.{path.name}.partial')
+_publish_lock = threading.Lock()
 
 
-def publish_staged(movies, sidecar_path, sidecar, label):
-    """Stage every movie and the JSON beside its target, then replace the targets.
-
-    ``movies`` holds (rendered file, target) pairs. No target changes until every file is
-    staged, so a failure keeps the previous files of those names and removes the staged
-    copies. Existing targets are overwritten; the final renames stay within each target
-    directory. Raises RuntimeError with ``label`` and the OSError as its cause."""
-    staged = []
+def _entry_stat(target):
     try:
-        for source, target in movies:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(source), str(_staged(target)))
-            staged.append((_staged(target), target))
-        _staged(sidecar_path).write_text(json.dumps(sidecar, ensure_ascii=False, indent=1) + '\n',
-                                         encoding='utf-8')
-        staged.append((_staged(sidecar_path), sidecar_path))
-        for temporary, target in staged:
-            os.replace(temporary, target)
-    except OSError as exc:
-        for temporary, _target in staged:
-            temporary.unlink(missing_ok=True)
-        _staged(sidecar_path).unlink(missing_ok=True)
-        raise RuntimeError(f'{label}写出失败：{exc}') from exc
+        return target.lstat()
+    except FileNotFoundError:
+        return None
+
+
+def _publish_target_stat(target):
+    info = _entry_stat(target)
+    if info is not None and not stat.S_ISREG(info.st_mode):
+        raise ValueError(f'视频输出目标必须是普通文件：{target}')
+    return info
+
+
+def _publish_path_key(path):
+    name = str(path)
+    if sys.platform == 'darwin':
+        return unicodedata.normalize('NFD', name.casefold())
+    return os.path.normcase(name)
+
+
+class _PublishTarget(NamedTuple):
+    requested: Path
+    path: Path
+    ancestor: Path
+    ancestor_stat: os.stat_result
+    original: os.stat_result | None
+
+
+def _publish_ancestor(target):
+    for parent in target.parents:
+        try:
+            info = parent.stat()
+        except FileNotFoundError:
+            if _entry_stat(parent) is not None:
+                raise ValueError(f'视频输出目录链接无效：{parent}') from None
+            continue
+        if not stat.S_ISDIR(info.st_mode):
+            raise ValueError(f'视频输出目录无效：{parent}')
+        return parent, info
+    raise ValueError(f'视频输出目录无效：{target.parent}')
+
+
+def validate_publish_targets(targets):
+    """Validate and freeze independent destinations without creating anything."""
+    paths, files, plan = {}, {}, []
+    for target in (Path(value).absolute() for value in targets):
+        if target.name in {'', '..'} or (os.name == 'nt' and target.is_reserved()):
+            raise ValueError(f'无效的视频输出文件名：{target}')
+        try:
+            resolved = target.parent.resolve() / target.name
+            ancestor, ancestor_stat = _publish_ancestor(target)
+            if resolved.parent != target.parent:
+                ancestor, ancestor_stat = _publish_ancestor(resolved)
+            info = _publish_target_stat(resolved)
+        except (OSError, RuntimeError) as exc:
+            raise ValueError(f'无法访问视频输出路径：{target}（{exc}）') from exc
+        key = _publish_path_key(resolved)
+        identity = (info.st_dev, info.st_ino) if info is not None and info.st_ino else None
+        duplicate = paths.get(key) or files.get(identity)
+        if duplicate is not None:
+            raise ValueError(f'视频输出目标重复：{duplicate} 与 {target}')
+        paths[key] = resolved
+        plan.append(_PublishTarget(target, resolved, ancestor, ancestor_stat, info))
+        if identity is not None:
+            files[identity] = target
+    for path in paths.values():
+        for parent in path.parents:
+            if _publish_path_key(parent) in paths:
+                raise ValueError(f'视频输出文件和目录冲突：{parent} 与 {path}')
+    return tuple(plan)
+
+
+def _file_stamp(info):
+    if info is None:
+        return None
+    # ctime is left out: extended attributes, links and renames change it without changing the contents.
+    return info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns
+
+
+def _verify_publish_target(output):
+    target = output.requested
+    try:
+        ancestor_stat = output.ancestor.lstat()
+        same_parent = (target.parent.resolve() == output.path.parent
+                       and stat.S_ISDIR(ancestor_stat.st_mode)
+                       and os.path.samestat(ancestor_stat, output.ancestor_stat))
+    except (OSError, RuntimeError) as exc:
+        raise RuntimeError(f'无法核对视频输出目标的目录：{target}（{exc}）') from exc
+    if not same_parent:
+        raise RuntimeError(f'视频输出目标的目录已发生变化：{target}')
+    if _file_stamp(_entry_stat(output.path)) != _file_stamp(output.original):
+        raise RuntimeError(f'视频输出目标在预检后发生变化：{target}')
+
+
+def _capture_down_entry(target, captured, expected, retained):
+    """Move a live entry atomically and verify the entry that actually moved."""
+    conflict = f'视频输出目标已被其他写入更改：{target}'
+    if _file_stamp(_entry_stat(target)) != expected:
+        raise RuntimeError(conflict)
+    try:
+        os.replace(target, captured)
+        if _file_stamp(captured.lstat()) != expected:
+            raise RuntimeError(conflict)
+    except BaseException as exc:
+        retained.add(captured.parent)
+        try:
+            if _entry_stat(captured) is not None:
+                _commit_export(captured, target)
+                captured.unlink(missing_ok=True)
+        except BaseException as recovery_error:
+            raise RuntimeError(f'{exc}。恢复失败：{recovery_error}。请检查 {target} 和暂存路径 {captured}') from recovery_error
+        retained.discard(captured.parent)
+        raise
+
+
+def _commit_down_outputs(staged, retained):
+    for _, output in staged:
+        _verify_publish_target(output)
+    originals = {output.path: _file_stamp(output.original) for _, output in staged}
+    attempted, published = [], set()
+    publishing = None
+    try:
+        for temporary, output in staged:
+            _verify_publish_target(output)
+            target = output.path
+            staged_stat = temporary.lstat()
+            if not stat.S_ISREG(staged_stat.st_mode):
+                raise ValueError(f'视频输出暂存文件必须是普通文件：{temporary}')
+            original = originals[target]
+            stamp = _file_stamp(staged_stat)
+            backup = temporary.with_name('previous') if original is not None else None
+            attempted.append((temporary, target, backup, stamp))
+            if backup is not None:
+                _capture_down_entry(target, backup, original, retained)
+            publishing = target
+            _commit_export(temporary, target)
+            published.add(target)
+            publishing = None
+    except BaseException as exc:
+        recovery_errors = []
+        for temporary, target, backup, stamp in reversed(attempted):
+            if temporary.parent in retained:
+                continue
+            try:
+                if target in published or (publishing == target and _file_stamp(_entry_stat(target)) == stamp):
+                    _capture_down_entry(target, temporary.with_name('rollback'), stamp, retained)
+                backup_info = _entry_stat(backup) if backup is not None else None
+                if backup_info is not None:
+                    if _file_stamp(backup_info) != originals[target]:
+                        raise RuntimeError(f'视频输出备份已发生变化：{backup}')
+                    _commit_export(backup, target)
+            except BaseException as error:
+                if backup is not None:
+                    retained.add(backup.parent)
+                    recovery_errors.append(f'{error}。请检查 {target} 和备份路径 {backup}')
+                else:
+                    recovery_errors.append(str(error))
+        if recovery_errors:
+            raise RuntimeError(f'{exc}。恢复失败：' + '；'.join(recovery_errors)) from exc
+        raise
+
+
+def publish_staged(movies, sidecar_path, sidecar, label, *, preflight=None):
+    """Move private rendered movies and JSON to per-destination staging.
+
+    A Path sidecar is an already completed private JSON file.
+    Preflight records which destination entries the caller authorized overwriting.
+    When omitted, the destinations are frozen when publication begins.
+    Invalid targets raise ValueError before staging. Overwriting moves the existing entry
+    aside before exclusive publication. On failure, restore prior entries where possible
+    and retain displaced entries whose restoration fails.
+    """
+    from .atomic_json import write_json
+
+    outputs = [(source, Path(target).absolute()) for source, target in movies]
+    outputs.append((sidecar if isinstance(sidecar, Path) else None, Path(sidecar_path).absolute()))
+    with _publish_lock:
+        requested = tuple(target for _, target in outputs)
+        if preflight is None:
+            preflight = validate_publish_targets(requested)
+        elif requested != tuple(output.requested for output in preflight):
+            raise ValueError('视频输出目标与预检路径不一致')
+        staged, retained = [], set()
+        try:
+            for output in preflight:
+                _verify_publish_target(output)
+            for (source, _), output in zip(outputs, preflight):
+                target = output.path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                directory = Path(tempfile.mkdtemp(prefix='.wfrl-down-', dir=target.parent))
+                temporary = directory / 'new'
+                staged.append((temporary, output))
+                if source is None:
+                    write_json(temporary, sidecar)
+                else:
+                    shutil.move(str(source), str(temporary))
+            _commit_down_outputs(staged, retained)
+        except (OSError, ValueError, TypeError, RuntimeError) as exc:
+            raise RuntimeError(f'{label}写出失败：{exc}') from exc
+        finally:
+            for temporary, _target in staged:
+                if temporary.parent not in retained:
+                    shutil.rmtree(temporary.parent, ignore_errors=True)
 
 
 def _commit_export(source, destination):

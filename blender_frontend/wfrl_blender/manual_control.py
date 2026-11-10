@@ -77,6 +77,8 @@ def validate_scene(scene):
         owner = scene.get('wfrl_manual_owner')
         if not owner:
             return False, '手动控制场景缺少对象归属标识'
+        foreign_objects = {obj.as_pointer() for other in bpy.data.scenes if other != scene
+                           for obj in other.objects}
         seen_objects, seen_ids = set(), set()
         for entry in entries:
             if not entry.turbine_id or entry.turbine_id in seen_ids:
@@ -104,7 +106,7 @@ def validate_scene(scene):
                 if key in seen_objects:
                     return False, '风机控制对象不能重复使用'
                 seen_objects.add(key)
-                if any(owner != scene for owner in obj.users_scene):
+                if key in foreign_objects:
                     return False, '控制对象与其他场景共享，请使用独立副本'
         return True, ''
     except (AttributeError, ReferenceError, TypeError):

@@ -28,10 +28,14 @@ assert not bpy.ops.wfrl.live_stream_start.poll()
 assert not bpy.ops.wfrl.live_stream_stop.poll()
 assert view.session() is None and view.status() == []
 assert bpy.types.IMAGE_HT_header._dyn_ui_initialize().count(view._draw_header) == 1
+assert view._on_load_post in bpy.app.handlers.load_post
+assert view._on_load_post in bpy.app.handlers.load_post_fail
 addon.unregister()
 assert not hasattr(bpy.types.WindowManager, 'wfrl_live_url')
 assert view._draw_header not in bpy.types.IMAGE_HT_header._dyn_ui_initialize()
 assert view._on_load_pre not in bpy.app.handlers.load_pre
+assert view._on_load_post not in bpy.app.handlers.load_post
+assert view._on_load_post not in bpy.app.handlers.load_post_fail
 addon.register()
 addon.unregister()
 print('LIVE_STREAM_REGISTER_PASS', flush=True)

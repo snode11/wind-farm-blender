@@ -99,12 +99,13 @@ def main():
     try:
         for sequence, t in enumerate(sample_times(args.start, args.end, args.fps)):
             budget = 16384
-            frame = api.simulation.simulate_detections(sampler.sample, t, sensor_id='X100-T1',
-                session_id=session, sequence=sequence, interval_s=sampler.interval,
-                integration_budget=budget, output_point_limit=api.schema.PROFILE['max_points'],
-                sampling_seed=args.seed, noise_seed=args.seed,
-                config=config, visibility=sampler.visibility, material_at=sampler.material_sample,
-                sampling_plan=sampler.sampling_plan(budget, seed=args.seed))
+            with sampler.sampling_transaction():
+                frame = api.simulation.simulate_detections(sampler.sample, t, sensor_id='X100-T1',
+                    session_id=session, sequence=sequence, interval_s=sampler.interval,
+                    integration_budget=budget, output_point_limit=api.schema.PROFILE['max_points'],
+                    sampling_seed=args.seed, noise_seed=args.seed,
+                    config=config, visibility=sampler.visibility, material_at=sampler.material_sample,
+                    sampling_plan=sampler.sampling_plan(budget, seed=args.seed))
             if frame is None:
                 raise ValueError(f'No source sample at {t} s')
             frame.provenance['calibration_id'] = sampler.calibration_id

@@ -85,11 +85,12 @@ class WFRL_OT_X100FrameUnit(bpy.types.Operator):
 class WFRL_OT_X100SearchApply(bpy.types.Operator):
     bl_idname = 'wfrl.x100_search_apply'
     bl_label = '应用搜索推荐安装'
-    bl_description = '核对来源后应用离线搜索结果，保留当前场景时刻'
+    bl_description = '应用离线搜索生成的 .summary.json 或大小不超过 16 MiB 的完整报告，保留当前场景时刻'
 
     def execute(self, context):
         import json
         from pathlib import Path
+        from ..radar_x100.core import installation
         from ..radar_x100.runtime import apply_mount_preset
         try:
             busy = _busy(context.scene)
@@ -97,9 +98,10 @@ class WFRL_OT_X100SearchApply(bpy.types.Operator):
                 raise ValueError(busy)
             path = Path(bpy.path.abspath(context.scene.wfrl_x100_search_path))
             with path.open('rb') as stream:
-                raw = stream.read(16 * 1024 * 1024 + 1)
-            if len(raw) > 16 * 1024 * 1024:
-                raise ValueError('安装搜索报告超过大小上限')
+                raw = stream.read(installation.SEARCH_REPORT_MAX_BYTES + 1)
+            if len(raw) > installation.SEARCH_REPORT_MAX_BYTES:
+                raise ValueError('安装搜索报告超过 16 MiB，请选择同次搜索的 .summary.json。'
+                                 '也可用 scripts/radar_x100/extract_mount_summary.py 从完整报告提取摘要')
             apply_mount_preset(context.scene, 'SEARCH', search_report=json.loads(raw))
         except Exception as exc:
             self.report({'ERROR'}, str(exc))
@@ -584,7 +586,8 @@ def register_properties():
             ('PROJECTIVE', '相机矩形', '与针孔相机画面一致的矩形：横向与纵向正切不超过半角正切；半角须小于 90°'))),
         candidates=p.IntProperty(name='采样预算', description='下一新样本读取的材料表面候选预算；不等于输出点数', default=512, min=1, max=schema.PROFILE['max_points']),
         fov=p.BoolProperty(name='名义视场', description=f"即时显示名义视场，长度 {schema.DISPLAY_DEFAULTS['fov_length_m']:g} m，不代表探测结果或量程", default=True),
-        path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH', update=ply_path_changed),
+        path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH',
+            options={'ANIMATABLE', 'PATH_SUPPORTS_BLEND_RELATIVE'}, update=ply_path_changed),
         ply_source=p.EnumProperty(name='单帧 PLY 来源', default='UNDECLARED', items=(
             ('UNDECLARED', '请选择来源', 'PLY 本身不包含来源信息，需根据实际生成方式声明'),
             ('GEOMETRY_SIMULATION', '几何仿真', '来自几何仿真的单帧文件'),

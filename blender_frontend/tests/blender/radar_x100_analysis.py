@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[3]
 sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import farm_flex, performance
-from wfrl_blender.radar_x100 import runtime,scene as scene_api,view
+from wfrl_blender.radar_x100 import runtime,scene as scene_api
 from wfrl.radar_x100 import analysis
 OUT=Path(os.environ['WFRL_TEST_OUTPUT']);OUT.mkdir(parents=True,exist_ok=False)
 addon.register()
@@ -165,15 +165,21 @@ assert session.context is not None,session.analysis_error
 old_frame,old_sampler,old_session=session.frame,session.sampler,session.source_session
 old_matrix=np.array(session.mount.matrix_basis)
 old_config=tuple(scene.wfrl_x100_location)
+old_fov_mesh=session.fov.data
+old_snapshot=scene[runtime.configuration.SAVED_KEY]
+model=runtime.view.housing(session.mount)
+old_visibility=(model.hide_viewport,model.hide_render)
 saved_capture=session.capture_configuration
 session.capture_configuration=lambda: (_ for _ in ()).throw(RuntimeError('commit injection'))
 try:
-    runtime.apply_mount_preset(scene,'NACELLE_SIDE')
+    runtime.apply_mount_preset(scene,'DOWN_CAMERA')
     raise AssertionError('Expected commit failure')
 except RuntimeError: pass
 assert session.frame is old_frame and session.sampler is old_sampler and session.source_session==old_session
 np.testing.assert_allclose(np.array(session.mount.matrix_basis),old_matrix,atol=1e-6)
 assert tuple(scene.wfrl_x100_location)==old_config
+assert session.fov.data==old_fov_mesh and scene[runtime.configuration.SAVED_KEY]==old_snapshot
+assert (model.hide_viewport,model.hide_render)==old_visibility
 session.capture_configuration=saved_capture
 # Rewind and same source frame get distinct contexts; frozen old contexts do not mutate.
 scene['wfrl_clearance_time_s']=session.sampler.interval[0]+.1

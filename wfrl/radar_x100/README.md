@@ -146,7 +146,9 @@ Blender `SceneSampler.analysis_context()` 从中心源时刻样本提取配对�
 
 [installation.py](installation.py) 与 [optimize_mount.py](../../scripts/radar_x100/optimize_mount.py) 使用 `x100-installation-search.v2`。报告分开保存硬件、ROI、机械、几何覆盖、所评网格的模拟检测支持及 `detection_profiles[].passage_detection_support`。主指标为 `DISTAL_ROI_PASSAGE_DETECTIONS.v1`：完整叶片经过期间末段ROI的非纯噪声检测支持、最长连续漏检秒数、精确正下方时刻支持与塔距误差。排序依次比较最差经过支持率、最长漏检、正下方支持率、最差叶片支持率、塔距RMSE、平均ROI检测点数，几何覆盖只作平局辅助。各配置取最不利值，不合成设备可靠性分数。
 
-`selected_installation()` 校验v2、来源、几何、面积方法与算法身份并重算排名；机械／运动须为 `PASS_RESEARCH`，检测经过、正下方与适用塔距误差须已知，最差叶片检测支持须为正。导入还要求所评网格的模拟支持已知且为正、几何覆盖字段齐全；几何零覆盖本身不再是排名否决条件。缺证据、排名不符、来源不符或有错误帧时拒绝应用。仅筛选前若干经过的报告不提供可应用 `winner_id`。应用保留预算、观测模式和场景时刻；ROI可能包含塔架返回，支持率不是叶片识别率，详见[安装覆盖搜索](../../docs/blender/X100观测研究.md#安装覆盖搜索)。
+`--output` 指定完整报告路径。存在可应用推荐时，配套的 `<文件名主体>.summary.json` 保存同一 v2 来源信息、机械筛选策略、全部候选及用于资格检查和重算排名的汇总字段。逐帧数据留在完整报告中，摘要的 `evidence_report` 记录该文件的名称和 SHA-256。Blender 导入上限为 16 MiB，超限时选择摘要。搜索按筛选与评分字段排名，再从检查点逐候选写入完整报告。已有兼容的完整报告可用 `scripts/radar_x100/extract_mount_summary.py` 提取摘要，提取命令需要读入并解析整份输入。完整报告及摘要使用新文件名发布，摘要写出失败时保留已发布的完整报告。搜索失败或中断保留任务目录中的 `metadata.json` 和已完成候选的独立 JSON。[搜索与摘要提取](../../docs/blender/X100观测研究.md#安装覆盖搜索)
+
+`selected_installation()` 校验v2、来源、几何、面积方法与算法身份并重算排名。导入要求 `mechanical_policy` 声明当前安装包络尺寸、轴向与中心、研究参数、仅外部安装规则及 `physical_installation_approved=false`。缺失或不符时须重新运行 `scripts/radar_x100/optimize_mount.py`。机械／运动须为 `PASS_RESEARCH`，检测经过、正下方与适用塔距误差须已知，最差叶片检测支持须为正。导入还要求所评网格的模拟支持已知且为正、几何覆盖字段齐全；几何零覆盖本身不再是排名否决条件。缺证据、排名不符、来源不符或有错误帧时拒绝应用。仅筛选前若干经过的报告不提供可应用 `winner_id`。应用保留预算、观测模式和场景时刻；ROI可能包含塔架返回，支持率不是叶片识别率，详见[安装覆盖搜索](../../docs/blender/X100观测研究.md#安装覆盖搜索)。
 
 `tracking.py` 的 `fit_blades()` 只接收观测世界坐标、同帧塔面距离及三个 `BladePrior`。先验含逻辑叶片编号、`world_from_blade` 和名义叶尖径向坐标 `tip_span_m`；Blender 以轮毂为原点、根部方向为坐标轴，末端局部Z取结构参数 `TipRad`。已知塔面附近点及多叶片走廊重叠点保持未关联；原始观测和原索引不改写。分段中位数与稳健二次拟合提供候选叶片段，支持、跨度、残差和外推条件满足时给出名义径向截面的模型叶尖估计。拟合离散度不是经过标定的物理置信区间。
 

@@ -1,6 +1,5 @@
 """Scene-owned radar lifecycle and deterministic simulation/replay sampling."""
 import math
-from pathlib import Path
 import time
 import uuid
 import numpy as np
@@ -38,17 +37,20 @@ def _validate_mount_drivers(mount):
 
 
 class Session:
-    def __init__(self, scene, *, restoring=False):
+    def __init__(self, scene, *, owner, restoring=False):
+        import bpy
         from .. import farm_flex
         from .scene import SceneSampler, installation_matrix
-        self.scene, self.mode = scene, scene.wfrl_x100_source
-        self.observation_mode = scene.wfrl_x100_observation_mode
+        saved = configuration.saved(scene) if restoring else None
+        applied = saved if saved is not None else configuration.capture(scene, abspath=bpy.path.abspath)
+        self.scene, self.owner = scene, owner
+        self.mode, self.applied_config = applied['source'], applied
+        self.observation_mode = applied.get('observation_mode', 'GEOMETRY')
         self.key, self.frame, self.gpu_batch, self.client = None, None, None, None
         self.mount, self.fov, self.fanout = None, None, None
         self.recording_stopping = self.closing = False
         self.close_remove = True
         self.restore_after_close = False
-        self._gpu_required = True
         self.gpu_retry_at = None
         self.fov_gpu_batch = None
         self.render_color = None
@@ -79,49 +81,47 @@ class Session:
         self.replay_cursor = None
         self.replay_time_s = float(scene.wfrl_x100_replay_s)
         self.frame_index = self.record_last_index = self.record_last_stamp = None
-        self.owner = scene.get('wfrl_x100_owner') or str(uuid.uuid4())
-        scene['wfrl_x100_owner'] = self.owner
-        if not restoring:
-            view.remove_objects(scene)
         if self.mode == 'SIMULATION':
             flex = farm_flex.active_for(scene)
             if flex is None or not farm_flex.is_active(scene):
                 raise ValueError('仿真需要本场景已加载的风场柔性回放')
-            self.sampler = SceneSampler(flex, mount=scene.wfrl_x100_mount,
-                mount_from_sensor=installation_matrix(scene.wfrl_x100_location, scene.wfrl_x100_rotation),
-                field_of_view=tuple(scene.wfrl_x100_field_of_view),
-                field_of_view_shape=scene.wfrl_x100_field_of_view_shape)
-            t = max(self.sampler.interval[0], min(self.sampler.interval[1], float(scene.get('wfrl_clearance_time_s', 0))))
             if restoring:
                 self.mount, self.fov = view.existing_installation(scene, self.owner)
-            else:
+                if saved is None:
+                    applied['field_of_view'], applied['field_of_view_shape'] = view.saved_field_of_view(self.fov)
+            self.sampler = SceneSampler(flex, mount=applied['mount'],
+                mount_from_sensor=installation_matrix(applied['location'], applied['rotation']),
+                field_of_view=applied['field_of_view'], field_of_view_shape=applied['field_of_view_shape'])
+            if not restoring:
+                _, t = _simulation_time(scene, self.sampler)
                 self.mount, self.fov = view.install(scene, self.owner,
                     self.sampler.mount_world_at(t) @ self.sampler.mount_from_sensor, show_fov=scene.wfrl_x100_fov,
                     field_of_view_deg=self.sampler.field_of_view,
                     field_of_view_shape=self.sampler.field_of_view_shape)
                 from mathutils import Matrix
                 yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
-                self.mount.parent = yaw if scene.wfrl_x100_mount == 'NACELLE' else (
-                    yaw.parent if scene.wfrl_x100_mount == 'TOWER_BASE' else None)
+                self.mount.parent = yaw if self.sampler.mount == 'NACELLE' else (
+                    yaw.parent if self.sampler.mount == 'TOWER_BASE' else None)
                 self.mount.matrix_parent_inverse = Matrix.Identity(4)
                 self.mount.matrix_basis = Matrix(self.sampler.mount_from_sensor.tolist())
-            view.sync_housing_visibility(scene, self.mount)
             self.fov_shown = scene.wfrl_x100_fov
             self.fov_hidden = ({layer.as_pointer(): (layer, False) for layer in scene.view_layers}
                                if not self.fov_shown else {})
         elif self.mode == 'REPLAY':
-            import bpy
-            path = Path(bpy.path.abspath(scene.wfrl_x100_path)).expanduser()
+            path = configuration.resolve_path(applied['path'], abspath=bpy.path.abspath)
             self.replay_path = path
-            self.replay = recording.Replay(path) if path.is_dir() else None
-            if self.replay is None and scene.wfrl_x100_ply_source == 'UNDECLARED':
-                raise ValueError('请选择单帧 PLY 的来源；文件本身不含来源信息')
+            directory = path.is_dir()
+            if saved is not None and directory == ('ply_source' in applied):
+                raise ValueError('保存的回放路径类型已改变，请重新应用配置')
+            if not directory and saved is None:
+                if scene.wfrl_x100_ply_source == 'UNDECLARED':
+                    raise ValueError('请选择单帧 PLY 的来源；文件本身不含来源信息')
+                applied['ply_source'] = scene.wfrl_x100_ply_source
+            self.replay = recording.Replay(path) if directory else None
             self.static_frame = None if self.replay else ply.ply_frame(path, sensor_id='X100',
-                session_id=self.source_session, sequence=0, source_kind=scene.wfrl_x100_ply_source)
+                session_id=self.source_session, sequence=0, source_kind=applied['ply_source'])
         else:
-            self.client = channel.LocalClient(scene.wfrl_x100_port, stale_after_s=scene.wfrl_x100_stale_s)
-        self.capture_configuration()
-        scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
+            self.client = channel.LocalClient(applied['port'], stale_after_s=applied['stale_s'])
 
     def capture_configuration(self):
         return observations.capture_configuration(self)
@@ -147,8 +147,8 @@ class Session:
     def _record_frame(self, frame):
         return session_recording._record_frame(self, frame)
 
-    def update(self):
-        return observations.update(self)
+    def update(self, *, preparing=False):
+        return observations.update(self, preparing=preparing)
 
     def _reset_blades(self):
         return estimation._reset_blades(self)
@@ -259,24 +259,53 @@ def _release_session(key, scene=None):
 
 
 def start(scene, *, restoring=False):
+    import bpy
     _guard_installation()
-    if not stop(scene, remove=not restoring):
-        raise ValueError('记录关闭中，请等待写盘完成后再应用配置')
+    current = session_for(scene)
+    if current is not None and (current.fanout is not None or current.closing):
+        raise ValueError('请先结束记录或等待关闭完成，再应用 X100 配置')
+    previous_owner = current.owner if current is not None else scene.get('wfrl_x100_owner')
+    owner = previous_owner if restoring and previous_owner else str(uuid.uuid4())
     session = None
+    previous_metadata = {}
     try:
-        session = Session(scene, restoring=restoring)
-        session.update()
-        session._gpu_required = False
-        _SESSIONS[scene.as_pointer()] = session
+        session = Session(scene, owner=owner, restoring=restoring)
+        status, error = session.update(preparing=True)
+        if session.mount is not None:
+            if session.fov_shown and not bpy.app.background:
+                session.fov_gpu_batch = view.fov_batch(session.fov)
+            view.sync_housing_visibility(scene, session.mount)
+        snapshot = configuration.encode(session.applied_config)
+        metadata = {configuration.SAVED_KEY: snapshot, 'wfrl_x100_owner': owner,
+                    'wfrl_x100_status': status, 'wfrl_x100_error': error}
+        for field, value in metadata.items():
+            previous = scene.get(field)
+            scene[field] = value
+            previous_metadata[field] = previous
         scene.wfrl_x100_enabled = True
-        _RESTORE_ATTEMPTED.add(scene.as_pointer())
-        return session
     except Exception:
-        if session:
-            session.close(remove=not restoring)
-        elif not restoring:
-            view.remove_objects(scene)
+        try:
+            for field, value in previous_metadata.items():
+                if value is None:
+                    scene.pop(field, None)
+                else:
+                    scene[field] = value
+            if session is not None:
+                session.close(remove=False)
+        finally:
+            if not restoring:
+                view.remove_objects(scene, owner=owner)
+                view.remove_orphans(owner)
         raise
+
+    key = scene.as_pointer()
+    _SESSIONS[key] = session
+    _RESTORE_ATTEMPTED.add(key)
+    if current is not None:
+        current.close(remove=False)
+    if not restoring and previous_owner:
+        view.remove_objects(scene, owner=previous_owner)
+    return session
 
 
 def tick():
