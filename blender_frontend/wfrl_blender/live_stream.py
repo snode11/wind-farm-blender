@@ -13,6 +13,7 @@ from __future__ import annotations
 import atexit
 from collections import deque
 import os
+import re
 import subprocess
 import sys
 import threading
@@ -57,6 +58,30 @@ def display_url(url):
     if parts.port:
         host += f':{parts.port}'
     return f'{parts.scheme}://{host}{parts.path}'
+
+
+_URL_IN_TEXT = re.compile(r'''(?P<scheme>[A-Za-z][A-Za-z0-9+.-]*)://(?P<netloc>[^\s/?#'"]*)'''
+                          r'''(?P<path>[^\s?#'"]*)(?P<tail>[?#][^\s'"]*)?''')
+_TRAILING_PUNCTUATION = re.compile(r'[.,:;!)\]]*$')
+
+
+def scrub_text(text, url=''):
+    """``text`` with ``url`` shown as ``display_url``, user info removed from every URL
+    and the query dropped from stream URLs, for diagnostics shown on screen."""
+    if '://' in url:
+        try:
+            text = text.replace(url, display_url(url))
+        except ValueError:
+            pass
+
+    def scrub(match):
+        tail = match['tail'] or ''
+        if match['scheme'].lower() in SCHEMES:
+            # FFmpeg ends sentences right after the URL; keep that punctuation.
+            tail = tail[_TRAILING_PUNCTUATION.search(tail).start():]
+        return f"{match['scheme']}://{match['netloc'].rpartition('@')[2]}{match['path']}{tail}"
+
+    return _URL_IN_TEXT.sub(scrub, text)
 
 
 def command(ffmpeg, url, size):
@@ -190,7 +215,8 @@ class LiveStream:
 
     def _drain(self, pipe):
         for line in iter(pipe.readline, b''):
-            text = line.decode('utf-8', errors='replace').strip()
+            # FFmpeg names the input URL in its errors; keep only the on-screen form.
+            text = scrub_text(line.decode('utf-8', errors='replace').strip(), self.url)
             with self.lock:
                 self.errors.append(text)
 
@@ -224,7 +250,7 @@ class LiveStream:
             try:
                 process = _spawn(self.args, options)
             except Exception as exc:
-                self._status = ('ERROR', f'无法启动 FFmpeg：{exc}')
+                self._status = ('ERROR', scrub_text(f'无法启动 FFmpeg：{exc}', self.url))
                 return
             if process is None:
                 return

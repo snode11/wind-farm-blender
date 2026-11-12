@@ -40,6 +40,51 @@ def test_display_url_hides_credentials_and_query():
     assert live_stream.display_url('rtmp://user:pw@host:1935/rtp/a?sign=secret') == 'rtmp://host:1935/rtp/a'
 
 
+_SECRET_URL = 'rtsp://admin:S3cretPw@127.0.0.1:9/Streaming/Channels/101?token=abc123'
+
+
+@pytest.mark.parametrize(('line', 'expected'), [
+    ('[in#0 @ 0x600] Error opening input: Connection refused',
+     '[in#0 @ 0x600] Error opening input: Connection refused'),
+    (f'Error opening input file {_SECRET_URL}.',
+     'Error opening input file rtsp://127.0.0.1:9/Streaming/Channels/101.'),
+    ('Error opening input files: Connection refused', 'Error opening input files: Connection refused'),
+    (f'{_SECRET_URL}: Connection refused', 'rtsp://127.0.0.1:9/Streaming/Channels/101: Connection refused'),
+    # FFmpeg may print a re-encoded form of the address that differs from the entered one.
+    ('rtsp://admin:S3cret%40Pw@cam.local/live?token=abc123: Connection refused',
+     'rtsp://cam.local/live: Connection refused'),
+    ('Error opening input file https://cam.local/live.flv?token=abc123.',
+     'Error opening input file https://cam.local/live.flv.'),
+    ('srt://cam.local:9000?passphrase=topsecret1234: Connection timed out',
+     'srt://cam.local:9000: Connection timed out'),
+    ('Unable to open resource: no stream', 'Unable to open resource: no stream'),
+    ('[tcp @ 0x700] Connection to tcp://127.0.0.1:9?timeout=0 failed: Connection refused',
+     '[tcp @ 0x700] Connection to tcp://127.0.0.1:9?timeout=0 failed: Connection refused'),
+])
+def test_scrub_text_removes_credentials_and_stream_queries(line, expected):
+    assert live_stream.scrub_text(line, _SECRET_URL) == expected
+    assert live_stream.scrub_text(line) == expected
+
+
+def test_stream_diagnostics_and_status_hide_credentials():
+    line = f'{_SECRET_URL}: Connection refused'
+    stream = live_stream.LiveStream(sys.executable, _SECRET_URL, (1, 1), args=[
+        sys.executable, '-c', f'import sys; sys.stderr.write({line!r} + "\\n")'])
+    try:
+        deadline = time.monotonic() + 5
+        while stream.state != 'RECONNECTING' and time.monotonic() < deadline:
+            time.sleep(.025)
+        diagnostics, (state, message) = stream.diagnostics(), stream.status()
+    finally:
+        stream.stop()
+        stream.thread.join(timeout=5)
+    assert state == 'RECONNECTING'
+    assert diagnostics == ('rtsp://127.0.0.1:9/Streaming/Channels/101: Connection refused',)
+    assert message.endswith('rtsp://127.0.0.1:9/Streaming/Channels/101: Connection refused')
+    for secret in ('S3cretPw', 'abc123', 'admin'):
+        assert secret not in ''.join(diagnostics) + message
+
+
 def test_command_adds_tcp_only_for_rtsp_and_flips_rows():
     rtmp = live_stream.command('ffmpeg', 'rtmp://h:1935/rtp/a', (1280, 720))
     rtsp = live_stream.command('ffmpeg', 'rtsp://h/a', (1280, 720))
