@@ -11,6 +11,12 @@ POWERS_MW = np.array([2.0, 1.0, 0.5])
 NEXT_SPEED = 10.0
 
 
+@pytest.fixture(autouse=True)
+def _case_directory(tmp_path, monkeypatch):
+    """WFCRL writes generated cases under the working directory's __simul__."""
+    monkeypatch.chdir(tmp_path)
+
+
 def _with_changed_inflow(env):
     """Return the next state with a new freestream and fixed powers, as a gust would."""
     def take_action(state, joint_action):
