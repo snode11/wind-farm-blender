@@ -599,7 +599,7 @@ class BackendSession:
                             self._signal_process_group(signal.SIGTERM)
                             stopped = self._wait_until_stopped(self.kill_grace_seconds)
                             if not stopped:
-                                self._signal_process_group(signal.SIGKILL)
+                                self._signal_process_group(getattr(signal, 'SIGKILL', signal.SIGTERM))
                                 stopped = self._wait_until_stopped(self.kill_grace_seconds)
                             if stopped:
                                 self._fail('Stop timeout: formal backend was force terminated')

@@ -1,7 +1,9 @@
 """Local process ownership across process-group changes and reparenting."""
 import math
 import os
+import signal as signals
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -45,6 +47,10 @@ class OwnedProcesses:
         return owned
 
     def start(self, argv, *, cwd, env, **options):
+        if sys.platform == 'win32':
+            # Windows has no sessions. A new process group lets CTRL_BREAK_EVENT
+            # reach this tree without the caller's console group.
+            options['creationflags'] = options.get('creationflags', 0) | subprocess.CREATE_NEW_PROCESS_GROUP
         self.process = subprocess.Popen(argv, cwd=cwd, env=dict(env, **{self.ENV_KEY: self.token}),
                                         start_new_session=True, **options)
         try:
@@ -157,8 +163,23 @@ class OwnedProcesses:
                        and self._exists(process) for process in self._owned)
 
     def signal(self, signum):
+        """Send ``signum`` to every owned process.
+
+        Windows cannot deliver SIGINT to another process. There the graceful
+        request is CTRL_BREAK_EVENT to the root's process group, which needs a
+        shared console; every other signal terminates each owned process.
+        """
         with self._lock:
             self._remember(force=True)
+            if sys.platform == 'win32' and signum == signals.SIGINT:
+                if self.process is not None and self.process.poll() is None:
+                    try:
+                        self.process.send_signal(signals.CTRL_BREAK_EVENT)
+                    except OSError:
+                        pass
+                return
+            if sys.platform == 'win32':
+                signum = signals.SIGTERM
             for process in tuple(self._owned):
                 try:
                     process.send_signal(signum)

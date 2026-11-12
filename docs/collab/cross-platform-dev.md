@@ -31,6 +31,8 @@ print([m.__file__ for n, m in sys.modules.items() if n.endswith('wfrl_blender')]
 
 完整环境、构建身份与原生检查入口见[项目技能](../../.agents/skills/windfarm-blender-dev/SKILL.md)和[验证入口](../../.agents/skills/windfarm-blender-dev/references/verification.md)。
 
+FAST.Farm 控制器是平台二进制：`servo_dll/DISCON_WT1.dll` 与 `SC_DLL.dll` 须在目标系统按同一份源码编译，不能跨 macOS／Windows 复制；修改 `DISCON.F90` 后各平台分别重编并核对。Windows 的 MPI、求解器定位与控制器编译要求见[Windows FAST.Farm 后端](../setup/setup_local.md#windows-fastfarm-后端)，该路线尚未实机验证。
+
 ## 模块与接口
 
 | 目录或模块 | 职责 |

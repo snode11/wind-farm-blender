@@ -34,7 +34,7 @@ class _ParallelEnv:
     def _obs(self, value):
         return {a: {"yaw": np.array([value], np.float32)} for a in self.possible_agents}
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         self.steps = 0
         self.resets += 1
         return self._obs(1), {a: {"episode": self.resets} for a in self.possible_agents}
@@ -294,3 +294,21 @@ def test_central_training_uses_terminal_state_and_matching_normalization(monkeyp
     assert captured["last_v"] == pytest.approx(10 + normalized[4][1].sum() * 0.1, abs=1e-6)
     _, ret = actual_gae(**captured)
     assert ret[1] == pytest.approx(captured["rews"][1] + 0.99 * expected_terminal, abs=1e-6)
+
+
+def test_seeded_central_sampler_repeats_episode_seed_sequence(monkeypatch):
+    class SeedRecordingEnv(_ParallelEnv):
+        def reset(self, seed=None, options=None):
+            self.seeds = getattr(self, "seeds", []) + [seed]
+            return super().reset()
+
+    sequences = []
+    for _ in range(2):
+        par = SeedRecordingEnv()
+        monkeypatch.setattr(central, "_parallel_environment", lambda par=par: par)
+        sampler = central.Sampler(seed=7)
+        for _ in range(3):
+            sampler.reset()
+        sequences.append(par.seeds)
+    assert sequences[0] == sequences[1]
+    assert len(set(sequences[0])) == 3 and all(isinstance(s, int) for s in sequences[0])

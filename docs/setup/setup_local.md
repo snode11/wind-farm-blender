@@ -81,6 +81,8 @@ mpiexec -n 1 python scripts/experiments/smoke_fastfarm.py
 
 M 系列 Mac 的文件类型应包含 `arm64`，Intel 为 `x86_64`。短仿真须正常退出、打印测量数据并出现 `SMOKE_OK`；这些命令是安装与检查入口，不代表目标机器已经通过验收。生成新来流还需可用的 TurbSim，Blender 5.2+ 及扩展按[安装说明](../blender/INSTALL.md)准备。手动视频监管要求 `os.waitid` / `os.WNOWAIT`；已检查的 macOS Python 3.11 环境不具备这些接口，不能据此环境声明该功能可用。
 
+机组控制器 [DISCON.F90](../../wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/DISCON.F90) 的基线行为：未下发外部变桨指令时，集体变桨 PI 按 8 °/s 速率上限从上一指令推进，并限制在 0–90°；发电机转速达到额定，或原生桨距不小于 1° 时，转矩取恒功率段。下发外部变桨时，实际桨距取外部指令与基线 PI 输出的较大值，转矩分段只按转速判定；下发外部转矩时直接替换基线转矩。修改控制器源码后须在各平台重新编译 `DISCON_WT1.dll`。在本机 macOS arm64 单机算例的控制窗口中，8 m/s 为 9.04 rpm、0°、1.707 MW，12 m/s 为 12.10 rpm、约 3.0°、5.000 MW，28 m/s 为 12.10 rpm、约 25.9°、5.000 MW；这些是该平台的运行结果，不是其他平台的验收结论。
+
 求解脚本可通过 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE` 或 `PATH` 定位二进制；Blender 启动器使用自身的 `--python`、`--mpi`、`--fastfarm` 参数或对应配置。机组控制器、supercontroller 路径由算例输入决定，必须分别核对。执行下列入口前，恢复选定场景需要的资源和模型权重，见[分发说明](../PUBLICATION.md)。解释器选择与生命周期的验证范围见[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)。
 
 当前 macOS Blender 启动器入口是：
@@ -93,6 +95,23 @@ scripts/blender/run_wfrl_macos.sh --help
 它委托 `scripts/blender/wfrl_launcher.py launch`，使用实际配置的解释器和已安装扩展；修改仓库源码不会自动更新已安装扩展。`WFRL_LAUNCHER_PYTHON` 指定启动器 Python，`--python`／`WFRL_PYTHON` 指定 Bridge Python，两者均需项目核心依赖 psutil；可共同指向已安装项目依赖的环境。不能将“离线示例能播放”推定为 Bridge 或 FAST.Farm 环境可用。
 
 当前工作区启动器保留虚拟环境解释器路径，使用所选后端 Python 解析 YAML 并统一后端预检与 MPI 配置判定。监管按 PID／创建时间和继承的运行标识覆盖本机后代，父进程退出不结束监管；身份不可读时保留 UNKNOWN 与两份恢复文件。Bridge 独立声明当前会话，界面换连接不改写启动器归属；`stop-session` 使用记录的固定端点并校验活进程身份。普通重连保留原身份，认领新后端须显式确认且不停止旧任务。连接恢复的 `state_revision` 语义需要匹配的前端与 Bridge；源码合同见[维护说明](../../blender_frontend/README.md#55-实时连接与控制生命周期)，公开源码与日常工作区构建的适用范围分别见[源码验证](../blender/发布状态与验证范围.md#源码软件合同与验证)和[日常安装身份](../../publication/daily-installation.json)。
+
+### Windows FAST.Farm 后端
+
+Windows 路线尚未在实机上运行验证；以下为源码支持的配置要求。
+
+- MPI：安装 Microsoft MPI 运行时与 SDK，用官方 `C:\Program Files\Microsoft MPI\Bin\mpiexec.exe -n 1 python ...` 启动；`FastFarmDriver` 在 Windows 上拒绝非官方 `MSMPI_BIN`。
+- 求解器：Windows 版 FAST.Farm 及其 Intel 运行时 DLL。`wfcrl` 优先使用 `WFCRL_FASTFARM_EXECUTABLE`，未配置时依次查找 Python 所在目录、相对仓库根的 `simulators/fastfarm/bin/FAST.Farm_x64_OMP_2023.exe` 和 `PATH`；该变量须在导入 `wfcrl` 前设置。
+- 控制器：仓库与资源包不提供 Windows 版 `DISCON_WT1.dll`。在 Intel oneAPI 命令行中从 `wfcrl-env\wfcrl\simulators\fastfarm` 编译：
+
+```bat
+cmake -S src\DISCON -B src\DISCON\build-win -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_Fortran_FLAGS="/fpp /real-size:64 /libs:static"
+cmake --build src\DISCON\build-win
+copy /Y src\DISCON\build-win\DISCON.dll servo_dll\DISCON_WT1.dll
+```
+
+  `ifx` 的 CMake 编译器标识为 `IntelLLVM`，`CMakeLists.txt` 的 Intel 分支不会自动加参数，须如上显式传入；CMake 4 需要 `CMAKE_POLICY_VERSION_MINIMUM`。`dumpbin /dependents` 应只列出系统库。`SC_DLL.dll` 须为链接 MS-MPI 的 Windows x64 版本。
+- 检查：用官方 `mpiexec` 运行 `scripts/experiments/smoke_fastfarm.py`，再按上文单机风速核对转速、桨距与功率。
 
 ## 4. 兼容配置与输入约束
 

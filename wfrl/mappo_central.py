@@ -96,8 +96,11 @@ def _parallel_environment():
 
 
 class Sampler:
-    def __init__(self):
+    def __init__(self, seed=None):
         self.par = _parallel_environment()
+        # One generator supplies each episode's reset seed, so a seeded run repeats
+        # its sampled inflow sequence while successive episodes still differ.
+        self._episode_seeds = None if seed is None else np.random.default_rng(seed)
         self.agents = self.par.possible_agents
         self.n = len(self.agents)
         self.obs_keys = list(self.par.observation_space(self.agents[0]).keys())
@@ -117,7 +120,10 @@ class Sampler:
         ])
 
     def reset(self):
-        obs_dict, _ = self.par.reset()
+        if self._episode_seeds is None:
+            obs_dict, _ = self.par.reset()
+        else:
+            obs_dict, _ = self.par.reset(seed=int(self._episode_seeds.integers(2**31 - 1)))
         self._obs = self._pack(obs_dict)
         return self._obs
 
@@ -194,7 +200,8 @@ def train(total_timesteps, n_steps=1024, n_epochs=10, mb_steps=256,
           gamma=0.99, lam=0.95, clip=0.2, lr=3e-4,
           ent_coef=0.005, vf_coef=0.5, max_grad=0.5, seed=0):
     torch.manual_seed(seed)
-    smp = Sampler()
+    np.random.seed(seed)                                   # minibatch shuffling
+    smp = Sampler(seed=seed)
     actor = Actor(smp.obs_dim, smp.act_dim).to(DEVICE)
     critic = Critic(smp.state_dim).to(DEVICE)
     opt = torch.optim.Adam(list(actor.parameters()) + list(critic.parameters()),
@@ -296,8 +303,8 @@ def train(total_timesteps, n_steps=1024, n_epochs=10, mb_steps=256,
                 nn.utils.clip_grad_norm_(
                     list(actor.parameters()) + list(critic.parameters()), max_grad)
                 opt.step()
-                pg_log.append(float(pg)); v_log.append(float(vloss))
-                ent_log.append(float(ent))
+                pg_log.append(pg.item()); v_log.append(vloss.item())
+                ent_log.append(ent.item())
 
         # explained variance（critic 质量）
         ev = 1.0 - np.var(ret - B_val) / (np.var(ret) + 1e-8)

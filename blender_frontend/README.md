@@ -586,6 +586,8 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 - `.command` 和 macOS shell 入口只适用于 macOS。见 [`.command` 入口示例](../scripts/blender/打开净空雷达演示.command#L4)、[`run_wfrl_macos.sh`](../scripts/blender/run_wfrl_macos.sh#L1) 和 [`verify_macos.sh`](../scripts/blender/verify_macos.sh#L1)。
 - 已有 MP4 导出在 Windows 上按设备、inode、大小和 mtime 判定源文件身份，不比较 ctime；POSIX 另比较 ctime，以发现保留 mtime 的内容修改。
 - Launcher 在 Windows 上以 `CREATE_NEW_PROCESS_GROUP` 启动并发送 `signal.CTRL_BREAK_EVENT` 请求停止，接收进程须与发送者共享控制台。Bridge 的 `__main__` 注册 SIGBREAK 并等待后端清理确认；前后端联合验收仍以进程退出和 `EMPTY_CONFIRMED` 为准，不能仅凭信号发送成功或某个退出码判断清理完成。
+- Formal 训练进程在 Windows 上同样以 `CREATE_NEW_PROCESS_GROUP` 启动。停止时先向其根进程组发送 `CTRL_BREAK_EVENT`，超时后结束全部归属进程；Windows 没有 SIGKILL，强制阶段使用 TerminateProcess。该路径只有模拟 Windows 的宿主测试覆盖。
+- `wfcrl` 在所有平台优先使用 `WFCRL_FASTFARM_EXECUTABLE` 指定的 FAST.Farm；Windows 未配置时依次查找 Python 所在目录、相对仓库根的 `simulators/fastfarm/bin/FAST.Farm_x64_OMP_2023.exe` 和 `PATH`。
 - [.gitattributes](../.gitattributes) 对 `wfrl_blender/assets/` 与 `wfrl_blender/_vendor/` 关闭换行转换，保证检出字节与完整性摘要一致。
 - 宿主测试的 venv 路径、Python 工具夹具和符号链接辅助位于 [tests/_platform.py](tests/_platform.py)；无法创建符号链接时相关用例跳过并附原因。
 - Windows 上的前端宿主测试在 `windows-host` 任务中非阻塞运行。见 [Windows 前端宿主检查](../docs/development/自动检查.md#windows-前端宿主检查)和[工作流任务](../.github/workflows/checks.yml#L165)。
