@@ -49,7 +49,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 # --- NREL 5MW 基线控制器常数，全部来自 DISCON.F90 的 PARAMETER 段 -----------
-GB_RATIO = 97.0            # 齿轮箱速比，与 fastfarm_driver.py:38 同源
+GB_RATIO = 97.0            # NREL 5MW 齿轮箱速比
 VS_RtGnSp = 121.6805       # 额定发电机转速 (rad/s)，DISCON.F90:85
 VS_RtPwr = 5296610.0       # 额定发电功率 (W)，DISCON.F90:86
 VS_MaxTq = 47402.91        # 发电机转矩上限 (N·m)，DISCON.F90:81
@@ -112,13 +112,6 @@ RATED_TORQUE = VS_RtPwr / VS_RtGnSp
 #: 超速判据。ElastoDyn 没有硬停机逻辑，这条是我们自己设的运行包线。
 #: 取额定的 1.1 倍 —— 与 DISCON 用 VS_MaxTq = 1.1 × VS_RtTq 同一个裕度口径。
 RPM_ALARM = 1.1 * RATED_RPM
-#: driver 把反解结果裁在这里（fastfarm_driver.py:41 的 RPM_MAX），所以读到这个
-#: 数只说明"被裁过"，不说明转子真转到了 20 rpm。
-RPM_CLIPPED = 20.0
-#: 转速是 ω=P/(ηT) 反解的，T 趋零时商发散 —— 判"是不是数值问题"要看**转矩**，
-#: 不能看转速大小：driver 已经裁过，靠转速阈值等于在裁剪天花板附近猜。
-#: 低于额定的 30% 时 region 2 都到不了，此时的大转速一律当反解发散。
-DIVERGE_TORQUE_FRAC = 0.3
 
 #: 执行机构占空比上限，multiagent_env.py:205 的 `>= 0.1`
 DUTY_LIMIT = 0.1
@@ -241,34 +234,18 @@ class SafetyLimiter:
         return out, evs
 
     def monitor(self, measure: Dict[str, Any]) -> List[Event]:
-        """看仿真回读判超速。不改指令 —— 这一步已经执行完了。
-
-        "超速"与"反解发散"要靠**转矩**分辨，不是转速大小：转速本身就是
-        ω=P/(ηT) 反解来的，而 driver 已经把它裁在 20 rpm，拿转速阈值去分
-        等于在裁剪天花板附近猜。转矩低于额定的 30% 时机组连 region 2 都没
-        进，这时的大转速一律是数值问题。
-        """
+        """按直接转速回读报告超速；缺测不推断，低转矩不撤销超速报警。"""
         evs: List[Event] = []
         m = measure or {}
         rpm = np.asarray(m.get("rotor_speed", np.full(self.n, np.nan)), float)
-        tq = np.asarray(m.get("torque", np.full(self.n, np.nan)), float)
-        tq_min = DIVERGE_TORQUE_FRAC * RATED_TORQUE
         for i in range(self.n):
             r = float(rpm[i]) if i < rpm.size else float("nan")
             if not np.isfinite(r) or r <= RPM_ALARM:
                 continue
-            t = float(tq[i]) if i < tq.size else float("nan")
-            if np.isfinite(t) and abs(t) < tq_min:
-                evs.append(Event(self._step, self.ids[i], "rotor_speed",
-                                 "转速反解发散", r, r, "warn",
-                                 f"转矩仅 {t:.0f} N·m（< 额定的 "
-                                 f"{DIVERGE_TORQUE_FRAC:.0%}），ω=P/(ηT) 的商"
-                                 f"无意义；driver 已裁在 {RPM_CLIPPED} rpm"))
-            else:
-                evs.append(Event(self._step, self.ids[i], "rotor_speed",
-                                 "超速", r, r, "block",
-                                 f"额定 {RATED_RPM:.2f} rpm，报警线 "
-                                 f"{RPM_ALARM:.2f} rpm"))
+            evs.append(Event(self._step, self.ids[i], "rotor_speed",
+                             "超速", r, r, "block",
+                             f"额定 {RATED_RPM:.2f} rpm，报警线 "
+                             f"{RPM_ALARM:.2f} rpm"))
         self._record(evs)
         return evs
 

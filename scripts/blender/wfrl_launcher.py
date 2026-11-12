@@ -283,7 +283,8 @@ def launch(args: argparse.Namespace) -> int:
     bridge: subprocess.Popen | None = None
     state_api, process_class = ownership_modules()
     owned = process_class(env_key=state_api.RUN_TOKEN)
-    env = os.environ.copy()
+    from wfrl.mpi_runtime import launcher_environment
+    env = launcher_environment()
     for key in (state_api.RUN_TOKEN, state_api.BINDING_FILE, 'WFRL_PROCESS_RUN_TOKEN',
                 'WFRL_FORMAL_RUN_TOKEN', 'WFRL_SESSION_FILE'):
         env.pop(key, None)

@@ -45,8 +45,8 @@ class PowerSensor(Sensor):
 class BladeLoadSensor(Sensor):
     type_name = "bladeload"
     fidelity = Fidelity.DIRECT
-    provenance = ("叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON.F90:363-368 "
-                  "回传，driver 将 mdp 的归一化量还原为 N·m")
+    provenance = ("叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON 回传；"
+                  "driver 优先读取 MPI 六分量原值，单位 N·m")
     requires = ("aeroelastic",)
 
     @property
@@ -64,17 +64,17 @@ class BladeLoadSensor(Sensor):
 class ActuatorSensor(Sensor):
     type_name = "actuator"
     fidelity = Fidelity.DIRECT
-    provenance = ("偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef "
-                  "（DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读")
+    provenance = ("yaw/yaw_measured 为 MPI 偏航测量（度），yaw_command 为累加指令；"
+                  "pitch 为指令或未控桨距，pitch_meas 为 avrSWAP(4) 实测；转矩为 MPI 回读")
 
     @property
     def topics(self):
-        return ["yaw", "pitch", "pitch_meas", "torque"]
+        return ["yaw", "yaw_command", "yaw_measured", "pitch", "pitch_meas", "torque"]
 
     def sample(self, ctx):
         n = self.scene.n
         return {k: _get(ctx, k, n)[self.indices]
-                for k in ("yaw", "pitch", "pitch_meas", "torque")}
+                for k in self.topics}
 
 
 # ---------------------------------------------------------------------------
@@ -155,26 +155,11 @@ class NacelleLidar(Sensor):
 @registry.register
 class RotorSpeedSensor(Sensor):
     type_name = "rotorspeed"
-    fidelity = Fidelity.DERIVED
-    provenance = ("由 ω=P/(η·T) 反解高速轴、再除齿轮箱速比 97 得转子转速；"
-                  "MPI 的 12 个通道里没有转速，不是仿真器直接回传")
-
-    # 与 fastfarm_driver.py:40-41 同源，改一处必须两处一起改
-    ETA = 0.944
-    GB_RATIO = 97.0
-    RPM_MAX = 20.0            # NREL 5MW 额定 12.1 rpm，超此值必是反解发散
+    fidelity = Fidelity.DIRECT
+    provenance = "OpenFAST 原生 RotSpeed 输出，单位 rpm；缺测不以功率和转矩反算"
 
     def sample(self, ctx):
-        n = self.scene.n
-        p = _get(ctx, "power", n) * 1e6          # MW → W
-        t = _get(ctx, "torque", n)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            omega_gen = p / (self.ETA * t)        # rad/s，高速轴
-            rpm = omega_gen * 60.0 / (2 * np.pi) / self.GB_RATIO
-        rpm[~np.isfinite(rpm)] = np.nan
-        rpm[np.abs(t) < 1.0] = np.nan             # 转矩≈0 时商无意义
-        rpm = np.clip(rpm, 0.0, self.RPM_MAX)
-        return {"rotorspeed": rpm[self.indices]}
+        return {"rotorspeed": _get(ctx, "rotor_speed", self.scene.n)[self.indices]}
 
 
 @registry.register

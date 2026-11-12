@@ -37,7 +37,7 @@ def case(tmp_path, monkeypatch):
     wind_path = input_dir / "loaded.bts"
     wind_path.write_bytes(b"loaded wind fixture")
     for i in range(1, 4):
-        (input_dir / f"T{i}.fst").write_text(json.dumps({"EDFile": f'"T{i}.dat"'}), encoding="utf-8")
+        (input_dir / f"T{i}.fst").write_text(json.dumps({"EDFile": f'"T{i}.dat"', "DT": .00625}), encoding="utf-8")
         (input_dir / f"T{i}.dat").write_text(json.dumps({"NacYaw": float(i - 1)}), encoding="utf-8")
     farm_path.write_text(json.dumps({
         "InflowFile": '"InflowWind.dat"', "Mod_AmbWind": 2, "DT_Low": 3., "DT_High": .05,

@@ -37,7 +37,8 @@ class Layout:
 @pytest.fixture
 def live_cards(monkeypatch):
     owner, other = Scene(name='owner'), Scene(name='other')
-    bpy = NS(types=NS(Panel=object), data=NS(scenes=[owner, other]), context=NS(scene=owner))
+    bpy = NS(types=NS(Panel=object, Operator=object), props=NS(EnumProperty=lambda **kw: kw),
+             data=NS(scenes=[owner, other]), context=NS(scene=owner))
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
     monkeypatch.setitem(sys.modules, 'wfrl_blender.panels.diagnostics', NS(draw_diagnostic=lambda *args, **kwargs: None))
     module_path = Path(runtime.__file__).parent / 'panels/telemetry.py'
@@ -82,3 +83,20 @@ def test_removed_owner_cards_keep_snapshot_hidden(live_cards):
     labels = labels_for(live_cards, live_cards.other)
     assert 'WAITING / no backend snapshot' in labels
     assert not any(text.startswith('Step ') for text in labels)
+
+
+def test_selected_native_group_precedes_core_cards_and_hides_other_groups(live_cards):
+    owner = live_cards.owner
+    owner.wfrl_chart_channel = 'tip_dx'
+    records = runtime.kinematics.snapshot['turbines'][0]['channels']
+    source = next(iter(records.values()))
+    records['power'] = dict(source, value=1., unit='MW')
+    for key in charts.SOLVER_OUTPUT_CHANNELS:
+        records[key] = dict(source, value=1., unit=charts.SOLVER_OUTPUT_CHANNELS[key]['unit'],
+                            timestamp=dict(value=12.5, timebase='simulation_seconds'))
+    labels = labels_for(live_cards, owner)
+    selected = [text for text in labels if 'Tip displacement x:' in text]
+    assert len(selected) == 3
+    assert not any('Tip displacement y:' in text for text in labels)
+    assert labels.index(selected[0]) < next(i for i,text in enumerate(labels) if text.startswith('Power:'))
+    assert 'Sample: 12.5 s' in labels

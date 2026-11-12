@@ -34,7 +34,8 @@ class HistoryWindow:
         self.session_id = message.get('session_id')
         now = self.clock()
         context = {key: deepcopy(p[key]) for key in
-                   ('mode', 'step', 'agent_step', 'iteration', 'phase', 'episode', 'timestamp', 'record_kind') if key in p}
+                   ('mode', 'step', 'agent_step', 'iteration', 'phase', 'episode', 'timestamp',
+                    'control_elapsed_seconds', 'record_kind') if key in p}
         context.update(run_id=run_id, session_id=self.session_id, sequence=sequence,
                        message_type=message['type'], received_monotonic=now)
         if message['type'] == 'snapshot':

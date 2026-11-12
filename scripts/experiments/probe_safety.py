@@ -215,27 +215,17 @@ def main():
     check("包线内不报事件",
           not any("转矩" in e.rule for e in evs))
 
-    print("\n== 9. 超速 vs 反解发散 ==", flush=True)
+    print("\n== 9. 直接转速超速报警 ==", flush=True)
     lim = SafetyLimiter(scene(dt=dt))
-    # 分辨依据是**转矩**不是转速：W2 转矩正常 ⇒ 真超速；W3 转矩趋零 ⇒ ω=P/(ηT)
-    # 的商无意义。两台转速都高，只有转矩能把它们分开。
-    evs = lim.monitor(measure(n, rpm=[9.0, 13.5, 19.9],
+    evs = lim.monitor(measure(n, rpm=[9.0, 13.5, 25.0],
                               torque=[RATED_TORQUE, RATED_TORQUE, 300.0]))
     kinds = {e.turbine: e.rule for e in evs}
     check("9.0 rpm 正常，不报", "W1" not in kinds, f"{kinds}")
-    check(f"13.5 rpm + 额定转矩 ⇒ 超速", kinds.get("W2") == "超速")
-    check("19.9 rpm + 转矩 300 N·m ⇒ 反解发散",
-          kinds.get("W3") == "转速反解发散",
-          "转矩趋零时 ω=P/(ηT) 发散，不该当成物理超速")
-    check("超速是 block、发散是 warn",
-          all(e.blocked for e in evs if e.rule == "超速")
-          and all(not e.blocked for e in evs if e.rule == "转速反解发散"))
-    # 反过来：同样 19.9 rpm 但转矩正常 ⇒ 必须判超速，否则"发散"成了万能借口
-    lim2 = SafetyLimiter(scene(dt=dt))
-    evs2 = lim2.monitor(measure(n, rpm=[9.0, 9.0, 19.9],
-                                torque=np.full(n, RATED_TORQUE)))
-    check("同一转速、转矩正常时判超速（不是靠转速大小猜）",
-          {e.turbine: e.rule for e in evs2}.get("W3") == "超速")
+    check("13.5 rpm 报告超速", kinds.get("W2") == "超速")
+    check("25 rpm、低转矩仍报告超速", kinds.get("W3") == "超速")
+    check("超速保持 block 级别", all(e.blocked for e in evs))
+    check("缺失转速不根据功率或转矩补造报警",
+          not SafetyLimiter(scene(dt=dt)).monitor(measure(n, rpm=np.full(n, np.nan))))
 
     print("\n== 10. 汇总给 UI ==", flush=True)
     lim = SafetyLimiter(scene(dt=dt))

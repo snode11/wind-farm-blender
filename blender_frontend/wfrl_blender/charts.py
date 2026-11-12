@@ -10,10 +10,25 @@ import math
 import uuid
 from .history import HistoryWindow, ExportJob
 from .training import STAT_LABELS
+from .protocol import BLADE_COMPONENTS, SOLVER_OUTPUT_CHANNELS, SOLVER_OUTPUT_GROUPS
 
-CHANNELS = ('power', 'reward', 'yaw', 'pitch', 'pitch_command', 'torque', 'rotor_speed', 'load')
-LABELS = dict(power='Power', reward='Reward', yaw='Yaw', pitch='Pitch measured',
+CHANNELS = tuple(dict.fromkeys(('power', 'reward', 'yaw', 'yaw_command', 'pitch', 'pitch_command', 'torque', 'rotor_speed', 'load', *BLADE_COMPONENTS, *SOLVER_OUTPUT_CHANNELS)))
+LABELS = dict(power='Power', reward='Reward', yaw='Yaw measured', yaw_command='Yaw command', pitch='Pitch measured',
               pitch_command='Pitch command', torque='Torque', rotor_speed='RPM', load='Load')
+LABELS.update({name: f'Blade {index + 1} root {"flap" if axis == "m_flap" else "edge"} moment'
+               for name, (axis, index) in BLADE_COMPONENTS.items()})
+LABELS.update(m_flap='Blade root flap moments (1–3)', m_edge='Blade root edge moments (1–3)')
+LABELS.update({name: spec['label'] for name, spec in SOLVER_OUTPUT_CHANNELS.items()})
+GROUPS = {axis: [f'{axis}_{blade}' for blade in (1, 2, 3)] for axis in ('m_flap', 'm_edge')}
+GROUPS.update(SOLVER_OUTPUT_GROUPS)
+for _group, _channels in SOLVER_OUTPUT_GROUPS.items():
+    _spec = SOLVER_OUTPUT_CHANNELS[_channels[0]]
+    LABELS[_group] = (_spec['label'].removeprefix('B1 ') + ' (blades 1–3)' if _spec['blade'] else
+                      _group.replace('_', ' ').capitalize() + ' (x/y/z)')
+
+
+def selected_channels(channel):
+    return tuple(GROUPS.get(channel, (channel,)))
 FARM = '__farm__'
 _ATOMIC_METADATA_TYPES = frozenset((str, int, float, bool, type(None)))
 
@@ -88,7 +103,8 @@ class ChartHistory:
                     validity = 'invalid'
                 if record.get('source_age_seconds', 0) >= record.get('stale_after_seconds', 2):
                     validity = 'stale'
-                point = Point(step, payload['timestamp']['value'], value if validity == 'valid' else None,
+                stamp = record.get('timestamp', payload['timestamp'])
+                point = Point(step, stamp['value'], value if validity == 'valid' else None,
                               record.get('unit', ''), record.get('fidelity', 'UNKNOWN'), validity,
                               _copy_metadata(record.get('provenance', {})),
                               episode)
@@ -348,7 +364,17 @@ def _plot_data(channel, selected, scene=None):
     ids = all_ids if selected == 'ALL' else (selected,)
     if channel == 'reward' or channel in STAT_LABELS:
         ids = (FARM,)
-    series = tuple((tid, history.points(tid, channel)) for tid in ids)
+    if channel in GROUPS:
+        def series_id(tid, key):
+            spec = SOLVER_OUTPUT_CHANNELS.get(key, {})
+            suffix = f"B{spec['blade']}" if spec.get('blade') else (
+                f'B{BLADE_COMPONENTS[key][1] + 1}' if key in BLADE_COMPONENTS else key.rsplit('_', 1)[-1])
+            return f'{tid} / {suffix}'
+        series = tuple((series_id(tid, key), history.points(tid, key))
+                       for tid in ids for key in GROUPS[channel])
+        all_ids = tuple(series_id(tid, key) for tid in all_ids for key in GROUPS[channel])
+    else:
+        series = tuple((tid, history.points(tid, channel)) for tid in ids)
     available = [point for _, points in series for point in points if point.value is not None]
     bounds = None
     if available:
@@ -365,6 +391,15 @@ def _plot_data(channel, selected, scene=None):
     if len(_data_cache) > _CACHE_LIMIT:
         _data_cache.popitem(last=False)
     return data
+
+
+def tick_labels(ticks):
+    """Preserve distinct tick values when the plotted signal has a narrow range."""
+    for precision in range(3, 13):
+        labels = tuple(f'{value:.{precision}g}' for value in ticks)
+        if len(set(labels)) == len(set(ticks)):
+            return labels
+    return tuple(str(value) for value in ticks)
 
 
 def _plot_commands(data, scale, panel_width, blf):
@@ -395,10 +430,10 @@ def _plot_commands(data, scale, panel_width, blf):
     xmin, xmax, ymin, ymax = xticks[0], xticks[-1], yticks[0], yticks[-1]
     def px(value): return left + (value - xmin) / (xmax - xmin) * width
     def py(value): return bottom + (value - ymin) / (ymax - ymin) * height
-    for value in yticks:
+    for value, text in zip(yticks, tick_labels(yticks)):
         yy = py(value)
         line([(left, yy), (left + width, yy)], (.2,.28,.36,.6))
-        label(x + 6 * scale, yy - 4 * scale, f'{value:.3g}', _MUTED, 10)
+        label(x + 6 * scale, yy - 4 * scale, text, _MUTED, 10)
     origin = xmin if data.timebase == 'unix_seconds' else 0.
     for value in xticks:
         xx = px(value)

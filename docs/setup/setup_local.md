@@ -83,6 +83,8 @@ M 系列 Mac 的文件类型应包含 `arm64`，Intel 为 `x86_64`。短仿真�
 
 机组控制器 [DISCON.F90](../../wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/DISCON.F90) 的基线行为：未下发外部变桨指令时，集体变桨 PI 按 8 °/s 速率上限从上一指令推进，并限制在 0–90°；发电机转速达到额定，或原生桨距不小于 1° 时，转矩取恒功率段。下发外部变桨时，实际桨距取外部指令与基线 PI 输出的较大值，转矩分段只按转速判定；下发外部转矩时直接替换基线转矩。修改控制器源码后须在各平台重新编译 `DISCON_WT1.dll`。在本机 macOS arm64 单机算例的控制窗口中，8 m/s 为 9.04 rpm、0°、1.707 MW，12 m/s 为 12.10 rpm、约 3.0°、5.000 MW，28 m/s 为 12.10 rpm、约 25.9°、5.000 MW；这些是该平台的运行结果，不是其他平台的验收结论。
 
+macOS 本机求解通过 [MPI 环境配置](../../wfrl/mpi_runtime.py) 默认使用 `OMPI_MCA_btl=self,tcp` 和 `OMPI_MCA_btl_tcp_if_include=lo0`，避免动态生成的求解器进程选择不可达的数据接口。Blender 启动器、隔离 worker、`FastFarmDriver` 和上面的冒烟入口共用此配置；直接脚本须在导入 `mpi4py` 或 `wfcrl` 前调用 `configure_local_mpi()`。已有 BTL、PML 和 TCP 接口包含／排除配置保持优先，Linux 与 Windows 不添加这些默认值。新建 MPI 作业会清除继承的作业身份，已在运行的 MPI rank 保留自身身份。此默认值适用于同一台 Mac，多主机运行须显式配置可达接口；它不设置 PRTE 的管理通信接口。修改配置后重新启动后端进程。
+
 求解脚本可通过 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE` 或 `PATH` 定位二进制；Blender 启动器使用自身的 `--python`、`--mpi`、`--fastfarm` 参数或对应配置。机组控制器、supercontroller 路径由算例输入决定，必须分别核对。执行下列入口前，恢复选定场景需要的资源和模型权重，见[分发说明](../PUBLICATION.md)。解释器选择与生命周期的验证范围见[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)。
 
 当前 macOS Blender 启动器入口是：

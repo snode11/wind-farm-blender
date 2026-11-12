@@ -133,6 +133,7 @@ class SceneRuntime:
         d.done = False
         d._steps = 0
         d._started = False
+        d._prepare_solver_outputs()
         # 偏航占空比滑动窗口（driver.__init__ 被 __new__ 绕过，这里手动补齐）
         import collections as _c
         from wfrl.fastfarm_driver import (YAW_DUTY_WINDOW, YAW_DUTY_LIMIT)
@@ -160,7 +161,14 @@ class SceneRuntime:
         ctx["_source"] = self.driver
         ctx["_grab"] = grab
         ctx["u_inf"] = self.u_inf
-        ctx["t"] = self._t * self.scene.dt
+        ctx["control_elapsed_seconds"] = self._t * self.scene.dt
+        clock = m.get('solver_clock')
+        ctx["t"] = clock['value'] if clock else ctx["control_elapsed_seconds"]
+        if clock:
+            ctx['timestamp'] = {key: value for key, value in clock.items()
+                                if key not in ('servo_time_steps', 'power_window_steps')}
+        if 'yaw_measured' in m:
+            ctx['yaw'] = m['yaw_measured']
         self.last_measure = dict(m)
         self.last_ctx = ctx
         frame: Dict[str, Any] = {}

@@ -24,8 +24,8 @@ def test_adapter_preserves_missing_invalid_units_ids_fidelity():
     data = adapter.encode(snap())
     assert [t['turbine_id'] for t in data['turbines']] == ['A','B']
     c = data['turbines'][0]['channels']
-    assert c['rotor_speed']['value'] is None and c['rotor_speed']['validity'] == 'invalid'
-    assert c['rotor_speed']['fidelity'] == 'SYNTH'
+    assert c['rotor_speed']['value'] is None and c['rotor_speed']['validity'] == 'unsupported'
+    assert c['rotor_speed']['fidelity'] == 'DIRECT'
     assert c['power']['unit'] == 'MW' and c['power']['fidelity'] == 'DIRECT'
     assert c['torque']['validity'] == 'unsupported'
     encode_message(envelope('snapshot',data))

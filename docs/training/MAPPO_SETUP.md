@@ -26,7 +26,7 @@ Interactive 的 `episode_steps` 指每回合用于训练的控制步数，默认
 
 回合切换与训练收尾使用严格关闭：排空、环境关闭或 MPI 子通信器断开无法确认时报告失败并阻止启动下一回合；不把清理异常视为正常回合完成。暂停和取消在控制步、回合启动及预热边界检查。
 
-`step` 和迭代计数贯穿训练，`episode` 从零编号；仿真时间属于当前回合，可以在回合重启时回零。快照以顶层 `payload.episode` 传递回合；当前源码前端仅在顶层缺字段时兼容旧的 `payload.context.episode`，零值有效。实时曲线在回合变化或时间回退处断线，保留同一全局步数的跨回合边界样本与训练统计，合同见[快照与曲线说明](../../blender_frontend/README.md)。Blender 工作区的 **WFRL / 后端运行 → Episode steps** 设置仅用于 Interactive；安装版需要匹配扩展载荷，后端改动需重启 Bridge。
+`step` 和迭代计数贯穿训练，`episode` 从零编号。FAST.Farm 快照的仿真时间按当前物理回合的已完成 MPI 交换序号与实际步长重建，包含初始化和预热；来源字段保留这一计算方法，`control_elapsed_seconds` 单独表示相对控制时间。每个新算例重新计时，不沿用上一回合的原点。快照以顶层 `payload.episode` 传递回合；当前源码前端仅在顶层缺字段时兼容旧的 `payload.context.episode`，零值有效。实时曲线在回合变化或时间回退处断线，保留同一全局步数的跨回合边界样本与训练统计，合同见[快照与曲线说明](../../blender_frontend/README.md)。Blender 工作区的 **WFRL / 后端运行 → Episode steps** 设置仅用于 Interactive；安装版需要匹配扩展载荷，后端改动需重启 Bridge。
 
 环境原始奖励为各机组功率除以上游来流立方的均值，有载荷测量时再减去 `load_coef` 乘叶根弯矩（N·m 除以 1e7）绝对值的均值；功率与来流取自同一次仿真交换，来流裁到状态空间风速范围，见[奖励整形器](../../wfrl/rewards.py)。训练奖励缩放使用折扣累加器 `G = gamma * G + reward` 和二阶矩指数移动平均 `M = 0.99 * M + 0.01 * G**2`。`G` 在同一回合跨 rollout 保留，并在回合边界清零；`M` 跨回合保留。本轮实际采集的奖励统一除以本轮末的 `sqrt(M) + 1e-8` 后计算 GAE。该实现不等同于 SB3 `VecNormalize`。仪表板的 `mean_raw_reward` 来自本轮原始奖励均值，归一化 `mean_reward` 通道没有输出，不将两者混称。
 

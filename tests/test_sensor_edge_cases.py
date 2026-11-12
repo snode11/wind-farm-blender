@@ -61,7 +61,7 @@ def sensor_scene():
 
 
 @pytest.mark.parametrize("sensor_type,key", [(PowerSensor, "power"), (ActuatorSensor, "yaw"),
-                                           (RotorSpeedSensor, "torque")])
+                                           (RotorSpeedSensor, "rotor_speed")])
 def test_scalar_sensor_requires_full_farm_shape_before_subselection(sensor_type, key):
     scene = sensor_scene()
     sensor = sensor_type(scene, SensorSpec(sensor_type.type_name), [0])
@@ -161,12 +161,13 @@ def test_acoustic_missing_or_nonfinite_loads_stay_unknown_without_warning():
     np.testing.assert_allclose(values[1:], [1., 1.])
 
 
-def test_sensor_units_preserve_newton_metres_and_convert_power_to_rotor_rpm():
+def test_sensor_units_preserve_newton_metres_and_native_rotor_rpm():
     scene = sensor_scene()
     loads = np.arange(9, dtype=float).reshape(3, 3) * 1e6
     blade = BladeLoadSensor(scene, SensorSpec("bladeload"), [2, 0])
     np.testing.assert_array_equal(blade.sample({"m_flap": loads})["m_flap"], loads[[2, 0]])
     rotor = RotorSpeedSensor(scene, SensorSpec("rotorspeed"), [0, 1, 2])
-    rpm = rotor.sample({"power": [.944, 2., np.nan], "torque": [10000., 0., 10000.]})["rotorspeed"]
-    assert rpm[0] == pytest.approx(100. * 60. / (2 * np.pi * 97.))
-    assert np.isnan(rpm[1:]).all()
+    rpm = rotor.sample({"rotor_speed": [30., 0., np.nan], "power": [.944, 2., np.nan],
+                        "torque": [10000., 0., 10000.]})["rotorspeed"]
+    np.testing.assert_equal(rpm, [30., 0., np.nan])
+    assert np.isnan(rotor.sample({"power": [.944, 2., 1.], "torque": [1., 2., 3.]})['rotorspeed']).all()
