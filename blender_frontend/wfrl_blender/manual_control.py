@@ -1,8 +1,6 @@
 """Independent manual turbine state, rigid poses and main-thread motion."""
 import math
-import os
 from pathlib import Path
-import tempfile
 import time
 from dataclasses import replace
 
@@ -11,7 +9,7 @@ from bpy.app.handlers import persistent
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from .manual_motion import RotorClock, pitch_at
-from . import manual_pose
+from . import atomic_json, manual_pose
 
 
 DEFAULT_RPM = 9.0
@@ -785,7 +783,6 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
     filter_glob: bpy.props.StringProperty(default='*.json', options={'HIDDEN'})
 
     def execute(self, context):
-        temporary = None
         try:
             valid, reason = validate_scene(context.scene)
             if not valid:
@@ -794,17 +791,10 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
             path = Path(bpy.path.abspath(self.filepath))
             if not path.name or path.is_dir():
                 raise ValueError('请选择JSON文件位置')
-            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
-                                             prefix='.' + path.name, suffix='.tmp', delete=False) as stream:
-                temporary = Path(stream.name)
-                stream.write(payload)
-            os.replace(temporary, path)
+            atomic_json.write_text(path, payload)
         except (OSError, ValueError, ReferenceError, AttributeError) as exc:
             self.report({'ERROR'}, f'无法保存姿态：{exc}')
             return {'CANCELLED'}
-        finally:
-            if temporary is not None:
-                temporary.unlink(missing_ok=True)
         self.report({'INFO'}, '三机姿态已保存')
         return {'FINISHED'}
 
