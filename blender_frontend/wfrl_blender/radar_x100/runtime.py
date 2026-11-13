@@ -394,7 +394,10 @@ def _redraw_changed_overlays(alive):
 
 def on_load_pre(_unused):
     from . import output
-    output.close_all()
+    try:
+        output.close_all()
+    except Exception as exc:
+        print('X100 output close failed:', str(exc))
     for key, session in list(_SESSIONS.items()):
         try:
             session.restore_after_close = True
@@ -433,9 +436,12 @@ def unregister():
     import bpy
     from ..panels import radar_x100
     from . import output
-    output.close_all()
     errors = []
     try:
+        try:
+            output.close_all()
+        except Exception as exc:
+            errors.append(exc)
         for key, session in list(_SESSIONS.items()):
             try:
                 session.restore_after_close = False

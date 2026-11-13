@@ -7,17 +7,46 @@ from .core import schema
 _HANDLER = None
 
 
+def _remove_unused_materials(materials):
+    import bpy
+    for material in set(materials):
+        if (material is not None and material.get('wfrl_x100_owner')
+                and material.users == 0 and not material.use_fake_user):
+            bpy.data.materials.remove(material)
+
+
+def remove_mesh(mesh):
+    """Release an unused radar-created mesh and its unused radar-created materials."""
+    import bpy
+    if (isinstance(mesh, bpy.types.Mesh) and mesh.get('wfrl_x100_owner')
+            and mesh.users == 0 and not mesh.use_fake_user):
+        materials = tuple(mesh.materials)
+        bpy.data.meshes.remove(mesh)
+        _remove_unused_materials(materials)
+
+
+def _remove_data_orphans(owner):
+    import bpy
+    for mesh in list(bpy.data.meshes):
+        if mesh.get('wfrl_x100_owner') == owner:
+            remove_mesh(mesh)
+    _remove_unused_materials(material for material in bpy.data.materials
+                             if material.get('wfrl_x100_owner') == owner)
+
+
 def remove_orphans(owner):
     import bpy
     for obj in list(bpy.data.objects):
-        if obj.get('wfrl_x100_owner') == owner and not obj.users_scene and not obj.use_fake_user:
+        if (obj.get('wfrl_x100_owner') == owner and not obj.users_scene and not obj.use_fake_user
+                and not any(collection.users or collection.use_fake_user for collection in obj.users_collection)):
             data = obj.data
             bpy.data.objects.remove(obj, do_unlink=True)
-            if isinstance(data, bpy.types.Mesh) and data.users == 0 and not data.use_fake_user:
-                bpy.data.meshes.remove(data)
+            remove_mesh(data)
     for collection in list(bpy.data.collections):
-        if collection.get('wfrl_x100_owner') == owner and not collection.users and not collection.use_fake_user:
+        if (collection.get('wfrl_x100_owner') == owner and not collection.users
+                and not collection.use_fake_user and not collection.objects and not collection.children):
             bpy.data.collections.remove(collection)
+    _remove_data_orphans(owner)
 
 
 def remove_objects(scene, *, owner=None):
@@ -43,12 +72,12 @@ def remove_objects(scene, *, owner=None):
             continue
         data = obj.data
         bpy.data.objects.remove(obj, do_unlink=True)
-        if data is not None and data.users == 0 and not data.use_fake_user:
-            if isinstance(data, bpy.types.Mesh):
-                bpy.data.meshes.remove(data)
+        remove_mesh(data)
     for collection in list(scene.collection.children):
-        if collection.get('wfrl_x100_owner') == owner and not collection.objects and collection.users == 1:
+        if (collection.get('wfrl_x100_owner') == owner and not collection.objects
+                and not collection.children and collection.users == 1 and not collection.use_fake_user):
             bpy.data.collections.remove(collection)
+    _remove_data_orphans(owner)
 
 
 def existing_installation(scene, owner):
@@ -114,6 +143,7 @@ def set_field_of_view(fov, limits, shape='ANGULAR'):
     previous = fov.data
     mesh = _fov_mesh(limits, shape)
     try:
+        mesh['wfrl_x100_owner'] = fov['wfrl_x100_owner']
         fov.data = mesh
     except Exception:
         bpy.data.meshes.remove(mesh)
@@ -126,40 +156,52 @@ def install(scene, owner, sensor_matrix, *, show_fov=True, field_of_view_deg=Non
     import bpy
     from mathutils import Matrix
     collection = bpy.data.collections.new('WFRL.X100')
-    collection['wfrl_x100_owner'] = owner
-    scene.collection.children.link(collection)
+    objects, meshes, created_materials = [], [], []
 
     def add_object(name, data=None, role=None):
-        try:
-            obj = bpy.data.objects.new(name, data)
-        except Exception:
-            if data is not None:
-                bpy.data.meshes.remove(data)
-            raise
+        if data is not None:
+            meshes.append(data)
+            data['wfrl_x100_owner'] = owner
+        obj = bpy.data.objects.new(name, data)
+        objects.append(obj)
         obj['wfrl_x100_owner'] = owner
         if role is not None:
             obj['wfrl_x100_role'] = role
         collection.objects.link(obj)
         return obj
 
-    mount = add_object('WFRL.X100.Mount')
-    mount.matrix_world = Matrix(sensor_matrix.tolist())
-    from . import housing_model
-    vertices, faces, materials = housing_model.build()
-    mesh = bpy.data.meshes.new('WFRL.X100.Housing')
-    housing = add_object('WFRL.X100.Housing', mesh, 'physical')
-    mesh.from_pydata(vertices.tolist(), [], faces)
-    for name, color, metallic, roughness in housing_model.MATERIALS:
-        mesh.materials.append(_material(name, color, metallic, roughness))
-    mesh.polygons.foreach_set('material_index', materials.astype(np.int32))
-    mesh.update()
-    housing.parent = mount
-    housing['geometry_source'] = housing_model.SOURCE
-    fov = add_object('WFRL.X100.FOV', _fov_mesh(field_of_view_deg, field_of_view_shape), 'annotation')
-    fov.parent, fov.hide_render = mount, True
-    fov.color = (.05, .7, 1, 1)
-    for layer in scene.view_layers:
-        fov.hide_set(not show_fov, view_layer=layer)
+    try:
+        collection['wfrl_x100_owner'] = owner
+        scene.collection.children.link(collection)
+        mount = add_object('WFRL.X100.Mount')
+        mount.matrix_world = Matrix(sensor_matrix.tolist())
+        from . import housing_model
+        vertices, faces, materials = housing_model.build()
+        mesh = bpy.data.meshes.new('WFRL.X100.Housing')
+        housing = add_object('WFRL.X100.Housing', mesh, 'physical')
+        mesh.from_pydata(vertices.tolist(), [], faces)
+        for name, color, metallic, roughness in housing_model.MATERIALS:
+            mesh.materials.append(_material(name, color, metallic, roughness,
+                                            owner=owner, created=created_materials))
+        mesh.polygons.foreach_set('material_index', materials.astype(np.int32))
+        mesh.update()
+        housing.parent = mount
+        housing['geometry_source'] = housing_model.SOURCE
+        fov = add_object('WFRL.X100.FOV', _fov_mesh(field_of_view_deg, field_of_view_shape), 'annotation')
+        fov.parent, fov.hide_render = mount, True
+        fov.color = (.05, .7, 1, 1)
+        for layer in scene.view_layers:
+            fov.hide_set(not show_fov, view_layer=layer)
+    except Exception:
+        for obj in reversed(objects):
+            bpy.data.objects.remove(obj, do_unlink=True)
+        for mesh in meshes:
+            bpy.data.meshes.remove(mesh)
+        for material in created_materials:
+            if material.users == 0 and not material.use_fake_user:
+                bpy.data.materials.remove(material)
+        bpy.data.collections.remove(collection)
+        raise
     return mount, fov
 
 
@@ -206,12 +248,14 @@ def sync_housing_visibility(scene, mount):
 _CAMERA_HIDE = 'wfrl_x100_hidden_for_camera'
 
 
-def _material(name, color, metallic, roughness):
+def _material(name, color, metallic, roughness, *, owner, created):
     import bpy
     material = bpy.data.materials.get(name)
     if material is not None:
         return material
     material = bpy.data.materials.new(name)
+    created.append(material)
+    material['wfrl_x100_owner'] = owner
     material.diffuse_color, material.metallic, material.roughness = color, metallic, roughness
     if material.node_tree is None and hasattr(material, 'use_nodes'):
         material.use_nodes = True

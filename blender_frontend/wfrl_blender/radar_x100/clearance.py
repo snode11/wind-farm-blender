@@ -143,18 +143,37 @@ def read_recorded(replay, index, frame):
     result = payload['result']
     if result is not None:
         labels = np.asarray(result['labels'])
-        if labels.shape != (len(frame.points),) or not np.isin(labels, [0, 1, 2]).all():
+        if (labels.shape != (len(frame.points),) or not np.isin(labels, [0, 1, 2]).all()
+                or any(type(value) is not int for value in result['labels'])):
             raise ValueError('记录的回波分类无效')
         rows = result['blades']
-        if len(rows) != 3 or {row['blade'] for row in rows} != {1, 2, 3}:
+        if (len(rows) != 3 or any(not isinstance(row, dict) or not set(ROW_FIELDS) <= row.keys()
+                                or type(row['blade']) is not int for row in rows)
+                or {row['blade'] for row in rows} != {1, 2, 3}):
             raise ValueError('记录的叶片估计无效')
         for row in rows:
+            if (type(row['points']) is not int or not 0 <= row['points'] <= len(frame.points)
+                    or type(row['consecutive_frames']) is not int or row['consecutive_frames'] < 0
+                    or any(value is not None and (not _finite_number(value) or value < 0)
+                           for value in (row['fit_residual_m'], row['extrapolation_m']))):
+                raise ValueError('记录的叶片估计数值无效')
             if row['status'] == 'SUPPORTED':
-                lo, hi = row['clearance_interval95_m']
-                value, std = row['clearance_m'], row['clearance_std_m']
-                if not np.isfinite([lo, hi, value, std]).all() or not 0 <= lo <= value <= hi or std < 0:
+                tip, interval = row['tip_world'], row['clearance_interval95_m']
+                if (not isinstance(tip, list) or len(tip) != 3 or not all(map(_finite_number, tip))
+                        or row['points'] == 0 or row['consecutive_frames'] == 0
+                        or row['fit_residual_m'] is None or row['extrapolation_m'] is None):
+                    raise ValueError('记录的有效叶片估计缺少支持数据')
+                if not isinstance(interval, list) or len(interval) != 2:
                     raise ValueError('记录的塔距区间无效')
-            elif row['status'] not in REASONS or any(row[key] is not None for key in
+                lo, hi = interval
+                value, std = row['clearance_m'], row['clearance_std_m']
+                if not all(map(_finite_number, (lo, hi, value, std))) or not 0 <= lo <= value <= hi or std < 0:
+                    raise ValueError('记录的塔距区间无效')
+            elif row['status'] not in REASONS or row['consecutive_frames'] != 0 or any(row[key] is not None for key in
                     ('clearance_m', 'clearance_std_m', 'clearance_interval95_m', 'tip_world')):
                 raise ValueError('记录的不可估计状态无效')
     return result, str(payload['error'])
+
+
+def _finite_number(value):
+    return type(value) in (int, float) and math.isfinite(value)

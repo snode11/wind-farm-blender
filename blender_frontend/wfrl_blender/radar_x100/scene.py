@@ -426,9 +426,12 @@ class SceneSampler:
     def material_sample(self, time_s, triangle_ids, *, barycentric=None):
         """Transport fixed material coordinates using only their bound rest vertices."""
         self._validate_sampling()
-        ids = np.asarray(triangle_ids, dtype=np.int32)
-        if ids.ndim != 1 or np.any(ids < 0) or np.any(ids >= len(self.triangles)):
+        ids = np.asarray(triangle_ids)
+        if (ids.ndim != 1 or (ids.size and ids.dtype.kind not in 'iu')
+                or np.any(ids < 0) or np.any(ids >= len(self.triangles))
+                or np.any(ids > np.iinfo(np.int32).max)):
             raise ValueError('Invalid material triangle identity')
+        ids = ids.astype(np.int32, copy=False)
         if self._material_ids is None or not np.array_equal(ids, self._material_ids):
             plan = []
             for part, (_, faces) in enumerate(self.parts):

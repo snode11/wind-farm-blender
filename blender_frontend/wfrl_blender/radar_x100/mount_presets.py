@@ -168,8 +168,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.__dict__.update(saved_session)
         raise
     if previous_fov_mesh is not None:
-        if previous_fov_mesh.users == 0:
-            bpy.data.meshes.remove(previous_fov_mesh)
+        view.remove_mesh(previous_fov_mesh)
     scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
     scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · ' + configuration.RATE_LABEL
     return current
