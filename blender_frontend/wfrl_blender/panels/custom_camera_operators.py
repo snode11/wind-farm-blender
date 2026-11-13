@@ -169,42 +169,55 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
             return
         if not getattr(self, '_finishing', False):
             self._finish_options = restore, resume
+            self._finish_done = set()
         self._finishing = True
         restore, resume = self._finish_options
         # An invalidated identity lets the watchdog retry without modal events.
         self.identity = None
         self.drag = None
-        try:
-            # Modal callbacks become inert immediately and retire on their next event.
-            if self.handle is not None:
-                try:
-                    _panel.bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
-                except (ReferenceError, RuntimeError, ValueError) as exc:
-                    if not _removed_handle(exc):
-                        raise
-                self.handle = None
-            if self.timer is not None:
-                try:
-                    self.wm.event_timer_remove(self.timer)
-                except (ReferenceError, RuntimeError, ValueError) as exc:
-                    if not _removed_handle(exc):
-                        raise
-                self.timer = None
-            if self.session and not self.session.closed:
-                self.session.cancel(restore=resume)
-            if self.preview is not None:
-                self.preview.free()
-            if restore and self.external_snapshot is not None:
-                self.external_snapshot.restore()
-        except Exception as exc:
-            self.error = str(exc)
-            self.report({'ERROR'}, self.error)
-            raise RuntimeError(self.error) from exc
+
+        def release_handle(name, remove):
+            handle = getattr(self, name)
+            if handle is None:
+                return
+            try:
+                remove(handle)
+            except (ReferenceError, RuntimeError, ValueError) as exc:
+                if not _removed_handle(exc):
+                    raise
+            setattr(self, name, None)
+
+        actions = (
+            ('draw', lambda: release_handle('handle', lambda handle:
+                _panel.bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW'))),
+            ('timer', lambda: release_handle('timer', self.wm.event_timer_remove)),
+            ('draft', lambda: self.session.cancel(restore=resume)
+                if self.session and not self.session.closed else None),
+            ('preview', lambda: self.preview.free() if self.preview is not None else None),
+            ('restore', lambda: self.external_snapshot.restore()
+                if restore and self.external_snapshot is not None else None),
+        )
+        errors = []
+        for name, action in actions:
+            if name in self._finish_done:
+                continue
+            try:
+                action()
+            except Exception as exc:
+                errors.append((name, exc))
+            else:
+                # A pending draft can restore its own view on the next cancel.
+                if name != 'restore' or not self.session or self.session.closed:
+                    self._finish_done.add(name)
         try:
             self.area.header_text_set(None)
             self.area.tag_redraw()
         except (ReferenceError, RuntimeError):
             pass
+        if errors:
+            self.error = '；'.join(f'{name}: {exc}' for name, exc in errors)
+            self.report({'ERROR'}, self.error)
+            raise RuntimeError(self.error) from errors[0][1]
         self.closed, self.drag = True, None
         if _panel._ACTIVE is self:
             _panel._ACTIVE = None

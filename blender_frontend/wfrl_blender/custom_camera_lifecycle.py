@@ -133,10 +133,31 @@ def set_enabled(scene, slot, enabled):
         return
     if any(obj.get('wfrl_custom_draft') for obj in scene.objects):
         raise ValueError('请先确认或取消当前相机调整')
+    missing = object()
+    previous = camera.get('custom_enabled', missing)
+    log = history.HISTORY
+    saved_history = tuple(log.entries), log.identity, log.notice, log._watchdog_signature
     before = history.before_change(scene)
-    camera['custom_enabled'] = bool(enabled)
-    history.committed(scene, before, f'C{slot} ' + ('参与' if enabled else '不参与') + '三路预览与采集')
-    _core._refresh_references(scene)
+    try:
+        camera['custom_enabled'] = bool(enabled)
+        _core._refresh_references(scene)
+        history.committed(scene, before, f'C{slot} ' + ('参与' if enabled else '不参与') + '三路预览与采集')
+    except Exception as exc:
+        try:
+            if previous is missing:
+                camera.pop('custom_enabled', None)
+            else:
+                camera['custom_enabled'] = previous
+        except Exception as error:
+            exc.add_note('Camera participation restoration failed: ' + str(error))
+        try:
+            _core._refresh_references(scene)
+        except Exception as error:
+            exc.add_note('Camera reference restoration failed: ' + str(error))
+        entries, log.identity, log.notice, log._watchdog_signature = saved_history
+        log.entries.clear()
+        log.entries.extend(entries)
+        raise
 
 
 def _publication_checkpoint(stage, slot=None):

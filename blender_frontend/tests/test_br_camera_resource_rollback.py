@@ -126,11 +126,12 @@ def test_preview_cleanup_failure_retains_resources_for_watchdog_retry(preview_op
         with pytest.raises(RuntimeError, match='resource release unavailable'):
             r.op.finish()
     assert not r.op.closed and r.panel._ACTIVE is r.op
-    assert r.op.timer is r.timer
+    assert r.op.timer is (r.timer if resource == 'timer' else None)
     assert r.op.handle is (r.handle if resource == 'draw' else None)
-    assert r.op.session is r.session and r.session.draft is not None and not r.session.closed
+    assert r.op.session is r.session and r.session.draft is None and r.session.closed
     assert r.op.preview is r.renderer
-    r.renderer.free.assert_not_called()
+    r.renderer.free.assert_called_once_with()
+    r.session.cancel.assert_called_once_with(restore=True)
     remove.side_effect = None
     assert r.panel.lifecycle_watchdog() == .25
     assert r.op.closed and r.panel._ACTIVE is None
