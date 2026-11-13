@@ -3,17 +3,98 @@
 from __future__ import annotations
 
 import math
+import logging
+from contextlib import contextmanager
+from numbers import Real
 
 from .materials import get_material
 from .scene_model import SceneDTO
 
 
 COLLECTION_NAME = "WFRL_Scene"
+_BUILD_DATA = ('objects', 'meshes', 'materials', 'collections', 'images', 'curves',
+               'lights', 'worlds', 'node_groups', 'cameras', 'actions')
 
 
 def _bpy():
     import bpy
     return bpy
+
+
+@contextmanager
+def _build_transaction(collection=None, *, scene=None):
+    """Release new IDs on failure, preserving existing IDs and external users.
+
+    Only links added to the build destination and a newly assigned World are
+    undone. Existing datablock contents and a cleared scene are not restored.
+    """
+    data = _bpy().data
+    before = {block.as_pointer() for name in _BUILD_DATA for block in getattr(data, name)}
+    world = scene.world if scene is not None else None
+    try:
+        yield
+    except BaseException as error:
+        try:
+            created = {block for name in _BUILD_DATA for block in getattr(data, name)
+                       if block.as_pointer() not in before}
+            if collection is not None:
+                for links in (collection.objects, collection.children):
+                    for block in list(links):
+                        if block in created:
+                            links.unlink(block)
+            if scene is not None and scene.world in created:
+                scene.world = world
+            users = data.user_map(subset=created)
+            removable = {block for block in created
+                         if block.library is None and not block.use_fake_user}
+            # Retention propagates through meshes, materials, images and the
+            # collection/node-group graph used by vegetation instances.
+            while True:
+                shared = {block for block in removable if users[block] - removable}
+                if not shared:
+                    break
+                removable.difference_update(shared)
+            if removable:
+                data.batch_remove(ids=removable)
+        except Exception as cleanup_error:
+            logging.getLogger(__name__).exception('Scene construction resource rollback failed')
+            error.add_note(f'Resource rollback failed: {cleanup_error}')
+        raise
+
+
+def _validate_scene_input(scene):
+    """Validate meter/degree DTO values before removing any existing geometry."""
+    def number(owner, field, *, minimum=None, positive=False):
+        value = getattr(owner, field, None)
+        try:
+            valid = not isinstance(value, bool) and isinstance(value, Real) and math.isfinite(value)
+        except OverflowError:
+            valid = False
+        if not valid:
+            raise ValueError(f'{field} must be a finite number')
+        if (minimum is not None and value < minimum) or (positive and value <= 0):
+            bound = 'positive' if positive else f'at least {minimum}'
+            raise ValueError(f'{field} must be {bound}')
+
+    for field in ('name', 'backend'):
+        if not isinstance(getattr(scene, field, None), str):
+            raise ValueError(f'{field} must be a string')
+    turbines = getattr(scene, 'turbines', None)
+    if not isinstance(turbines, (tuple, list)) or not turbines:
+        raise ValueError('turbines must contain at least one turbine')
+    ids = set()
+    for turbine in turbines:
+        turbine_id = getattr(turbine, 'turbine_id', None)
+        if not isinstance(turbine_id, str) or not turbine_id.strip():
+            raise ValueError('turbine_id must be a nonempty string')
+        if turbine_id in ids:
+            raise ValueError(f'Duplicate turbine_id: {turbine_id}')
+        ids.add(turbine_id)
+        number(turbine, 'x_m')
+        number(turbine, 'y_m')
+    number(scene, 'wind_speed_mps', minimum=0)
+    number(scene, 'wind_direction_deg')
+    number(scene, 'dt_s', positive=True)
 
 
 def _link(collection, obj):
@@ -667,40 +748,42 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
 
 
 def build_scene(scene: SceneDTO, collection_name: str = COLLECTION_NAME):
+    _validate_scene_input(scene)
     bpy = _bpy()
     if bpy.context.scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("手动场景不接受回放或后端场景重建")
     existing = validate_scene_build(collection_name)
     if existing:
         clear_scene(collection_name)
-    collection = bpy.data.collections.new(collection_name)
-    bpy.context.scene.collection.children.link(collection)
-    collection["wfrl_scene"] = scene.name
-    collection["backend"] = scene.backend
-    collection["wind_direction_deg"] = scene.wind_direction_deg
-    collection["wind_speed_mps"] = scene.wind_speed_mps
-    collection["fidelity"] = "SYNTH"
-    for turbine in scene.turbines:
-        _make_turbine(collection, turbine)
-        foundation = _cone(collection, f"WFRL.Turbine.{turbine.turbine_id}.Foundation", 7.5, 7.5, 1.15, get_material("foundation"))
-        foundation.location = (turbine.x_m, turbine.y_m, .225)
-        _finish(foundation, bevel=.08, smooth=True)
-        _make_label(collection, turbine.turbine_id, f"WFRL.Label.{turbine.turbine_id}", (turbine.x_m, turbine.y_m - 18.0, 6.0))
-    _make_terrain_surface(collection)
-    _make_ground_grid(collection)
-    # A restrained set of arrows makes the inflow direction legible without implying a measured field.
-    for index, y in enumerate((-72.0, 30.0, 132.0), start=1):
-        _primitive(collection, "cube", f"WFRL.Inflow.Arrow{index}.Shaft", (60.0, y, 1.0), (38.0, 0.8, 0.8), get_material("accent"))
-        arrow = _primitive(collection, "cone", f"WFRL.Inflow.Arrow{index}.Head", (102.0, y, 1.0), (4.0, 3.2, 2.2), get_material("accent"))
-        arrow.rotation_euler[1] = math.radians(90.0)
-    _make_wake(collection, scene)
-    _make_sensor_fixtures(collection, scene)
-    for obj in collection.objects:
-        if obj.name.startswith(("WFRL.Grid.", "WFRL.Inflow.", "WFRL.Fixture.T1.")):
-            obj.hide_render = True
-            obj.hide_set(True)
-    _configure_environment(collection, scene)
-    _configure_render()
-    from . import repair_marks
-    repair_marks.ensure(bpy.context.scene)
-    return collection
+    with _build_transaction(bpy.context.scene.collection, scene=bpy.context.scene):
+        collection = bpy.data.collections.new(collection_name)
+        bpy.context.scene.collection.children.link(collection)
+        collection["wfrl_scene"] = scene.name
+        collection["backend"] = scene.backend
+        collection["wind_direction_deg"] = scene.wind_direction_deg
+        collection["wind_speed_mps"] = scene.wind_speed_mps
+        collection["fidelity"] = "SYNTH"
+        for turbine in scene.turbines:
+            _make_turbine(collection, turbine)
+            foundation = _cone(collection, f"WFRL.Turbine.{turbine.turbine_id}.Foundation", 7.5, 7.5, 1.15, get_material("foundation"))
+            foundation.location = (turbine.x_m, turbine.y_m, .225)
+            _finish(foundation, bevel=.08, smooth=True)
+            _make_label(collection, turbine.turbine_id, f"WFRL.Label.{turbine.turbine_id}", (turbine.x_m, turbine.y_m - 18.0, 6.0))
+        _make_terrain_surface(collection)
+        _make_ground_grid(collection)
+        # A restrained set of arrows makes the inflow direction legible without implying a measured field.
+        for index, y in enumerate((-72.0, 30.0, 132.0), start=1):
+            _primitive(collection, "cube", f"WFRL.Inflow.Arrow{index}.Shaft", (60.0, y, 1.0), (38.0, 0.8, 0.8), get_material("accent"))
+            arrow = _primitive(collection, "cone", f"WFRL.Inflow.Arrow{index}.Head", (102.0, y, 1.0), (4.0, 3.2, 2.2), get_material("accent"))
+            arrow.rotation_euler[1] = math.radians(90.0)
+        _make_wake(collection, scene)
+        _make_sensor_fixtures(collection, scene)
+        for obj in collection.objects:
+            if obj.name.startswith(("WFRL.Grid.", "WFRL.Inflow.", "WFRL.Fixture.T1.")):
+                obj.hide_render = True
+                obj.hide_set(True)
+        _configure_environment(collection, scene)
+        _configure_render()
+        from . import repair_marks
+        repair_marks.ensure(bpy.context.scene)
+        return collection
