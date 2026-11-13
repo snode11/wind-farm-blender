@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
+import tempfile
 
 from .media import read_frames, sha256, validate_video
 
@@ -15,9 +17,40 @@ def read_json(path):
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + '.tmp')
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8')
-    temporary.replace(path)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', dir=path.parent, prefix='.camera-json-',
+                                         delete=False, encoding='utf-8') as handle:
+            temporary = Path(handle.name)
+            json.dump(value, handle, ensure_ascii=False, indent=2, allow_nan=False)
+            handle.write('\n')
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def _validate_labels(rows, geometry):
+    """Keep CSV missing values and per-blade geometry validity in agreement."""
+    import numpy as np
+    if geometry['clearance_valid'].shape != (len(rows), 3):
+        raise ValueError('Geometry clearance validity shape mismatch')
+    for index, row in enumerate(rows):
+        for name, field in [('rpm', 'rpm'), *[(f'clearance_b{b}', f'clearance_b{b}_m') for b in (1, 2, 3)]]:
+            valid = row[name + '_valid']
+            reason = row[name + '_reason']
+            if valid not in ('True', 'False') or not reason:
+                raise ValueError(f'Invalid CSV validity or reason: {name}')
+            if valid == 'True':
+                if not math.isfinite(float(row[field])) or reason != 'valid':
+                    raise ValueError(f'Invalid CSV measurement: {field}')
+            elif row[field] != '' or reason == 'valid':
+                raise ValueError(f'Missing CSV measurement must be empty with a reason: {field}')
+        expected = [row[f'clearance_b{b}_valid'] == 'True' for b in (1, 2, 3)]
+        if not np.array_equal(geometry['clearance_valid'][index], expected):
+            raise ValueError('Geometry/CSV clearance validity mismatch')
 
 
 def _build_manifest(directory, *, ffprobe='ffprobe'):
@@ -27,13 +60,15 @@ def _build_manifest(directory, *, ffprobe='ffprobe'):
     render = read_json(root / 'render_manifest.json')
     camera = read_json(root / 'camera.json')
     rows = read_frames(root / 'frames.csv')
-    fps = int(data['time_contract']['fps'])
+    fps = data['time_contract']['fps']
     if not render.get('complete') or render.get('status') != 'complete':
         raise ValueError('Rendering is not complete')
     if data['source_status'] != 'REVIEW_ONLY' or render['source_status'] != 'REVIEW_ONLY':
         raise ValueError('Source review status must be retained')
     if camera != render['camera']:
         raise ValueError('Camera settings differ from the rendered configuration')
+    if 'resolution' in camera and camera['resolution'] != [render['width'], render['height']]:
+        raise ValueError('Camera calibration resolution differs from renderer configuration')
     contract = data['time_contract']
     if len(rows) != contract['frame_count']:
         raise ValueError('CSV count differs from time contract')
@@ -41,6 +76,7 @@ def _build_manifest(directory, *, ffprobe='ffprobe'):
         raise ValueError('Data and camera target turbines differ')
     from .data import frame_schedule
     schedule = frame_schedule(contract['start_s'], contract['end_s'], fps, contract['exposure_s'])
+    fps = int(fps)
     if len(schedule) != len(rows):
         raise ValueError('Duration differs from CSV frame count')
     for row, expected in zip(rows, schedule):
@@ -64,11 +100,18 @@ def _build_manifest(directory, *, ffprobe='ffprobe'):
         expected_shape = (len(rows), 4, 4)
         if rendered_camera.shape != expected_shape or geometry['camera_world_transform'].shape != expected_shape:
             raise ValueError('Camera world transform frame count mismatch')
-        if not geometry['camera_transform_valid'].all() or not np.allclose(
-                rendered_camera, geometry['camera_world_transform'], atol=1e-4, rtol=0):
+        if (geometry['camera_transform_valid'].shape != (len(rows),)
+                or not np.array_equal(geometry['camera_transform_valid'], np.ones(len(rows), dtype=bool))
+                or not np.isfinite(rendered_camera).all()
+                or not np.isfinite(geometry['camera_world_transform']).all() or not np.allclose(
+                rendered_camera, geometry['camera_world_transform'], atol=1e-4, rtol=0)):
             raise ValueError('Rendered camera and label camera world transforms differ')
-        if not np.allclose(geometry['sim_time_s'], [float(r['sim_time_s']) for r in rows], atol=1e-10, rtol=0):
+        if not np.array_equal(geometry['frame_id'], np.arange(len(rows))):
+            raise ValueError('Geometry/CSV frame ID mismatch')
+        if geometry['sim_time_s'].shape != (len(rows),) or not np.allclose(
+                geometry['sim_time_s'], [float(r['sim_time_s']) for r in rows], atol=1e-10, rtol=0):
             raise ValueError('Geometry/CSV simulation time mismatch')
+        _validate_labels(rows, geometry)
     verification = validate_video(root / 'video.mp4', root / 'frames.csv', fps, ffprobe=ffprobe)
     encoding = read_json(root / 'checks' / 'encoding.json')
     if encoding['video_sha256'] != verification['video_sha256']:
@@ -86,7 +129,7 @@ def _build_manifest(directory, *, ffprobe='ffprobe'):
         raise ValueError('Master frames differ from rendering records')
     for row in rows:
         record = records[str(row['frame_id'])]
-        if abs(record['sim_time_s'] - float(row['sim_time_s'])) > 1e-9:
+        if not math.isfinite(record['sim_time_s']) or abs(record['sim_time_s'] - float(row['sim_time_s'])) > 1e-9:
             raise ValueError('Render and CSV center time mismatch')
         shutter = record['exposure_samples_s']
         center, exposure, count = float(row['sim_time_s']), contract['exposure_s'], render['exposure_samples']

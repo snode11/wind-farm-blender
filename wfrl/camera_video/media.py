@@ -199,10 +199,17 @@ def h264_samples(video, *, ffprobe='ffprobe'):
 
 
 def read_sample(handle, packet, length_size):
-    handle.seek(int(packet['pos']))
-    data = handle.read(int(packet['size']))
+    position, size = int(packet['pos']), int(packet['size'])
+    if length_size not in (1, 2, 3, 4) or position < 0 or size <= 0:
+        raise ValueError('Invalid AVCC sample bounds')
+    handle.seek(position)
+    data = handle.read(size)
+    if len(data) != size:
+        raise ValueError('Truncated AVCC sample')
     nals, offset = [], 0
     while offset < len(data):
+        if offset + length_size > len(data):
+            raise ValueError('Truncated AVCC NAL length')
         length = int.from_bytes(data[offset:offset + length_size], 'big'); offset += length_size
         if not length or offset + length > len(data):
             raise ValueError('Invalid AVCC sample')

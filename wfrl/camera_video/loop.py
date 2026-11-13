@@ -10,6 +10,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -122,58 +123,72 @@ def verify_loop(directory, *, ffprobe='ffprobe'):
 
 
 def build_loop(source_dir, output_dir, *, repeats=5, ffmpeg='ffmpeg', ffprobe='ffprobe'):
+    """Verify a staged loop, commit to an unused name, and clean failed builds."""
     from .package import verify_package
-    source_dir, output = Path(source_dir).resolve(), Path(output_dir).resolve()
+    from .publication import commit_exclusive
+    source_dir = Path(source_dir).resolve()
+    output = Path(output_dir)
+    output = output.parent.resolve() / output.name
     if not isinstance(repeats, int) or isinstance(repeats, bool) or repeats < 1:
         raise ValueError('Repeat count must be a positive integer')
     if output == source_dir or source_dir in output.parents:
         raise ValueError('Loop output must be separate from source package')
     stage = output.with_name('.' + output.name + '.building')
-    if output.exists() or stage.exists():
+    if os.path.lexists(output) or os.path.lexists(stage):
         raise FileExistsError('Output or owned build staging already exists: ' + str(output))
     verify_package(source_dir, ffprobe=ffprobe)
     source = read_json(source_dir / 'manifest.json')
     if source['schema'] != 'wfrl.camera-video.v1':
         raise ValueError('Use the original base video as loop source')
     stage.mkdir(parents=True)
-    (stage / 'source').mkdir()
-    for name in SOURCE_FILES:
-        shutil.copy2(source_dir / name, stage / 'source' / name)
-    shutil.copy2(source_dir / 'camera.json', stage / 'camera.json')
-    rows = read_frames(stage / 'source/frames.csv')
-    fps = source['fps']
-    labels = list(repeated_rows(rows, repeats, fps, source['dataset_id']))
-    with (stage / 'frames.csv').open('w', newline='', encoding='utf-8') as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(labels[0]))
-        writer.writeheader()
-        writer.writerows(labels)
-    with np.load(stage / 'source/frame_geometry.npz', allow_pickle=False) as src:
-        arrays = {name: np.concatenate([src[name]] * repeats, axis=0) for name in src.files}
-    arrays.update(frame_id=np.arange(len(labels)), source_frame_id=np.arange(len(labels)) % len(rows),
-                  source_cycle_id=np.arange(len(labels)) // len(rows))
-    np.savez_compressed(stage / 'frame_geometry.npz', **arrays)
-    command = [ffmpeg, '-v', 'error', '-nostdin', '-n', '-stream_loop', str(repeats - 1),
-               '-i', str(stage / 'source/video.mp4'), '-map', '0:v:0', '-an', '-c:v', 'copy',
-               '-video_track_timescale', str(fps), '-movflags', '+faststart', str(stage / 'video.mp4')]
-    subprocess.run(command, check=True)
-    files = {name: sha256(stage / name) for name in ('video.mp4', 'frames.csv', 'frame_geometry.npz', 'camera.json')}
-    files.update({'source/' + name: sha256(stage / 'source' / name) for name in SOURCE_FILES})
-    manifest = {'schema': SCHEMA, 'status': 'REVIEW_ONLY',
-                'description': '基于仿真数据的单风机相机视频；原始片段重复播放',
-                'source_dataset_id': source['dataset_id'], 'source_repeat_count': repeats,
-                'source_package_verified_at_creation': True,
-                'lossless_render_masters': 'retained in original base package; no new rendering',
-                'frame_count': len(labels), 'fps': fps, 'time_base': f'1/{fps}',
-                'width': source['width'], 'height': source['height'],
-                'time_contract': {'fps': fps, 'frame_count': len(labels), 'duration_s': len(labels) / fps,
-                                  'source_frame_count': len(rows), 'source_duration_s': len(rows) / fps,
-                                  'mapping': 'source_frame_id = frame_id % source_frame_count; source_cycle_id = frame_id // source_frame_count',
-                                  'simulation_time': 'repeats source segment; not continuous new physics'},
-                'rtsp_cycle_semantics': 'cycle_id counts the entire derived file; source_cycle_id is inside frame_data',
-                'encoding': 'exact H.264 access-unit repetition, no transcoding', 'files': files}
-    manifest['dataset_id'] = _identity(manifest)
-    write_json(stage / 'manifest.json', manifest)
-    write_json(stage / 'checks/loop-build.json', {'command': command, 'source_package': str(source_dir)})
-    result = verify_loop(stage, ffprobe=ffprobe)
-    stage.rename(output)
-    return {**result, 'directory': str(output)}
+    identity = stage.stat()
+    try:
+        (stage / 'source').mkdir()
+        for name in SOURCE_FILES:
+            shutil.copy2(source_dir / name, stage / 'source' / name)
+        shutil.copy2(source_dir / 'camera.json', stage / 'camera.json')
+        rows = read_frames(stage / 'source/frames.csv')
+        fps = source['fps']
+        labels = list(repeated_rows(rows, repeats, fps, source['dataset_id']))
+        with (stage / 'frames.csv').open('w', newline='', encoding='utf-8') as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(labels[0]))
+            writer.writeheader()
+            writer.writerows(labels)
+        with np.load(stage / 'source/frame_geometry.npz', allow_pickle=False) as src:
+            arrays = {name: np.concatenate([src[name]] * repeats, axis=0) for name in src.files}
+        arrays.update(frame_id=np.arange(len(labels)), source_frame_id=np.arange(len(labels)) % len(rows),
+                      source_cycle_id=np.arange(len(labels)) // len(rows))
+        np.savez_compressed(stage / 'frame_geometry.npz', **arrays)
+        command = [ffmpeg, '-v', 'error', '-nostdin', '-n', '-stream_loop', str(repeats - 1),
+                   '-i', str(stage / 'source/video.mp4'), '-map', '0:v:0', '-an', '-c:v', 'copy',
+                   '-video_track_timescale', str(fps), '-movflags', '+faststart', str(stage / 'video.mp4')]
+        subprocess.run(command, check=True)
+        files = {name: sha256(stage / name) for name in ('video.mp4', 'frames.csv', 'frame_geometry.npz', 'camera.json')}
+        files.update({'source/' + name: sha256(stage / 'source' / name) for name in SOURCE_FILES})
+        manifest = {'schema': SCHEMA, 'status': 'REVIEW_ONLY',
+                    'description': '基于仿真数据的单风机相机视频；原始片段重复播放',
+                    'source_dataset_id': source['dataset_id'], 'source_repeat_count': repeats,
+                    'source_package_verified_at_creation': True,
+                    'lossless_render_masters': 'retained in original base package; no new rendering',
+                    'frame_count': len(labels), 'fps': fps, 'time_base': f'1/{fps}',
+                    'width': source['width'], 'height': source['height'],
+                    'time_contract': {'fps': fps, 'frame_count': len(labels), 'duration_s': len(labels) / fps,
+                                      'source_frame_count': len(rows), 'source_duration_s': len(rows) / fps,
+                                      'mapping': 'source_frame_id = frame_id % source_frame_count; source_cycle_id = frame_id // source_frame_count',
+                                      'simulation_time': 'repeats source segment; not continuous new physics'},
+                    'rtsp_cycle_semantics': 'cycle_id counts the entire derived file; source_cycle_id is inside frame_data',
+                    'encoding': 'exact H.264 access-unit repetition, no transcoding', 'files': files}
+        manifest['dataset_id'] = _identity(manifest)
+        write_json(stage / 'manifest.json', manifest)
+        write_json(stage / 'checks/loop-build.json', {'command': command, 'source_package': str(source_dir)})
+        result = verify_loop(stage, ffprobe=ffprobe)
+        commit_exclusive(stage, output)
+        return {**result, 'directory': str(output)}
+    finally:
+        try:
+            current = stage.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            if (current.st_dev, current.st_ino) == (identity.st_dev, identity.st_ino):
+                shutil.rmtree(stage)

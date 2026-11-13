@@ -9,13 +9,16 @@ from __future__ import annotations
 
 import base64
 from collections import OrderedDict
+from contextlib import ExitStack
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
 import secrets
 import socket
 import struct
+import tempfile
 import threading
 import time
 from urllib.parse import parse_qs, urlparse
@@ -37,7 +40,11 @@ class RTSPConnection:
         parsed = _local_url(url, 'rtsp')
         self.url = url
         self.sock = socket.create_connection((parsed.hostname, parsed.port or 554), timeout=timeout)
-        self.file = self.sock.makefile('rb')
+        try:
+            self.file = self.sock.makefile('rb')
+        except BaseException:
+            self.sock.close()
+            raise
         self.cseq = 0
         self.session = None
 
@@ -108,8 +115,10 @@ class RTSPConnection:
                 return payload
 
     def close(self):
-        self.file.close()
-        self.sock.close()
+        try:
+            self.file.close()
+        finally:
+            self.sock.close()
 
 
 def packetize(nals, timestamp, ssrc, sequence, mtu=1200):
@@ -177,6 +186,9 @@ class AccessUnits:
             if len(payload) < 2:
                 self.invalid = True
             elif payload[1] & 0x80:
+                if self.fragment is not None:
+                    self.invalid = True
+                    self.discontinuities += 1
                 self.fragment = bytearray([(payload[0] & 0xe0) | (payload[1] & 31)]) + payload[2:]
             elif self.fragment is None:
                 self.invalid = True
@@ -238,13 +250,28 @@ class MappingServer:
                 pass
 
         self.server = ThreadingHTTPServer(('127.0.0.1', port), Handler)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        try:
+            self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        except BaseException:
+            self.server.server_close()
+            raise
 
     def __enter__(self):
-        self.thread.start(); return self
+        try:
+            self.thread.start()
+        except BaseException:
+            self.server.server_close()
+            raise
+        return self
 
     def __exit__(self, *args):
-        self.server.shutdown(); self.server.server_close(); self.thread.join()
+        try:
+            self.server.shutdown()
+        finally:
+            try:
+                self.server.server_close()
+            finally:
+                self.thread.join()
 
     def add(self, record):
         with self.lock:
@@ -369,13 +396,21 @@ def receive(rtsp_url, mapping_url, *, frame_count=100, output_dir=None, timeout=
     can rewrite SSRC, so both published and received SSRC are recorded.
     Decoder output order equals access-unit order only because B frames are
     forbidden by package validation. The optional recording can be decoded with
-    FFmpeg; each complete access unit has one JSONL row alongside it.
+    FFmpeg; each complete access unit has one JSONL row alongside it. Both files
+    are staged before exclusive publication, with JSONL committed last. A failed
+    JSONL commit removes the recording only while its file identity is still ours.
     """
     _local_url(mapping_url, 'http')
-    connection = RTSPConnection(rtsp_url, timeout=timeout)
+    if output_dir:
+        root = Path(output_dir)
+        for name in ('received.h264', 'received.jsonl'):
+            if os.path.lexists(root / name):
+                raise FileExistsError(root / name)
     matched = []
     recording = None
-    try:
+    with ExitStack() as resources:
+        connection = RTSPConnection(rtsp_url, timeout=timeout)
+        resources.callback(connection.close)
         headers, sdp = connection.request('DESCRIBE', headers={'Accept': 'application/sdp'})
         advertised = [line.removeprefix('s=WFRL camera ').strip() for line in sdp.decode().splitlines()
                       if line.startswith('s=WFRL camera ')]
@@ -388,8 +423,9 @@ def receive(rtsp_url, mapping_url, *, frame_count=100, output_dir=None, timeout=
         connection.request('SETUP', track, {'Transport': 'RTP/AVP/TCP;unicast;interleaved=0-1'})
         connection.request('PLAY')
         if output_dir:
-            root = Path(output_dir); root.mkdir(parents=True, exist_ok=True)
-            recording = (root / 'received.h264').open('xb')
+            root.mkdir(parents=True, exist_ok=True)
+            stage = Path(resources.enter_context(tempfile.TemporaryDirectory(prefix='.wfrl-receive-', dir=root)))
+            recording = resources.enter_context((stage / 'received.h264').open('xb'))
         assembler = AccessUnits()
         ready = False
         session = None
@@ -426,6 +462,11 @@ def receive(rtsp_url, mapping_url, *, frame_count=100, output_dir=None, timeout=
                 raise ValueError('New session must begin at independently decodable IDR')
             if record['cycle_start'] and not idr:
                 raise ValueError('Cycle boundary is not independently decodable')
+            media_timestamp = record['media_timestamp']
+            if (not isinstance(media_timestamp, int) or isinstance(media_timestamp, bool)
+                    or media_timestamp < 0
+                    or (matched and media_timestamp <= matched[-1]['media_timestamp'])):
+                raise ValueError('Received media timestamp must be a nonnegative, strictly increasing integer')
             session, ready = record['session_id'], True
             record = dict(record, received_rtp_ssrc=ssrc, received_rtp_timestamp=timestamp,
                           mapping_method='observed_rtp_timestamp_and_complete_vcl_sha256')
@@ -435,9 +476,26 @@ def receive(rtsp_url, mapping_url, *, frame_count=100, output_dir=None, timeout=
                     recording.write(b'\x00\x00\x00\x01' + nal)
             deadline = time.monotonic() + timeout
         if output_dir:
-            (root / 'received.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in matched), encoding='utf-8')
-        return matched
-    finally:
-        if recording:
+            recording.flush()
+            os.fsync(recording.fileno())
+            identity = os.fstat(recording.fileno())
             recording.close()
-        connection.close()
+            with (stage / 'received.jsonl').open('x', encoding='utf-8') as handle:
+                for record in matched:
+                    handle.write(json.dumps(record, allow_nan=False) + '\n')
+                handle.flush()
+                os.fsync(handle.fileno())
+            from .publication import commit_exclusive
+            commit_exclusive(stage / 'received.h264', root / 'received.h264')
+            try:
+                commit_exclusive(stage / 'received.jsonl', root / 'received.jsonl')
+            except BaseException:
+                try:
+                    current = (root / 'received.h264').lstat()
+                except FileNotFoundError:
+                    pass
+                else:
+                    if (current.st_dev, current.st_ino) == (identity.st_dev, identity.st_ino):
+                        (root / 'received.h264').unlink()
+                raise
+        return matched
