@@ -182,19 +182,32 @@ def _arrange(window, area):
     other = _partner(window, _SESSION)
     if other is None or area.width <= 1 or other.width <= 1 or area.x == other.x:
         return
-    if area.x < other.x:
-        # The split placed the new area on the left: swap roles so the
-        # stream sits on the right beside the simulated view.
-        area.spaces.active.image = None
-        area.type = 'VIEW_3D'
-        _copy_view(_SESSION['view'], area.spaces.active)
-        area.spaces.active.show_region_ui = True
-        _SESSION.update(area=other.as_pointer(), partner=area.as_pointer(),
-                        partner_space=area.spaces.active.as_pointer())
-        _SESSION['editor'] = _prepare_stream_area(other, _SESSION['marker'])
-        area, other = other, area
-    _record_layout(window.screen, area, other, _SESSION['marker'])
-    _SESSION['arranged'] = True
+    layout, caller = dict(_SESSION), other
+    try:
+        if area.x < other.x:
+            # The split placed the new area on the left: swap roles so the
+            # stream sits on the right beside the simulated view.
+            area.spaces.active.image = None
+            area.type = 'VIEW_3D'
+            _copy_view(_SESSION['view'], area.spaces.active)
+            area.spaces.active.show_region_ui = True
+            _SESSION.update(area=other.as_pointer(), partner=area.as_pointer(),
+                            partner_space=area.spaces.active.as_pointer())
+            _SESSION['editor'] = _prepare_stream_area(other, _SESSION['marker'])
+            area, other = other, area
+        _record_layout(window.screen, area, other, _SESSION['marker'])
+        _SESSION['arranged'] = True
+    except Exception:
+        # A partial role swap still owns only the newly split area and its caller.
+        _SESSION.update(layout, editor=None)
+        try:
+            caller.type = 'VIEW_3D'
+            _SESSION['partner_space'] = caller.spaces.active.as_pointer()
+            _copy_view(layout['saved_view'], caller.spaces.active)
+            caller.tag_redraw()
+        finally:
+            stop()
+        raise
 
 
 def _view_state(space):
@@ -295,7 +308,8 @@ def start(context, url, *, turbine='T1', size='1280x720'):
                 stream_area = added[0]
                 _SESSION.update(stream=None, origin=_origin(window), area=stream_area.as_pointer(),
                                 editor=None, marker=None, partner=partner, partner_space=space.as_pointer(),
-                                view=view, shown=0, texture=None, arranged=False, turbine=turbine, label=label)
+                                view=view, saved_view=saved_view, shown=0, texture=None, arranged=False,
+                                turbine=turbine, label=label)
         if len(added) != 1:
             raise ValueError('无法分割当前视图')
         if 'FINISHED' not in result:
@@ -549,7 +563,7 @@ class WFRL_OT_LiveStreamStart(bpy.types.Operator):
         try:
             start(context, wm.wfrl_live_url, turbine=self.turbine, size=wm.wfrl_live_size)
         except (ValueError, RuntimeError, OSError) as exc:
-            self.report({'ERROR'}, str(exc))
+            self.report({'ERROR'}, live_stream.scrub_text(str(exc), wm.wfrl_live_url))
             return {'CANCELLED'}
         return {'FINISHED'}
 

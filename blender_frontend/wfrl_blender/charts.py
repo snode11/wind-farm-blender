@@ -7,6 +7,7 @@ from collections import OrderedDict, deque
 from copy import deepcopy
 from dataclasses import dataclass
 import math
+import sys
 import uuid
 from .history import HistoryWindow, ExportJob
 from .training import STAT_LABELS
@@ -130,21 +131,26 @@ class ChartHistory:
         return tuple(dict.fromkeys(tid for tid, _ in self.series if tid != FARM))
 
 
+def _plottable(point):
+    return point.validity == 'valid' and scalar(point.value) and scalar(point.time)
+
+
 def segments(points):
     """Split gaps, episode/time resets and source/unit changes."""
     result, current, previous = [], [], None
     previous_time = None
     for point in points:
         signature = (point.unit, point.fidelity, point.episode)
-        if (point.value is None or (previous is not None and signature != previous)
+        valid = _plottable(point)
+        if (not valid or (previous is not None and signature != previous)
                 or (previous_time is not None and point.time < previous_time)):
             if current:
                 result.append(current)
             current = []
-        if point.value is not None:
+        if valid:
             current.append((point.time, point.value))
         previous = signature
-        previous_time = point.time
+        previous_time = point.time if valid else None
     if current:
         result.append(current)
     return result
@@ -225,13 +231,18 @@ def record_training(message, *, scene=None):
     if p['stats']:
         history.revision += 1
     for key, record in p['stats'].items():
-        value = record['value'] if record['validity'] == 'valid' and scalar(record['value']) else None
+        validity = record['validity']
+        if (validity == 'valid' and
+                record.get('source_age_seconds', 0) >= record.get('stale_after_seconds', 30)):
+            validity = 'stale'
+        value = record['value'] if validity == 'valid' and scalar(record['value']) else None
         point = Point(p['step'], p['timestamp']['value'], value, record['unit'], record['fidelity'],
-                      record['validity'], deepcopy(record['provenance']))
+                      validity, deepcopy(record['provenance']))
         history.series.setdefault((FARM, key), deque(maxlen=600)).append(point)
 
 
 def record_curve(message, *, scene=None):
+    """Keep missing records and episode boundaries as gaps without changing raw data."""
     history = history_for(scene)
     raw_history_for(scene).ingest(message)
     p = message['payload']
@@ -242,9 +253,13 @@ def record_curve(message, *, scene=None):
         validity = 'stale'
     history.revision += 1
     values = history.series.setdefault((p['turbine_id'] or FARM, p['channel']), deque(maxlen=600))
-    for stamp, value in record['value'] or []:
+    samples = record['value'] or []
+    if not samples and validity != 'valid':
+        samples = [(p['timestamp']['value'], None)]
+    episode = p['episode'] if 'episode' in p else p.get('context', {}).get('episode')
+    for stamp, value in samples:
         values.append(Point(p['step'], stamp, value if validity == 'valid' else None,
-                            record['unit'], record['fidelity'], validity, deepcopy(record['provenance'])))
+                            record['unit'], record['fidelity'], validity, deepcopy(record['provenance']), episode))
 
 
 def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
@@ -298,12 +313,24 @@ _handle = None
 
 
 def axis_ticks(values, count=5):
-    """Readable bounds even for a constant signal or a single timestamp."""
+    """Finite ticks for constants and extreme ranges; no ticks without finite samples."""
+    values = [value for value in values if scalar(value)]
+    if not values:
+        return ()
     low, high = min(values), max(values)
     if low == high:
         pad = max(abs(low) * 1e-6, .5)
-        low, high = low - pad, high + pad
-    return tuple(low + (high - low) * i / (count - 1) for i in range(count))
+        low, high = max(-sys.float_info.max, low - pad), min(sys.float_info.max, high + pad)
+    if math.isfinite((high - low) * (count - 1)):
+        return tuple(low + (high - low) * i / (count - 1) for i in range(count))
+    return tuple(low * (1 - i / (count - 1)) + high * (i / (count - 1)) for i in range(count))
+
+
+def _axis_fraction(value, low, high):
+    span = high - low
+    if math.isfinite(span):
+        return (value - low) / span
+    return (value / 2 - low / 2) / (high / 2 - low / 2)
 
 
 _CACHE_LIMIT = 8
@@ -375,14 +402,14 @@ def _plot_data(channel, selected, scene=None):
         all_ids = tuple(series_id(tid, key) for tid in all_ids for key in GROUPS[channel])
     else:
         series = tuple((tid, history.points(tid, channel)) for tid in ids)
-    available = [point for _, points in series for point in points if point.value is not None]
+    available = [point for _, points in series for point in points if _plottable(point)]
     bounds = None
     if available:
         bounds = (min(p.time for p in available), max(p.time for p in available),
                   min(p.value for p in available), max(p.value for p in available))
     data = _PlotData(
         tuple((tid, tuple(tuple(segment) for segment in segments(points)),
-               '/'.join(sorted({p.fidelity for p in points if p.value is not None})) or 'UNKNOWN')
+               '/'.join(sorted({p.fidelity for p in points if _plottable(p)})) or 'UNKNOWN')
               for tid, points in series),
         all_ids, tuple(sorted({p.unit for p in available})), bounds,
         'unix_seconds' if channel in STAT_LABELS else (history.identity[1] if history.identity else 'simulation_seconds'),
@@ -428,8 +455,8 @@ def _plot_commands(data, scale, panel_width, blf):
     xticks = axis_ticks(data.bounds[:2], 3 if width < 350 * scale else 5)
     yticks = axis_ticks(data.bounds[2:], 4)
     xmin, xmax, ymin, ymax = xticks[0], xticks[-1], yticks[0], yticks[-1]
-    def px(value): return left + (value - xmin) / (xmax - xmin) * width
-    def py(value): return bottom + (value - ymin) / (ymax - ymin) * height
+    def px(value): return left + _axis_fraction(value, xmin, xmax) * width
+    def py(value): return bottom + _axis_fraction(value, ymin, ymax) * height
     for value, text in zip(yticks, tick_labels(yticks)):
         yy = py(value)
         line([(left, yy), (left + width, yy)], (.2,.28,.36,.6))

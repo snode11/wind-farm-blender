@@ -37,7 +37,10 @@ _EXITING = globals().get('_EXITING', False)
 def check_url(url):
     """Return the stripped stream URL or raise ValueError with a user-facing reason."""
     url = (url or '').strip()
-    parts = urlsplit(url)
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        raise ValueError('流地址格式无效') from None
     if parts.scheme.lower() not in SCHEMES:
         raise ValueError('流地址须以 ' + ' / '.join(s + '://' for s in SCHEMES) + ' 开头')
     if not parts.hostname:
@@ -242,7 +245,7 @@ class LiveStream:
         try:
             read(pipe)
         except Exception as exc:
-            self._read_error = f'读取 FFmpeg 管道失败：{exc}'
+            self._read_error = scrub_text(f'读取 FFmpeg 管道失败：{exc}', self.url)
 
     def _run(self):
         options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
@@ -284,7 +287,7 @@ class LiveStream:
                     if self.stopping.wait(_CHECK_S):
                         break
         except Exception as exc:
-            self._read_error = f'无法启动 FFmpeg 管道读取：{exc}'
+            self._read_error = scrub_text(f'无法启动 FFmpeg 管道读取：{exc}', self.url)
         finally:
             self._end(process)
 
