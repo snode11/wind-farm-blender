@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Run installed-extension window checks and their independent reopen check."""
+"""Run installed-extension window checks and their independent reopen check.
+
+Unconfirmed process cleanup fails the check and stops subsequent launches.
+The failure's *.cleanup.json record can be retried through
+scripts.blender.run_regressions.retry_cleanup(path).
+"""
 from __future__ import annotations
 
 import argparse
@@ -10,13 +15,23 @@ import os
 from pathlib import Path
 import runpy
 import shutil
-import signal
 import subprocess
 import sys
 import time
 
 
+if __name__ == '__main__':
+    sys.dont_write_bytecode = True
+
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from wfrl.blender_bridge.formal_process import OwnedProcesses
+from scripts.blender.run_regressions import (
+    ProcessCleanupError, cleanup_pending, cleanup_process, finite_json_float,
+    reject_json_constant, traceback_exceptions,
+)
+
 TEST_ROOT = ROOT / 'blender_frontend/tests/blender'
 VALIDATOR = Path(__file__).with_name('validate_frontend_package.py').resolve()
 write_json = runpy.run_path(str(ROOT / 'blender_frontend/wfrl_blender/atomic_json.py'))['write_json']
@@ -71,9 +86,10 @@ class Profile:
 
 @dataclass(frozen=True)
 class ProcessResult:
-    returncode: int
+    returncode: int | None
     timed_out: bool = False
     interrupted: bool = False
+    error: str | None = None
 
 
 def select_tests(names):
@@ -89,7 +105,8 @@ def select_tests(names):
 
 
 def read_object(path):
-    data = json.loads(path.read_text(encoding='utf-8'))
+    data = json.loads(path.read_text(encoding='utf-8'), parse_constant=reject_json_constant,
+                      parse_float=finite_json_float)
     if not isinstance(data, dict):
         raise ValueError(f'Expected a JSON object in {path}')
     return data
@@ -163,43 +180,32 @@ def isolated_environment(scratch, inherited=None):
     return env
 
 
-def stop_process(process, *, grace=5.):
-    """Stop the child, including its POSIX session after the leader exits."""
-    if os.name == 'nt':
-        process.terminate()
-        try:
-            process.wait(timeout=grace)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=grace)
-        return
-    try:
-        os.killpg(process.pid, signal.SIGTERM)
-        deadline = time.monotonic() + grace
-        while time.monotonic() < deadline:
-            process.poll()
-            os.killpg(process.pid, 0)
-            time.sleep(.05)
-        os.killpg(process.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
-    process.wait(timeout=grace)
-
-
 def run_process(command, env, log_path, timeout_s):
-    process_options = ({'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP}
-                       if os.name == 'nt' else {'start_new_session': True})
+    owner = OwnedProcesses(env_key='WFRL_INSTALLED_CHECK_RUN_TOKEN')
+    process = None
+    timed_out, interrupted, error = False, False, None
     with log_path.open('xb') as log:
-        process = subprocess.Popen(command, cwd=log_path.parent, env=env, stdout=log,
-                                   stderr=subprocess.STDOUT, **process_options)
         try:
-            return ProcessResult(process.wait(timeout=timeout_s))
+            process = owner.start(command, cwd=log_path.parent, env=env, stdout=log,
+                                  stderr=subprocess.STDOUT)
+            process.wait(timeout=timeout_s)
+            if owner.alive():
+                error = 'Installed check left live descendants after its launcher exited'
         except subprocess.TimeoutExpired:
-            stop_process(process)
-            return ProcessResult(process.returncode, timed_out=True)
+            timed_out = True
         except KeyboardInterrupt:
-            stop_process(process)
-            return ProcessResult(process.returncode, interrupted=True)
+            interrupted = True
+        except Exception as exc:
+            error = f'{type(exc).__name__}: {exc}'
+        finally:
+            process = process if process is not None else owner.process
+            if process is not None:
+                try:
+                    cleanup_process(process, owner, log_path.with_suffix('.cleanup.json'))
+                except ProcessCleanupError as exc:
+                    error = '; '.join(part for part in (error, str(exc)) if part)
+    return ProcessResult(process.returncode if process is not None else None,
+                         timed_out=timed_out, interrupted=interrupted, error=error)
 
 
 def has_marker(log, marker):
@@ -208,12 +214,15 @@ def has_marker(log, marker):
 
 def setup_command(command, env, log, marker=None, *, timeout_s=240):
     process = run_process(command, env, log, timeout_s)
+    detail = f'; {process.error}' if process.error else ''
     if process.interrupted:
-        raise KeyboardInterrupt
+        raise KeyboardInterrupt('Installation interrupted by caller' + detail)
     if process.timed_out:
-        raise RuntimeError(f'Installation step exceeded {timeout_s}s. See {log}')
-    if process.returncode != 0 or (marker and not has_marker(log.read_text(encoding='utf-8', errors='replace'), marker)):
-        raise RuntimeError(f'Installation step failed (exit {process.returncode}). See {log}')
+        raise RuntimeError(f'Installation step exceeded {timeout_s}s{detail}. See {log}')
+    text = log.read_text(encoding='utf-8', errors='replace')
+    if (process.returncode != 0 or process.error or traceback_exceptions(text)
+            or (marker and not has_marker(text, marker))):
+        raise RuntimeError(f'Installation step failed (exit {process.returncode}){detail}. See {log}')
 
 
 def prepare_installation(blender, output, archive=None):
@@ -274,6 +283,10 @@ def prepare_case(check, blender, profile, case, prerequisite):
 
 def evaluate(check, process, report, log):
     reasons = []
+    if process.error:
+        reasons.append(process.error)
+    if exceptions := traceback_exceptions(log):
+        reasons.append(f'Python exception diagnostics: {exceptions}')
     if process.timed_out:
         reasons.append(f'Process exceeded its {check.timeout_s}s timeout')
     if process.interrupted:
@@ -329,7 +342,7 @@ def run_case(check, blender, profile, case, prerequisite):
 
 def run_checks(selected, blender, profile, output):
     results = {}
-    interrupted = False
+    stopped = None
     for check in selected:
         case = output / Path(check.script).stem
         case.mkdir()
@@ -337,8 +350,8 @@ def run_checks(selected, blender, profile, output):
         prerequisite = results.get(check.depends_on)
         if profile is None:
             reason = 'Installation setup did not pass'
-        elif interrupted:
-            reason = 'Batch interrupted'
+        elif stopped:
+            reason = stopped
         elif check.depends_on and (not prerequisite or prerequisite['status'] != 'PASS'):
             previous = prerequisite['status'] if prerequisite else 'not selected'
             reason = f'Requires PASS from {check.depends_on} ({previous})'
@@ -354,7 +367,10 @@ def run_checks(selected, blender, profile, output):
                 log = case / 'blender.log'
                 tail = log.read_text(encoding='utf-8', errors='replace').splitlines()[-40:] if log.is_file() else []
                 record.update(status='FAIL', reasons=[str(exc)], log_tail=tail)
-            interrupted = record.get('interrupted', False)
+            if cleanup_pending(output):
+                stopped = 'Batch stopped after unconfirmed process cleanup'
+            elif record.get('interrupted', False):
+                stopped = 'Batch interrupted'
         if not (case / 'launch.json').exists():
             write_json(case / 'launch.json', dict(record, command=None))
         results[check.script] = record

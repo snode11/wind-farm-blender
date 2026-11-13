@@ -346,7 +346,9 @@ def test_package_validator_decodes_utf8_with_replacement(tmp_path, monkeypatch):
 
 
 def test_regression_bootstrap_writes_utf8():
-    assert "encoding='utf-8'" in runner.BOOTSTRAP
+    # The bootstrap publishes through atomic_json, whose writer fixes UTF-8.
+    assert "wfrl_blender/atomic_json.py'))['write_json']" in runner.BOOTSTRAP
+    assert "encoding='utf-8'" in (Path(__file__).resolve().parents[1] / 'wfrl_blender/atomic_json.py').read_text(encoding='utf-8')
     compile(runner.BOOTSTRAP, 'bootstrap.py', 'exec')
 
 
