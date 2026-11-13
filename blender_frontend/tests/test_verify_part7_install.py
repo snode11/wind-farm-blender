@@ -66,7 +66,10 @@ def stub_install(monkeypatch, evidence_dir, *, produce_output=True):
             else:
                 assert Path(command[-1]) == cwd / "build" / "wfrl_blender-1.2.3.zip"
                 assert Path(command[-1]).is_file()
-        return SimpleNamespace(returncode=0, stdout="Blender fixture\n")
+        content = "Blender fixture\n"
+        if "--inside" in command and produce_output:
+            content += "WFRL_PART7_INSTALLED_SMOKE=PASS\n"
+        return SimpleNamespace(returncode=0, stdout=content)
 
     monkeypatch.setitem(sys.modules, "build_extension", SimpleNamespace(build=fake_build))
     monkeypatch.setattr(smoke.subprocess, "run", fake_run)
