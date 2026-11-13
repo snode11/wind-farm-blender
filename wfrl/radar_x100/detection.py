@@ -574,9 +574,10 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
     total_power = np.bincount(inverse, weights=power, minlength=cells)
     total_rcs = np.bincount(inverse, weights=rcs, minlength=cells)
     contributors = np.bincount(inverse, minlength=cells)
-    centroid = np.column_stack([np.bincount(inverse, weights=power * polar[:, i], minlength=cells)
-                                / total_power for i in range(3)])
-    speed = np.bincount(inverse, weights=power * velocity, minlength=cells) / total_power
+    weights = power / total_power[inverse]
+    centroid = np.column_stack([np.bincount(inverse, weights=weights * polar[:, i], minlength=cells)
+                                for i in range(3)])
+    speed = np.bincount(inverse, weights=weights * velocity, minlength=cells)
     target_rng, dropout_rng, false_rng, error_rng = [np.random.Generator(np.random.PCG64(s))
         for s in np.random.SeedSequence([seed, template.sequence]).spawn(4)]
     noise = config.detector_noise_power_w
