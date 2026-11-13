@@ -20,6 +20,7 @@ from .blade_recon_data import ReconSequence,MODEL_SHA256
 
 SESSIONS={}
 _PENDING_IMPORTS={}
+_RUNNING=False
 
 
 def active(scene):
@@ -199,7 +200,8 @@ def load_surface(context,surface_path):
         hub=sequence.rotor.hub
         radius=sequence.rotor.cfg.tip_radius_m
         scene.camera=_camera(scene,prefix+'.Overview',hub+np.array([radius*4,-radius*2,radius*.25]),hub,register=resources.register)
-        SESSIONS[scene.as_pointer()]=dict(sequence=sequence,blades=blades,pending=True,index=None)
+        SESSIONS[scene.as_pointer()]=dict(sequence=sequence,blades=blades,pending=True,index=None,
+            scene_uid=getattr(scene, 'session_uid', scene.as_pointer()))
         if context.window:
             context.window.scene=scene
         apply(scene)
@@ -214,19 +216,23 @@ def load_surface(context,surface_path):
                     space.overlay.show_axis_x=space.overlay.show_axis_y=False
         return scene
     except Exception as error:
-        if context.window and context.window.scene==scene:
-            context.window.scene=previous
-        SESSIONS.pop(scene.as_pointer(),None)
-        scene.camera=None
-        scene.world=None
-        for key in list(scene.keys()):
-            if key.startswith('surface_') or key == 'wfrl_scene_kind': scene.pop(key,None)
-        errors=resources.rollback()
-        if errors:
-            _PENDING_IMPORTS[scene.as_pointer()]=resources
-            error.add_note('Surface resource cleanup unconfirmed; next load retries: '+str(errors[0]))
-        else:
-            bpy.data.scenes.remove(scene)
+        key = scene.as_pointer()
+        _PENDING_IMPORTS[key] = resources
+        SESSIONS.pop(key, None)
+        try:
+            if context.window and context.window.scene == scene:
+                context.window.scene = previous
+        except Exception as exc:
+            error.add_note('Surface scene restoration failed: ' + str(exc))
+        try:
+            scene.camera = None
+            scene.world = None
+            for name in list(scene.keys()):
+                if name.startswith('surface_') or name == 'wfrl_scene_kind':
+                    scene.pop(name, None)
+            _retry_pending()
+        except Exception as exc:
+            error.add_note('Surface resource cleanup unconfirmed; next load retries: ' + str(exc))
         raise
 
 
@@ -235,18 +241,31 @@ def restore(scene):
     recon=_embedded(scene,'recon')
     if metadata['model_sha256']!=MODEL_SHA256 or scene.get('surface_model_sha256')!=MODEL_SHA256:
         raise ValueError('saved surface model identity mismatch')
+    if metadata['recon_sha256'] != scene.get('surface_recon_sha256'):
+        raise ValueError('saved surface reconstruction identity mismatch')
     sequence=ReconSequence.from_data(recon,truth_data=None,cameras_data=None,
         source_label='Saved captured RGB appearance; REVIEW_ONLY',source_sha256=metadata['recon_sha256'])
     blades=sorted((o for o in scene.objects if o.get('surface_role')=='estimate'),key=lambda o:o['surface_blade_id'])
-    if len(blades)!=3 or any(len(o.data.vertices)!=sequence.rotor.cfg.n_sections*sequence.rotor.cfg.n_ring for o in blades):
+    if ([o.get('surface_blade_id') for o in blades] != [0, 1, 2]
+            or any(type(o.get('surface_blade_id')) is not int for o in blades)
+            or any(len(o.data.vertices)!=sequence.rotor.cfg.n_sections*sequence.rotor.cfg.n_ring for o in blades)):
         raise ValueError('saved surface mesh dimensions mismatch')
-    for obj in blades:
+    textures = metadata.get('textures')
+    shape = metadata.get('atlas_shape')
+    if not isinstance(textures, list) or len(textures) != 3 or not isinstance(shape, list) or len(shape) != 2:
+        raise ValueError('saved captured RGB atlas metadata is incomplete')
+    for blade, obj in enumerate(blades):
         if 'template_material_q' not in obj.data.uv_layers:
             raise ValueError('saved fixed UV binding missing')
         texture=obj.data.materials[0].node_tree.nodes.get('Image Texture')
         if texture is None or texture.image is None or texture.image.packed_file is None:
             raise ValueError('saved captured RGB atlas is not packed')
-    SESSIONS[scene.as_pointer()]=dict(sequence=sequence,blades=blades,pending=True,index=None)
+        if tuple(texture.image.size) != tuple(reversed(shape)):
+            raise ValueError('saved captured RGB atlas dimensions mismatch')
+        if hashlib.sha256(texture.image.packed_file.data).hexdigest() != textures[blade].get('sha256'):
+            raise ValueError('saved captured RGB atlas hash mismatch')
+    SESSIONS[scene.as_pointer()]=dict(sequence=sequence,blades=blades,pending=True,index=None,
+        scene_uid=getattr(scene, 'session_uid', scene.as_pointer()))
     scene['surface_error']=''
 
 
@@ -278,20 +297,36 @@ def _frame(scene,*_):
 
 
 @persistent
+def _invalidate(_):
+    SESSIONS.clear()
+
+
+@persistent
 def _loaded(_):
     SESSIONS.clear()
     _retry_pending()
     for scene in bpy.data.scenes:
         if active(scene):
             scene['surface_error']='restoring captured RGB appearance'
+            scene.pop('surface_restore_failed', None)
 
 
 def _tick():
-    for scene in tuple(bpy.data.scenes):
+    scenes = tuple(bpy.data.scenes)
+    live = {scene.as_pointer() for scene in scenes if active(scene)}
+    for key in set(SESSIONS) - live:
+        SESSIONS.pop(key, None)
+    if not _RUNNING:
+        return None
+    for scene in scenes:
         if not active(scene) or scene.get('surface_restore_failed'):
             continue
         try:
             value=SESSIONS.get(scene.as_pointer())
+            uid = getattr(scene, 'session_uid', scene.as_pointer())
+            if value is not None and value.get('scene_uid', uid) != uid:
+                SESSIONS.pop(scene.as_pointer(), None)
+                value = None
             if value is None:
                 restore(scene)
                 value=SESSIONS[scene.as_pointer()]
@@ -308,18 +343,27 @@ def _tick():
     return .02
 
 
+def _callbacks():
+    handlers = bpy.app.handlers
+    return ((handlers.frame_change_post, _frame), (handlers.load_pre, _invalidate),
+            (handlers.undo_pre, _invalidate), (handlers.redo_pre, _invalidate),
+            (handlers.load_post, _loaded), (handlers.undo_post, _loaded),
+            (handlers.redo_post, _loaded))
+
+
 def register():
-    for handlers,callback in ((bpy.app.handlers.frame_change_post,_frame),(bpy.app.handlers.load_post,_loaded)):
-        if callback not in handlers:
-            handlers.append(callback)
-    if not bpy.app.timers.is_registered(_tick):
-        bpy.app.timers.register(_tick,first_interval=.02,persistent=True)
+    from .split_reconstruction_lifecycle import _register_callbacks
+    global _RUNNING
+    with _register_callbacks(_callbacks(), _tick):
+        pass
+    _RUNNING = True
 
 
 def unregister():
-    if bpy.app.timers.is_registered(_tick):
-        bpy.app.timers.unregister(_tick)
-    for handlers,callback in ((bpy.app.handlers.frame_change_post,_frame),(bpy.app.handlers.load_post,_loaded)):
-        if callback in handlers:
-            handlers.remove(callback)
+    from .split_reconstruction_lifecycle import _remove_callbacks
+    global _RUNNING
+    _RUNNING = False
+    errors = _remove_callbacks(_callbacks(), _tick)
     SESSIONS.clear()
+    if errors:
+        raise errors[0]

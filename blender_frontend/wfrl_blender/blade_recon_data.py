@@ -298,8 +298,15 @@ class ReconSequence:
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         truth = Path(truth_path).expanduser().resolve() if truth_path is not None else path.with_name('truth.json')
         cameras = Path(cameras_path).expanduser().resolve() if cameras_path is not None else path.with_name('cameras.json')
-        truth_data = _read_json(truth) if truth_path is not None or truth.is_file() else None
-        cameras_data = _read_json(cameras) if cameras_path is not None or cameras.is_file() else None
+        companions = []
+        for label, companion, explicit in (('truth', truth, truth_path), ('cameras', cameras, cameras_path)):
+            value = None
+            if explicit is not None or companion.is_file():
+                value = _read_json(companion)
+                if not isinstance(value, dict):
+                    raise ValueError(f'{label} JSON {companion} must be an object')
+            companions.append(value)
+        truth_data, cameras_data = companions
         manifest_path = path.with_name('manifest.json')
         source_label = EXTERNAL_SOURCE_LABEL
         manifest = None

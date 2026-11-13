@@ -1,6 +1,49 @@
 """Split comparison jobs, resize debounce, timers and Blender data callbacks."""
 from __future__ import annotations
 
+from contextlib import contextmanager
+
+
+def _remove_callbacks(callbacks, timer=None):
+    """Attempt every release; failed native registrations remain retryable."""
+    import bpy
+    errors = []
+    if timer is not None:
+        try:
+            if bpy.app.timers.is_registered(timer):
+                bpy.app.timers.unregister(timer)
+        except Exception as exc:
+            errors.append(exc)
+    for collection, callback in reversed(tuple(callbacks)):
+        try:
+            if callback in collection:
+                collection.remove(callback)
+        except Exception as exc:
+            errors.append(exc)
+    return errors
+
+
+@contextmanager
+def _register_callbacks(callbacks, timer=None, *, first_interval=.02):
+    """Roll back only registrations acquired by this attempt."""
+    import bpy
+    added = []
+    new_timer = None
+    try:
+        for collection, callback in callbacks:
+            bpy.app.handlers.persistent(callback)
+            if callback not in collection:
+                collection.append(callback)
+                added.append((collection, callback))
+        if timer is not None and not bpy.app.timers.is_registered(timer):
+            new_timer = timer
+            bpy.app.timers.register(timer, first_interval=first_interval, persistent=True)
+        yield
+    except Exception as exc:
+        for error in _remove_callbacks(added, new_timer):
+            exc.add_note('Callback cleanup requires retry: ' + str(error))
+        raise
+
 
 def _remember(window, areas):
     _core._SESSIONS[_core._key(window)] = dict(signature=_core._signature(areas), changed=None,
@@ -32,6 +75,8 @@ def _advance_jobs(now):
     import bpy
     from . import cameras, playback
     for key, job in list(_core._JOBS.items()):
+        if _core._JOBS.get(key) is not job:
+            continue
         scene = job['scene']
         try:
             window = job['window']
@@ -105,6 +150,8 @@ def _advance_jobs(now):
             if job.get('detail'):
                 with bpy.context.temp_override(window=window, area=areas[1], region=_core._region(areas[1])):
                     _core.texture_adapter(scene).focus(bpy.context, areas[1])
+            if _core._JOBS.get(key) is not job:
+                continue
             if job.get('right_navigation') is not None:
                 _core._restore_navigation(areas[1].spaces.active, job['right_navigation'])
             _core._remember(window, areas)
@@ -112,6 +159,8 @@ def _advance_jobs(now):
             _core._redraw_scene(scene)
             del _core._JOBS[key]
         except (ReferenceError, RuntimeError, ValueError, TypeError, AttributeError, StopIteration) as exc:
+            if _core._JOBS.get(key) is not job:
+                continue
             try:
                 _core._set_error(scene, exc)
             except ReferenceError:
@@ -144,6 +193,8 @@ def _tick():
             if state is not None and state.get('failed'):
                 continue
             if state is None:
+                from .split_reconstruction_timing import spec_from_scene
+                spec_from_scene(scene)
                 for name, value in _core._METADATA.items():
                     if name not in scene:
                         scene[name] = value
