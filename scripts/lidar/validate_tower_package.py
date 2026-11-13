@@ -7,6 +7,7 @@ sys.path.insert(0,str(ROOT/'blender_frontend'))
 from wfrl_blender.farm_flex import read_package
 from wfrl_blender.deflection import read_comparison,rigid_frame,compare
 from wfrl_blender.tower_motion import read_tower
+from scripts.lidar._atomic_output import write_text
 
 
 def validate(package,output):
@@ -23,12 +24,14 @@ def validate(package,output):
             tr=transforms[i,0,b-1,-1]
             actual=tr[:,:3]@rest+tr[:,3]
             errors.append(compare(actual,ref,axes,d['simulation'][i,b-1])['error'])
+    if not errors or not np.isfinite(errors).all():
+        raise ValueError('Missing/nonfinite structural deflection errors')
     maximum=np.max(np.abs(errors),axis=0)
     if np.max(maximum)>.0002:raise ValueError('Structural deflection disagreement: '+str(maximum))
     data=json.loads((Path(package)/'data.json').read_text(encoding='utf-8'))
     result=dict(status='PASS',saved_tips=len(errors),max_error_m=maximum.tolist(),
         tower_station_count=len(support['heights']),statistics={tid:p['statistics'] for tid,p in data.items()})
-    Path(output).write_text(json.dumps(result,indent=2)+'\n', encoding='utf-8')
+    write_text(output, json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
 
 

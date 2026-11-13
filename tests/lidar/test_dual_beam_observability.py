@@ -195,8 +195,9 @@ def test_loader_never_accesses_dynamic_archives_or_source_geometry(tmp_path, mon
     original = audit.np.load
     accessed = []
     def guarded(path, *args, **kwargs):
-        accessed.append(Path(path).name)
-        assert Path(path).name == 'reference-surfaces.npz'
+        name = Path(path.name if hasattr(path, 'read') else path).name
+        accessed.append(name)
+        assert name == 'reference-surfaces.npz'
         return original(path, *args, **kwargs)
     monkeypatch.setattr(audit.np, 'load', guarded)
     model, inputs = audit.load_independent_model(source, calibration)

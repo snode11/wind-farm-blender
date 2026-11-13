@@ -5,6 +5,7 @@ import hashlib
 import json
 import numpy as np
 from scripts.experiments.calib_blade_flex import read_fast_out
+from scripts.lidar._atomic_output import write_text
 
 
 def validate(probe,solver_log,output,start=117.,duration=60.,legacy_yaw_radians=False):
@@ -42,7 +43,7 @@ def validate(probe,solver_log,output,start=117.,duration=60.,legacy_yaw_radians=
     report['segment']=dict(start_s=start,end_s=start+duration)
     report['status']='CONTROL_PROBE_COMPLETE' if all(c['passed'] for c in report['physical_checks']) else 'FAILED'
     report.pop('error',None)
-    output.write_text(json.dumps(report,indent=2,allow_nan=False), encoding='utf-8')
+    write_text(output, json.dumps(report,indent=2,allow_nan=False), exclusive=True)
     if report['status']=='FAILED':raise ValueError('Native interval audit failed')
     print(json.dumps(report['physical_checks']),flush=True)
 

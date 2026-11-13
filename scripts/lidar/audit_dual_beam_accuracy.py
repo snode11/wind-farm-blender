@@ -19,6 +19,7 @@ from wfrl.lidar.molas_cl import SPEC
 from wfrl.lidar.moving_tower import horizontal_clearance
 from wfrl.lidar.replay import ReplayReader
 from types import SimpleNamespace
+from scripts.lidar._atomic_output import new_directory
 
 
 def signed_statistics(errors):
@@ -135,7 +136,6 @@ def main():
     parser.add_argument('--output',required=True,type=Path)
     args=parser.parse_args()
     path,overlay=resolve_package(args.package)
-    args.output.mkdir(parents=True,exist_ok=False)
     result=dict(status='RESEARCH_AUDIT_COMPLETE_NOT_ACCURACY_ACCEPTANCE',
         package_manifest_sha256=digest(args.package/'manifest.json'),
         implementation_hashes={name:digest(ROOT/name) for name in
@@ -164,7 +164,8 @@ def main():
         'reason':'A deformation perturbation proportional to s^2(s-s2)(s-s3) preserves the root displacement/slope and both measured locations but changes the tip. Surface-to-axis mapping and curvature require additional validated information.',
         'not_available':['manufacturer full inversion algorithm','unit emitter spacing and calibrated directions','synchronized raw echo timestamps and blade association','independent validation runs and physical measurements'],
         'disallowed_shortcuts':['bias subtraction fitted to this segment','truth tip or terminal transforms fed to estimator','40 Hz interpolation labeled 20 kHz','DP averages labeled simultaneous hits']}
-    (args.output/'audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n', encoding='utf-8')
+    with new_directory(args.output) as output:
+        (output/'audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2,allow_nan=False)+'\n', encoding='utf-8')
     print(args.output/'audit.json')
 
 

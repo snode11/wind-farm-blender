@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from scripts.lidar.run_physics import replace, resolve_executable
+from scripts.lidar._atomic_output import new_directory, write_text
 
 DEFAULT_TEMPLATE = ROOT / 'results/prebend-20260918/C'
 DEFAULT_REFERENCE = ROOT / 'results/prebend-20260918/C-rest'
@@ -41,10 +42,7 @@ def digest(path):
 
 
 def save_json(path, data):
-    path = Path(path)
-    temporary = path.with_name(path.name + '.tmp')
-    temporary.write_text(json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + '\n', encoding='utf-8')
-    temporary.replace(path)
+    write_text(path, json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + '\n')
 
 
 def validate_parameters(wind, duration, fps, dt, rpm, pitch, azimuth, evaluation_start):
@@ -99,44 +97,45 @@ def prepare(output, *, template=DEFAULT_TEMPLATE, reference=DEFAULT_REFERENCE,
     solver_hash = digest(executable)
     source_hashes = {str(p.relative_to(template)): digest(p) for p in baseline_inputs}
     source_hashes.update({f'FarmInputs/{name}': digest(template / 'FarmInputs' / name) for name in names})
-    output.mkdir(parents=True, exist_ok=False)
-    (output / 'FarmInputs').mkdir()
-    for name in names:
-        shutil.copy2(template / 'FarmInputs' / name, output / 'FarmInputs' / name)
-    for source in baseline_inputs:
-        destination = output / source.relative_to(template)
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, destination)
-    farm = output / 'FarmInputs'
-    replace(farm / names[0], dict(TMax=duration, DT=dt, CompElast=2, CompServo=0,
-            CompAero=2, CompInflow=1, Gravity=9.80665, WrVTK=2, VTK_type=1,
-            VTK_fields='False', VTK_fps=fps, DT_Out=1 / fps, TStart=0,
-            OutFileFmt=1, OutFmt='"ES16.8E3"', SumPrint='True',
-            **{f'BDBldFile({b})': '"../5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat"' for b in (1, 2, 3)}))
-    replace(farm / names[1], dict(GenDOF='False', DrTrDOF='False', YawDOF='False',
-            RotSpeed=rpm, Azimuth=azimuth, NacYaw=0, FlapDOF1='False',
-            FlapDOF2='False', EdgeDOF='False', TwFADOF1='True', TwFADOF2='True',
-            TwSSDOF1='True', TwSSDOF2='True', **{f'BlPitch({b})': pitch for b in (1, 2, 3)}))
-    replace(farm / names[2], dict(WindType=1, HWindSpeed=wind, PLExp=0))
-    inputs = input_inventory(output)
-    config.update(duration_s=duration, dt_s=dt, unloaded=False, wind_mps=wind,
-                  fps=fps, rpm=rpm, pitch_deg=pitch, azimuth_deg=azimuth,
-                  inputs={r['path']: r['sha256'] for r in inputs},
-                  scope='Independent full-window single-turbine prescribed-speed numerical validation; no ServoDyn or MAPPO')
-    save_json(output / 'probe-config.json', config)
-    run_config = dict(schema='wfrl.dual-beam-validation-run.v1', status='PREPARED_ONLY',
-            duration_s=duration, fps=fps, dt_s=dt, wind_mps=wind, rpm=rpm,
-            pitch_deg=pitch, azimuth_deg=azimuth,
-            evaluation_window_s=[evaluation_start, duration], reference_path=str(reference),
-            template_path=str(template), executable=str(executable), solver_sha256=solver_hash,
-            template_config_sha256=digest(config_path), template_input_hashes=source_hashes,
-            reference_config_sha256=digest(reference_config), inputs=inputs,
-            controller='Prescribed rotor speed/fixed pitch; CompServo=0; no policy checkpoint',
-            telemetry_boundary='Electrical generator power/torque unavailable because ServoDyn is disabled',
-            archive='Lossless xz preset 6; original byte hashes verified by decompression before plain-file removal',
-            provenance_boundary='Independent numerical run with deterministic steady wind; no random seed, device or field validation')
-    save_json(output / 'run-config.json', run_config)
-    return output
+    final_output = output
+    with new_directory(final_output) as output:
+        (output / 'FarmInputs').mkdir()
+        for name in names:
+            shutil.copy2(template / 'FarmInputs' / name, output / 'FarmInputs' / name)
+        for source in baseline_inputs:
+            destination = output / source.relative_to(template)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+        farm = output / 'FarmInputs'
+        replace(farm / names[0], dict(TMax=duration, DT=dt, CompElast=2, CompServo=0,
+                CompAero=2, CompInflow=1, Gravity=9.80665, WrVTK=2, VTK_type=1,
+                VTK_fields='False', VTK_fps=fps, DT_Out=1 / fps, TStart=0,
+                OutFileFmt=1, OutFmt='"ES16.8E3"', SumPrint='True',
+                **{f'BDBldFile({b})': '"../5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat"' for b in (1, 2, 3)}))
+        replace(farm / names[1], dict(GenDOF='False', DrTrDOF='False', YawDOF='False',
+                RotSpeed=rpm, Azimuth=azimuth, NacYaw=0, FlapDOF1='False',
+                FlapDOF2='False', EdgeDOF='False', TwFADOF1='True', TwFADOF2='True',
+                TwSSDOF1='True', TwSSDOF2='True', **{f'BlPitch({b})': pitch for b in (1, 2, 3)}))
+        replace(farm / names[2], dict(WindType=1, HWindSpeed=wind, PLExp=0))
+        inputs = input_inventory(output)
+        config.update(duration_s=duration, dt_s=dt, unloaded=False, wind_mps=wind,
+                      fps=fps, rpm=rpm, pitch_deg=pitch, azimuth_deg=azimuth,
+                      inputs={r['path']: r['sha256'] for r in inputs},
+                      scope='Independent full-window single-turbine prescribed-speed numerical validation; no ServoDyn or MAPPO')
+        save_json(output / 'probe-config.json', config)
+        run_config = dict(schema='wfrl.dual-beam-validation-run.v1', status='PREPARED_ONLY',
+                duration_s=duration, fps=fps, dt_s=dt, wind_mps=wind, rpm=rpm,
+                pitch_deg=pitch, azimuth_deg=azimuth,
+                evaluation_window_s=[evaluation_start, duration], reference_path=str(reference),
+                template_path=str(template), executable=str(executable), solver_sha256=solver_hash,
+                template_config_sha256=digest(config_path), template_input_hashes=source_hashes,
+                reference_config_sha256=digest(reference_config), inputs=inputs,
+                controller='Prescribed rotor speed/fixed pitch; CompServo=0; no policy checkpoint',
+                telemetry_boundary='Electrical generator power/torque unavailable because ServoDyn is disabled',
+                archive='Lossless xz preset 6; original byte hashes verified by decompression before plain-file removal',
+                provenance_boundary='Independent numerical run with deterministic steady wind; no random seed, device or field validation')
+        save_json(output / 'run-config.json', run_config)
+    return final_output
 
 
 class SurfaceArchiver:
@@ -193,6 +192,7 @@ class SurfaceArchiver:
             if self.previous.get(path) == signature:
                 ready.append((path, signature))
         completed = []
+        previous_surfaces = list(self.surfaces)
         try:
             # liblzma releases the GIL; each worker owns one temporary file.
             # Inventory and original-file removal remain on the main thread.
@@ -214,19 +214,27 @@ class SurfaceArchiver:
                 if first_error is not None:
                     raise first_error
         finally:
-            if completed:
-                # Persist one batch before removing any verified original.
-                self.surfaces.sort(key=lambda row: row['path'])
-                self.write_inventory()
-                for path in completed:
-                    path.unlink()
-                    current.pop(path, None)
-            # Interrupted/failed worker results retain their original VTP.
-            for path, _ in ready:
-                temporary = path.with_name(path.name + '.xz.tmp')
-                if temporary.exists():
-                    temporary.unlink()
-            self.previous = current
+            try:
+                if completed:
+                    # Persist one batch before removing any verified original.
+                    self.surfaces.sort(key=lambda row: row['path'])
+                    try:
+                        self.write_inventory()
+                    except BaseException:
+                        self.surfaces = previous_surfaces
+                        for path in completed:
+                            path.with_name(path.name + '.xz').unlink()
+                        raise
+                    for path in completed:
+                        path.unlink()
+                        current.pop(path, None)
+            finally:
+                # Interrupted/failed worker results retain their original VTP.
+                for path, _ in ready:
+                    temporary = path.with_name(path.name + '.xz.tmp')
+                    if temporary.exists():
+                        temporary.unlink()
+                self.previous = current
 
     def write_inventory(self, **extra):
         save_json(self.run / 'compressed-surfaces.json', dict(

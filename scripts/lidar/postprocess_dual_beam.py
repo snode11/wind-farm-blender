@@ -13,6 +13,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from scripts.lidar._atomic_output import new_directory, write_text
 from wfrl.camera_video.data import SourceGeometry, blade_root_frame
 from wfrl.lidar.dual_beam import METHOD_VERSIONS, validate_calibration, validate_inner_origins, observe, reconstruct, s1_state
 from wfrl.lidar.dual_beam_replay import SCHEMA, digest, precompute, error_statistics
@@ -20,7 +21,7 @@ from wfrl.lidar.moving_tower import horizontal_clearance, tip_surface_clearance
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n', encoding='utf-8')
+    write_text(path, json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n')
 
 
 def installation(output, config):
@@ -207,59 +208,60 @@ def main():
     config.update(reconstruction_method=method, algorithm_version=METHOD_VERSIONS[method])
     validate_calibration(config)
     output=args.output.resolve()
-    output.mkdir(parents=True,exist_ok=False)
-    write_json(output/'calibration.json',config)
-    audit=installation(output,config)
-    results={}
-    source_manifest=json.loads((args.source/'manifest.json').read_text(encoding='utf-8'))
-    for tid in source_manifest['turbine_ids']:
-        source=SourceGeometry(args.source,tid)
-        results[tid]=process(source,config)
-        write_json(output/f'{tid}-summary.json',results[tid]['summary'])
-    write_json(output/'results.json',results)
-    import scipy
-    from scipy.spatial import _qhull
-    manifest=dict(schema=SCHEMA,status='REVIEW_ONLY',algorithm_version=METHOD_VERSIONS[method],
-                  reconstruction_method=method,
-                  performance_status='PENDING_ACCEPTANCE',sample_kind='source',source_fps=source.manifest['source_fps'],
-                  source_package=os.path.relpath(source.path,output),source_hashes=source.source_hashes,
-                  segment=source.manifest['segment'],turbine_ids=source.manifest['turbine_ids'],
-                  reference_definition='independent unloaded structural tip transported by saved terminal section transform',
-                  clearance_definition='signed horizontal distance to known same-global-height moving tower section',
-                  surface_definition='separate terminal contour surface minimum; not whole-blade clearance',
-                  calibration_status=config['status'],
-                  calibration_sha256=digest(output/'calibration.json'),
-                  runtime=dict(python=platform.python_version(),numpy=np.__version__,scipy=scipy.__version__,
-                      numpy_core_sha256=digest(np.core._multiarray_umath.__file__),
-                      scipy_qhull_sha256=digest(_qhull.__file__)),
-                  implementation_hashes={name:digest(ROOT/name) for name in
-                      ('wfrl/lidar/dual_beam.py','wfrl/lidar/dual_beam_replay.py','scripts/lidar/postprocess_dual_beam.py',
-                       'wfrl/lidar/physics.py','wfrl/lidar/moving_tower.py','wfrl/camera_video/data.py',
-                       'wfrl/lidar/replay.py','wfrl/lidar/evidence.py','wfrl/__init__.py','wfrl/paths.py',
-                       'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json')},
-                  files={p.name:digest(p) for p in output.iterdir() if p.is_file()})
-    write_json(output/'manifest.json',manifest)
-    lines=[f"# 双束与 S1 独立报警：{source.manifest['source_fps']:g} Hz 保存网格结果",'',
-           f'方法：`{method}`；算法版本：`{METHOD_VERSIONS[method]}`；性能状态：`PENDING_ACCEPTANCE`。', '',
-           f"安装状态：`{config['status']}`。S1 名义径向塔壁间距 {audit['nominal_gap_m']:.3f} m（包含侧向偏距）；4.5 m 为参考目标，不强制平移读数。",'',
-           f"结果来自源包 {source.manifest['segment']['start_s']:g}–{source.manifest['segment']['end_s']:g} s 全部保存时刻，未重跑 FAST.Farm。采用仿真叶片编号、机舱姿态和已知变形塔筒。",
-           '固定有效长度由预弯参考 [-1,0,63] 的模确定，包含轮毂到叶根距离；不按当前帧调整。',
-           '报警和读数分别保持 1 仿真秒；未知通道不删除报警历史。无双束测量不表示安全。','',
-           '|机组|双束有效/全网格|预期区有效/样本|经过/整次漏测|MAE (m)|S1 事件/命中样本|',
-           '|---|---:|---:|---:|---:|---:|']
-    for tid,data in results.items():
-        s=data['summary'];mae='不适用' if s['mae_m'] is None else f"{s['mae_m']:.4f}"
-        lines.append(f"|{tid}|{s['all_valid_samples']}/{len(data['samples'])}|{s['valid_samples']}/{s['expected_samples']}|{s['passage_count']}/{s['missed_passage_count']}|{mae}|{s['alarm_events']}/{s['raw_alarm_hits']}|")
-    lines += ['', '完整逐束斜距、首交类别、世界坐标、重建和独立评估见 results.json；各叶片、各次经过及 nearest-rank P95 见各机组 summary。',
-              '预期区预先固定为各叶片朝下 ±15°，报警和射线扫描覆盖全部时刻；报告同时保留区外命中。',
-              '整次漏测只统计完整经过；片段起止截断的测量区另标 boundary_truncated，不计为整次漏测。',
-              f"相邻保存样本不证明中间持续命中。事件边界时间不确定性至少受 {1000/source.manifest['source_fps']:g} ms 保存间隔约束，原始窄事件仍可能完全漏存。",
-              '精度、覆盖率和端到端延迟门槛未约定，结论为待性能验收。没有报警的片段仅表示本片段未保存到 S1 有效命中。',
-              ('当前安装位已按仿真源几何选定，实体安装仍待现场核验；不能用插值替代采样验收。'
-               if config['status']=='SIMULATION_SELECTED' else
-               '当前仅诊断标定；先确认安装布局再决定是否加密真实几何输出，不能用插值替代采样验收。')]
-    (output/'report.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
-    print(output,flush=True)
+    destination = output
+    with new_directory(destination) as output:
+        write_json(output/'calibration.json',config)
+        audit=installation(output,config)
+        results={}
+        source_manifest=json.loads((args.source/'manifest.json').read_text(encoding='utf-8'))
+        for tid in source_manifest['turbine_ids']:
+            source=SourceGeometry(args.source,tid)
+            results[tid]=process(source,config)
+            write_json(output/f'{tid}-summary.json',results[tid]['summary'])
+        write_json(output/'results.json',results)
+        import scipy
+        from scipy.spatial import _qhull
+        manifest=dict(schema=SCHEMA,status='REVIEW_ONLY',algorithm_version=METHOD_VERSIONS[method],
+                      reconstruction_method=method,
+                      performance_status='PENDING_ACCEPTANCE',sample_kind='source',source_fps=source.manifest['source_fps'],
+                      source_package=os.path.relpath(source.path,destination),source_hashes=source.source_hashes,
+                      segment=source.manifest['segment'],turbine_ids=source.manifest['turbine_ids'],
+                      reference_definition='independent unloaded structural tip transported by saved terminal section transform',
+                      clearance_definition='signed horizontal distance to known same-global-height moving tower section',
+                      surface_definition='separate terminal contour surface minimum; not whole-blade clearance',
+                      calibration_status=config['status'],
+                      calibration_sha256=digest(output/'calibration.json'),
+                      runtime=dict(python=platform.python_version(),numpy=np.__version__,scipy=scipy.__version__,
+                          numpy_core_sha256=digest(np.core._multiarray_umath.__file__),
+                          scipy_qhull_sha256=digest(_qhull.__file__)),
+                      implementation_hashes={name:digest(ROOT/name) for name in
+                          ('wfrl/lidar/dual_beam.py','wfrl/lidar/dual_beam_replay.py','scripts/lidar/postprocess_dual_beam.py',
+                           'wfrl/lidar/physics.py','wfrl/lidar/moving_tower.py','wfrl/camera_video/data.py',
+                           'wfrl/lidar/replay.py','wfrl/lidar/evidence.py','wfrl/__init__.py','wfrl/paths.py',
+                           'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json')},
+                      files={p.name:digest(p) for p in output.iterdir() if p.is_file()})
+        write_json(output/'manifest.json',manifest)
+        lines=[f"# 双束与 S1 独立报警：{source.manifest['source_fps']:g} Hz 保存网格结果",'',
+               f'方法：`{method}`；算法版本：`{METHOD_VERSIONS[method]}`；性能状态：`PENDING_ACCEPTANCE`。', '',
+               f"安装状态：`{config['status']}`。S1 名义径向塔壁间距 {audit['nominal_gap_m']:.3f} m（包含侧向偏距）；4.5 m 为参考目标，不强制平移读数。",'',
+               f"结果来自源包 {source.manifest['segment']['start_s']:g}–{source.manifest['segment']['end_s']:g} s 全部保存时刻，未重跑 FAST.Farm。采用仿真叶片编号、机舱姿态和已知变形塔筒。",
+               '固定有效长度由预弯参考 [-1,0,63] 的模确定，包含轮毂到叶根距离；不按当前帧调整。',
+               '报警和读数分别保持 1 仿真秒；未知通道不删除报警历史。无双束测量不表示安全。','',
+               '|机组|双束有效/全网格|预期区有效/样本|经过/整次漏测|MAE (m)|S1 事件/命中样本|',
+               '|---|---:|---:|---:|---:|---:|']
+        for tid,data in results.items():
+            s=data['summary'];mae='不适用' if s['mae_m'] is None else f"{s['mae_m']:.4f}"
+            lines.append(f"|{tid}|{s['all_valid_samples']}/{len(data['samples'])}|{s['valid_samples']}/{s['expected_samples']}|{s['passage_count']}/{s['missed_passage_count']}|{mae}|{s['alarm_events']}/{s['raw_alarm_hits']}|")
+        lines += ['', '完整逐束斜距、首交类别、世界坐标、重建和独立评估见 results.json；各叶片、各次经过及 nearest-rank P95 见各机组 summary。',
+                  '预期区预先固定为各叶片朝下 ±15°，报警和射线扫描覆盖全部时刻；报告同时保留区外命中。',
+                  '整次漏测只统计完整经过；片段起止截断的测量区另标 boundary_truncated，不计为整次漏测。',
+                  f"相邻保存样本不证明中间持续命中。事件边界时间不确定性至少受 {1000/source.manifest['source_fps']:g} ms 保存间隔约束，原始窄事件仍可能完全漏存。",
+                  '精度、覆盖率和端到端延迟门槛未约定，结论为待性能验收。没有报警的片段仅表示本片段未保存到 S1 有效命中。',
+                  ('当前安装位已按仿真源几何选定，实体安装仍待现场核验；不能用插值替代采样验收。'
+                   if config['status']=='SIMULATION_SELECTED' else
+                   '当前仅诊断标定；先确认安装布局再决定是否加密真实几何输出，不能用插值替代采样验收。')]
+        (output/'report.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+    print(destination,flush=True)
 
 
 if __name__=='__main__':

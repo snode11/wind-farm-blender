@@ -3,6 +3,7 @@ from pathlib import Path
 import json,sys,math
 import numpy as np
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
+from scripts.lidar._atomic_output import write_text
 from wfrl.lidar.physics import (
     Calibration,
     first_hit,
@@ -61,7 +62,8 @@ def main():
     evidence['sampling'].update(base_run=str(args.spatial),refined_run=str(args.temporal))
     evidence['truth_numerical_error_m']=max(evidence['spatial']['max_truth_difference_m'],evidence['temporal']['max_truth_difference_m'],1e-5)
     evidence['interpretation']='Empirical two-level differences, not a rigorous uncertainty bound. No field accuracy or continuous-time collision claim.'
-    args.output.parent.mkdir(exist_ok=True,parents=True);args.output.write_text(json.dumps(evidence,indent=2,allow_nan=False), encoding='utf-8')
+    args.output.parent.mkdir(exist_ok=True,parents=True)
+    write_text(args.output, json.dumps(evidence,indent=2,allow_nan=False), exclusive=True)
     print(args.output)
 
 if __name__=='__main__':main()

@@ -19,6 +19,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from scripts.lidar._atomic_output import new_directory
 from wfrl.camera_video.data import SourceGeometry, blade_root_frame
 from wfrl.lidar.dual_beam_replay import DualBeamReader, digest, resolve_package
 
@@ -168,11 +169,15 @@ def numerical_reproduction(actual, historical, tolerance=NUMERICAL_TOLERANCE_M):
             for i, (av, hv) in enumerate(zip(a, h)):
                 visit(av, hv, f'{path}[{i}]')
         elif type(h) is float and type(a) in (int, float):
+            if not math.isfinite(a) or not math.isfinite(h):
+                mismatches.append(dict(path=path, reason='nonfinite')); return
             difference = abs(a-h)
+            if not math.isfinite(difference):
+                mismatches.append(dict(path=path, reason='nonfinite_difference')); return
             numeric_differences.append(difference)
             field = path.rsplit('.', 1)[-1].split('[', 1)[0]
             exact_time = field in ('time_s', 'hit_times_s', 'start_s', 'end_s', 'last_hit_s', 'output_time_s', 'expires_at_s')
-            if not math.isfinite(a) or (difference != 0 if exact_time else difference > tolerance):
+            if difference != 0 if exact_time else difference > tolerance:
                 mismatches.append(dict(path=path, reason='numeric', absolute_difference=difference))
         elif type(a) != type(h) or a != h:
             mismatches.append(dict(path=path, reason='exact', actual=a, historical=h))
@@ -425,7 +430,8 @@ def markdown_report(report):
               '|固定 ±15° 窗口|新鲜有效/预期|覆盖|未知|完整经过覆盖|最长缺测网格 / s|',
               '|---|---:|---:|---:|---:|---:|']
     for name, s in report['coverage']['pooled'].items():
-        lines.append(f"|{name}|{s['fresh_valid_samples']}/{s['expected_samples']}|{100*s['fresh_coverage']:.2f}%|{s['unknown_samples']}|{s['covered_complete_passages']}/{s['complete_passages']}|{s['longest_missing_grid_duration_s']:.3f}|")
+        fraction = 'unknown' if s['fresh_coverage'] is None else f"{100*s['fresh_coverage']:.2f}%"
+        lines.append(f"|{name}|{s['fresh_valid_samples']}/{s['expected_samples']}|{fraction}|{s['unknown_samples']}|{s['covered_complete_passages']}/{s['complete_passages']}|{s['longest_missing_grid_duration_s']:.3f}|")
     lines += ['', '|完整经过最低净空误差（独立指标）|经过|MAE / m|P95 / m|最大高估 / m|最小有符号误差 / m|',
               '|---|---:|---:|---:|---:|---:|']
     for name, s in report['passage_minimum_statistics'].items():
@@ -449,15 +455,16 @@ def main(argv=None):
     baseline, candidate = load_verified(args.baseline), load_verified(args.candidate)
     historical = load_verified(args.historical) if args.historical else None
     report = compare_packages(baseline, candidate, historical)
-    output = args.output.resolve(); output.mkdir(parents=True, exist_ok=False)
+    output = args.output.resolve()
     report['baseline_package'] = os.path.relpath(baseline['path'], output)
     report['candidate_package'] = os.path.relpath(candidate['path'], output)
     report['package_path_reference'] = 'comparison output directory'
     report['evidence_tool_hashes'] = {
         'scripts/lidar/compare_dual_beam_methods.py':digest(Path(__file__)),
         'tests/lidar/test_dual_beam_comparison.py':digest(ROOT/'tests/lidar/test_dual_beam_comparison.py')}
-    (output/'comparison.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2)+'\n', encoding='utf-8')
-    (output/'report.md').write_text(markdown_report(report), encoding='utf-8')
+    with new_directory(output) as staged:
+        (staged/'comparison.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2)+'\n', encoding='utf-8')
+        (staged/'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(output)
 
 

@@ -5,6 +5,7 @@ import hashlib
 import json
 import numpy as np
 from scripts.experiments.calib_blade_flex import read_fast_out
+from scripts.lidar._atomic_output import write_text
 
 
 def metrics(a, b):
@@ -91,7 +92,7 @@ def main():
                   scope='OpenFAST integration time and ElastoDyn tower modal integration quadrature only; no global convergence certificate',
                   numerical_screen_passed=all(c['passed'] for c in comparisons.values()) and
                      all(t['tower_rms_nonincreasing'] and t['blade_rms_nonincreasing'] for t in trends))
-    a.output.write_text(json.dumps(result, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+    write_text(a.output, json.dumps(result, indent=2, allow_nan=False)+'\n')
     print(json.dumps({k: v for k, v in result.items() if k != 'comparisons'}, indent=2))
 
 

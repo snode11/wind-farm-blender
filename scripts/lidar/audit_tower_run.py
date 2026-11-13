@@ -5,6 +5,7 @@ import hashlib
 import json
 import numpy as np
 from scripts.experiments.calib_blade_flex import read_fast_out
+from scripts.lidar._atomic_output import write_text
 
 
 def audit(probe, log, output):
@@ -39,7 +40,7 @@ def audit(probe, log, output):
                             for f in farm.iterdir() if f.is_file() and f.suffix in ('.fst','.fstf','.dat','.bts')}
     report.update(original_probe_sha256=hashlib.sha256(probe.read_bytes()).hexdigest(),
         solver_log_sha256=hashlib.sha256(log.read_bytes()).hexdigest(),segment=dict(start_s=117.,end_s=177.))
-    output.write_text(json.dumps(report,indent=2)+'\n', encoding='utf-8')
+    write_text(output, json.dumps(report,indent=2)+'\n')
     print(json.dumps(report['tower_checks'],indent=2))
 
 

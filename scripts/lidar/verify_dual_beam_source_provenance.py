@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
 import sys
@@ -19,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from wfrl.camera_video.data import blade_root_frame
 from wfrl.lidar.physics import read_surface
+from scripts.lidar._atomic_output import new_directory
 
 # Existing exporter interface checks, not newly chosen performance thresholds.
 POSE_TOLERANCE = .002
@@ -38,7 +40,8 @@ def digest(path):
 
 def read_output(path):
     """Read every numeric row and preserve the original channel unit declarations."""
-    lines = Path(path).read_text(encoding='latin-1').splitlines()
+    raw = path.read() if hasattr(path, 'read') else Path(path).read_bytes()
+    lines = raw.decode('latin-1').splitlines()
     header = next((i for i, line in enumerate(lines)
                    if line.split() and line.split()[0] == 'Time'), None)
     if header is None or header + 1 >= len(lines):
@@ -64,7 +67,8 @@ def read_output(path):
 
 
 def input_value(path, key):
-    for line in Path(path).read_text(encoding='utf-8').splitlines():
+    raw = path.read() if hasattr(path, 'read') else Path(path).read_bytes()
+    for line in raw.decode('utf-8').splitlines():
         words = line.split()
         if len(words) > 1 and words[1] == key:
             return words[0].strip('"')
@@ -169,6 +173,7 @@ def verify_numeric_turbine(tid, columns, units, geometry, nacelles, payload, tel
 def verify_provenance(source, repo_root=ROOT, provenance_root=None):
     source, repo_root = Path(source).resolve(), Path(repo_root).resolve()
     provenance_root = Path(provenance_root).resolve() if provenance_root is not None else None
+    verified_bytes = {}
     report = dict(schema='wfrl.dual-beam-source-provenance.v1', source_package=str(source),
                   scope='same-run raw-file provenance and exporter interface consistency; no independent performance acceptance',
                   failures=[], evidence_gaps=[], hash_checks=[], numeric_checks={}, reference_geometry=[],
@@ -205,10 +210,14 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
     def auxiliary(kind, original):
         resolved = resolve_raw(original)
         if resolved.is_file():
-            retain(kind, original, resolved, digest(resolved))
+            key = Path(original).absolute()
+            if key not in verified_bytes:
+                verified_bytes[key] = resolved.read_bytes()
+            retain(kind, original, resolved, hashlib.sha256(verified_bytes[key]).hexdigest())
         return resolved
 
     def check_hash(kind, path, expected):
+        cache_key = Path(path).absolute()
         original = Path(path).resolve()
         path = original if kind == 'source_package' else resolve_raw(original)
         record = dict(kind=kind, path=str(path), recorded_path=str(original), resolved_path=str(path),
@@ -217,32 +226,43 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
             record['status'] = 'MISSING'
             gap(kind, 'Original file is not retained; this check is unavailable.', path=str(path))
         else:
-            actual = digest(path)
+            raw = path.read_bytes() if kind in ('source_package', 'originating_output', 'originating_FAST_input') else None
+            actual = hashlib.sha256(raw).hexdigest() if raw is not None else digest(path)
             record.update(actual_sha256=actual, size_bytes=path.stat().st_size,
                           status='MATCH' if actual == expected else 'MISMATCH')
             if actual != expected:
                 report['failures'].append(f'Hash mismatch: {kind}: {path}')
-            elif kind != 'source_package':
-                retain(kind, original, path, actual)
+            else:
+                if raw is not None:
+                    verified_bytes[cache_key] = raw
+                if kind != 'source_package':
+                    retain(kind, original, path, actual)
         report['hash_checks'].append(record)
         return record['status'] == 'MATCH'
 
     try:
-        manifest = json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
+        manifest_bytes = (source / 'manifest.json').read_bytes()
+        manifest = json.loads(manifest_bytes)
         if (manifest.get('schema') != 'wfrl.farm-flex-review.v3'
                 or manifest.get('status') != 'REVIEW_ONLY' or manifest.get('structural_module') != 'BeamDyn'
                 or not manifest.get('includes_rigid_motion') or manifest.get('tower_model') != 'elastodyn-flexible'):
             raise ValueError('Expected a v3 BeamDyn source including rigid and flexible motion')
-        report['source_manifest_sha256'] = digest(source / 'manifest.json')
+        report['source_manifest_sha256'] = hashlib.sha256(manifest_bytes).hexdigest()
+        required = {'source-run.json', 'telemetry.json', 'deflection-t1.json',
+                    'blade-reference.json', 'source-surfaces.json', 'reference-surfaces.npz',
+                    'geometry.npz', 'tower-motion.npz', 'data.json'}
+        missing = required - manifest['files'].keys()
+        if missing:
+            raise ValueError('Source inventory misses consumed files: ' + ', '.join(sorted(missing)))
         for name, expected in manifest['files'].items():
             if Path(name).name != name:
                 raise ValueError('Package inventory must use package-local names')
             if not check_hash('source_package', source / name, expected):
                 raise ValueError('Source package integrity is not intact: ' + name)
-        run = json.loads((source / 'source-run.json').read_text(encoding='utf-8'))
-        telemetry = json.loads((source / 'telemetry.json').read_text(encoding='utf-8'))
-        deflection = json.loads((source / 'deflection-t1.json').read_text(encoding='utf-8'))
-        reference = json.loads((source / 'blade-reference.json').read_text(encoding='utf-8'))
+        run = json.loads(verified_bytes[source / 'source-run.json'])
+        telemetry = json.loads(verified_bytes[source / 'telemetry.json'])
+        deflection = json.loads(verified_bytes[source / 'deflection-t1.json'])
+        reference = json.loads(verified_bytes[source / 'blade-reference.json'])
         case = Path(run['case_dir'])
         case = case.resolve() if case.is_absolute() else (repo_root / case).resolve()
         farm = case / 'FarmInputs'
@@ -262,7 +282,7 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
             check_hash('originating_BeamDyn_input', case / '5MW_Baseline' / name, expected)
         wind_input = auxiliary('wind_path_input', farm / 'InflowWind.dat')
         if wind_input.is_file():
-            check_hash('originating_wind', (farm / input_value(wind_input, 'FileName_BTS')).resolve(), run['wind_sha256'])
+            check_hash('originating_wind', (farm / input_value(BytesIO(verified_bytes[farm / 'InflowWind.dat']), 'FileName_BTS')).resolve(), run['wind_sha256'])
         else:
             gap('originating_wind', 'InflowWind input is missing; original wind path cannot be resolved.')
         for tid in manifest['turbine_ids']:
@@ -271,13 +291,14 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
             if not fst.is_file():
                 gap('originating_controller', 'FAST input is missing; controller path cannot be resolved.', turbine_id=tid)
                 continue
-            recorded_servo = (farm / input_value(fst, 'ServoFile')).resolve()
+            auxiliary('controller_path_input', recorded_fst)
+            recorded_servo = (farm / input_value(BytesIO(verified_bytes[recorded_fst]), 'ServoFile')).resolve()
             servo = auxiliary('controller_path_input', recorded_servo)
             if not servo.is_file():
                 gap('originating_controller', 'ServoDyn input is missing; controller path cannot be resolved.', turbine_id=tid)
                 continue
-            check_hash('originating_controller', (recorded_servo.parent / input_value(servo, 'DLL_FileName')).resolve(), run['controller_sha256'])
-        surfaces = json.loads((source / 'source-surfaces.json').read_text(encoding='utf-8'))
+            check_hash('originating_controller', (recorded_servo.parent / input_value(BytesIO(verified_bytes[recorded_servo]), 'DLL_FileName')).resolve(), run['controller_sha256'])
+        surfaces = json.loads(verified_bytes[source / 'source-surfaces.json'])
         counts, missing_examples, mismatches = Counter(), [], []
         for name, expected in surfaces.items():
             path = Path(name)
@@ -301,7 +322,7 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
         if sum(value for key, value in counts.items() if key.endswith('_missing')):
             gap('raw_source_surfaces', 'Missing loaded/reference VTP prevents full raw-surface reconstruction verification.',
                 counts={key: value for key, value in counts.items() if key.endswith('_missing')})
-        with np.load(source / 'reference-surfaces.npz', allow_pickle=False) as archive:
+        with np.load(BytesIO(verified_bytes[source / 'reference-surfaces.npz']), allow_pickle=False) as archive:
             frozen_reference = {key: archive[key] for key in archive.files}
         for name, points, triangles in [(f'Blade{blade}', frozen_reference['blades'][blade - 1], frozen_reference['triangles'])
                                         for blade in (1, 2, 3)] + [('Tower', frozen_reference['tower'], frozen_reference['tower_triangles'])]:
@@ -311,25 +332,26 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
             if path is None:
                 gap('reference_geometry', 'Independent rest VTP is missing.', surface=name)
                 continue
-            actual_points, actual_triangles = read_surface(path)
+            raw_reference = path.read_bytes()
+            actual_points, actual_triangles = read_surface(BytesIO(raw_reference))
             # NPZ contains these exact original double-precision reference points.
             residual = difference(actual_points, points, 0., 'independent rest ' + name)
             if not np.array_equal(actual_triangles, triangles):
                 raise ValueError('Independent rest topology differs: ' + name)
-            checksum = digest(path)
+            checksum = hashlib.sha256(raw_reference).hexdigest()
             original = reference_folder / path.name
             retain('reference_geometry', original, path, checksum)
             report['reference_geometry'].append(dict(surface=name, path=str(path), recorded_path=str(original),
                                                       resolved_path=str(path), sha256=checksum,
                                                       points=len(actual_points), max_coordinate_difference_m=residual,
                                                       topology_identical=True))
-        with np.load(source / 'geometry.npz', allow_pickle=False) as archive:
+        with np.load(BytesIO(verified_bytes[source / 'geometry.npz']), allow_pickle=False) as archive:
             geometry = {key: archive[key] for key in archive.files}
-        with np.load(source / 'tower-motion.npz', allow_pickle=False) as archive:
+        with np.load(BytesIO(verified_bytes[source / 'tower-motion.npz']), allow_pickle=False) as archive:
             nacelles, tower_times = archive['nacelle'], archive['times']
         difference(tower_times, geometry['times'], TIME_TOLERANCE_S, 'tower timestamps')
         difference(telemetry['times'], geometry['times'], TIME_TOLERANCE_S, 'telemetry timestamps')
-        payload = json.loads((source / 'data.json').read_text(encoding='utf-8'))
+        payload = json.loads(verified_bytes[source / 'data.json'])
         for index, tid in enumerate(manifest['turbine_ids']):
             output = farm / f'Case.{tid}.out'
             expected = telemetry['sources'][tid]['sha256']
@@ -338,7 +360,7 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
             if not check_hash('originating_output', output, expected):
                 continue
             try:
-                columns, units, rows = read_output(resolve_raw(output))
+                columns, units, rows = read_output(BytesIO(verified_bytes[output.absolute()]))
                 check = verify_numeric_turbine(tid, columns, units, geometry, nacelles, payload[tid], telemetry,
                                                deflection['scalars'], np.asarray(reference['tip_local_m'], float),
                                                index, deflection if tid == 'T1' else None)
@@ -353,8 +375,9 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
     report['status'] = ('FAILED_INTEGRITY' if not report['passed'] else
                         'SAME_RUN_VERIFIED_WITH_EVIDENCE_GAPS' if report['evidence_gaps'] else 'SAME_RUN_VERIFIED')
     report['saved_samples_checked'] = sum(check.get('saved_samples_checked', 0) for check in report['numeric_checks'].values())
-    report['max_tip_component_difference_m'] = max((check.get('max_tip_component_difference_m', 0.)
-                                                   for check in report['numeric_checks'].values()), default=None)
+    report['max_tip_component_difference_m'] = max((check['max_tip_component_difference_m']
+                                                   for check in report['numeric_checks'].values()
+                                                   if check.get('passed')), default=None)
     return report
 
 
@@ -390,10 +413,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     report = verify_provenance(args.source, args.repo_root, args.provenance_root)
     output = args.output.resolve()
-    output.mkdir(parents=True, exist_ok=False)
-    report['evidence_tool_sha256'] = digest(Path(__file__))
-    (output / 'provenance.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n', encoding='utf-8')
-    (output / 'report.md').write_text(markdown_report(report), encoding='utf-8')
+    with new_directory(output) as staged:
+        report['evidence_tool_sha256'] = digest(Path(__file__))
+        (staged / 'provenance.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n', encoding='utf-8')
+        (staged / 'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(report['status'], output)
     return 0 if report['passed'] else 1
 
