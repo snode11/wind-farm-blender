@@ -74,6 +74,8 @@ class Trainer:
 
     `episode_steps > 0` 时按训练控制步切分回合，每回合关闭并重建 runtime；
     `episode_steps == 0` 使用单长回合。每回合的 warmup 不计入训练样本。
+    训练与回放均严格确认 runtime 关闭；关闭失败时保留资源并阻止重新启动。
+    检查点仅在当前训练运行完成至少一次优化后保存。
     """
 
     def __init__(self, scene, iters: int = 8, n_steps: int = 64,
@@ -150,6 +152,8 @@ class Trainer:
     def start(self):
         if self.running:
             return
+        if self.runtime is not None:
+            raise RuntimeError('Trainer cleanup unconfirmed; restart blocked')
         self._stop.clear()
         self._thread = threading.Thread(target=self._run, name="wfrl-train",
                                         daemon=True)
@@ -163,6 +167,7 @@ class Trainer:
     def stop(self, timeout: float = 120.0):
         """请求停止并等它排空。幂等。
 
+        工作线程中的回调调用此方法只请求停止，不等待自身退出。
         超时值给得大：`close(purge=True)` 要把 FAST.Farm 在 t=0 领到的迭代预算
         走完，剩几十步就是几十秒。中途 kill 掉换来的是一个卡在 MPI_RECV 的孤儿
         进程，下次起算例时端口还被占着。
@@ -170,7 +175,7 @@ class Trainer:
         self._stop.set()
         self._paused.clear()
         t = self._thread
-        if t is not None and t.is_alive():
+        if t is not None and t.is_alive() and t is not threading.current_thread():
             t.join(timeout)
         if t is None or not t.is_alive():
             self._thread = None
@@ -215,8 +220,7 @@ class Trainer:
         finally:
             if self.runtime is not None:
                 try:
-                    self.runtime.close(purge=True, **({"strict": True}
-                                                     if not (self.demo or self.replay) else {}))
+                    self.runtime.close(purge=True, strict=True)
                 except Exception as e:                   # noqa: BLE001
                     cleanup_error = traceback.format_exc()
                     self.error = (self.error + "\n" + cleanup_error
@@ -669,6 +673,7 @@ class Trainer:
         ret_rms_var, ret_acc = 1.0, 0.0
 
         gstep = 0
+        updated = False
         for it in range(self.iters):
             if self._stop.is_set():
                 break
@@ -755,6 +760,7 @@ class Trainer:
                                  next_val_buf[:filled], episode_end[:filled])
             stats = self._update(obs_buf[:filled], act_buf[:filled],
                                  logp_buf[:filled], adv, ret, opt)
+            updated = True
             # 全场功率取本轮全部采样步的均值；任何一步缺测使整轮统计无效。
             stats.update(iter=it, step=gstep,
                          mean_power=float(np.mean(pow_buf[:filled])),
@@ -766,7 +772,7 @@ class Trainer:
                           reward=float(rew_buf[:filled].mean()), events=[],
                           phase="updating", stats=dict(stats))
 
-        if self.ckpt_path and self.history:
+        if self.ckpt_path and updated:
             self._save(rms)
 
     # ---- 观测打包、GAE 与 PPO 更新 --------------------------------------

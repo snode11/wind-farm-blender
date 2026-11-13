@@ -12,10 +12,12 @@ class TipBridgeClient:
     def __init__(self,address,package,scene=None,timeout=15):
         host,port=address.rsplit(':',1)
         if not ipaddress.ip_address(host).is_loopback:raise ValueError('Bridge must be loopback')
-        self.socket=socket.create_connection((host,int(port)),timeout=timeout)
+        options={'tip_package':str(Path(package).resolve())}
+        if scene:options['scene']=str(Path(scene).resolve())
         self.decoder=FrameDecoder();self.messages=deque();self.sequence=0;self.received=0
         self.session='';self.owned=False;self.started=False;self.finished=False;self.timeout=timeout
-        self.expected_package=str((Path(package).resolve()/'manifest.json'))
+        self.expected_package=str(Path(options['tip_package'])/'manifest.json')
+        self.socket=socket.create_connection((host,int(port)),timeout=timeout)
         try:
             self._send('hello',dict(supported_versions=[1],capabilities=[],resume_session_id=None))
             ack=self._receive()
@@ -23,13 +25,14 @@ class TipBridgeClient:
             self.session=ack['session_id']
             if ack['payload']['run_status'] not in ('READY','STOPPED'):
                 raise ValueError('Bridge already has an active run; stop it before recorded tip preview')
-            options={'tip_package':str(Path(package).resolve())}
-            if scene:options['scene']=str(Path(scene).resolve())
             self.command('run.start',{'mode':'replay','options':options})
             self.owned=True
             self.command('run.pause')
-        except BaseException:
-            self.close()
+        except BaseException as exc:
+            try:
+                self.close()
+            except BaseException as cleanup:
+                exc.add_note('Bridge client cleanup failed: ' + str(cleanup))
             raise
 
     def _send(self,kind,payload):
@@ -40,10 +43,13 @@ class TipBridgeClient:
     def command(self,name,arguments=None):
         self._send('command',{'command':name,'arguments':arguments or {}})
 
-    def _receive(self):
-        deadline=time.monotonic()+self.timeout
+    def _receive(self, deadline=None):
+        if deadline is None:deadline=time.monotonic()+self.timeout
+        if time.monotonic()>=deadline:raise TimeoutError('Bridge response timed out')
         while not self.messages:
-            self.socket.settimeout(max(.01,deadline-time.monotonic()))
+            remaining=deadline-time.monotonic()
+            if remaining<=0:raise TimeoutError('Bridge response timed out')
+            self.socket.settimeout(remaining)
             data=self.socket.recv(65536)
             if not data:raise ConnectionError('Bridge disconnected')
             self.messages.extend(self.decoder.feed(data))
@@ -60,9 +66,10 @@ class TipBridgeClient:
 
     def next_sample(self):
         if self.finished:return None
+        deadline=time.monotonic()+self.timeout
         if self.started:self.command('run.step')
         while True:
-            message=self._receive()
+            message=self._receive(deadline)
             if message['type']=='snapshot':
                 sample=sample_from_snapshot(message['payload'])
                 if sample['provenance'].get('file')!=self.expected_package:
@@ -77,9 +84,10 @@ class TipBridgeClient:
         if self.socket is None:return
         try:
             if self.owned and not self.finished:
+                deadline=time.monotonic()+self.timeout
                 self.command('run.stop',{'timeout_seconds':2})
                 while True:
-                    message=self._receive()
+                    message=self._receive(deadline)
                     if message['type']=='lifecycle' and message['payload']['run_status']=='STOPPED':break
         finally:
             self.socket.close();self.socket=None;self.owned=False

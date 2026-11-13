@@ -24,12 +24,12 @@ def main():
                           session_binding=SessionBinding.from_environment(args.host, args.port))
     def request_shutdown(_signum, _frame):
         server.shutdown_requested = True
-    for name in ('SIGTERM', 'SIGHUP', 'SIGBREAK'):
-        if hasattr(signal, name):
-            signal.signal(getattr(signal, name), request_shutdown)
-    print(f'WFRL Bridge listening on {args.host}:{server.port}', flush=True)
     stop_requested = False
     try:
+        for name in ('SIGTERM', 'SIGHUP', 'SIGBREAK'):
+            if hasattr(signal, name):
+                signal.signal(getattr(signal, name), request_shutdown)
+        print(f'WFRL Bridge listening on {args.host}:{server.port}', flush=True)
         while not server.closed:
             try:
                 server.poll()
@@ -44,8 +44,10 @@ def main():
             except KeyboardInterrupt:
                 request_shutdown(None, None)
     finally:
-        server.close()
-        if session._stop_worker: session._stop_worker.join()
+        try:
+            server.close()
+        finally:
+            if session._stop_worker: session._stop_worker.join()
 
 
 if __name__ == '__main__': main()

@@ -40,5 +40,5 @@ def validate_run_options(mode, options):
         raise ValueError('Replay requires ckpt_path')
     if checkpoint and not Path(checkpoint).is_file():
         raise ValueError(f'Checkpoint does not exist: {checkpoint}')
-    if mode == 'interactive_training' and options.get('ckpt_path'):
+    if mode == 'interactive_training' and (options.get('ckpt_path') or 'resume_from' in options):
         raise ValueError('Existing Trainer does not support resuming interactive training')

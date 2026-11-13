@@ -84,9 +84,8 @@ class SessionBinding:
                     or previous.get('bridge') != self.identity
                     or previous.get('host') != host or previous.get('port') != port):
                 raise RuntimeError('Bridge binding belongs to a different process instance')
-        if session_id != self.session_id:
-            self.generation += 1
-            self.session_id = session_id
+        generation = self.generation + int(session_id != self.session_id)
         atomic_write(self.path, dict(schema=BINDING_SCHEMA, run_token=self.token,
             host=host, port=port, bridge=self.identity, session_id=session_id,
-            session_generation=self.generation))
+            session_generation=generation))
+        self.session_id, self.generation = session_id, generation
