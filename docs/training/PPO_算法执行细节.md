@@ -355,7 +355,7 @@ tensorboard --logdir results/logs/ppo_wf
 
 最终模型与统计由 `results/checkpoints/ppo_ablaincourt.manifest.json` 选择，定期检查点按步数使用独立清单。`--eval-only` 与 `--resume` 均校验清单及其完整配对；缺失、损坏或配对标识冲突时明确报错。只有清单不存在时读取 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；无配对标识的模型仍需另外核对来源。
 
-可视化分析入口 `scripts/analysis/eval_visualize_ppo.py` 当前只读取固定名称 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`，尚不解析清单，评估图输出到 `results/eval_outputs/`。它不能直接选择同代清单产物；固定名称旧文件保留时，该入口读取的是旧配对。清单产物的策略评估使用训练入口的 `--eval-only`。
+可视化分析入口 `scripts/analysis/eval_visualize_ppo.py` 复用 `train_ppo.CheckpointPair.require()`，先校验清单和 SHA-256，再固定同一代模型与归一化统计；清单切换不会改变已选配对。仅在清单不存在时读取固定名称 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；清单或引用产物损坏时停止，不回退。加载后通过公共配对校验核对空间、有限统计量、折扣因子及配对标识，冻结观测统计并使用原始奖励。评估图输出到 `results/eval_outputs/`；正常结束或加载、评估失败时关闭已创建的环境。
 
 `--resume` 恢复观测与奖励统计及累计步数，`--timesteps` 指追加的全场控制步数，实际按完整 rollout 向上取整。评估固定观测统计、使用原始奖励。训练前评估使用当前训练环境统计量的独立副本：新训练评估初始策略，续训评估加载的策略。该评估不构成零偏航对照，不能仅靠 before/after 日志宣称匹配零动作收益。
 

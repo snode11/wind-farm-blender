@@ -10,10 +10,12 @@ Produces (into eval_outputs/):
   - wakefield_trained.png  : wake field after the learned policy has steered yaws
   - ppo_timeseries.png     : yaw / farm power / reward over the episode
 
-Run AFTER training (needs checkpoints/ppo_ablaincourt.zip + vecnormalize.pkl):
+Run AFTER training (the manifest selects a matching model/statistics generation;
+fixed ppo_ablaincourt.zip + vecnormalize.pkl are used only without a manifest):
     python eval_visualize_ppo.py
 """
 
+from contextlib import ExitStack
 import os
 
 import matplotlib
@@ -28,6 +30,8 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 from wfcrl import environments as envs
+from scripts.train.train_ppo import CheckpointPair
+from wfrl.sb3_checkpoint import validate_model_normalization
 from wfrl.sb3_wrapper import WFCRLSB3Wrapper
 
 from wfrl import paths
@@ -44,20 +48,27 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 def build_env():
     raw = envs.make(ENV_ID, controls=["yaw"], max_num_steps=MAX_STEPS)
-    return WFCRLSB3Wrapper(raw)
+    try:
+        return WFCRLSB3Wrapper(raw)
+    except BaseException:
+        raw.close()
+        raise
 
 
-def load_normalizer():
-    """Load VecNormalize stats (for obs normalization at inference)."""
-    if not os.path.exists(VECNORM_PATH):
-        raise FileNotFoundError(
-            f"{VECNORM_PATH} not found. Train first: python train_ppo.py"
-        )
-    venv = DummyVecEnv([lambda: Monitor(build_env())])
-    vecnorm = VecNormalize.load(VECNORM_PATH, venv)
-    vecnorm.training = False
-    vecnorm.norm_reward = False
-    return vecnorm
+def load_normalizer(norm_path=None):
+    """Load pinned inference statistics, resolving the pair when called alone."""
+    if norm_path is None:
+        _, norm_path = CheckpointPair(MODEL_PATH, VECNORM_PATH).require()
+    env = build_env()
+    try:
+        venv = DummyVecEnv([lambda: Monitor(env)])
+        vecnorm = VecNormalize.load(norm_path, venv)
+        vecnorm.training = False
+        vecnorm.norm_reward = False
+        return vecnorm
+    except BaseException:
+        env.close()
+        raise
 
 
 def plot_wakefield(env, tag):
@@ -114,30 +125,32 @@ def plot_timeseries(yaws, powers, rewards, n):
 
 
 def main():
-    if not os.path.exists(MODEL_PATH + ".zip"):
-        raise FileNotFoundError(
-            f"{MODEL_PATH}.zip not found. Train first: python train_ppo.py"
+    model_path, norm_path = CheckpointPair(MODEL_PATH, VECNORM_PATH).require()
+    model = PPO.load(model_path)
+    with ExitStack() as resources:
+        vecnorm = load_normalizer(norm_path)
+        resources.callback(vecnorm.close)
+        validate_model_normalization(model, vecnorm)
+
+        # Baseline scene: reset, no yaw steering yet
+        base_env = build_env()
+        resources.callback(base_env.close)
+        base_env.reset(options=WIND)
+        plot_wakefield(base_env, tag="baseline")
+
+        # Trained policy rollout
+        env = build_env()
+        resources.callback(env.close)
+        yaws, powers, rewards = rollout(env, model, vecnorm)
+        plot_wakefield(env, tag="trained")
+        plot_timeseries(yaws, powers, rewards, env.n_turbines)
+
+        tot = powers.sum(axis=1)
+        print(
+            f"\n[summary] total farm power over episode: "
+            f"start {tot[0]:.1f} kW -> end {tot[-1]:.1f} kW "
+            f"(mean {tot.mean():.1f} kW)"
         )
-    model = PPO.load(MODEL_PATH)
-    vecnorm = load_normalizer()
-
-    # Baseline scene: reset, no yaw steering yet
-    base_env = build_env()
-    base_env.reset(options=WIND)
-    plot_wakefield(base_env, tag="baseline")
-
-    # Trained policy rollout
-    env = build_env()
-    yaws, powers, rewards = rollout(env, model, vecnorm)
-    plot_wakefield(env, tag="trained")
-    plot_timeseries(yaws, powers, rewards, env.n_turbines)
-
-    tot = powers.sum(axis=1)
-    print(
-        f"\n[summary] total farm power over episode: "
-        f"start {tot[0]:.1f} kW -> end {tot[-1]:.1f} kW "
-        f"(mean {tot.mean():.1f} kW)"
-    )
 
 
 if __name__ == "__main__":
