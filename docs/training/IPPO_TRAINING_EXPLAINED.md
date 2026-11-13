@@ -173,9 +173,9 @@ for epoch in 1..10:
 
 > 多模态版有个关键区别：`norm_obs_keys` 只归一化标量+振动，**图像不使用 VecNormalize 的逐维运行统计**；它仍由当前图像输入和特征提取路径处理。不能一般化为“图像归一化会毁掉空间结构”。
 
-多模态入口 `scripts/train/train_mappo_mm.py` 使用独立配对 `mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。`--eval-only` 自动加载二者，冻结统计并返回原始奖励；`--resume` 恢复模型、观测／奖励统计与累计 agent transitions，`--timesteps` 为追加量，按完整 rollout 取整。图像模式须与保存模型一致；使用 `--no-image` 训练时，续训和评估也须携带该参数。缺少文件、归一化通道或模型空间不兼容时明确失败。
+多模态入口 `scripts/train/train_mappo_mm.py` 使用独立清单 `mappo_mm_ablaincourt.manifest.json`，引用 `mappo_mm_ablaincourt.<generation>.zip` 与 `vecnormalize_mappo_mm.<generation>.pkl`。`--eval-only` 自动加载同一代的模型与统计，冻结统计并返回原始奖励；`--resume` 恢复模型、观测／奖励统计与累计 agent transitions，`--timesteps` 为追加量，按完整 rollout 取整。图像模式须与保存模型一致；使用 `--no-image` 训练时，续训和评估也须携带该参数。缺少文件、归一化通道或模型空间不兼容时明确失败。
 
-多模态入口当前依次直接保存这两个固定路径文件，最终保存带相同配对标识，但没有上述参数共享 IPPO 的清单原子切换保证。
+多模态入口共用 `train_ppo.CheckpointPair`，给模型与统计写入相同代标识；通过 `atomic_write()` 的同目录临时写入、加载校验后，才原子替换清单。统计校验只要求 `NORM_KEYS` 中的标量与振动通道，保留图像输入约定。新代提交失败保留原配对并移除未提交文件，成功后保留旧代。读取先校验清单文件名和 SHA-256，再固定同代路径；只有清单不存在时兼容读取 `mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`，损坏清单或引用产物不回退。
 
 ---
 

@@ -310,11 +310,14 @@ entropy_loss / approx_kl / clip_fraction / std 等（第一次梯度更新后才
 清空 buffer → 回到环境采样。默认每轮采集 1024 步、进行 80 次参数更新；请求 100000 步时完成 98 轮 rollout，实际采集 100352 步并进行 7840 次参数更新。
 
 ```python
-model.save("results/checkpoints/ppo_ablaincourt")   # 网络权重 θ
-venv.save("results/checkpoints/vecnormalize.pkl")    # obs/reward 的 mean/var（推理必须）
+from scripts.train.train_ppo import save_checkpoint_pair
+
+model_path, normalization_path = save_checkpoint_pair(model, venv)
 ```
 
-这是 `train_ppo.py` 当前依次写入固定路径的方式。最终保存前给模型与统计设置相同配对标识，但这两个文件不是通过同代清单原子提交；中途失败可能留下不完整或不匹配的配对。该入口也没有正式 CLI／Studio 的同目录临时文件校验流程。`wfrl/mappo_sb3.py` 的参数共享 IPPO 使用独立的同代产物与清单切换，不能将其保证套用于本页单智能体 PPO；[各入口保存合同](MAPPO_SETUP.md#检查点写入与产物选择)列出了实际范围。
+`train_ppo.py` 用 `training_integrity.atomic_write()` 在各目标的同目录写临时文件并加载校验，以相同 `generation` 发布 `ppo_ablaincourt.<generation>.zip` 和 `vecnormalize.<generation>.pkl`。两者完整后原子替换 `ppo_ablaincourt.manifest.json`，清单记录文件名和 SHA-256。定期保存也通过 `ppo_wf_<steps>_steps.manifest.json` 提交同一步数、同代的模型与统计。新代提交失败时保留原清单及其完整配对，移除未提交产物和临时文件；成功后保留旧代文件。
+
+续训和评估先校验清单、摘要，再固定同一代的模型与统计路径；随后校验配对标识、空间、统计量和折扣因子。仅在清单不存在时兼容读取固定名称 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；清单或引用文件损坏时明确失败，不回退。保存合同与产物命名见[各入口保存合同](MAPPO_SETUP.md#检查点写入与产物选择)。
 
 **推理**：raw obs → normalize_obs(用 pkl) → actor MLP → μ（deterministic，丢 σ）
 → {"yaw": μ} → FLORIS → 新尾流场 + 功率
@@ -348,10 +351,11 @@ venv.save("results/checkpoints/vecnormalize.pkl")    # obs/reward 的 mean/var�
 python scripts/train/train_ppo.py --timesteps 100000
 python scripts/train/train_ppo.py --eval-only
 tensorboard --logdir results/logs/ppo_wf
-python scripts/analysis/eval_visualize_ppo.py
 ```
 
-模型在 `results/checkpoints/ppo_ablaincourt.zip`，归一化在同目录的 `vecnormalize.pkl`；评估图在 `results/eval_outputs/`。`--eval-only` 与 `--resume` 都要求完整且兼容的权重／归一化配对，缺失、损坏或配对标识冲突时明确报错。最终保存写入相同配对标识；无标识的模型仍需另外核对来源。定期检查点按同一步数分别保存权重和归一化文件，不提供两文件原子提交保证。
+最终模型与统计由 `results/checkpoints/ppo_ablaincourt.manifest.json` 选择，定期检查点按步数使用独立清单。`--eval-only` 与 `--resume` 均校验清单及其完整配对；缺失、损坏或配对标识冲突时明确报错。只有清单不存在时读取 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；无配对标识的模型仍需另外核对来源。
+
+可视化分析入口 `scripts/analysis/eval_visualize_ppo.py` 当前只读取固定名称 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`，尚不解析清单，评估图输出到 `results/eval_outputs/`。它不能直接选择同代清单产物；固定名称旧文件保留时，该入口读取的是旧配对。清单产物的策略评估使用训练入口的 `--eval-only`。
 
 `--resume` 恢复观测与奖励统计及累计步数，`--timesteps` 指追加的全场控制步数，实际按完整 rollout 向上取整。评估固定观测统计、使用原始奖励。训练前评估使用当前训练环境统计量的独立副本：新训练评估初始策略，续训评估加载的策略。该评估不构成零偏航对照，不能仅靠 before/after 日志宣称匹配零动作收益。
 

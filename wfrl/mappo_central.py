@@ -22,6 +22,7 @@ import torch
 import torch.nn as nn
 from torch.distributions import Normal
 from wfrl import paths
+from wfrl.training_integrity import save_checkpoint_atomic
 
 ENV_ID = "Dec_Ablaincourt_Floris"
 MAX_STEPS = 200
@@ -314,10 +315,10 @@ def train(total_timesteps, n_steps=1024, n_epochs=10, mb_steps=256,
               f"ent {np.mean(ent_log):.3f}  explained_var {ev:.3f}")
 
     os.makedirs(CKPT_DIR, exist_ok=True)
-    torch.save({"actor": actor.state_dict(), "critic": critic.state_dict(),
-                "obs_mean": obs_rms.mean, "obs_var": obs_rms.var,
-                "obs_dim": smp.obs_dim, "act_dim": smp.act_dim,
-                "state_dim": smp.state_dim}, MODEL_PATH)
+    save_checkpoint_atomic({"actor": actor.state_dict(), "critic": critic.state_dict(),
+                            "obs_mean": obs_rms.mean, "obs_var": obs_rms.var,
+                            "obs_dim": smp.obs_dim, "act_dim": smp.act_dim,
+                            "state_dim": smp.state_dim}, MODEL_PATH)
     print(f"[mappo-c] saved -> {MODEL_PATH}")
     evaluate(actor, obs_rms, smp)
     return actor, critic, obs_rms
