@@ -17,7 +17,10 @@ import torch
 import torch.nn as nn
 
 from wfrl.mappo_central import Actor, Critic, RunningMeanStd
-from wfrl.policy_actions import PolicyActionContract, load_action_contract
+from wfrl.policy_actions import (
+    PolicyActionContract, duty_headroom, load_action_contract, load_obs_duty_limit,
+)
+from wfrl.safety import control_duty_limit
 from wfrl.rewards import CHOICES as REWARD_CHOICES, make_shaper
 
 from wfrl import paths, windcond
@@ -106,6 +109,7 @@ class FastFarmSampler:
         #  obs_duty     —— obs 追加"占空比余量"列，策略从此看得见自己还能发多大；
         #  duty_penalty —— 动作被占空比清零时按被吃掉的幅度给负奖励（λ 权重）。
         self.obs_duty = bool(obs_duty)
+        self.obs_duty_limit = None
         self.duty_penalty = float(duty_penalty)
         self.load_coef = float(load_coef)
         # 整形器**一个实例贯穿整个训练**：Centered 的 EMA 基线要跨回合保留，
@@ -142,15 +146,14 @@ class FastFarmSampler:
     def _pack(self, m):
         """driver 测量 dict -> (n, obs_dim) 本地观测矩阵。
 
-        obs_duty 开启时追加一列"占空比余量"：(0.1 − duty)/0.1 裁到 [0,1]，
-        1 = 还能自由发、0 = 再发就被清零。策略可从此列判断执行约束。
+        obs_duty 开启时按训练固定的 obs_duty_limit 追加占空比余量。
+        1 表示尚未占用，0 表示达到清零上限；不表示本步增量的限幅值。
         """
         cols = [np.asarray(m[k], dtype=np.float32) for k in self.obs_keys]
         if self.obs_duty:
             duty = np.asarray((m.get("duty") or {}).get(
                 "yaw", np.zeros(self.n)), np.float32).ravel()
-            headroom = np.clip((0.1 - duty) / 0.1, 0.0, 1.0).astype(np.float32)
-            cols.append(headroom)
+            cols.append(duty_headroom(duty, self.obs_duty_limit))
         return np.stack(cols, axis=1)                # (n, obs_dim)
 
     def _spawn(self):
@@ -188,6 +191,11 @@ class FastFarmSampler:
                  else self.drv.reset(wind_speed=ws, wind_direction=wd, **reset_options))
             for _ in range(self.warmup):             # 建立瞬态：空转、丢弃
                 m = self.drv.step(np.zeros(self.n))
+        if self.obs_duty:
+            limit = control_duty_limit(m, "yaw")
+            if self.obs_duty_limit is not None and self.obs_duty_limit != limit:
+                raise ValueError("obs_duty_limit must remain fixed across training episodes")
+            self.obs_duty_limit = limit
         self._m = m
         self._t = 0
         self.u_inf = self.drv.u_inf
@@ -489,6 +497,12 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
             action_contract.validate_runtime(["yaw"], bounds)
         policy_metadata = {"controls": ["yaw"], "policy_source": "train_fastfarm",
                            "action_contract": action_contract.to_dict()}
+        if smp.obs_duty:
+            if ckpt is not None and load_obs_duty_limit(ckpt) != smp.obs_duty_limit:
+                raise ValueError(
+                    "resume obs_duty_limit must match the checkpoint: "
+                    f"checkpoint={load_obs_duty_limit(ckpt):g}, runtime={smp.obs_duty_limit:g}")
+            policy_metadata["obs_duty_limit"] = smp.obs_duty_limit
         if policy_scene is not None:
             policy_metadata["scene"] = policy_scene.to_dict()
 

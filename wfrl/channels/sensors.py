@@ -350,7 +350,7 @@ class NacelleCamera(Sensor):
         ti = self.indices[i]
         t = self.scene.turbines[ti]
         try:
-            yaws = np.asarray((ctx or {}).get("yaw", [0.0]), dtype=float)
+            yaws = np.asarray((ctx or {}).get("yaw", np.nan), dtype=float)
         except (TypeError, ValueError, OverflowError) as exc:
             raise ValueError("camera yaw must be numeric") from exc
         if yaws.shape == (self.scene.n,):

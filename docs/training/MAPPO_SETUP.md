@@ -52,7 +52,17 @@ Replay 在后端启动、预热和控制步边界响应暂停与停止。最终�
 
 无版本动作合同的模型只接受可识别的保存格式：Trainer 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
 
-研究探针 `FlexPolicy` 只接受可识别的 `Dec_Turb3_Row1_Fastfarm` legacy yaw-only、非循环、无 duty 观测模型；固定动作边界为 ±5°、变换为 `clip`。它复用合同校验，并拒绝保存 `scene` 的模型及未知版本，不拓展普通 Replay 的模型适用域。
+研究探针 `FlexPolicy` 只接受可识别的 `Dec_Turb3_Row1_Fastfarm` yaw-only、非循环模型，可带 `obs_duty` 观测；固定动作边界为 ±5°、变换为 `clip`。它复用合同校验及 checkpoint 的 `obs_duty_limit`，并拒绝保存 `scene` 的模型及未知版本，不拓展普通 Replay 的模型适用域。
+
+### 执行机构占空比与观测余量
+
+[FastFarmDriver](../../wfrl/fastfarm_driver.py) 的测量同时提供逐机组 `duty` 与逐控制量 `duty_limit`。yaw 默认使用最近 20 个控制步的滑动窗口，上限直接读取运行配置 `yaw_duty_limit`（默认 `0.30`）；pitch 使用 env 累计版 `0.10`，关闭 yaw 滑动窗口时 yaw 也使用累计版 `0.10`。torque 不受该占空比约束，因此没有对应条目。清零判据为动作前的 `duty >= duty_limit`，不是按本步动作幅度提前限幅。
+
+[SafetyLimiter](../../wfrl/safety.py) 的 `budget()`、动作门控和事件说明均使用测量中的逐控制量上限；测量没有 `duty_limit` 或缺少该控制量时回退既有 `DUTY_LIMIT=0.1`。Studio 默认 `enforce_duty=True`：窗口 yaw 占空比为 `0.2` 时放行，为 `0.3` 时清零，与默认 Driver 一致；pitch 在 `0.1` 清零。关闭强制时保留请求，只对达到相应上限的控制量报告后端清零事件。`sustainable()`、`reachable()`、`notes()` 不读取测量，仍为上限 `0.1` 的 env 累计模型估算；`notes()` 明示此口径，可达量不含状态边界，也不代表 yaw 滑动窗口的可达上界。
+
+正式 CLI 开启 `--obs-duty` 后，从初始运行测量取得 yaw 上限，在训练期间固定使用，并在定期和最终 checkpoint 中保存 `obs_duty_limit`。换回合的上限必须一致。余量列统一调用 [duty_headroom()](../../wfrl/policy_actions.py)，计算 `clip((limit - duty_yaw) / limit, 0, 1)`；默认窗口上限 `0.30` 下 duty 为 `0.20` 时余量约为 `1/3`。余量是占空比比例，不是可下发增量的幅度。Studio 自身训练不启用 `obs_duty`。
+
+Studio Replay、`rollout_ckpt.py` 和 `FlexPolicy` 均读取 checkpoint 的 `obs_duty_limit`，不以当前运行上限替换观测编码。没有该字段的 checkpoint 固定按 `0.1` 计算，保留对应入口的输入精度与观测向量；显式字段必须为有限正数。正式 CLI 续训除核对 `obs_duty` 开关、网络及恢复状态外，还将保存的观测上限与 sampler 的实际上限比较，不一致时拒绝训练并严格关闭 sampler；旧 checkpoint 按 `0.1` 参与同一比较。
 
 ### 检查点写入与产物选择
 
@@ -63,11 +73,14 @@ Replay 在后端启动、预热和控制步边界响应暂停与停止。最终�
 | 正式 CLI `train_fastfarm.py` | 定期和结束检查点均用 `save_checkpoint_exclusive()`，通过 Torch 重读校验；发布前若目标已存在则拒绝覆盖。保存完整软件恢复状态。 |
 | Studio / Interactive `Trainer._save()` | 用 `save_checkpoint_atomic()`，通过 Torch 重读校验后原子替换指定路径；失败保留原文件。内容为 actor、critic、观测统计、场景和动作合同，不等于正式 CLI 的完整恢复检查点。 |
 | SB3 参数共享 IPPO `wfrl/mappo_sb3.py` | 模型、归一化统计分别写入同目录临时文件并加载校验，以相同 `generation` 写为独立产物；两者就绪后原子替换清单，切换可读取的一代。 |
-| 单智能体 PPO、多模态 IPPO、HornsRev2 PPO | 当前仍依次直接保存模型和归一化文件；最终保存带相同配对标识，但没有上述临时文件校验和清单原子切换保证。不能把参数共享 IPPO 的保存合同推广到这些入口。 |
+| 集中式 FLORIS MAPPO `wfrl/mappo_central.py` | actor、critic 和观测统计保存在同一个 `.pt` 中；用 `save_checkpoint_atomic()` 写同目录临时文件，通过 Torch 重读校验后原子替换；失败保留原文件。 |
+| 单智能体 PPO、多模态 IPPO、HornsRev2 PPO | 共用 `train_ppo.CheckpointPair`，通过 `atomic_write()` 写入、加载校验同代模型与归一化统计，再原子切换清单；PPO 和 HornsRev2 的定期保存也使用此合同。多模态校验只要求标量与振动通道的归一化统计。 |
 
 参数共享 IPPO 的入口清单为 `results/checkpoints/mappo_ablaincourt.manifest.json`，引用 `mappo_ablaincourt.<generation>.zip` 与 `vecnormalize_mappo.<generation>.pkl`，并保存两者 SHA-256。加载先解析一代并校验文件名、摘要及模型／统计兼容性；加载中的配对不会因清单切换混用新旧代。发布新代后保留旧代文件；提交失败不切换已发布配对。仅在清单不存在时读取固定路径 `mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl`；清单或其引用文件损坏时明确失败，不回退到固定路径。
 
-实现与合同用例：[SB3 配对保存](../../wfrl/mappo_sb3.py)、[原子保存与恢复用例](../../tests/test_bp_checkpoint_recovery.py)。其他 SB3 入口见 [PPO](../../scripts/train/train_ppo.py)、[多模态 IPPO](../../scripts/train/train_mappo_mm.py)、[HornsRev2](../../scripts/train/train_ppo_hornsrev2.py)。
+单智能体 PPO、多模态 IPPO、HornsRev2 PPO 使用相同的清单格式与提交顺序，最终入口分别为 `ppo_ablaincourt.manifest.json`、`mappo_mm_ablaincourt.manifest.json`、`ppo_hornsrev2.manifest.json`。模型为 `<模型基名>.<generation>.zip`，统计为 `<统计基名>.<generation>.pkl`；清单记录 `schema=1`、同代标识、两个文件名及 SHA-256。恢复归一化时同时固定模型路径，后续模型加载不重新选择一代。只有清单不存在才读取原固定名称；损坏清单或引用产物明确失败。发布新代保留旧代与旧固定名称文件；序列化、校验或提交失败不改变已发布配对，移除未提交产物和临时文件。清单已经替换后发生中断时，保留已提交的完整配对。
+
+实现与合同用例：[SB3 配对保存](../../wfrl/mappo_sb3.py)、[原子保存与恢复用例](../../tests/test_bp_checkpoint_recovery.py)、[四个训练入口的失败与兼容读取用例](../../tests/test_bx_training_checkpoint_atomicity.py)。入口见 [PPO](../../scripts/train/train_ppo.py)、[多模态 IPPO](../../scripts/train/train_mappo_mm.py)、[HornsRev2](../../scripts/train/train_ppo_hornsrev2.py)、[集中式 FLORIS MAPPO](../../wfrl/mappo_central.py)。
 
 ### 回合结束与时间截断
 
@@ -181,9 +194,9 @@ FAST.Farm MAPPO 的 `--resume-from` 使用明确的 `new_episode_segment`：从�
 下列产物均位于 `results/checkpoints/`，原子保存和覆盖范围见[检查点写入与产物选择](#检查点写入与产物选择)。
 
 - SB3 IPPO：`mappo_ablaincourt.manifest.json` 引用的同代 `.zip`／`.pkl`；无清单时才使用固定名称配对。
-- 单智能体 PPO：`ppo_ablaincourt.zip` 与 `vecnormalize.pkl`。
-- 多模态 IPPO：`mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。
-- HornsRev2 PPO：`ppo_hornsrev2.zip` 与 `vecnormalize_hr2.pkl`。
+- 单智能体 PPO：`ppo_ablaincourt.manifest.json` 引用的同代产物；无清单时使用 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`。
+- 多模态 IPPO：`mappo_mm_ablaincourt.manifest.json` 引用的同代产物；无清单时使用 `mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。
+- HornsRev2 PPO：`ppo_hornsrev2.manifest.json` 引用的同代产物；无清单时使用 `ppo_hornsrev2.zip` 与 `vecnormalize_hr2.pkl`。
 - 集中式 FLORIS MAPPO：`mappo_central_ablaincourt.pt`；观测统计在 checkpoint 内。
 - FAST.Farm MAPPO：环境与可读标签、完整实验摘要及运行 UUID 共同命名的 `.pt`，检查其中 `obs_keys`、维度、机组顺序、控制量、观测统计及配置／来源身份；最终保存和定期检查点均包含完整软件恢复状态。
 
@@ -193,11 +206,11 @@ SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一�
 
 SB3 IPPO、多模态 IPPO、单智能体 PPO 与 HornsRev2 PPO 的最终保存均给模型和归一化文件写入相同配对标识，加载时校验标识、观测／动作空间、有限统计量和折扣因子。无配对标识的现有文件可以按兼容性校验加载，但仅凭空间和统计形状不能证明二者来自同次训练，仍须核对来源。
 
-单智能体 PPO 的 `--resume` 和 `--eval-only` 都要求完整的 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；缺失、损坏或配对不兼容时停止。续训恢复观测与奖励统计及累计步数，`--timesteps` 表示追加的全场控制步数，按完整 rollout 向上取整。评估冻结统计并报告原始奖励；训练前评估使用当前训练环境统计量的独立副本，新训练不会读取磁盘上的旧统计量。定期检查点分别保存同一步数的 `ppo_wf_<steps>_steps.zip` 和 `ppo_wf_vecnormalize_<steps>_steps.pkl`，不做清单原子切换。正常结束、加载、推理、训练或保存失败时均关闭本次创建的环境。
+单智能体 PPO 的 `--resume` 和 `--eval-only` 都按清单选择完整配对，无清单时读取 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；缺失、损坏或配对不兼容时停止。续训恢复观测与奖励统计及累计步数，`--timesteps` 表示追加的全场控制步数，按完整 rollout 向上取整。评估冻结统计并报告原始奖励；训练前评估使用当前训练环境统计量的独立副本，新训练不会读取磁盘上的旧统计量。定期检查点由 `ppo_wf_<steps>_steps.manifest.json` 原子选择 `ppo_wf_<steps>_steps.<generation>.zip` 和 `ppo_wf_vecnormalize_<steps>_steps.<generation>.pkl`。正常结束、加载、推理、训练或保存失败时均关闭本次创建的环境。
 
-多模态 IPPO 的 `--eval-only` 直接加载保存模型，无需额外指定 `--resume`；评估固定统计并报告原始奖励。`--resume` 恢复观测／奖励统计和累计 agent transitions，`--timesteps` 表示追加量。归一化仅作用于 `yaw`、`wind_speed`、`wind_direction`、`vibration`；`wake_image` 不使用 VecNormalize 的逐维运行统计。训练、续训和评估的图像模式须一致：使用 `--no-image` 训练的模型，后续也需传入该参数；模式、统计通道或空间不兼容时明确报错。两种模式共用默认输出路径，开始新训练会覆盖该路径的配对文件。
+多模态 IPPO 的 `--eval-only` 直接加载保存模型，无需额外指定 `--resume`；评估固定统计并报告原始奖励。`--resume` 恢复观测／奖励统计和累计 agent transitions，`--timesteps` 表示追加量。归一化仅作用于 `yaw`、`wind_speed`、`wind_direction`、`vibration`；`wake_image` 不使用 VecNormalize 的逐维运行统计。训练、续训和评估的图像模式须一致：使用 `--no-image` 训练的模型，后续也需传入该参数；模式、统计通道或空间不兼容时明确报错。两种模式共用默认清单路径，新训练成功保存后将清单切换到新代，旧代文件保留。
 
-HornsRev2 PPO 的 `--resume` 恢复保存的统计量和累计步数，允许调整 `--n-envs`；新建 worker 的回合回报累加器清零，已学习的统计量保留。`--timesteps` 表示所有独立风场 worker 的追加环境 transition 总数，按 `n_steps * n_envs` 的完整 rollout 向上取整，每个 worker 的一步包含整个 91 机组风场。评估只使用一个风场、冻结统计并报告原始奖励。训练前评估使用当前训练统计的独立副本；定期检查点分别保存同一步数的 `ppo_hr2_<steps>_steps.zip` 和 `ppo_hr2_vecnormalize_<steps>_steps.pkl`，不做清单原子切换。
+HornsRev2 PPO 的 `--resume` 恢复保存的统计量和累计步数，允许调整 `--n-envs`；新建 worker 的回合回报累加器清零，已学习的统计量保留。`--timesteps` 表示所有独立风场 worker 的追加环境 transition 总数，按 `n_steps * n_envs` 的完整 rollout 向上取整，每个 worker 的一步包含整个 91 机组风场。评估只使用一个风场、冻结统计并报告原始奖励。训练前评估使用当前训练统计的独立副本；定期检查点由 `ppo_hr2_<steps>_steps.manifest.json` 原子选择 `ppo_hr2_<steps>_steps.<generation>.zip` 和 `ppo_hr2_vecnormalize_<steps>_steps.<generation>.pkl`。
 
 多模态 IPPO 与 HornsRev2 PPO 的续训／评估均要求完整、兼容的模型和归一化文件；缺失、损坏或不兼容时停止，不回退随机策略或新统计量。正常结束以及加载、预测、训练或保存失败时关闭已创建的环境；HornsRev2 的归一化加载失败也会关闭其 worker。
 

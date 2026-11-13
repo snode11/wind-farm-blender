@@ -7,15 +7,13 @@
 
     DEFAULT ACTION SPACE   每步增量裁到 ±5°/±1°/±1e3   (mdp.py:300-305)
     状态边界               累加值裁到 yaw[-40,40] 等    (mdp.py:311-315)
-    执行机构占空比          超 10% 把该控制量**整个清零** (multiagent_env.py:196-207)
+    执行机构占空比          达到逐控制量 duty_limit 时把该控制量整个清零
 
-第三条最要命：它不是限幅，是清零，而且是**累计预算**式的清零 —— accumulator
-回合内永不衰减，判据 acc/(rate·k·dt) 约束的是"历史平均动作速率"。策略以为
-自己发了 5° 偏航，环境执行 0°，回报照常算 —— 训练曲线上什么都看不出来，只有
-奖励莫名其妙不涨。dt=3 s 时 yaw 的稳态可持续量只有 0.09 °/步（0.1 ×
-ACTUATORS_RATE 0.3 °/s × 3 s），于是 K 步回合内**可达偏航被封在 0.09K 附近**
-（见 `reachable`）：128 步只能走到 16.5°，而尾流偏航的增益要到 20° 才显现。
-`probe_duty_env.py` 在真环境上逐位零偏差地复现了这套时序。
+占空比是清零门控，不是增量限幅。FastFarmDriver 的 yaw 默认走滑动窗口，
+上限由其运行配置给出；pitch 及关闭滑动窗口的 yaw 走 env 累计版 0.1。
+本层按测量中的 duty_limit 判定；缺少该字段或控制量时回退 DUTY_LIMIT。
+sustainable/reachable/notes 不接收测量，只描述 0.1 的累计模型估算，不能
+据此判断滑动窗口的运行预算；运行预算由 budget/apply 的测量决定。
 
 还有两条仿真侧**不检查**、必须我们自己判的：
 
@@ -113,7 +111,7 @@ RATED_TORQUE = VS_RtPwr / VS_RtGnSp
 #: 取额定的 1.1 倍 —— 与 DISCON 用 VS_MaxTq = 1.1 × VS_RtTq 同一个裕度口径。
 RPM_ALARM = 1.1 * RATED_RPM
 
-#: 执行机构占空比上限，multiagent_env.py:205 的 `>= 0.1`
+#: env 累计版上限及缺少 duty_limit 测量时的回退，multiagent_env.py 的 `>= 0.1`
 DUTY_LIMIT = 0.1
 #: 各控制量的执行机构速率 (单位/s)，mdp.py:52。torque 没有条目 ⇒ 不受占空比约束
 ACTUATOR_RATE = {"yaw": 0.3, "pitch": 8.0}
@@ -124,6 +122,11 @@ STATE_BOUND = {"yaw": (-40.0, 40.0), "pitch": (0.0, 45.0),
                "torque": (-2e4, 2e4)}
 
 SEVERITY = ("info", "warn", "block")
+
+
+def control_duty_limit(measure, control):
+    """Read a control's effective limit, falling back to the cumulative env limit."""
+    return float(((measure or {}).get("duty_limit") or {}).get(control, DUTY_LIMIT))
 
 
 @dataclass
@@ -174,11 +177,10 @@ class SafetyLimiter:
 
     # ------------------------------------------------------------------
     def sustainable(self, control: str) -> float:
-        """该控制量每步可持续的最大 |Δ|，超过它迟早触发占空比清零。
+        """以 DUTY_LIMIT=0.1 估算 env 累计版的每步可持续 |Δ|。
 
-        占空比 = Σ|Δ| / rate / (k·dt)，稳态下每步都发 d 则 = d/(rate·dt)。
-        令其 < 0.1 得 d < 0.1·rate·dt。yaw 在 dt=3 s 下只有 0.09 °/步 ——
-        动作空间给的 ±5° 是它的 55 倍，这个落差是 UI 上必须写出来的一句话。
+        本方法不读取运行测量，也不表示滑动窗口的实际配置。
+        占空比 = Σ|Δ| / rate / (k·dt)，稳态临界量为 limit·rate·dt。
         """
         r = ACTUATOR_RATE.get(control)
         return float("inf") if r is None else DUTY_LIMIT * r * self.dt
@@ -186,10 +188,9 @@ class SafetyLimiter:
     def budget(self, measure: Dict[str, Any], control: str) -> np.ndarray:
         """本步在被清零之前还能发多大的 |Δ| (n,)。没有占空比约束的返回 inf。
 
-        环境判据用的是**上一步结束时**的累计除以 k+1 步（driver._duty 已按 k+1
-        算，与 multiagent_env.py:205 逐位对齐），本步的 |Δ| 不参与判定 —— 也就
-        是说超限那一步是"事后清零"，不是"提前限幅"。所以这里返回的是"还没超"
-        时的余量：一旦 duty 已经 ≥ 0.1，余量是 0，发多少都会被吞。
+        driver 的 duty 表示下一步判据：yaw 滑动窗口取当前窗口，env 累计版
+        取累计除以 k+1 步。本步的 |Δ| 不参与判定；duty 达到该控制量的
+        duty_limit 就返回 0，否则返回 inf。缺少上限时使用 DUTY_LIMIT。
         """
         if control not in ACTUATOR_RATE:
             return np.full(self.n, np.inf)
@@ -198,7 +199,7 @@ class SafetyLimiter:
         if d is None:
             return np.full(self.n, np.inf)
         d = np.asarray(d, float).ravel()
-        return np.where(d >= DUTY_LIMIT, 0.0, np.inf)
+        return np.where(d >= control_duty_limit(measure, control), 0.0, np.inf)
 
     # ------------------------------------------------------------------
     def apply(self, cmd: Dict[str, Any], measure: Optional[Dict[str, Any]] = None,
@@ -313,13 +314,15 @@ class SafetyLimiter:
             return v
         duty = np.asarray(((measure or {}).get("duty") or {}).get(
             c, np.zeros(self.n)), float).ravel()
+        limit = control_duty_limit(measure, c)
+        sustainable = limit * ACTUATOR_RATE[c] * self.dt
+        effect = "本步指令已归零" if enforce else "后端会把本步指令整个归零"
         for i in np.where(over)[0]:
             evs.append(Event(
                 self._step, self.ids[i], c, "执行机构占空比清零",
                 float(v[i]), 0.0 if enforce else float(v[i]), "block",
-                f"占空比 {duty[i]:.3f} ≥ {DUTY_LIMIT}，环境会把本步指令整个"
-                f"归零（multiagent_env.py:196-207）；可持续量仅 "
-                f"{self.sustainable(c):.3g} °/步"))
+                f"占空比 {duty[i]:.3f} ≥ {limit:g}，{effect}；"
+                f"按该上限的可持续量 {sustainable:.3g} °/步"))
         return np.where(over, 0.0, v) if enforce else v
 
     def _pitch_semantics(self, v, measure, evs):
@@ -397,34 +400,14 @@ class SafetyLimiter:
         return self.events[-k:]
 
     def reachable(self, control: str, n_steps: int) -> float:
-        """n_steps 步之内该控制量能累积到的最大变化量。
+        """以 DUTY_LIMIT=0.1 估算 env 累计版在 n_steps 步内的累计变化量。
 
-        占空比不是限幅，是**累计预算**：`_actuation_accumulator` 逐步累加
-        |Δ| 且回合内永不衰减（mdp.py:317-318），判据 acc/(rate·k·dt) 的分母
-        随 k 增长 —— 也就是说它约束的是"历史平均动作速率"。
+        不读取运行测量，不考虑状态边界，也不作为滑动窗口的可达上界。
 
-            reachable ≈ 0.1·rate·dt·K + step_bound
-
-        末项是因为 k=1 时 acc=0 ⇒ frac=0，**第一步永远免费**。稳态下清零占比
-        为 1 − sustainable/step_bound，生效间隔趋近 step_bound/sustainable 步；
-        `probe_duty_env.py` 在 FLORIS 算例（dt=60 s）上与环境逐位零偏差地
-        复现了这三条。
-
-        这个数决定回合长度够不够：yaw 在 dt=3 s 下 K=128 只能走到 16.5°，而
-        尾流偏航的增益要到 20° 上下才显现 —— 回合内到不了最优点，策略也就
-        拿不到"偏航有增益"的证据。
-
-        两处实测才发现、朴素推导会算错的地方：
-
-        · **acc 累加的是动作空间裁剪后的量，不含状态边界。** mdp.py:299-318
-          先 clip(Δ, ±5°) 累加进 accumulator，再 clip(state+Δ, ±40°) 写状态。
-          偏航贴到 ±40° 之后指令不再改变状态，acc 却照涨（实测末端偏航 40°
-          时 acc 已累到 115°）—— 饱和后每一步都在为未发生的动作付占空比。
-        · **accumulator 对非末位 agent 是先读后写，逐机组不同步。**
-          multiagent_env.py:246-249 的回抄在 is_last() 分支之后，而 mdp 的
-          累计值只在那一支里更新，于是遍历序靠前的 agent 抄到的值滞后一步、
-          约束更松。占空比在机组之间**不等价**，而 obs 里又没有 duty ——
-          策略在学一个自己看不见、且逐机组不一致的门控。
+        估算为 DUTY_LIMIT·rate·dt·K + step_bound；末项表示首步累计为零时
+        允许的一次满幅动作。累计器计动作空间裁剪后的量，状态边界截去的
+        部分仍计入占空比；非末位 agent 的累计回抄滞后一个控制步。
+        完整逐机组时序由 probe_duty_env.EnvModel 描述。
         """
         s = self.sustainable(control)
         if math.isinf(s):
@@ -432,11 +415,7 @@ class SafetyLimiter:
         return s * int(n_steps) + STEP_BOUND.get(control, 0.0)
 
     def notes(self, n_steps: Optional[int] = None) -> List[str]:
-        """这份场景下各控制量的可持续量，UI 启动时显示一次。
-
-        给了 n_steps 就同时报回合内可达量 —— 那是判断"这个回合长度下策略有
-        没有机会达到最优点"的唯一依据，比可持续量本身更该出现在面板上。
-        """
+        """报告 DUTY_LIMIT 的累计模型估算；运行限制须读取测量 duty_limit。"""
         out = []
         for c in self.controls:
             s = self.sustainable(c)
@@ -453,5 +432,7 @@ class SafetyLimiter:
             if n_steps:
                 line += (f"；{n_steps} 步回合内最多累积 "
                          f"{self.reachable(c, n_steps):.3g}")
+            line += (f"（累计模型上限 {DUTY_LIMIT:g} 的估算，未使用运行测量；"
+                     "不含状态边界，不代表 yaw 滑动窗口，实际限制以 duty_limit 为准）")
             out.append(line)
         return out

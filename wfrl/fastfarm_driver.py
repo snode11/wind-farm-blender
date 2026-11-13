@@ -35,6 +35,7 @@ from wfcrl import environments as envs
 from wfcrl.rewards import StepPercentage
 
 from wfrl import paths
+from wfrl.safety import DUTY_LIMIT
 
 _LOG = logging.getLogger(__name__)
 
@@ -57,14 +58,11 @@ HUB_HEIGHT = 90.0
 LOAD_SCALE = 1e7
 
 # --- 偏航执行机构占空比：滑动窗口版（贴合真实散热恢复）-----------------------
-# WFCRL 原版占空比是"回合累计、永不衰减"：早期偏得多，配额被历史永久占用，
-# 剩下整个回合的偏航全被清零 —— 偏航到不了 wake steering 需要的 20~30°。这不符合
-# 真实风机（偏航电机偏完散热恢复后可再偏）。这里改成滑动窗口：只看最近 W 步的
-# 动作占比，偏完停几步配额就还回来。同时把上限从 10% 放宽到 30%（wake steering
-# 风场对风动作更频繁，30% 可辩护）⇒ 可持续量 0.3·rate·dt = 0.27°/步，170 步可
-# 偏到 ~45°，真正解锁 30°。偏航速率 0.3°/s 不动（贴合 NREL 5MW，Jonkman 2009）。
+# yaw 默认只累计最近 W 步的动作占比；零动作随窗口滚动释放预算。
+# pitch 及关闭滑动窗口的 yaw 使用 env 的回合累计判据，上限为 DUTY_LIMIT。
+# 测量 duty_limit 与各控制量实际使用的配置一致。
 YAW_DUTY_WINDOW = 20        # 滑动窗口步数（dt=3 s ⇒ 60 s，贴合散热时间尺度）
-YAW_DUTY_LIMIT = 0.30       # 占空比上限（放宽自 WFCRL 原版的 0.10）
+YAW_DUTY_LIMIT = 0.30       # yaw 滑动窗口默认占空比上限
 YAW_RATE = 0.3             # 偏航电机速率 (°/s)，与 mdp.ACTUATORS_RATE["yaw"] 同源
 
 # 一次训练里删不掉的算例目录（Windows 句柄没释放）。下一次 purge 时一并重试。
@@ -388,10 +386,9 @@ class FastFarmDriver:
     def _duty(self):
         """各机组各控制量的**执行机构占空比**，≥上限时动作被清零。
 
-        yaw 走本 driver 的**滑动窗口**（见 YAW_DUTY_* 常量）：只看最近 W 步的动作
-        占比，偏完停几步配额恢复；上限 0.30。其余控制量（pitch）仍走 env 的累计版
-        （`multiagent_env.py:196-207`，acc/rate/(k·dt)，上限 0.10）。
-        yaw 关掉滑动窗口时回退到 env 累计版，与旧行为一致。
+        yaw 滑动窗口只看最近 yaw_duty_window 步，使用 yaw_duty_limit。
+        其余受约束控制量及关闭滑动窗口的 yaw 使用 env 累计版，
+        acc/rate/(k·dt)，上限 DUTY_LIMIT。对应上限由 _duty_limits 提供。
         """
         rate = self._uenv.mdp.ACTUATORS_RATE
         dt = float(self._uenv.farm_case.dt)
@@ -413,6 +410,14 @@ class FastFarmDriver:
                 d["yaw"] = float(yaw_frac[j])
             out[ag] = d
         return out
+
+    def _duty_limits(self):
+        """各受约束控制量的生效上限；env 累计版固定使用 DUTY_LIMIT。"""
+        limits = {c: DUTY_LIMIT for c in self.controls
+                  if c in self.env.mdp.ACTUATORS_RATE}
+        if self.yaw_duty_sliding and "yaw" in self.controls:
+            limits["yaw"] = self.yaw_duty_limit
+        return limits
 
     def _read(self, reward):
         """Read a physical round; *_valid masks describe each turbine's sample.
@@ -470,15 +475,9 @@ class FastFarmDriver:
         tq = self._raw_measure("torque")
         torque = tq if tq is not None else np.full(n, np.nan)
         duty = self._duty()
-        # yaw 已从 env 的 ACTUATORS_RATE 移除（滑动窗口接管），但它的占空比仍要
-        # 上报给 obs-duty/D5 ⇒ 显式把 yaw 并进来。
-        duty_ctrls = [c for c in self.controls
-                      if c in self.env.mdp.ACTUATORS_RATE]
-        if self.yaw_duty_sliding and "yaw" in self.controls \
-                and "yaw" not in duty_ctrls:
-            duty_ctrls.append("yaw")
+        duty_limits = self._duty_limits()
         duty_arr = {c: np.array([duty[ag].get(c, 0.0) for ag in self.agents])
-                    for c in duty_ctrls}
+                    for c in duty_limits}
         clock = self._solver_clock()
         measurement = {
             "yaw": yaw, "power": power, "load": load,
@@ -492,6 +491,7 @@ class FastFarmDriver:
             "pitch_meas": pitch_meas,
             "torque": torque, "rotor_speed": np.full(n, np.nan),
             "duty": duty_arr,
+            "duty_limit": duty_limits,
             "reward": float(reward), "done": self.done, "step": self._steps,
             "solver_clock": clock,
             "wind_conditions": copy.deepcopy(getattr(

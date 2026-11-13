@@ -7,7 +7,8 @@
 
 策略接口:
   - obs = controls + [wind_speed, wind_direction] (+ duty headroom 若 obs_duty)
-  - duty headroom = clip((0.1 - duty_yaw)/0.1, 0, 1)
+  - duty headroom = clip((obs_duty_limit - duty_yaw)/obs_duty_limit, 0, 1)
+  - checkpoint 缺少 obs_duty_limit 时固定使用 0.1
   - 动作按 checkpoint 的版本化合同变换并校验运行时边界
   - 无版本模型须有可确认的 Studio 或 train_fastfarm 元数据
   - 确定性: 用 dist.mean，不 sample
@@ -28,7 +29,9 @@ import torch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from wfrl.mappo_central import Actor                          # noqa: E402
-from wfrl.policy_actions import load_action_contract           # noqa: E402
+from wfrl.policy_actions import (                            # noqa: E402
+    LEGACY_OBS_DUTY_LIMIT, duty_headroom, load_action_contract, load_obs_duty_limit,
+)
 from wfrl.scene.schema import load_scene                      # noqa: E402
 from wfrl.scene.runtime import SceneRuntime                   # noqa: E402
 
@@ -54,7 +57,7 @@ def measurement(m, key, n):
     return values, valid
 
 
-def pack_obs(m, n, obs_keys, obs_duty):
+def pack_obs(m, n, obs_keys, obs_duty, obs_duty_limit=LEGACY_OBS_DUTY_LIMIT):
     cols = []
     for key in obs_keys:
         values, valid = measurement(m, key, n)
@@ -66,7 +69,7 @@ def pack_obs(m, n, obs_keys, obs_duty):
         duty, valid = measurement(m.get("duty") or {}, "yaw", n)
         if not valid.all():
             raise ValueError("拒绝策略观测: duty.yaw 缺失或无效；不做插补")
-        cols.append(np.clip((0.1 - duty) / 0.1, 0.0, 1.0).astype(np.float32))
+        cols.append(duty_headroom(duty, obs_duty_limit))
     obs = np.stack(cols, axis=1).astype(np.float32)
     if not np.isfinite(obs).all():
         raise ValueError("拒绝策略观测: float32 转换后存在非有限值")
@@ -115,13 +118,15 @@ def main():
         ck, controls=sc.controls, n_agents=n, scene=sc.to_dict())
     obs_keys = ck["obs_keys"]
     obs_duty = ck.get("obs_duty", False)
+    obs_duty_limit = load_obs_duty_limit(ck)
     mean = np.asarray(ck["obs_mean"], np.float32)
     std = np.sqrt(np.asarray(ck["obs_var"], np.float32) + 1e-8)
     actor = Actor(ck["obs_dim"], ck["act_dim"])
     actor.load_state_dict(ck["actor"])
     actor.eval()
     print(f"载入 {args.ckpt}\n  obs_dim={ck['obs_dim']} act_dim={ck['act_dim']} "
-          f"obs_duty={obs_duty} recurrent={ck.get('recurrent', False)} "
+          f"obs_duty={obs_duty} obs_duty_limit={obs_duty_limit:g} "
+          f"recurrent={ck.get('recurrent', False)} "
           f"transform={contract.transform} controls={list(contract.controls)}", flush=True)
     print(f"  log_std={ck['actor']['log_std'].numpy()} "
           f"(std={np.exp(ck['actor']['log_std'].numpy())})", flush=True)
@@ -138,7 +143,7 @@ def main():
             rt.step(**{f"{c}_delta": np.zeros(n) for c in contract.controls})
         m = rt.last_measure
         for t in range(ep_steps):
-            obs = pack_obs(m, n, obs_keys, obs_duty)
+            obs = pack_obs(m, n, obs_keys, obs_duty, obs_duty_limit)
             obs_n = ((obs - mean) / std).astype(np.float32)
             if not np.isfinite(obs_n).all():
                 raise ValueError("拒绝策略观测: 归一化后存在非有限值，请检查 checkpoint")
