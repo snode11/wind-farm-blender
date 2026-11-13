@@ -10,14 +10,14 @@ FRAMES, START = 4, 10
 def opengl_job(frontend_module, stub_module, monkeypatch):
     stub_module('bpy_extras.io_utils', ExportHelper=type('ExportHelper', (), {}),
                 ImportHelper=type('ImportHelper', (), {}))
-    down = frontend_module('wfrl_blender.manual_down')
+    down = frontend_module('wfrl_blender.manual_down_jobs')
     evaluated = []
 
     def apply_motion(_scene, _job, frame):
         evaluated.append(frame)
         return dict(frame=frame, evaluation=len(evaluated))
 
-    monkeypatch.setattr(down, 'apply_motion', apply_motion)
+    monkeypatch.setattr(down.motion, 'apply_motion', apply_motion)
     rows = []
     job = dict(frame_events='OPENGL', frame_start=START, frames_written=0, plan=dict(frames=FRAMES),
                append_sample=rows.append)

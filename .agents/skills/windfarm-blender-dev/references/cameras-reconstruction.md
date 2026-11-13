@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | 重建对照与纹理 | `split_reconstruction*.py`、`split_turbine_context.py`、`blade_recon_*.py` | [操作说明](../../../../前端readme.md)、[Blade Recon](../../../../docs/blender/BladeRecon可视化使用说明.md) |
 | Down、机舱与三相机 | `cameras.py`、`nacelle_camera.py`、`stacked_camera_rig.py`、`custom_camera*.py` | [Down](../../../../docs/blender/T1Down机舱下视.md)、[机舱](../../../../docs/blender/NREL机舱相机.md)、[三相机](../../../../docs/blender/T1三相机使用说明.md) |
+| 手动 Down／侧视机位、标注与外形 | `manual_down_cameras.py`；入口 `manual_down.py`；`manual_down_ui.py` 只切换调用视口，运动与导出由对应模块管理 | [Down 实现结构](../../../../blender_frontend/README.md#手动-down-相机与导出)、[视频作业](video-jobs.md#手动-down-视频) |
 | 缺陷编辑与分析 | `nrel_defects/`、`repair_marks.py` | [NREL 缺陷编辑器](../../../../docs/blender/NREL缺陷编辑器.md) |
 
 ## 光学、预览与资源生命周期

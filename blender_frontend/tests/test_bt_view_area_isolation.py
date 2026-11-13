@@ -20,11 +20,11 @@ def _state(area):
 def down_view(frontend_module, stub_module, monkeypatch):
     stub_module('bpy_extras.io_utils', ExportHelper=type('ExportHelper', (), {}),
                 ImportHelper=type('ImportHelper', (), {}))
-    down = frontend_module('wfrl_blender.manual_down')
+    down = frontend_module('wfrl_blender.manual_down_ui')
     cameras = dict(CENTER=object(), LEFT=object(), RIGHT=object())
     ensure = Mock(return_value=cameras['CENTER'])
-    monkeypatch.setattr(down, 'ensure_down_camera', ensure)
-    monkeypatch.setattr(down, 'ensure_side_cameras',
+    monkeypatch.setattr(down.camera_rig, 'ensure_down_camera', ensure)
+    monkeypatch.setattr(down.camera_rig, 'ensure_side_cameras',
                         Mock(return_value=dict(Left=cameras['LEFT'], Right=cameras['RIGHT'])))
 
     def frame(area, _scene):

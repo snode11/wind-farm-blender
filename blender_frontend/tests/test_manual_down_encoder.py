@@ -10,7 +10,7 @@ import pytest
 def manual_down(frontend_module, stub_module):
     stub_module('bpy_extras.io_utils', ExportHelper=type('ExportHelper', (), {}),
                 ImportHelper=type('ImportHelper', (), {}))
-    return frontend_module('wfrl_blender.manual_down')
+    return frontend_module('wfrl_blender.manual_down_render')
 
 
 def _encoder(script):

@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT/'blender_frontend'), str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import manual_down as down, custom_camera_preview as preview
+from wfrl_blender import manual_down_jobs as jobs, manual_down_motion as motion, manual_down_render as rendering
 
 OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
 OUT.mkdir(parents=True, exist_ok=False)
@@ -44,7 +45,7 @@ def check_encoder_startup_cleanup(scene, ffmpeg):
         job = {'plan': {'fps': 25}}
         view = (None, None, None)
         try:
-            with patch.dict(sys.modules, gpu=gpu), patch.object(down.subprocess, 'Popen', launch):
+            with patch.dict(sys.modules, gpu=gpu), patch.object(rendering.subprocess, 'Popen', launch):
                 try:
                     if allocation_fails:
                         down._draw_offscreen(scene, job, view, None, ffmpeg, str(OUT / 'gpu.mp4'))
@@ -181,7 +182,7 @@ try:
             raise RuntimeError('controlled pose failure')
         return apply_motion(render_scene, job, frame)
 
-    with patch.object(down, 'apply_motion', fail_pose):
+    with patch.object(motion, 'apply_motion', fail_pose):
         try:
             export('failed-pose')
         except RuntimeError as exc:
@@ -189,7 +190,7 @@ try:
         else:
             raise AssertionError('A failed frame was published as a successful Down video')
     assert destination.read_bytes() == b'previous video' and sidecar.read_bytes() == b'previous samples'
-    assert down._snapshot(scene) == saved and not down._EXPORT
+    assert down._snapshot(scene) == saved and not jobs._EXPORT
     assert set(scratch.glob('wfrl_down_*')) == old_temps
     retry = export('failed-pose').with_suffix('.json')
     retry_data = json.loads(retry.read_text(encoding='utf-8'))
@@ -227,7 +228,7 @@ try:
             bpy.app.handlers.render_write.remove(write_during_render)
         assert observed == [1]
         assert target.read_bytes() == external_movie and sidecar.read_bytes() == external_json
-        assert down._snapshot(scene) == saved and not down._EXPORT
+        assert down._snapshot(scene) == saved and not jobs._EXPORT
         assert not scene.get('wfrl_manual_last_video')
         assert set(scratch.glob('wfrl_down_*')) == old_temps and not list(OUT.glob('.wfrl-down-*'))
 
@@ -259,7 +260,7 @@ try:
         if render_scene.frame_current != 2:
             frame_written(render_scene, depsgraph)
 
-    with patch.object(down, '_write_frame_handler', miss_last_write):
+    with patch.object(jobs, '_write_frame_handler', miss_last_write):
         try:
             export('missing-write')
         except RuntimeError as exc:
@@ -271,7 +272,7 @@ try:
 
     rejected = SimpleNamespace(render=SimpleNamespace(render=lambda *_args, **_kwargs: {'CANCELLED'}))
     native = SimpleNamespace(ops=rejected, context=bpy.context, data=bpy.data, app=bpy.app, path=bpy.path)
-    with patch.object(down, 'bpy', native):
+    with patch.object(jobs, 'bpy', native):
         try:
             down.export_down_video(scene, 'T1', str(OUT / 'cancelled.mp4'), engine='SCENE',
                                    blocking=False, frames=2, size=(96, 54), labels=False, dynamics=False)
@@ -279,7 +280,7 @@ try:
             pass
         else:
             raise AssertionError('A rejected render invocation was treated as an active job')
-    assert not scene.get('wfrl_manual_exporting') and scene.as_pointer() not in down._EXPORT
+    assert not scene.get('wfrl_manual_exporting') and scene.as_pointer() not in jobs._EXPORT
     assert down._snapshot(scene) == saved
     assert set(scratch.glob('wfrl_down_*')) == old_temps
     assert down._frame_handler not in bpy.app.handlers.frame_change_pre
@@ -288,7 +289,7 @@ try:
 
     center = OUT / 'take_left.mp4'
     native = SimpleNamespace(app=SimpleNamespace(background=False), path=bpy.path)
-    with patch.object(down, 'bpy', native), patch.object(down, '_view_area', side_effect=AssertionError):
+    with patch.object(jobs, 'bpy', native), patch.object(rendering, '_view_area', side_effect=AssertionError):
         try:
             down.export_triple_down_video(scene, 'T1', [center, center, OUT / 'take_right.mp4'])
         except ValueError:

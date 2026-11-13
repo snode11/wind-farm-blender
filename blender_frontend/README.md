@@ -77,7 +77,7 @@
 - `panels/home.py` 与 `home_state.py`：WFRL 主入口、只读任务摘要、播放器归属、当前结果／时刻、已应用相机与草稿／观察／采集状态，以及独立后端状态；各模块 `status_for(scene)` 与 `can_start(action, scene)` 共享前台资源冲突判断，独立文件复制不使用全局 busy 锁。主页提供 X100／研究任务跳转和手动 Down／三路 Down 视频入口；复用回放、相机、手动和导出面板的现有操作器，不管理运动时钟。导航保存在 WindowManager，进入／返回独立手动场景时保留所选页面；卸载移除导航属性。
 - `manual_scene.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py`、`manual_down.py` 与 `panels/manual_control.py`：独立刚性场景、墙钟积分、限速变桨、姿态预设、按机组当前值微调、三机概览、严格姿态 JSON，以及手动场景的 Down 相机、叶片外形与 Down MP4 导出；`manual_dynamics.py` 提供视口实时与导出共用的示意性叶片挥舞弯曲与塔架运动。`manual_pose.py` 只使用标准库，定义 `wfrl.manual-pose.v1` 和角度边界；Blender 操作器先校验所选机组再写入参数、对象与时钟，导入后暂停。文件保存不暂停运行，运动相位以同一墙钟时刻采样；[操作说明](../docs/blender/风机手动控制.md)。
 - `manual_scene_links.py`：`Scene.wfrl_manual_scene` 是由 `bind()`／`resolve()` 实现的 Python 属性。原场景以稳定的手动归属标识（`wfrl_manual_scene_owner`）查找其独立场景，手动场景以 Scene 指针 `wfrl_manual_return_scene` 保存返回目标，避免双向 Scene ID 引用形成依赖环。名称改变不影响查找；候选手动场景须返回到该原场景，复制的原场景不能认领另一原场景的手动模型，归属不明确时不返回目标。`restore()` 在扩展 `load_post` 与手动控制的加载／撤销／重做恢复回调中规范存储关联；缺少标识的保存文件仅通过唯一返回关系恢复关联，显式解除的关联保持断开。
-- `live_stream.py` 与 `live_stream_view.py`：现场视频分屏。`live_stream.py` 校验流地址并以 FFmpeg 子进程解码为固定尺寸 RGBA 帧，只保留最新一帧，断流后按间隔重连；`live_stream_view.py` 把调用的 3D 视图拆成左侧手动场景 Down 相机与右侧图像编辑器，后者以绘制回调显示最新帧，标题栏提供关闭按钮。每个 Blender 进程一个会话。停止、关闭右侧区域、加载文件或停用扩展时释放纹理并在后台结束 FFmpeg，确认进程及读取线程退出后释放占用。Blender 正常退出时回收仍由直播模块持有的 FFmpeg 进程。离开原布局也会停止拉流，返回时按布局标记收回直播区域。布局标记可随 `.blend` 重开。操作器为 `wfrl.live_stream_start`／`wfrl.live_stream_stop`。
+- `live_stream.py` 与 `live_stream_view.py`：现场视频分屏。`live_stream.py` 校验流地址并以 FFmpeg 子进程解码为固定尺寸 RGBA 帧，只保留最新一帧，断流后按间隔重连；`live_stream_view.py` 只切换并分割发起调用的 3D 视图，形成左侧手动场景 Down 相机与右侧图像编辑器，其他视口的相机、取景和绘制设置保持。缺少可用的调用视图时报告错误，不选择其他视口。启动前保存调用视图；Down 切换、分屏、解码器或绘制／计时器启动失败时回收已取得的分屏和资源，恢复原相机、透视／正交模式、视图矩阵、位置、旋转、距离、相机缩放偏移、裁剪、着色、叠加层与侧栏状态。图像编辑器以绘制回调显示最新帧，标题栏提供关闭按钮。每个 Blender 进程一个会话。停止、关闭右侧区域、加载文件或停用扩展时释放纹理并在后台结束 FFmpeg，确认进程及读取线程退出后释放占用。Blender 正常退出时回收仍由直播模块持有的 FFmpeg 进程。离开原布局也会停止拉流，返回时按布局标记收回直播区域。布局标记可随 `.blend` 重开。操作器为 `wfrl.live_stream_start`／`wfrl.live_stream_stop`。
 - `blade_root_display.py`：回放外形对应的叶根展示附件事务，`mesh_fingerprint()` 为叶根附件计算网格几何指纹。叶片切换失败时恢复接头，保留原材质及用户数据；不改写运动、载荷或测量资源。
 - `panels/farm_replay.py`：共享播放、单步、复位及功能页；普通三机回放提供进度定位，统一重建对照隐藏进度滑块。View 页组织观察相机，切视角保留回放时刻。
 - `split_reconstruction.py`、`split_reconstruction_timing.py`、`split_reconstruction_ui.py`：保存分屏生命周期、完整风机显示、独立视口、固定采样映射、统一入口、模式切换及左下角状态说明；底层样本步进工具保留，统一侧栏使用单帧步进。规范资源为 `assets/examples/mappo_reconstruction_split.blend`。
@@ -97,7 +97,24 @@
 
 限速变桨：`pitch_b{i}_deg`／`pitch_deg` 是设定桨距，每台机组另存 `pitch_actual_b{i}_deg`（叶片对象实际使用）与 `pitch_start_b{i}_deg`（本次变桨起点）。场景属性 `wfrl_manual_pitch_rate_deg_s` 为 0 时设定即到位；大于 0 时修改桨距字段只记录起点，`tick()` 按墙钟以 `manual_motion.pitch_at()` 推进实际桨距并在到位后停止唤醒。旧文件缺少实际桨距时（`pitch_state_ready` 为假）以设定值初始化。姿态预设、复位与姿态文件载入立即到位，微调遵循变桨速度；变桨速度不属于 `wfrl.manual-pose.v1`。
 
-`manual_down.py` 为手动场景每台风机创建 `<owner>.Turbine.<机组>.DownCamera`（`wfrl_down_camera=True`，父级为该机 YawRoot），由 `cameras.down_gimbal()` 按与回放 Down 相同的挂点射线、偏移和光学预设安装，俯仰取相机自定义属性 `wfrl_down_pitch_deg`（`manual_down_pitch()` 按叶片外形取 `MANUAL_DOWN_PITCH_DEG`：rootkink −78°，NREL 与回放相同的 −82.5°；回放 Down 无此属性，仍用 `DOWN_PITCH_DEG`）；`apply_blade_model()` 切换外形后由 `_reaim_down_cameras()` 重新对准中心相机并重算侧视相机；`cameras.is_down_camera()` 统一识别回放与手动场景的 Down 相机。`wfrl_manual_blade_model` 以 `foreach_set` 原位改写三机共享的叶片网格（NREL 与 rootkink 拓扑相同），并重新标记叶尖色带。`wfrl.manual_down_video` 暂停场景，按导出开始时的叶轮角度、RPM、起点／设定桨距与变桨速度生成逐帧计划（`_plan()`／`pose_at()`），由 `apply_frame()` 直接写入转子与叶片变换，不改动机组属性；长度为时长或帧数，分辨率取 `VIDEO_SIZES`，输出 MPEG-4 / H.264 与同名逐帧 JSON（含 `render_mode`、`encoder`、`gpu`、`blade_labels`）。导出前校验目标路径和原生控制冲突，并记录目标路径、目录身份和文件状态。提交时复核导出前的状态。每路视频以完整相机画幅和单视图渲染，结束后恢复场景的渲染区域、多视图和图片位深。逐帧样本流式写入作业私有 JSON。姿态失败或样本不完整会阻止发布。成片与完整 JSON 通过 `video_output.publish_staged()` 暂存、提交和失败回滚。渲染方式如下。
+### 手动 Down 相机与导出
+
+| 模块 | 职责 |
+| --- | --- |
+| [manual_down.py](wfrl_blender/manual_down.py) | 薄入口，直接导出相机、运动、视频函数、常量、操作器及 `register()`／`unregister()`；`__init__.py` 从此注册，`live_stream_view.py` 从此导入 `ffmpeg_executable()` |
+| [manual_down_cameras.py](wfrl_blender/manual_down_cameras.py) | Down／左右侧视机位、叶片编号、叶片外形与镜头重新对准 |
+| [manual_down_motion.py](wfrl_blender/manual_down_motion.py) | 帧计划、姿态采样、导出与现场相机抖动、静止姿态恢复，以及 `manual_dynamics` 的运动调用 |
+| [manual_down_jobs.py](wfrl_blender/manual_down_jobs.py) | 单路／三路编排、预检、唯一导出所有权、原生渲染回调、快照恢复、样本写入、发布与清理重试 |
+| [manual_down_render.py](wfrl_blender/manual_down_render.py) | FFmpeg 查找与进程／写帧线程回收、GPU 离屏绘制、导出视口适配与恢复 |
+| [manual_down_ui.py](wfrl_blender/manual_down_ui.py) | 三个操作器、导出对话框参数、场景属性及回调注册／卸载 |
+
+`_EXPORT` 与 `_JOBS` 只由 `manual_down_jobs.py` 持有；其他实现模块通过 `is_exporting(scene)`、`_check_owner(job)` 与 `stop_exports()` 访问占用和生命周期。入口直接引用所属模块的函数，不包装回调；注册、重复注册检查与卸载使用同一个函数对象。测试故障注入指向实际所属模块：姿态采样 patch `manual_down_motion.apply_motion`，收尾与原生回调 patch `manual_down_jobs`，编码与绘制 patch `manual_down_render`，机位创建 patch `manual_down_cameras`。
+
+`manual_down_cameras.py` 为手动场景每台风机创建 `<owner>.Turbine.<机组>.DownCamera`（`wfrl_down_camera=True`，父级为该机 YawRoot），由 `cameras.down_gimbal()` 按与回放 Down 相同的挂点射线、偏移和光学预设安装，俯仰取相机自定义属性 `wfrl_down_pitch_deg`（`manual_down_pitch()` 按叶片外形取 `MANUAL_DOWN_PITCH_DEG`：rootkink −78°，NREL 与回放相同的 −82.5°；回放 Down 无此属性，仍用 `DOWN_PITCH_DEG`）；`apply_blade_model()` 切换外形后由 `_reaim_down_cameras()` 重新对准中心相机并重算侧视相机；`cameras.is_down_camera()` 统一识别回放与手动场景的 Down 相机。`wfrl_manual_blade_model` 以 `foreach_set` 原位改写三机共享的叶片网格（NREL 与 rootkink 拓扑相同），并重新标记叶尖色带。
+
+`manual_down_ui.WFRL_OT_ManualDownView` 的操作器 ID 为 `wfrl.manual_down_view`，只向调用的 3D 视图设置本地相机并适配画框。侧栏调用使用同一区域的 WINDOW region；缺少有效区域时取消，不回退到其他视口。它也供 `live_stream_view.start()` 在调用区域的上下文中使用。
+
+`manual_down_jobs.export_down_video()` 暂停场景，按导出开始时的叶轮角度、RPM、起点／设定桨距与变桨速度生成逐帧计划（`manual_down_motion._plan()`／`pose_at()`），由 `apply_frame()` 直接写入转子与叶片变换，不改动机组属性；长度为时长或帧数，分辨率取 `VIDEO_SIZES`，输出 MPEG-4 / H.264 与同名逐帧 JSON（含 `render_mode`、`encoder`、`gpu`、`blade_labels`）。导出前校验目标路径和原生控制冲突，并记录目标路径、目录身份和文件状态。提交时复核导出前的状态。每路视频以完整相机画幅和单视图渲染，结束后恢复场景的渲染区域、多视图和图片位深。逐帧样本流式写入作业私有 JSON。姿态失败或样本不完整会阻止发布。成片与完整 JSON 通过 `video_output.publish_staged()` 暂存、提交和失败回滚。渲染方式如下。
 
 - `VIEWPORT_MATERIAL`／`VIEWPORT_SOLID`：需要窗口中的 3D 视图，`_prepare_view()` 临时切换为本地 Down 相机、对应着色并关闭叠加层，导出期间同步阻塞。`ffmpeg_executable()` 找到 FFmpeg（偏好 `video_ffmpeg`，否则 PATH）时，`_draw_offscreen()` 以 `GPUOffScreen.draw_view3d()` 按 Down 相机矩阵逐帧绘制、读回 RGBA8，经后台线程写入 FFmpeg 标准输入（libx264 veryfast、CRF 18、yuv420p）；否则调用 `render.opengl(animation=True, view_context=True)` 并由 `frame_change_pre` 推进姿态。视口方式使用 Standard 视图变换、单采样、关闭抖动与合成，结束后恢复。
 - `SCENE`（EEVEE，采样数可设）与 `WORKBENCH`：`render.render`；窗口中以 `INVOKE_DEFAULT` 运行，由 `render_complete`／`render_cancel` 收尾，后台同步渲染。渲染启动失败时同样释放作业并恢复设置。
@@ -106,15 +123,15 @@
 
 视口实时运动由 `manual_control.MOTION_HOOKS` 中的 `manual_dynamics.live_update(scene, now)` 在每次 `tick()` 的叶轮更新之后执行：每台风机的幅度以 2 s 一阶滞后趋向 `load_factor(rpm 或 0, 实际桨距)`，大于 0 时为三台风机共用一份 `.FlapBend` 网格并挂上同一修改器，回落到 0 后恢复。恢复所需的原网格名、原修改器显示状态和 Root 基准矩阵保存在对象自定义属性 `wfrl_flap_restore`／`wfrl_flap_base` 中；场景不再显示时由 `STOP_HOOKS` 中的 `live_stop()` 恢复，`save_pre` 在保存前恢复刚性模型，`load_post`／`undo_post`／`redo_post` 按自定义属性清理残留。`apply_blade_model()` 改写共享网格前同样撤下实时弯曲，下一次 tick 重新生成。叶尖偏移另含 `make_signals()` 按种子生成的每片固定偏差 `bias`（`BLADE_IMBALANCE_M`），使三片叶片经过塔筒时净空不同。
 
-视口相机抖动由 `manual_down.live_shake_update()` 在 `MOTION_HOOKS` 中紧随 `live_update` 执行（场景属性 `wfrl_manual_camera_shake`）：幅度以同一 2 s 滞后趋向 `shake_amplitude(rpm)`，形状取 `_shake_shape()`，俯仰同样经 `min_shake_tilt()` 限制，作用于该机全部 Down／侧视相机。静止姿态与上次写入的抖动姿态存于相机自定义属性 `wfrl_shake_base`／`wfrl_shake_pose`；当前姿态与上次写入不同（复位、重算侧视相机、视图导航）时以当前姿态为新的静止姿态。`side_camera_matrix()` 使用 `rest_matrix()`。`_start_motion()`、`save_pre`、`STOP_HOOKS` 与 `load_post`／`undo_post`／`redo_post` 恢复静止姿态。
+视口相机抖动由 `manual_down_motion.live_shake_update()` 在 `MOTION_HOOKS` 中紧随 `live_update` 执行（场景属性 `wfrl_manual_camera_shake`），也可通过 `manual_down.live_shake_update()` 调用：幅度以同一 2 s 滞后趋向 `shake_amplitude(rpm)`，形状取 `_shake_shape()`，俯仰同样经 `min_shake_tilt()` 限制，作用于该机全部 Down／侧视相机。静止姿态与上次写入的抖动姿态存于相机自定义属性 `wfrl_shake_base`／`wfrl_shake_pose`；当前姿态与上次写入不同（复位、重算侧视相机、视图导航）时以当前姿态为新的静止姿态。`side_camera_matrix()` 使用 `rest_matrix()`。`_start_motion()`、`save_pre`、`STOP_HOOKS` 与 `load_post`／`undo_post`／`redo_post` 恢复静止姿态。
 
-导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景；`_finish()` 无论成功与否都恢复场景、视图与进度条并删除临时目录。
+导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景。`manual_down_jobs._finish()` 在成功、失败或取消时等待原生渲染和编码资源退出，按仍有效的作业身份恢复场景、视图与姿态，再清理自有暂存；未完成时保留 `STOPPING`／`FINALIZING` 占用，由同一个 `_retry_exports` 计时器重试。场景加载、撤销／重做后失去归属的作业只回收资源，不向替代场景写入旧状态。
 
-`ensure_side_cameras(scene, turbine)` 在同一 YawRoot 下创建 `<owner>.Turbine.<机组>.DownCamera.Left` 和 `DownCamera.Right`，共用中心相机的挂点位置（`_down_mount()` 返回的坐标）、同样的 pitch、roll 和 8 mm 镜头；偏航分别为 `DOWN_YAW_DEG ± TRIPLE_STEP_DEG`（TRIPLE_STEP_DEG = 47°，由用户约定的 59° 视场角减去 12° 重叠得到，与中心相机构成 153° 有效视场）。三个相机的镜头和挂点相同，因此同一叶片在左、右相机中的叶片形态与中心相机完全一致，仅背景随偏航角不同。`_draw_offscreen_multi()` 在单帧循环内为三个相机各开一条 FFmpeg 标准输入管道，每帧依次渲染三路，三路视频帧时间戳完全同步；与三次单独渲染相比，只需建一个离屏缓冲区且只走一次 `apply_frame()`，总耗时约为单路的 3 倍。`wfrl.manual_triple_down_video` 在面板同一"Down 相机"分组下提供"导出三路 Down 视频 MP4…"按钮，中心路路径由对话框选取，左、右路自动加 `_left`、`_right` 后缀写入同一目录；三路导出只支持视口方式且要求 FFmpeg。
+`manual_down_cameras.ensure_side_cameras(scene, turbine)` 在同一 YawRoot 下创建 `<owner>.Turbine.<机组>.DownCamera.Left` 和 `DownCamera.Right`，复制中心相机的镜头参数。`side_camera_matrix()` 将中心静止位姿绕转子主轴旋转 ±`TRIPLE_STEP_DEG`，同时改变位置与方向；在相应叶轮方位下，侧视与中心视图的叶片投影相同，背景随机位改变。`TRIPLE_STEP_DEG=47°` 来自约定的 59° 视场与 12° 重叠，153° 是该约定下的合计视场；实际 16:9 Down 镜头的水平视场约 91.5°，实际重叠更大。`manual_down_render._draw_offscreen_multi()` 共用一个离屏缓冲区，每帧生成一次运动样本、依次绘制三路并交给各自的 FFmpeg 管道；三路视频逐帧同步。`wfrl.manual_triple_down_video` 在面板同一“Down 相机”分组下提供“导出三路 Down 视频 MP4…”按钮，中心路路径由对话框选取，左、右路自动加 `_left`、`_right` 后缀写入同一目录；三路导出只支持视口方式且要求 FFmpeg。
 
 手动场景光照：天空 HDRI 中提取的太阳（`world.use_sun_shadow`）是唯一投射阴影的光源；场景 Sun 灯 `use_shadow=False`，只作补光，避免每座塔筒出现两个方向不同的影子。`manual_scene._ensure_environment()` 进入或聚焦已有手动场景时同样校正。
 
-叶片编号：`ensure_down_camera()` 在每个 Down 相机下创建右上角深色框 `Legend.Back` 与三个文字物体 `Legend.B1..3`（B1／B2／B3），使用自发光材质、关闭阴影可见性并标记 `wfrl_down_label`；旧版本留下的 `Label.*`、`Legend.Title` 物体在此删除。`current_blade()` 取各叶片半展长截面中心在相机坐标中与视线夹角最小的叶片，`update_labels()` 只显示其编号；可见性仅在变化时写入，以避免逐帧重建依赖关系。`manual_control.POSE_LISTENERS` 在手动姿态刷新时调用编号更新；场景属性 `wfrl_manual_blade_labels` 控制显示。
+叶片编号：`ensure_down_camera()` 在每个 Down 相机下创建右上角深色框 `Legend.Back` 与三个文字物体 `Legend.B1..3`（B1／B2／B3），使用自发光材质、关闭阴影可见性并标记 `wfrl_down_label`；不属于该编号框的 `Label.B1..3`、对应 `.Back` 与 `Legend.Title` 物体在此删除。`current_blade()` 取各叶片半展长截面中心在相机坐标中与视线夹角最小的叶片，`update_labels()` 只显示其编号；可见性仅在变化时写入，以避免逐帧重建依赖关系。`manual_control.POSE_LISTENERS` 在手动姿态刷新时调用编号更新；场景属性 `wfrl_manual_blade_labels` 控制显示。
 
 ## 源码资源生命周期
 
@@ -593,7 +610,7 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 
 ### Windows 支持范围
 
-- 扩展构建产物发布依赖硬链接及相应排他提交语义，目标卷需支持。见 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。`test_extension_output.py`、`test_extension_package.py` 中依赖该发布语义的用例在 `os.name == 'nt'` 时跳过；这不表示 Windows 发布链路已验证，其他宿主用例仍运行。手动 Down 视频导出在临时目录完成后以 `shutil.move` 移到目标路径，再写同名 JSON，不使用排他提交。
+- 扩展构建产物发布依赖硬链接及相应排他提交语义，目标卷需支持。见 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。`test_extension_output.py`、`test_extension_package.py` 中依赖该发布语义的用例在 `os.name == 'nt'` 时跳过；这不表示 Windows 发布链路已验证，其他宿主用例仍运行。手动 Down 视频由 `manual_down_jobs.py` 在私有目录完成 MP4 与逐帧 JSON，经 `video_output.publish_staged()` 暂存至目标文件系统后排他提交；发布合同与失败回滚见[手动 Down 导出](#手动-down-相机与导出)。
 - `.command` 和 macOS shell 入口只适用于 macOS。见 [`.command` 入口示例](../scripts/blender/打开净空雷达演示.command#L4)、[`run_wfrl_macos.sh`](../scripts/blender/run_wfrl_macos.sh#L1) 和 [`verify_macos.sh`](../scripts/blender/verify_macos.sh#L1)。
 - 已有 MP4 导出在 Windows 上按设备、inode、大小和 mtime 判定源文件身份，不比较 ctime；POSIX 另比较 ctime，以发现保留 mtime 的内容修改。
 - Launcher 在 Windows 上以 `CREATE_NEW_PROCESS_GROUP` 启动并发送 `signal.CTRL_BREAK_EVENT` 请求停止，接收进程须与发送者共享控制台。Bridge 的 `__main__` 注册 SIGBREAK 并等待后端清理确认；前后端联合验收仍以进程退出和 `EMPTY_CONFIRMED` 为准，不能仅凭信号发送成功或某个退出码判断清理完成。

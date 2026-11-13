@@ -22,7 +22,7 @@ class Scene(dict):
 def down(frontend_module, stub_module, monkeypatch):
     stub_module('bpy_extras.io_utils', ExportHelper=type('ExportHelper', (), {}),
                 ImportHelper=type('ImportHelper', (), {}))
-    module = frontend_module('wfrl_blender.manual_down')
+    module = frontend_module('wfrl_blender.manual_down_jobs')
     monkeypatch.setattr(module.bpy.app, 'is_job_running', lambda _kind: False)
     for name in ('frame_change_pre', 'render_write', 'render_complete', 'render_cancel',
                  'load_pre', 'undo_pre', 'redo_pre'):
@@ -104,27 +104,27 @@ def test_encoder_shutdown_retains_every_handle_until_process_and_thread_exit(dow
 def test_context_manager_checks_last_join_and_keeps_stuck_writer(down, monkeypatch):
     job, process, writer = {}, Process(running=False), Writer()
     writer.start = lambda: None
-    monkeypatch.setattr(down.subprocess, 'Popen', lambda *_a, **_k: process)
-    monkeypatch.setattr(down.threading, 'Thread', lambda **_k: writer)
+    monkeypatch.setattr(down.rendering.subprocess, 'Popen', lambda *_a, **_k: process)
+    monkeypatch.setattr(down.rendering.threading, 'Thread', lambda **_k: writer)
     with pytest.raises(RuntimeError, match='停止中'):
-        with down._offscreen_encoder(['encoder'], job=job):
+        with down.rendering._offscreen_encoder(['encoder'], job=job):
             pass
     assert writer.joins == 2 and writer.checks == 2
     assert job['state'] == 'STOPPING' and len(job['encoders']) == 1
     assert not job['encoders'][0]['log'].closed
     writer.alive = False
-    assert down._reap_encoders(job) and not job['encoders']
+    assert down.rendering._reap_encoders(job) and not job['encoders']
 
 
 def test_encoder_start_failure_closes_registered_log(down, monkeypatch):
     job, log = {}, io.BytesIO()
-    monkeypatch.setattr(down.tempfile, 'TemporaryFile', lambda: log)
+    monkeypatch.setattr(down.rendering.tempfile, 'TemporaryFile', lambda: log)
     def fail(*_a, **_k):
         assert job['encoders'][0]['log'] is log
         raise OSError('encoder startup failed')
-    monkeypatch.setattr(down.subprocess, 'Popen', fail)
+    monkeypatch.setattr(down.rendering.subprocess, 'Popen', fail)
     with pytest.raises(OSError, match='startup failed'):
-        with down._offscreen_encoder(['encoder'], job=job):
+        with down.rendering._offscreen_encoder(['encoder'], job=job):
             pytest.fail('encoder must not start')
     assert log.closed and not job['encoders']
 
@@ -204,10 +204,10 @@ def test_camera_transform_failure_keeps_restore_record(down):
     camera = Camera()
     job = dict(rig=[(camera, None, dict(location=(1, 2, 3)))])
     with pytest.raises(RuntimeError, match='locked'):
-        down._end_shake(job)
+        down.motion._end_shake(job)
     assert len(job['rig']) == 1
     camera.fail = False
-    down._end_shake(job)
+    down.motion._end_shake(job)
     assert camera.location == (1, 2, 3) and 'rig' not in job
 
 
