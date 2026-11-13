@@ -88,6 +88,9 @@ class Sensor:
             raise SceneErrorProxy("rate_hz 和 dt 必须大于 0")
         interval = (1.0 / rate) / dt
         if not math.isfinite(interval):
+            # 有限的周期步数可能因先计算极小采样率的倒数而溢出。
+            interval = (1.0 / dt) / rate
+        if not math.isfinite(interval):
             raise SceneErrorProxy("采样周期超出有限控制步范围")
         period = max(1, int(math.ceil(interval)))
         self.period_steps = period
@@ -112,10 +115,13 @@ class Sensor:
         raise NotImplementedError
 
     def step(self, ctx) -> Optional[Dict[str, Any]]:
-        """带抽稀的采样。返回 None 表示本步不出数（保持上一帧）。"""
-        if not self.decimate():
-            return None
+        """带抽稀的采样；调度或采样异常通过各通道的 error 返回。
+
+        返回 None 表示本步不出数（保持上一帧）。
+        """
         try:
+            if not self.decimate():
+                return None
             self._last = self.sample(ctx)
         except Exception as e:                              # noqa: BLE001
             # 单个传感器炸掉不该让整场仿真停。把错误发到自己的通道上，UI 显示红字。
