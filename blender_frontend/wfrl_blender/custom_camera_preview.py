@@ -18,6 +18,7 @@ _REVISION = 0
 _ALL_SCENES_REVISION = 0
 _SCENE_REVISIONS = {}
 _RENDERERS = set()
+_PENDING_TARGETS = set()
 _CHANGE_CALLBACKS = globals().get('_CHANGE_CALLBACKS', set())
 # A module reload keeps the previous callback registered until it is removed.
 _previous_changed = globals().get('changed')
@@ -106,9 +107,16 @@ def drawing_settings(space, fast=False):
         space.overlay.show_overlays, space.show_gizmo = False, False
         yield
     finally:
-        for key, value in saved.items():
-            setattr(shader, key, value)
-        space.overlay.show_overlays, space.show_gizmo = overlays, gizmos
+        errors = []
+        restore = [(shader, key, value) for key, value in saved.items()]
+        restore.extend(((space.overlay, 'show_overlays', overlays), (space, 'show_gizmo', gizmos)))
+        for owner, key, value in restore:
+            try:
+                setattr(owner, key, value)
+            except Exception as exc:
+                errors.append(str(exc))
+        if errors:
+            raise RuntimeError('视口设置恢复失败：' + '；'.join(errors))
 
 
 @contextmanager
@@ -130,9 +138,20 @@ def without_annotations(scene, view_layer):
         view_layer.update()
         yield
     finally:
+        errors = []
         for obj in changed_objects:
-            obj.hide_set(False, view_layer=view_layer)
-        view_layer.update()
+            try:
+                obj.hide_set(False, view_layer=view_layer)
+            except ReferenceError:
+                continue
+            except Exception as exc:
+                errors.append(str(exc))
+        try:
+            view_layer.update()
+        except Exception as exc:
+            errors.append(str(exc))
+        if errors:
+            raise RuntimeError('标注可见性恢复失败：' + '；'.join(errors))
 
 
 def matrices(camera, depsgraph, long_edge, max_size=None, preview=False):
@@ -169,7 +188,7 @@ class RenderTarget:
         if self.offscreen is not None:
             try:
                 self.offscreen.free()
-            except (ReferenceError, RuntimeError):
+            except ReferenceError:
                 pass
             self.releases += 1
         self.offscreen, self.key = None, None
@@ -199,12 +218,20 @@ class RenderTargetPool:
         return offscreen
 
     def free(self):
-        for target in self.targets.values():
+        errors = []
+        for key, target in tuple(self.targets.items()):
             previous = target.releases
-            target.free()
+            try:
+                target.free()
+            except Exception as exc:
+                errors.append(str(exc))
+            else:
+                del self.targets[key]
             self.releases += target.releases - previous
-        self.targets.clear()
-        self.window = None
+        if not self.targets:
+            self.window = None
+        if errors:
+            raise RuntimeError('采集 GPU 资源释放失败：' + '；'.join(errors))
 
     def usage(self):
         return {'allocations': self.allocations, 'releases': self.releases,
@@ -240,16 +267,26 @@ class PreviewTargets:
 
     def trim(self, spare_count):
         idle = [target for target in self.targets if target not in self.leased]
-        for target in idle[spare_count:]:
-            target.free()
-            self.targets.remove(target)
+        self._free_targets(idle[spare_count:])
+
+    def _free_targets(self, targets):
+        errors = []
+        for target in targets:
+            try:
+                target.free()
+            except Exception as exc:
+                errors.append(str(exc))
+            else:
+                self.targets.remove(target)
+                self.leased.discard(target)
+        if errors:
+            raise RuntimeError('预览 GPU 资源释放失败：' + '；'.join(errors))
 
     def free(self):
-        for target in self.targets:
-            target.free()
-        self.targets.clear()
-        self.leased.clear()
-        self.state_cache.free()
+        try:
+            self._free_targets(tuple(self.targets))
+        finally:
+            self.state_cache.free()
 
 
 class CameraImage:
@@ -500,9 +537,17 @@ def render_group(context, cameras, long_edge=None, target=None, fast=False, *, c
             image.free()
         raise
     finally:
-        if owned_target:
-            target.free()
-        _DRAWING = False
+        try:
+            if owned_target:
+                try:
+                    target.free()
+                except Exception:
+                    _PENDING_TARGETS.add(target)
+                    for image in images.values():
+                        image.free()
+                    raise
+        finally:
+            _DRAWING = False
 
 
 def available_rectangle(area, region):
@@ -690,11 +735,19 @@ class Preview:
         for image in self.images.values():
             image.free()
         self.images.clear()
-        self.target.free()
-        self.draw_cache.free()
-        self.key = self.metadata = self.request = None
-        self.time_s, self.error = None, ''
-        _RENDERERS.discard(self)
+        try:
+            self.target.free()
+        except Exception as exc:
+            self.error = str(exc)
+            raise
+        else:
+            self.error = ''
+            _RENDERERS.discard(self)
+        finally:
+            self.draw_cache.free()
+            self.key = self.metadata = self.request = None
+            self.time_s = None
+            self.updating = False
 
     def observe(self, context, cameras, long_edge=640):
         long_edge = min(long_edge, 320) if playback_preview(context) else long_edge
@@ -769,8 +822,13 @@ class Preview:
             self.error = str(exc)
             diagnostics.record('preview_failure', reason=self.error)
         finally:
-            self.target.trim(len(self.images))
-            self.updating = False
+            try:
+                self.target.trim(len(self.images))
+            except Exception as exc:
+                self.error = '；'.join(filter(None, (self.error, str(exc))))
+                diagnostics.record('preview_failure', reason=self.error)
+            finally:
+                self.updating = False
 
     def draw(self, context, cameras, slot=1, hint='', closable=True):
         if _DRAWING:
@@ -855,9 +913,22 @@ class Preview:
 
 
 def shutdown():
+    errors = []
     for renderer in tuple(_RENDERERS):
-        renderer.free()
+        try:
+            renderer.free()
+        except Exception as exc:
+            errors.append(str(exc))
+    for target in tuple(_PENDING_TARGETS):
+        try:
+            target.free()
+        except Exception as exc:
+            errors.append(str(exc))
+        else:
+            _PENDING_TARGETS.discard(target)
     _CONTROL_DRAW_CACHE.free()
+    if errors:
+        raise RuntimeError('相机预览资源释放失败：' + '；'.join(errors))
 
 
 def action_buttons(rectangle, scale_ui=1.):

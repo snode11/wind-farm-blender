@@ -1,6 +1,7 @@
 """X100 controls for source identity, installation, replay and recording health."""
 import bpy
 import time
+from types import SimpleNamespace
 from ..radar_x100.output import WFRL_OT_X100Output
 
 
@@ -57,6 +58,24 @@ class WFRL_OT_X100MountPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def _frame_mount(context):
+    from ..radar_x100.runtime import session_for
+    try:
+        area = getattr(context, 'area', None)
+        if area is None or area.type != 'VIEW_3D':
+            return None
+        space = area.spaces.active
+        if not any(tuple(space.region_quadviews) or (space.region_3d,)):
+            return None
+        session = session_for(context.scene)
+        mount = session.mount if session is not None else None
+        if mount is not None and context.scene.objects.get(mount.name) == mount:
+            return mount
+    except (AttributeError, ReferenceError, RuntimeError):
+        return None
+    return None
+
+
 class WFRL_OT_X100FrameUnit(bpy.types.Operator):
     bl_idname = 'wfrl.x100_frame_unit'
     bl_label = '查看雷达'
@@ -64,20 +83,42 @@ class WFRL_OT_X100FrameUnit(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        from ..radar_x100.runtime import session_for
-        session = session_for(context.scene)
-        return bool(session and session.mount and session.mount.name in context.scene.objects)
+        return _frame_mount(context) is not None
 
     def execute(self, context):
-        from ..radar_x100.runtime import session_for
         from ..radar_x100.view import frame_unit, housing
-        mount = session_for(context.scene).mount
-        model = housing(mount)
-        if model is not None and model.get('wfrl_x100_hidden_for_camera') is not None:
-            self.report({'INFO'}, '雷达与相机光心重合，外形已隐藏以免遮挡相机画面')
+        mount = _frame_mount(context)
+        if mount is None:
+            self.report({'WARNING'}, '请在有效的 3D 视口中查看已安装的雷达')
             return {'CANCELLED'}
-        if not frame_unit(context, mount):
-            self.report({'WARNING'}, '当前窗口没有 3D 视口')
+        saved = []
+        try:
+            model = housing(mount)
+            if model is not None and model.get('wfrl_x100_hidden_for_camera') is not None:
+                self.report({'INFO'}, '雷达与相机光心重合，外形已隐藏以免遮挡相机画面')
+                return {'CANCELLED'}
+            space = context.area.spaces.active
+            saved.append((space, 'clip_start', space.clip_start))
+            for region in tuple(space.region_quadviews) or (space.region_3d,):
+                if region is None:
+                    continue
+                for name in ('view_perspective', 'view_location', 'view_rotation', 'view_distance'):
+                    value = getattr(region, name)
+                    saved.append((region, name, value.copy() if hasattr(value, 'copy') else value))
+            local_context = SimpleNamespace(screen=SimpleNamespace(areas=(context.area,)))
+            if not frame_unit(local_context, mount):
+                raise ValueError('当前区域没有 3D 视口')
+        except Exception as exc:
+            errors = []
+            for owner, name, value in saved:
+                try:
+                    setattr(owner, name, value)
+                except Exception as cleanup:
+                    errors.append(str(cleanup))
+            message = str(exc)
+            if errors:
+                message += '；视口恢复失败：' + '；'.join(errors)
+            self.report({'ERROR'}, message)
             return {'CANCELLED'}
         return {'FINISHED'}
 
@@ -109,32 +150,54 @@ class WFRL_OT_X100SearchApply(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def _replay_session(context):
+    from ..radar_x100.runtime import session_for
+    try:
+        session = session_for(context.scene)
+        if (session is not None and session.mode == 'REPLAY' and session.replay is not None
+                and session.replay.rows and not getattr(session, 'closing', False)):
+            return session
+    except (AttributeError, ReferenceError, RuntimeError):
+        return None
+    return None
+
+
 class WFRL_OT_X100Step(bpy.types.Operator):
     bl_idname = 'wfrl.x100_step'
     bl_label = '文件帧跳转'
     direction: bpy.props.IntProperty(default=1)
 
+    @classmethod
+    def poll(cls, context):
+        return _replay_session(context) is not None
+
     def execute(self, context):
-        from ..radar_x100.runtime import session_for
-        session = session_for(context.scene)
-        if session and session.mode == 'REPLAY' and session.replay:
+        session = _replay_session(context)
+        if session is None:
+            return {'CANCELLED'}
+
+        def step():
             session.playing = False
             index = session.selected_replay_index()
             index = max(0, min(len(session.replay.rows) - 1, index + self.direction))
-            return _replay_action(self, context, lambda: session.seek_frame(index))
-        return {'FINISHED'}
+            session.seek_frame(index)
+
+        return _replay_action(self, context, step)
 
 
 class WFRL_OT_X100Play(bpy.types.Operator):
     bl_idname = 'wfrl.x100_play'
     bl_label = '文件播放 / 暂停'
 
+    @classmethod
+    def poll(cls, context):
+        return _replay_session(context) is not None
+
     def execute(self, context):
-        from ..radar_x100.runtime import session_for
-        session = session_for(context.scene)
-        if session and session.mode == 'REPLAY' and session.replay:
-            return _replay_action(self, context, session.toggle_playback)
-        return {'FINISHED'}
+        session = _replay_session(context)
+        if session is None:
+            return {'CANCELLED'}
+        return _replay_action(self, context, session.toggle_playback)
 
 
 def _replay_action(operator, context, action):
@@ -482,6 +545,8 @@ class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):
         from ..radar_x100.runtime import session_for
         from ..radar_x100.display import source_label
         session = session_for(context.scene)
+        if session is None:
+            return
         layout = self.layout.column(align=True)
         if session.frame:
             frame = session.frame
