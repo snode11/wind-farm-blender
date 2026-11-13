@@ -292,6 +292,36 @@ def _read(scene, key):
     return raw
 
 
+def _validate_saved_texture_blades(objects, manifest, blade_key):
+    """Keep saved object order, zero-based blade IDs and atlas files aligned."""
+    if (not isinstance(manifest, dict) or not isinstance(manifest.get('atlas'), dict) or
+            not isinstance(manifest.get('files'), list) or len(manifest['files']) != 3 or
+            any(type(manifest['atlas'].get(key)) is not int or manifest['atlas'][key] < minimum
+                for key, minimum in (('W', 2), ('H', 1)))):
+        raise ValueError('保存的表面纹理元数据不完整')
+    if len(objects) != 3 or len({obj.as_pointer() for obj in objects}) != 3:
+        raise ValueError('保存的纹理叶片对象必须是三个独立对象')
+    for index, (obj, record) in enumerate(zip(objects, manifest['files'])):
+        if (not isinstance(record, dict) or type(record.get('blade')) is not int or
+                record['blade'] != index or record.get('name') != f'blade{index + 1}_tex.png' or
+                not isinstance(record.get('sha256'), str) or not record['sha256'] or
+                type(obj.get(blade_key)) is not int or obj[blade_key] != index):
+            raise ValueError('保存的纹理叶片编号、对象顺序或图像记录不匹配')
+
+
+def _validate_atlas_pixels(image, atlas):
+    """Validate decoded RGBA without changing pixels or unobserved alpha."""
+    count = atlas['W'] * atlas['H'] * 4
+    if tuple(image.size) != (atlas['W'], atlas['H']) or image.channels != 4:
+        raise ValueError('保存的纹理图像尺寸或 RGBA 通道不匹配')
+    if len(image.pixels) != count:
+        raise ValueError('保存的纹理图像像素缺失或数量不匹配')
+    pixels = np.empty(count, dtype=np.float32)
+    image.pixels.foreach_get(pixels)
+    if not np.isfinite(pixels).all():
+        raise ValueError('保存的纹理图像包含非有限像素')
+
+
 def _validate_clock(sequence):
     if (len(sequence.states) != 601 or sequence.fps != 10. or
             not np.allclose(sequence.times, np.arange(601)/10., rtol=0, atol=1e-9) or
@@ -368,8 +398,7 @@ def _restore(scene):
     if saved_camera is None or len(saved_blades) != 3 or any(obj is None or obj.type != 'MESH' for obj in saved_blades):
         raise ValueError('保存的同源纹理网格或相机缺失')
     manifest = json.loads(_read(scene, 'texture'))
-    if not isinstance(manifest.get('atlas'), dict) or len(manifest.get('files', [])) != 3:
-        raise ValueError('保存的同源纹理元数据不完整')
+    _validate_saved_texture_blades(saved_blades, manifest, 'split_mappo_texture_blade')
     if manifest['atlas'] != json.loads(texture_source)['atlas']:
         raise ValueError('保存的同源纹理图集合同不一致')
     for blade, record in zip(saved_blades, manifest['files']):
@@ -386,10 +415,9 @@ def _restore(scene):
         image = tex.image if tex else None
         if image is None or image.packed_file is None:
             raise ValueError('保存的同源纹理图像没有打包')
-        if tuple(image.size) != (manifest['atlas']['W'], manifest['atlas']['H']):
-            raise ValueError('保存的同源纹理图像尺寸不匹配')
         if hashlib.sha256(image.packed_file.data).hexdigest() != record['sha256']:
             raise ValueError('保存的同源纹理图像校验失败')
+        _validate_atlas_pixels(image, manifest['atlas'])
     structure = _ensure_structure(scene)
     value = dict(sequence=sequence, blades=saved_blades, structure=structure, index=None, tracking={}, provenance=provenance,
                  source_root=source_root, source_signature=_source_signature(source_root))
