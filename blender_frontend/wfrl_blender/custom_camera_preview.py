@@ -313,17 +313,26 @@ def _mesh_coordinates(evaluated):
         evaluated.to_mesh_clear()
 
 
+def _mesh_key(obj):
+    mesh = obj.data
+    shape_keys = getattr(mesh, 'shape_keys', None)
+    return (obj.as_pointer(), mesh.as_pointer(), shape_keys.as_pointer() if shape_keys else 0,
+            getattr(obj, 'session_uid', None), getattr(mesh, 'session_uid', None))
+
+
 class GeometryCache:
     """Cache evaluated coordinates with dependency-graph invalidation.
 
     Transforms and object membership are read on every hash. Geometry updates,
-    source/clock/graph changes and missing handlers invalidate the byte cache.
+    source/scene/graph changes and missing handlers invalidate the byte cache.
+    Both dependency-graph and frame evaluation notify geometry changes; a new
+    frame alone does not invalidate unchanged local coordinates.
     Capture does not use this cache and always reads the evaluated meshes.
     """
     def __init__(self):
         self.meshes = {}
         self.scope = None
-        self.handler_list = None
+        self.handler_lists = ()
         self.mesh_reads = 0
         self.cache_hits = 0
         self.fingerprint_key = self.fingerprint_value = None
@@ -341,9 +350,9 @@ class GeometryCache:
                              item.bl_rna.identifier == 'Camera')
                 if update.is_updated_geometry and not is_camera:
                     identifier = item.bl_rna.identifier
-                    if identifier in {'Object', 'Mesh'}:
+                    if identifier in {'Object', 'Mesh', 'Key'}:
                         pointer = item.as_pointer()
-                        index = 0 if identifier == 'Object' else 1
+                        index = {'Object': 0, 'Mesh': 1, 'Key': 2}[identifier]
                         self.meshes = {key: value for key, value in self.meshes.items()
                                        if key[index] != pointer}
                     else:
@@ -354,19 +363,23 @@ class GeometryCache:
 
     def hash(self, scene, depsgraph, identity):
         import bpy
-        handlers = bpy.app.handlers.depsgraph_update_post
-        scope = (scene.as_pointer(), depsgraph.as_pointer(), identity,
-                 scene.frame_current, scene.frame_subframe)
-        if self.scope != scope or self.updated not in handlers:
+        handlers = (bpy.app.handlers.depsgraph_update_post, bpy.app.handlers.frame_change_post)
+        scope = (scene.as_pointer(), depsgraph.as_pointer(), identity, _ALL_SCENES_REVISION,
+                 getattr(scene, 'session_uid', None))
+        if self.scope != scope or any(self.updated not in callbacks for callbacks in handlers):
             self.meshes.clear()
             self.scope = scope
-        if self.updated not in handlers:
-            handlers.append(self.updated)
-        self.handler_list = handlers
+        for callbacks in self.handler_lists:
+            if all(callbacks is not current for current in handlers) and self.updated in callbacks:
+                callbacks.remove(self.updated)
+        for callbacks in handlers:
+            if self.updated not in callbacks:
+                callbacks.append(self.updated)
+        self.handler_lists = handlers
         return _simulation_state_hash(scene, depsgraph, self)
 
     def coordinates(self, obj, evaluated):
-        key = (obj.as_pointer(), obj.data.as_pointer())
+        key = _mesh_key(obj)
         if key not in self.meshes:
             self.meshes[key] = _mesh_coordinates(evaluated)
             self.mesh_reads += 1
@@ -375,9 +388,11 @@ class GeometryCache:
         return self.meshes[key]
 
     def free(self):
-        if self.handler_list is not None and self.updated in self.handler_list:
-            self.handler_list.remove(self.updated)
-        self.handler_list = self.scope = None
+        for callbacks in self.handler_lists:
+            if self.updated in callbacks:
+                callbacks.remove(self.updated)
+        self.handler_lists = ()
+        self.scope = None
         self.meshes.clear()
         self.fingerprint_key = self.fingerprint_value = None
         self.fingerprint_geometry = ()
@@ -398,7 +413,7 @@ def _simulation_state_hash(scene, depsgraph, cache=None):
         coordinates = b''
         if obj.type == 'MESH':
             coordinates = cache.coordinates(obj, evaluated) if cache else _mesh_coordinates(evaluated)
-            alive.add((obj.as_pointer(), obj.data.as_pointer()))
+            alive.add(_mesh_key(obj))
         parts.append((obj.name.encode(), matrix, coordinates))
         if cache is not None:
             keys.append((obj.as_pointer(), obj.name, matrix, id(coordinates)))
@@ -536,21 +551,80 @@ def contains(rectangle, x, y):
     return left <= x < left + width and bottom <= y < bottom + height
 
 
-def draw_image(image, rectangle):
-    import gpu
-    from gpu_extras.batch import batch_for_shader
+class DrawCache:
+    """GPU shaders and quads owned by one current window/region layout.
+
+    Colors and texture samples remain live uniforms. Layout changes discard
+    quads, context changes also discard shaders; only the current image texture
+    is retained. Explicit free releases every GPU reference.
+    """
+    def __init__(self):
+        self.context_key = self.layout_key = None
+        self.shaders = {}
+        self.fills = {}
+        self.image_key = self.image_texture = self.image_batch = None
+
+    def begin(self, context, region, rectangle, ui, layout):
+        context_key = (context.window.as_pointer(), context.area.as_pointer(), region.as_pointer())
+        if context_key != self.context_key:
+            self.free()
+            self.context_key = context_key
+        layout_key = (region.width, region.height, tuple(rectangle), ui, layout)
+        if layout_key != self.layout_key:
+            self.fills.clear()
+            self.image_key = self.image_texture = self.image_batch = None
+            self.layout_key = layout_key
+
+    def shader(self, name):
+        import gpu
+        if name not in self.shaders:
+            self.shaders[name] = gpu.shader.from_builtin(name)
+        return self.shaders[name]
+
+    def fill(self, rectangle, color):
+        from gpu_extras.batch import batch_for_shader
+        key = tuple(rectangle)
+        shader = self.shader('UNIFORM_COLOR')
+        if key not in self.fills:
+            x, y, w, h = rectangle
+            self.fills[key] = batch_for_shader(shader, 'TRI_FAN',
+                {'pos': [(x,y),(x+w,y),(x+w,y+h),(x,y+h)]})
+        shader.bind()
+        shader.uniform_float('color', color)
+        self.fills[key].draw(shader)
+
+    def image(self, image, rectangle):
+        from gpu_extras.batch import batch_for_shader
+        shader = self.shader('IMAGE')
+        key = (tuple(rectangle), image.width, image.height)
+        if key != self.image_key or self.image_texture is not image.texture:
+            x, y, width, height = rectangle
+            batch = batch_for_shader(shader, 'TRI_FAN',
+                {'pos': [(x,y),(x+width,y),(x+width,y+height),(x,y+height)],
+                 'texCoord': [(0,0),(1,0),(1,1),(0,1)]})
+            self.image_key, self.image_texture, self.image_batch = key, image.texture, batch
+        shader.bind()
+        shader.uniform_sampler('image', image.texture)
+        self.image_batch.draw(shader)
+
+    def free(self):
+        self.context_key = self.layout_key = None
+        self.shaders.clear()
+        self.fills.clear()
+        self.image_key = self.image_texture = self.image_batch = None
+
+
+_CONTROL_DRAW_CACHE = DrawCache()
+
+
+def draw_image(image, rectangle, cache=None):
     x, y, w, h = rectangle
     scale = min(w / image.width, h / image.height)
     if scale <= 0:
         return
     width, height = image.width * scale, image.height * scale
     x, y = x + (w - width) / 2, y + (h - height) / 2
-    shader = gpu.shader.from_builtin('IMAGE')
-    batch = batch_for_shader(shader, 'TRI_FAN', {'pos': [(x,y),(x+width,y),(x+width,y+height),(x,y+height)],
-        'texCoord': [(0,0),(1,0),(1,1),(0,1)]})
-    shader.bind()
-    shader.uniform_sampler('image', image.texture)
-    batch.draw(shader)
+    (cache if cache is not None else DrawCache()).image(image, (x, y, width, height))
 
 
 def clock_text(time_s, frame, subframe):
@@ -598,6 +672,7 @@ def change_reasons(old, new):
 class Preview:
     def __init__(self):
         self.target = PreviewTargets()
+        self.draw_cache = DrawCache()
         self.images, self.key, self.error = {}, None, ''
         self.request = None
         self.camera_changed_at = 0.
@@ -616,6 +691,7 @@ class Preview:
             image.free()
         self.images.clear()
         self.target.free()
+        self.draw_cache.free()
         self.key = self.metadata = self.request = None
         self.time_s, self.error = None, ''
         _RENDERERS.discard(self)
@@ -701,20 +777,14 @@ class Preview:
             return
         import blf
         import bpy
-        import gpu
-        from gpu_extras.batch import batch_for_shader
         region = next(r for r in context.area.regions if r.type == 'WINDOW')
         rect = available_rectangle(context.area, region)
         scale_ui = max(1., bpy.context.preferences.system.ui_scale)
         x,y,w,h = rect
         ui = scale_ui
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        def fill(rectangle, color):
-            left, bottom, width, height = rectangle
-            shader.bind()
-            shader.uniform_float('color', color)
-            batch_for_shader(shader, 'TRI_FAN', {'pos': [(left,bottom),(left+width,bottom),
-                (left+width,bottom+height),(left,bottom+height)]}).draw(shader)
+        self.observe(context, cameras)
+        self.draw_cache.begin(context, region, rect, ui, closable)
+        fill = self.draw_cache.fill
         def text(value, left, bottom, width, size=12, color=(.83,.87,.93,1)):
             if width <= 0:
                 return
@@ -727,7 +797,6 @@ class Preview:
             blf.position(0, left, bottom, 0)
             blf.draw(0, value)
         fill(rect, (.018,.022,.03,1))
-        self.observe(context, cameras)
         current = self.request
         at = clock_text(current['time_s'], current['frame'], current['subframe'])
         playing = playback_preview(context)
@@ -760,7 +829,7 @@ class Preview:
                  color=(.4,.82,1,1) if selected else (.83,.87,.93,1))
             body = image_rectangle(cell, ui)
             if image:
-                draw_image(image, body)
+                draw_image(image, body, self.draw_cache)
             else:
                 message = '画面准备中…' if cam else '已安装，未参与三路预览与采集' if installed else '尚未设置安装位置'
                 hint = '单路仍可检查；参与设置见 View 面板' if installed and not cam else '点击右上角「设置位置」' if not installed else ''
@@ -788,6 +857,7 @@ class Preview:
 def shutdown():
     for renderer in tuple(_RENDERERS):
         renderer.free()
+    _CONTROL_DRAW_CACHE.free()
 
 
 def action_buttons(rectangle, scale_ui=1.):
@@ -800,18 +870,12 @@ def action_buttons(rectangle, scale_ui=1.):
 def draw_controls(context, state, editing=False, confirmable=False, reason='', external=False):
     """Same action hit areas in every stage, outside all preview image rectangles."""
     import blf
-    import gpu
-    from gpu_extras.batch import batch_for_shader
     region = next(r for r in context.area.regions if r.type == 'WINDOW')
     rect = available_rectangle(context.area, region)
     x, y, width, height = rect
     ui = max(1., context.preferences.system.ui_scale)
-    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-    def fill(box, color):
-        a,b,w,h = box
-        shader.bind()
-        shader.uniform_float('color', color)
-        batch_for_shader(shader, 'TRI_FAN', {'pos': [(a,b),(a+w,b),(a+w,b+h),(a,b+h)]}).draw(shader)
+    _CONTROL_DRAW_CACHE.begin(context, region, rect, ui, (editing, external))
+    fill = _CONTROL_DRAW_CACHE.fill
     def text(value, a, b, max_width, color=(.9,.94,1,1), size=11):
         blf.size(0, size*ui)
         while value and blf.dimensions(0, value)[0] > max_width:

@@ -91,8 +91,22 @@ def test_owned_snapshot_records_preserve_export_and_snapshot_isolation():
         detached, now_monotonic=40., now_unix=1000.)
     message['payload']['timestamp']['value'] = 99.
     record['provenance']['file'] = 'changed'
-    detached['series'][0]['records'][0]['data']['provenance']['file'] = 'snapshot-only'
+    # The snapshot is a read-only view of the pinned records; export works on its own copy.
+    assert detached['series'][0]['records'][0] is owned.series[('snapshot', None, 'T1', 'power')][0]
+    export_document(detached)['series'][0]['records'][0]['data']['provenance']['file'] = 'export-only'
     assert copied.snapshot() == owned.snapshot() == expected
+
+
+def test_snapshot_pins_record_range_while_window_keeps_ingesting():
+    window = HistoryWindow(capacity=3, clock=lambda: 10.)
+    for seq in range(3):
+        window.ingest(sample(seq))
+    pinned = window.snapshot()
+    for seq in range(3, 6):                     # evicts every pinned record from the window
+        window.ingest(sample(seq))
+    doc = export_document(pinned, now_monotonic=40.)
+    assert [r['sequence'] for r in doc['series'][0]['records']] == [0, 1, 2]
+    assert [r['sequence'] for r in window.snapshot()['series'][0]['records']] == [3, 4, 5]
 
 
 @pytest.mark.parametrize('existing', [False, True])

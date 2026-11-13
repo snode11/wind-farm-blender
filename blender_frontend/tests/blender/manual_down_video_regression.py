@@ -69,7 +69,10 @@ lamps = [obj for obj in scene.objects if obj.type == 'LIGHT']
 assert len(lamps) == 1 and not lamps[0].data.use_shadow and scene.world.use_sun_shadow
 
 # Down camera shares the recorded-scene preset.
-assert bpy.ops.wfrl.manual_down_view(turbine='T1') == {'FINISHED'}
+view_area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+view_region = next(region for region in view_area.regions if region.type == 'WINDOW')
+with bpy.context.temp_override(area=view_area, region=view_region):
+    assert bpy.ops.wfrl.manual_down_view(turbine='T1') == {'FINISHED'}
 camera = down.ensure_down_camera(scene, 'T1')
 assert camera.parent == t1.yaw_object and cameras.is_down_camera(camera)
 bpy.context.view_layer.update()

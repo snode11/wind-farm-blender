@@ -215,7 +215,9 @@ def test_failed_leased_group_releases_staging_without_touching_old_images(gpu_ca
 
 def test_geometry_cache_reuses_coordinates_but_tracks_native_edits_and_scope(monkeypatch):
     handlers = []
-    monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(handlers=NS(depsgraph_update_post=handlers))))
+    frame_handlers = []
+    monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(handlers=NS(
+        depsgraph_update_post=handlers, frame_change_post=frame_handlers))))
     matrix = [[float(i == j) for j in range(4)] for i in range(4)]
     mesh = NS(as_pointer=lambda: 20, bl_rna=NS(identifier='Mesh'))
     obj = NS(name='WFRL.Turbine.T1.Blade', type='MESH', as_pointer=lambda: 10, get=lambda key: None,
@@ -246,13 +248,13 @@ def test_geometry_cache_reuses_coordinates_but_tracks_native_edits_and_scope(mon
     cache.hash(scene, graph, 'new source')
     handlers.clear()
     cache.hash(scene, graph, 'new source')
-    assert cache.mesh_reads == 5 and len(handlers) == 1
+    assert cache.mesh_reads == 4 and len(handlers) == len(frame_handlers) == 1
     scene.objects.clear()
     cache.hash(scene, graph, 'new source')
     assert not cache.meshes
     cache.free()
     cache.free()
-    assert not handlers and cache.scope is None
+    assert not handlers and not frame_handlers and cache.scope is None
 
 
 def test_camera_feedback_coalesces_input_and_reserves_draw_time(monkeypatch):

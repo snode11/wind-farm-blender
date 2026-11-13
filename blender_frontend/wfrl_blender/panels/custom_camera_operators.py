@@ -4,6 +4,13 @@ from bpy.props import EnumProperty, IntProperty
 from .. import custom_cameras as core
 
 
+def _removed_handle(error):
+    """Only confirmed invalid handles count as successful deregistration."""
+    return isinstance(error, ReferenceError) or any(text in str(error).lower() for text in (
+        'already removed', 'already been removed', 'timer not found',
+        'handler not found', 'invalid handle'))
+
+
 def _timer_advanced(op, event):
     """Consume at most one poll per advance of this operator's own timer.
 
@@ -35,7 +42,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
         if context.scene.get('wfrl_stacked_camera_rig') and self.mode in {'PLACE', 'INPUT'}:
             self.report({'WARNING'}, '请先整体安装盒体，再调整各相机俯仰角')
             return {'CANCELLED'}
-        if _panel._ACTIVE and _panel._ACTIVE.stage not in _panel._VIEWING:
+        if _panel._ACTIVE and (getattr(_panel._ACTIVE, '_finishing', False)
+                               or _panel._ACTIVE.stage not in _panel._VIEWING):
             self.report({'WARNING'}, '请先确认或取消当前调整')
             return {'CANCELLED'}
         if self.mode not in _panel._VIEWING:
@@ -49,25 +57,29 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
             return {'CANCELLED'}
         _panel.core.migrate_scene(context.scene)
         previous = _panel._ACTIVE
-        self.area, self.scene, self.wm = context.area, context.scene, context.window_manager
-        self.window = context.window
-        self.region = next(r for r in self.area.regions if r.type == 'WINDOW')
-        self.slot = self.wm.wfrl_custom_slot
-        self.snapshot = _panel.ViewportSnapshot(self.area)
-        self.external_snapshot = previous.external_snapshot if previous and previous.area == self.area else self.snapshot
-        self.return_stage = previous.stage if previous and previous.area == self.area else None
-        if previous:
-            previous.finish(restore=False)
-        # The legacy controller must not also process the same mouse events.
-        from . import gimbal
-        if gimbal._ACTIVE:
-            gimbal._ACTIVE.finish()
+        self.timer = self.handle = self.session = self.preview = None
+        self.snapshot = self.external_snapshot = None
+        self._modal_registered = self._finishing = False
         self.closed, self.ready, self.error = False, False, ''
+        self.stage, self.identity, self.camera = self.mode, None, None
         self.drag, self.stick, self.last = None, (0, 0), (0, 0)
         self.hover, self.candidates, self.press = None, [], None
-        self.session = None
-        self.preview = _panel.preview.Preview()
+        self.area, self.scene, self.wm = context.area, context.scene, context.window_manager
+        self.window = context.window
         try:
+            self.region = next(r for r in self.area.regions if r.type == 'WINDOW')
+            self.slot = self.wm.wfrl_custom_slot
+            self.snapshot = _panel.ViewportSnapshot(self.area)
+            self.external_snapshot = previous.external_snapshot if previous and previous.area == self.area else self.snapshot
+            self.return_stage = previous.stage if previous and previous.area == self.area else None
+            if previous:
+                previous.finish(restore=False)
+            # The legacy controller must not also process the same mouse events.
+            from . import gimbal
+            if gimbal._ACTIVE:
+                gimbal._ACTIVE.finish()
+            _panel._ACTIVE = self
+            self.preview = _panel.preview.Preview()
             if self.mode in _panel._VIEWING:
                 self.camera = _panel.core.get_camera(self.scene, self.slot)
                 if not self.camera and self.mode == 'WATCH':
@@ -93,14 +105,20 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
             self.timer = self.wm.event_timer_add(.025, window=self.window)
             self._timer_duration = self.timer.time_duration
             self.handle = _panel.bpy.types.SpaceView3D.draw_handler_add(self.draw_overlay, (), 'WINDOW', 'POST_PIXEL')
-            _panel._ACTIVE = self
-            self.wm.modal_handler_add(self)
+            if self.wm.modal_handler_add(self) is False:
+                raise RuntimeError('无法注册相机预览交互处理器')
+            self._modal_registered = True
             _panel._redraw_if_changed(self)
             return {'RUNNING_MODAL'}
-        except (ValueError, RuntimeError) as exc:
-            if self.session:
-                self.session.cancel()
-            self.preview.free()
+        except Exception as exc:
+            try:
+                self.finish(restore=_panel._ACTIVE is self)
+            except (RuntimeError, ValueError) as cleanup:
+                self.report({'ERROR'}, f'{exc}；预览资源待清理：{cleanup}')
+                return {'CANCELLED'}
+            finally:
+                # Blender retires a modal handler when invoke returns CANCELLED.
+                self._modal_registered = False
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
 
@@ -149,33 +167,44 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
     def finish(self, restore=True, resume=True):
         if getattr(self, 'closed', True):
             return
-        if self.session and not self.session.closed:
-            try:
+        if not getattr(self, '_finishing', False):
+            self._finish_options = restore, resume
+        self._finishing = True
+        restore, resume = self._finish_options
+        # An invalidated identity lets the watchdog retry without modal events.
+        self.identity = None
+        self.drag = None
+        try:
+            # Modal callbacks become inert immediately and retire on their next event.
+            if self.handle is not None:
+                try:
+                    _panel.bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
+                except (ReferenceError, RuntimeError, ValueError) as exc:
+                    if not _removed_handle(exc):
+                        raise
+                self.handle = None
+            if self.timer is not None:
+                try:
+                    self.wm.event_timer_remove(self.timer)
+                except (ReferenceError, RuntimeError, ValueError) as exc:
+                    if not _removed_handle(exc):
+                        raise
+                self.timer = None
+            if self.session and not self.session.closed:
                 self.session.cancel(restore=resume)
-            except (RuntimeError, ValueError) as exc:
-                self.error = str(exc)
-                self.report({'ERROR'}, self.error)
-                raise
-        if restore:
-            self.external_snapshot.restore()
-        if getattr(self, 'timer', None):
-            try:
-                self.wm.event_timer_remove(self.timer)
-            except (ReferenceError, RuntimeError):
-                pass
-            self.timer = None
-        if getattr(self, 'handle', None):
-            try:
-                _panel.bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
-            except (ReferenceError, RuntimeError, ValueError):
-                pass
-            self.handle = None
+            if self.preview is not None:
+                self.preview.free()
+            if restore and self.external_snapshot is not None:
+                self.external_snapshot.restore()
+        except Exception as exc:
+            self.error = str(exc)
+            self.report({'ERROR'}, self.error)
+            raise RuntimeError(self.error) from exc
         try:
             self.area.header_text_set(None)
             self.area.tag_redraw()
         except (ReferenceError, RuntimeError):
             pass
-        self.preview.free()
         self.closed, self.drag = True, None
         if _panel._ACTIVE is self:
             _panel._ACTIVE = None
@@ -219,6 +248,14 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
 
     def modal(self, context, event):
         if self.closed:
+            self._modal_registered = False
+            return {'FINISHED'}
+        if getattr(self, '_finishing', False):
+            try:
+                self.finish()
+            except (RuntimeError, ValueError):
+                return {'RUNNING_MODAL'}
+            self._modal_registered = False
             return {'FINISHED'}
         try:
             if context.window != self.window:
@@ -385,6 +422,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
         self.return_to_view()
 
     def draw_overlay(self):
+        if getattr(self, '_finishing', False) or self.closed:
+            return
         return _overlay.draw_overlay(self)
 
 

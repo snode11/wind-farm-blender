@@ -16,6 +16,7 @@ import subprocess
 import tempfile
 import threading
 import time
+import uuid
 
 import bpy
 from bpy.app.handlers import persistent
@@ -82,6 +83,8 @@ _SHAKE_3P_WEIGHT = 0.12
 VIEWPORT_ENGINES = {'VIEWPORT_MATERIAL': 'MATERIAL', 'VIEWPORT_SOLID': 'SOLID'}
 ENGINES = {'SCENE', 'WORKBENCH', *VIEWPORT_ENGINES}
 _EXPORT = {}
+_JOBS = {}
+_JOB_KEY = 'wfrl_manual_export_job'
 
 # Labels are camera-parented text placed on the ray through a blade station,
 # LABEL_DEPTH metres in front of the optical centre: closer than any blade
@@ -442,13 +445,15 @@ def _reaim_down_cameras(scene):
             ensure_side_cameras(scene, camera['wfrl_turbine'])
 
 
-def _apply_pending_blade_model(scene):
+def _apply_pending_blade_model(scene, *, strict=False):
     """Apply a blade shape chosen while an export was rendering."""
     try:
         mesh = scene.wfrl_manual_turbines[0].blade1_object.data
         if mesh.get('wfrl_blade_model', DEFAULT_MODEL) != scene.wfrl_manual_blade_model:
             apply_blade_model(scene)
     except (IndexError, ValueError, ReferenceError, AttributeError) as exc:
+        if strict:
+            raise
         print('WFRL manual blade model:', exc)
 
 
@@ -566,12 +571,17 @@ def _start_shake(job, entry, cameras_list, seed=None):
 
 
 def _end_shake(job):
-    for camera, _base, transform in job.pop('rig', None) or ():
+    rig = job.get('rig', [])
+    for record in tuple(rig):
+        camera, _base, transform = record
         try:
             for name, value in transform.items():
+                _check_owner(job)
                 setattr(camera, name, value)
         except ReferenceError:
             pass
+        rig.remove(record)
+    job.pop('rig', None)
 
 
 # Live viewport shake: the Down cameras of running turbines on the manual-control clock.
@@ -781,6 +791,7 @@ def _start_motion(scene, job, turbine, cameras_list, dynamics, seed=None):
 
 def _end_motion(job):
     _end_shake(job)
+    _check_owner(job)
     manual_dynamics.end(job)
 
 
@@ -794,12 +805,13 @@ def _begin_samples(job, metadata):
 
 
 def _end_samples(job, *, complete):
-    stream = job.pop('sample_stream', None)
+    stream = job.get('sample_stream')
     if stream is not None:
         if complete:
             stream.close()
         else:
             stream.__exit__(GeneratorExit, GeneratorExit(), None)
+        job.pop('sample_stream', None)
 
 
 def _append_frame(job, frame, sample):
@@ -812,7 +824,8 @@ def _append_frame(job, frame, sample):
 
 def _frame_handler(scene, _depsgraph=None):
     job = _EXPORT.get(scene.as_pointer())
-    if job is None or not job.get('frame_events') or job.get('frame_error'):
+    if (job is None or job.get('state', 'RUNNING') != 'RUNNING'
+            or not job.get('frame_events') or job.get('frame_error')):
         return
     frame = scene.frame_current - job['frame_start']
     written = job['frames_written']
@@ -838,7 +851,8 @@ def _frame_handler(scene, _depsgraph=None):
 
 def _write_frame_handler(scene, _depsgraph=None):
     job = _EXPORT.get(scene.as_pointer())
-    if job is None or job.get('frame_events') != 'NATIVE' or job.get('frame_error'):
+    if (job is None or job.get('state', 'RUNNING') != 'RUNNING'
+            or job.get('frame_events') != 'NATIVE' or job.get('frame_error')):
         return
     frame = scene.frame_current - job['frame_start']
     try:
@@ -905,7 +919,7 @@ def _snapshot(scene):
         markers=[(marker.name, marker.frame, marker.camera) for marker in scene.timeline_markers])
 
 
-def _restore_marker_cameras(scene, saved):
+def _restore_marker_cameras(scene, saved, job=None):
     """Rebind marker cameras by marker name and frame, then by name for a moved marker.
 
     Markers may be added, removed or moved while an interactive render runs. Each saved binding
@@ -917,6 +931,7 @@ def _restore_marker_cameras(scene, saved):
             for index, (name, frame, camera) in enumerate(pending):
                 if name == marker.name and (frame == marker.frame or not exact):
                     try:
+                        _check_owner(job)
                         marker.camera = camera
                     except ReferenceError:
                         pass  # The bound camera was deleted during the export.
@@ -925,25 +940,34 @@ def _restore_marker_cameras(scene, saved):
                     break
 
 
-def _restore(scene, saved):
+def _restore(scene, saved, job=None):
     render = scene.render
     for name, value in saved['image'].items():
+        _check_owner(job)
         setattr(render.image_settings, name, value)
     for name, value in saved['ffmpeg'].items():
         try:
+            _check_owner(job)
             setattr(render.ffmpeg, name, value)
         except TypeError:
             pass  # Unset enums read back as '' and keep their defaults.
     for name, value in saved['render'].items():
+        _check_owner(job)
         setattr(render, name, value)
+    _check_owner(job)
     scene.view_settings.view_transform, scene.view_settings.look = saved['view']
+    _check_owner(job)
     scene.eevee.taa_samples, scene.eevee.taa_render_samples = saved['eevee']
+    _check_owner(job)
     scene.display.render_aa = saved['render_aa']
-    _restore_marker_cameras(scene, saved['markers'])
+    _restore_marker_cameras(scene, saved['markers'], job)
     start, end, step, frame, subframe = saved['frame']
+    _check_owner(job)
     scene.frame_start, scene.frame_end, scene.frame_step = start, end, step
+    _check_owner(job)
     scene.frame_set(frame, subframe=subframe)
     # Frame changes evaluate marker cameras; restore the active camera after evaluating the frame.
+    _check_owner(job)
     scene.camera = saved['camera']
 
 
@@ -989,70 +1013,221 @@ def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO
     render.filepath = filepath
 
 
-def _restore_manual_pose(scene):
-    scene['wfrl_manual_exporting'] = False
+class _ExportOwnershipLost(RuntimeError):
+    pass
+
+
+def _owned_scene(job):
+    if job.get('detached') or _EXPORT.get(job.get('scene_key')) is not job:
+        return None
+    scene = job.get('scene')
+    try:
+        if (scene is not None and scene.as_pointer() == job['scene_key']
+                and scene.get(_JOB_KEY) == job['identity']):
+            return scene
+    except ReferenceError:
+        pass
+    return None
+
+
+def _check_owner(job):
+    if job is not None and 'identity' in job and _owned_scene(job) is None:
+        raise _ExportOwnershipLost('Down 视频作业已失去场景归属')
+
+
+def _ensure_cleanup_timer():
+    if not bpy.app.timers.is_registered(_retry_exports):
+        bpy.app.timers.register(_retry_exports, first_interval=.2, persistent=True)
+
+
+def _own_job(scene, job):
+    key = scene.as_pointer()
+    if _JOBS or key in _EXPORT:
+        raise RuntimeError('Down 视频仍在导出或收尾，请等待回收完成')
+    identity = uuid.uuid4().hex
+    job.update(scene=scene, scene_key=key, identity=identity, state='RUNNING',
+               cleanup={job['temp']: job['temp'].lstat()}, encoders=[])
+    _JOBS[identity] = _EXPORT[key] = job
+    scene[_JOB_KEY] = identity
+    _check_owner(job)
+    scene['wfrl_manual_error'] = ''
+    _check_owner(job)
+    scene['wfrl_manual_exporting'] = True
+    _ensure_cleanup_timer()
+
+
+def _restore_manual_pose(scene, job=None):
+    _check_owner(job)
     manual_control.hold_pitch_clock(scene)
     for entry in scene.wfrl_manual_turbines:
+        _check_owner(job)
         manual_control._apply_entry(entry)
-    _apply_pending_blade_model(scene)
+    _check_owner(job)
+    _apply_pending_blade_model(scene, strict=True)
+    _check_owner(job)
     update_labels(scene)
 
 
-def _finish(scene, *, completed):
-    """Restore the scene and publish a complete set of movies and their sidecar."""
-    job = _EXPORT.pop(scene.as_pointer(), None)
+def _job_error(job, message):
+    job['error'] = message
+    scene = _owned_scene(job)
+    if scene is not None:
+        scene['wfrl_manual_error'] = message
+
+
+def _restore_job(job):
+    scene = _owned_scene(job)
+    if scene is None:
+        return
+    restored = job.setdefault('restored', set())
+    steps = [('motion', lambda: _end_motion(job)),
+             ('scene', lambda: _restore(scene, job['saved'], job)),
+             ('view', lambda: _restore_view(*job['view'], job=job) if job.get('view') else None),
+             ('pose', lambda: _restore_manual_pose(scene, job)),
+             ('progress', lambda: bpy.context.window_manager.progress_end() if job.get('progress') else None)]
+    for name, restore in steps:
+        if name not in restored:
+            _check_owner(job)
+            restore()
+            _check_owner(job)
+            restored.add(name)
+
+
+def _finish(scene=None, *, completed, job=None):
+    """Keep ownership until native rendering, restoration and private file cleanup settle."""
     if job is None:
+        try:
+            job = _EXPORT.get(scene.as_pointer())
+        except (ReferenceError, AttributeError):
+            return None
+    if job is None or job.get('state') == 'FINISHED':
+        return None if job is None else job.get('report')
+    if job.get('finishing'):
         return None
-    report = None
+    job.setdefault('completed', completed)
+    if not completed or job.get('stop_requested') or _owned_scene(job) is None:
+        job['completed'] = False
+    job['state'] = 'FINALIZING'
+    job['finishing'] = True
     try:
-        if not _EXPORT:
+        if (job.get('producer_active') or job.get('render_call_active')
+                or (job.get('native_render') and bpy.app.is_job_running('RENDER'))):
+            job['state'] = 'STOPPING'
+            _job_error(job, 'Down 视频停止中：等待原生渲染退出')
+            return None
+        if not _reap_encoders(job):
+            job['state'] = 'STOPPING'
+            _job_error(job, 'Down 视频停止中：' + job['encoder_error'])
+            return None
+        try:
+            _restore_job(job)
+        except _ExportOwnershipLost:
+            job['completed'] = False
+        if not job.get('publication_attempted'):
+            job['publication_attempted'] = True
+            try:
+                if job.get('frame_error'):
+                    raise RuntimeError(job['frame_error'])
+                if job['completed']:
+                    expected = job['plan']['frames']
+                    if job.get('frame_events') == 'OPENGL':
+                        _append_frame(job, expected - 1, job.pop('pending_sample', None))
+                    if job['frames_written'] != expected:
+                        raise RuntimeError(f'Down 视频帧样本不完整：{job["frames_written"]}/{expected}')
+                    targets, sidecar = job['publish_targets'][:-1], job['publish_targets'][-1]
+                    produced = job.get('movies') or sorted(Path(job['temp']).glob('*.mp4'))
+                    if (len(produced) != len(targets)
+                            or any(not path.is_file() or path.stat().st_size == 0 for path in produced)):
+                        raise RuntimeError('未生成完整的 Down MP4 文件')
+                    _end_samples(job, complete=True)
+                    label = 'Down 视频' if len(targets) == 1 else '三路 Down 视频'
+                    video_output.publish_staged(
+                        [(source, target.requested) for source, target in zip(produced, targets)],
+                        sidecar.requested, job['sample_path'], label, preflight=job['publish_targets'],
+                        cleanup=job.setdefault('publish_cleanup', {}))
+                    job['report'] = str(targets[0].path)
+            except Exception as exc:
+                job['failure'] = str(exc)
+        _end_samples(job, complete=False)
+        cleanup_errors = []
+        for owned in (job.get('publish_cleanup', {}), job.get('cleanup', {})):
+            try:
+                video_output.cleanup_owned_directories(owned)
+            except RuntimeError as exc:
+                cleanup_errors.append(str(exc))
+        if cleanup_errors:
+            raise RuntimeError('；'.join(cleanup_errors))
+        owner = _owned_scene(job)
+        if owner is not None:
+            _check_owner(job)
+            owner['wfrl_manual_last_video'] = job.get('report') or ''
+            _check_owner(job)
+            owner['wfrl_manual_error'] = job.get('failure', '')
+            _check_owner(job)
+            owner['wfrl_manual_exporting'] = False
+            _check_owner(job)
+            del owner[_JOB_KEY]
+        if _EXPORT.get(job['scene_key']) is job:
+            del _EXPORT[job['scene_key']]
+        _JOBS.pop(job['identity'], None)
+        job['state'] = 'FINISHED'
+        if not _JOBS:
             for handlers, function in ((bpy.app.handlers.frame_change_pre, _frame_handler),
                                        (bpy.app.handlers.render_write, _write_frame_handler),
                                        (bpy.app.handlers.render_complete, _render_complete),
                                        (bpy.app.handlers.render_cancel, _render_cancel)):
                 if function in handlers:
                     handlers.remove(function)
-        with ExitStack() as restore:
-            if job.get('progress'):
-                restore.callback(bpy.context.window_manager.progress_end)
-            restore.callback(_restore_manual_pose, scene)
-            if job.get('view') is not None:
-                restore.callback(_restore_view, *job['view'])
-            restore.callback(_restore, scene, job['saved'])
-            _end_motion(job)
-        if job.get('frame_error'):
-            raise RuntimeError(job['frame_error'])
-        if completed:
-            expected = job['plan']['frames']
-            if job.get('frame_events') == 'OPENGL':
-                _append_frame(job, expected - 1, job.pop('pending_sample', None))
-            if job['frames_written'] != expected:
-                raise RuntimeError(f'Down 视频帧样本不完整：{job["frames_written"]}/{expected}')
-            publish_targets = job['publish_targets']
-            targets, sidecar = publish_targets[:-1], publish_targets[-1]
-            produced = job.get('movies') or sorted(Path(job['temp']).glob('*.mp4'))
-            if len(produced) != len(targets) or any(not path.is_file() or path.stat().st_size == 0 for path in produced):
-                raise RuntimeError('未生成完整的 Down MP4 文件')
-            _end_samples(job, complete=True)
-            label = 'Down 视频' if len(targets) == 1 else '三路 Down 视频'
-            video_output.publish_staged([(source, target.requested) for source, target in zip(produced, targets)],
-                                        sidecar.requested, job['sample_path'], label, preflight=publish_targets)
-            report = str(targets[0].path)
+        if job.get('failure'):
+            raise RuntimeError(job['failure'])
+        return job.get('report')
+    except Exception as exc:
+        _job_error(job, f'Down 视频收尾失败：{exc}')
+        raise
     finally:
+        job['finishing'] = False
+        if job.get('state') != 'FINISHED':
+            _ensure_cleanup_timer()
+
+
+def _retry_exports():
+    for job in tuple(_JOBS.values()):
+        if _owned_scene(job) is None:
+            job['stop_requested'] = True
+        if job['state'] != 'RUNNING' or job.get('stop_requested'):
+            try:
+                _finish(completed=job.get('completed', False), job=job)
+            except Exception as exc:
+                message = str(exc)
+                if job.get('reported_error') != message:
+                    print('WFRL Down video cleanup:', message)
+                    job['reported_error'] = message
+    return .2 if _JOBS else None
+
+
+@persistent
+def _before_scene_change(_unused):
+    for job in tuple(_JOBS.values()):
+        job['stop_requested'] = True
         try:
-            _end_samples(job, complete=False)
+            _finish(completed=False, job=job)
+        except Exception as exc:
+            print('WFRL Down video cleanup:', exc)
         finally:
-            shutil.rmtree(job['temp'], ignore_errors=True)
-            scene['wfrl_manual_last_video'] = report or ''
-    return report
+            # RNA addresses and saved ID properties can be reused by load and undo.
+            job['detached'] = True
+    if _JOBS:
+        _ensure_cleanup_timer()
 
 
 def _end_render(scene, *, completed):
+    job = _EXPORT.get(scene.as_pointer())
+    if job is None or _owned_scene(job) is None:
+        return
     try:
-        _finish(scene, completed=completed)
+        _finish(completed=completed, job=job)
     except Exception as exc:
-        # Interactive render results are displayed by the manual and home panels.
-        scene['wfrl_manual_error'] = f'Down 视频导出失败：{exc}'
+        _job_error(job, f'Down 视频导出失败：{exc}')
         print('WFRL Down video export failed:', exc)
 
 
@@ -1090,18 +1265,49 @@ def _encoder_error(code, log, failures):
     return RuntimeError(f'FFmpeg 编码失败（{code}）' + (f'：{detail}' if detail else ''))
 
 
-@contextmanager
-def _offscreen_encoder(command):
-    """Own an FFmpeg process and its writer until input and encoding have finished.
+def _reap_encoders(job, timeout=.05):
+    errors = []
+    encoders = job.get('encoders', [])
+    for resource in tuple(encoders):
+        process, writer, log = resource['process'], resource.get('writer'), resource['log']
+        resource['stopping'].set()
+        try:
+            if process is not None and process.poll() is None:
+                process.kill()
+                process.wait(timeout=timeout)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            errors.append(f'FFmpeg 进程未能结束：{exc}')
+        try:
+            if writer is not None and writer.ident is not None:
+                writer.join(timeout=timeout)
+                if writer.is_alive():
+                    errors.append('FFmpeg 写帧线程未能结束')
+                    continue
+            if process is not None:
+                if process.poll() is None:
+                    continue
+                process.stdin.close()
+            log.close()
+        except (OSError, RuntimeError) as exc:
+            errors.append(str(exc))
+            continue
+        encoders.remove(resource)
+    job['encoder_error'] = '；'.join(errors) or '等待 FFmpeg 资源释放'
+    return not encoders
 
-    An input failure waits briefly for FFmpeg to exit, killing it otherwise, so the raised
-    error carries the exit code and the end of FFmpeg's log.
-    """
+
+@contextmanager
+def _offscreen_encoder(command, *, job):
+    """Register process, writer and log with the export before starting encoding."""
     options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
     pending, failures = queue.Queue(maxsize=4), []
     stopping = threading.Event()
-    with tempfile.TemporaryFile() as log:
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, **options)
+    resource = dict(process=None, writer=None, log=tempfile.TemporaryFile(), stopping=stopping)
+    job.setdefault('encoders', []).append(resource)
+    log = resource['log']
+    try:
+        process = resource['process'] = subprocess.Popen(
+            command, stdin=subprocess.PIPE, stdout=log, stderr=log, **options)
 
         def write():
             try:
@@ -1120,6 +1326,8 @@ def _offscreen_encoder(command):
         def send(data):
             deadline = time.monotonic() + _ENCODER_TIMEOUT_S
             while not failures:
+                if stopping.is_set() or job.get('stop_requested'):
+                    raise RuntimeError('Down 视频已请求停止')
                 try:
                     pending.put(data, timeout=.1)
                     return
@@ -1133,34 +1341,27 @@ def _offscreen_encoder(command):
                 code = process.wait(timeout=_ENCODER_EXIT_GRACE_S)
             raise _encoder_error(code, log, failures) from failures[0]
 
-        writer = None
-        try:
-            writer = threading.Thread(target=write, name='wfrl-down-encoder', daemon=True)
-            writer.start()
-            yield send
-            send(None)
-            writer.join(timeout=_ENCODER_TIMEOUT_S)
-            if writer.is_alive():
-                raise RuntimeError('等待 FFmpeg 写帧结束超时')
-            code = process.wait(timeout=_ENCODER_TIMEOUT_S)
-            if code or failures:
-                raise _encoder_error(code, log, failures)
-        except subprocess.TimeoutExpired as exc:
-            raise RuntimeError('等待 FFmpeg 编码结束超时') from exc
-        finally:
-            stopping.set()
-            try:
-                if process.poll() is None:
-                    process.kill()
-                    try:
-                        process.wait(timeout=5)
-                    except subprocess.TimeoutExpired as exc:
-                        raise RuntimeError('FFmpeg 进程未能结束') from exc
-            finally:
-                if writer is not None and writer.ident is not None:
-                    writer.join(timeout=5)
-                else:
-                    process.stdin.close()
+        writer = resource['writer'] = threading.Thread(target=write, name='wfrl-down-encoder', daemon=True)
+        writer.start()
+        yield send
+        send(None)
+        writer.join(timeout=_ENCODER_TIMEOUT_S)
+        if writer.is_alive():
+            raise RuntimeError('等待 FFmpeg 写帧结束超时')
+        code = process.wait(timeout=_ENCODER_TIMEOUT_S)
+        if code or failures:
+            raise _encoder_error(code, log, failures)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError('等待 FFmpeg 编码结束超时') from exc
+    finally:
+        # ExitStack closes each camera encoder separately; other cameras may still be draining.
+        owner = dict(encoders=[resource])
+        if _reap_encoders(owner, timeout=_ENCODER_EXIT_GRACE_S):
+            job['encoders'].remove(resource)
+        else:
+            job['state'] = 'STOPPING'
+            job['encoder_error'] = owner['encoder_error']
+            raise RuntimeError('Down 视频停止中：' + owner['encoder_error'])
 
 
 def _draw_offscreen(scene, job, view, camera, ffmpeg, output):
@@ -1181,13 +1382,16 @@ def _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, outputs):
     with ExitStack() as resources:
         offscreen = gpu.types.GPUOffScreen(width, height, format='RGBA8')
         resources.callback(offscreen.free)
-        writers = [resources.enter_context(_offscreen_encoder([*command, str(path)])) for path in outputs]
+        writers = [resources.enter_context(_offscreen_encoder([*command, str(path)], job=job)) for path in outputs]
         with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
             scene.frame_set(scene.frame_start)
             space, layer = area.spaces.active, bpy.context.view_layer
             depsgraph = bpy.context.evaluated_depsgraph_get()
             projections = [cam.calc_matrix_camera(depsgraph, x=width, y=height) for cam in cameras_list]
             for frame in range(plan['frames']):
+                _check_owner(job)
+                if job.get('stop_requested'):
+                    raise RuntimeError('Down 视频已请求停止')
                 sample = apply_motion(scene, job, frame)
                 depsgraph.update()
                 for camera, projection, write in zip(cameras_list, projections, writers):
@@ -1216,8 +1420,8 @@ def _validate_export(scene, turbine, targets):
     valid, reason = manual_control.validate_scene(scene)
     if not valid:
         raise ValueError(reason)
-    if scene.as_pointer() in _EXPORT:
-        raise ValueError('该场景正在导出视频')
+    if _JOBS or scene.as_pointer() in _EXPORT:
+        raise ValueError('Down 视频仍在导出或收尾，请等待回收完成')
     publish_targets = video_output.validate_publish_targets((*targets, targets[0].with_suffix('.json')))
     if bpy.app.is_job_running('RENDER'):
         raise ValueError('请等待当前 Blender 渲染结束后再导出 Down 视频')
@@ -1284,9 +1488,7 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
     out_paths = [temp / f'triple_{i}.mp4' for i in range(3)]
     job = dict(plan=plan, saved=saved, temp=temp, publish_targets=publish_targets,
                movies=out_paths, labels=labels_flag)
-    scene['wfrl_manual_error'] = ''
-    _EXPORT[scene.as_pointer()] = job
-    scene['wfrl_manual_exporting'] = True
+    _own_job(scene, job)
     try:
         _configure_video(scene, center_cam, fps, frames, engine, os.path.join(temp, 'triple_'),
                          size=size, samples=samples)
@@ -1306,11 +1508,15 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
         job['view'] = _prepare_view(area, center_cam, VIEWPORT_ENGINES[engine])
         bpy.context.window_manager.progress_begin(0, frames)
         job['progress'] = True
-        _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, out_paths)
+        job['producer_active'] = True
+        try:
+            _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, out_paths)
+        finally:
+            job['producer_active'] = False
     except BaseException:
-        _finish(scene, completed=False)
+        _finish(completed=False, job=job)
         raise
-    _finish(scene, completed=True)
+    _finish(completed=True, job=job)
     return tuple(str(output.path) for output in publish_targets[:-1])
 
 
@@ -1349,16 +1555,24 @@ def _prepare_view(area, camera, shading):
     return saved
 
 
-def _restore_view(space, saved):
+def _restore_view(space, saved, job=None):
     try:
+        _check_owner(job)
         space.shading.type = saved['type']
+        _check_owner(job)
         space.shading.use_scene_world = saved['world']
+        _check_owner(job)
         space.shading.use_scene_lights = saved['lights']
+        _check_owner(job)
         space.overlay.show_overlays = saved['overlays']
+        _check_owner(job)
         space.use_local_camera = saved['local']
+        _check_owner(job)
         space.camera = saved['camera']
         region = space.region_3d
+        _check_owner(job)
         region.view_perspective = saved['perspective']
+        _check_owner(job)
         region.view_camera_zoom, region.view_camera_offset = saved['zoom'], saved['offset']
     except ReferenceError:
         pass
@@ -1395,9 +1609,7 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
     saved = _snapshot(scene)
     temp = Path(tempfile.mkdtemp(prefix='wfrl_down_'))
     job = dict(plan=plan, saved=saved, temp=temp, publish_targets=publish_targets, labels=labels)
-    scene['wfrl_manual_error'] = ''
-    _EXPORT[scene.as_pointer()] = job
-    scene['wfrl_manual_exporting'] = True
+    _own_job(scene, job)
     try:
         _configure_video(scene, camera, fps, frames, engine, os.path.join(temp, 'down_'),
                          size=size, samples=samples)
@@ -1416,8 +1628,12 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
             if ffmpeg:
                 output = temp / 'down.mp4'
                 job['movies'] = (output,)
-                _draw_offscreen(scene, job, view, camera, ffmpeg, output)
-                return _finish(scene, completed=True)
+                job['producer_active'] = True
+                try:
+                    _draw_offscreen(scene, job, view, camera, ffmpeg, output)
+                finally:
+                    job['producer_active'] = False
+                return _finish(completed=True, job=job)
         job['frame_events'] = 'OPENGL' if viewport else 'NATIVE'
         job['frame_start'] = scene.frame_start
         hooks = [(bpy.app.handlers.frame_change_pre, _frame_handler)]
@@ -1434,25 +1650,30 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
         scene.frame_set(scene.frame_start)
         if job.get('frame_error'):
             raise RuntimeError(job['frame_error'])
-        if viewport:
-            with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
-                result = bpy.ops.render.opengl(animation=True, view_context=True)
-        elif blocking:
-            result = bpy.ops.render.render(animation=True, scene=scene.name)
-        else:
-            result = bpy.ops.render.render('INVOKE_DEFAULT', animation=True, scene=scene.name)
-            if 'RUNNING_MODAL' in result:
-                return None
+        job['native_render'] = True
+        job['render_call_active'] = True
+        try:
+            if viewport:
+                with bpy.context.temp_override(window=window, area=area, region=region, scene=scene):
+                    result = bpy.ops.render.opengl(animation=True, view_context=True)
+            elif blocking:
+                result = bpy.ops.render.render(animation=True, scene=scene.name)
+            else:
+                result = bpy.ops.render.render('INVOKE_DEFAULT', animation=True, scene=scene.name)
+        finally:
+            job['render_call_active'] = False
+        if not blocking and 'RUNNING_MODAL' in result:
+            return None
         if 'FINISHED' not in result:
             raise RuntimeError('Blender 未能完成 Down 视频渲染')
-        if scene.as_pointer() in _EXPORT:
-            return _finish(scene, completed=True)
+        if _EXPORT.get(job['scene_key']) is job:
+            return _finish(completed=True, job=job)
         # An interactive invocation may complete synchronously and run its handler before returning.
         if scene.get('wfrl_manual_error'):
             raise RuntimeError(scene['wfrl_manual_error'])
         return scene.get('wfrl_manual_last_video') or None
     except BaseException:
-        _finish(scene, completed=False)
+        _finish(completed=False, job=job)
         raise
 
 
@@ -1484,6 +1705,18 @@ class WFRL_OT_ManualDownView(bpy.types.Operator):
         return manual_control.is_manual(context.scene)
 
     def execute(self, context):
+        area = getattr(context, 'area', None)
+        if area is None or area.type != 'VIEW_3D':
+            self.report({'ERROR'}, '请在要切换的三维视图中点击')
+            return {'CANCELLED'}
+        region = getattr(context, 'region', None)
+        if region is None or region.type != 'WINDOW':
+            region = next((item for item in area.regions if item.type == 'WINDOW'), None)
+        space = area.spaces.active
+        if (region is None or all(region != item for item in area.regions)
+                or space is None or space.region_3d is None):
+            self.report({'ERROR'}, '当前三维视图没有可用的窗口区域')
+            return {'CANCELLED'}
         scene = context.scene
         scene.render.resolution_x, scene.render.resolution_y = VIDEO_SIZE
         scene.render.resolution_percentage = 100
@@ -1494,15 +1727,11 @@ class WFRL_OT_ManualDownView(bpy.types.Operator):
         except (ValueError, ReferenceError, AttributeError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
-        for area in context.screen.areas if context.screen else ():
-            if area.type != 'VIEW_3D':
-                continue
-            space = area.spaces.active
-            space.use_local_camera = True
-            space.camera = camera
-            space.region_3d.view_perspective = 'CAMERA'
-            cameras.fill_camera_view(area, scene)
-            area.tag_redraw()
+        space.use_local_camera = True
+        space.camera = camera
+        space.region_3d.view_perspective = 'CAMERA'
+        cameras.fill_camera_view(area, scene)
+        area.tag_redraw()
         return {'FINISHED'}
 
 
@@ -1714,9 +1943,15 @@ class WFRL_OT_ManualTripleDownVideo(bpy.types.Operator, ExportHelper):
 CLASSES = (WFRL_OT_ManualDownView, WFRL_OT_ManualDownVideo, WFRL_OT_ManualTripleDownVideo)
 _BLADE_ITEMS = tuple((key, label, '手动场景叶片外形', index)
                      for index, (key, (_, label)) in enumerate(MODELS.items()))
+_LIFECYCLE_HANDLERS = (('load_pre', _before_scene_change), ('undo_pre', _before_scene_change),
+                       ('redo_pre', _before_scene_change))
 
 
 def register():
+    for name, function in _LIFECYCLE_HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if function not in handlers:
+            handlers.append(function)
     for cls in CLASSES:
         if not cls.is_registered:
             bpy.utils.register_class(cls)
@@ -1742,6 +1977,16 @@ def register():
 
 
 def unregister():
+    for job in tuple(_JOBS.values()):
+        job['stop_requested'] = True
+        try:
+            _finish(completed=False, job=job)
+        except Exception as exc:
+            print('WFRL Down video cleanup:', exc)
+    for name, function in _LIFECYCLE_HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if function in handlers:
+            handlers.remove(function)
     for scene in getattr(bpy.data, 'scenes', ()):
         if scene.as_pointer() in _LIVE_SHAKE:
             live_shake_stop(scene)
@@ -1759,9 +2004,6 @@ def unregister():
     manual_dynamics.unregister()
     if _labels_listener in manual_control.POSE_LISTENERS:
         manual_control.POSE_LISTENERS.remove(_labels_listener)
-    for scene in getattr(bpy.data, 'scenes', ()):
-        if scene.as_pointer() in _EXPORT:
-            _finish(scene, completed=False)
     for name in ('wfrl_manual_blade_model', 'wfrl_manual_blade_labels'):
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)

@@ -384,7 +384,28 @@ def _commit_down_outputs(staged, retained):
         raise
 
 
-def publish_staged(movies, sidecar_path, sidecar, label, *, preflight=None):
+def cleanup_owned_directories(owned):
+    """Retry removal only while a private directory still has its acquired identity."""
+    errors = []
+    for directory, expected in tuple(owned.items()):
+        try:
+            current = _entry_stat(directory)
+            if current is None:
+                del owned[directory]
+                continue
+            if not stat.S_ISDIR(current.st_mode) or not os.path.samestat(current, expected):
+                del owned[directory]
+                raise RuntimeError(f'暂存目录归属已改变，保留路径：{directory}')
+            shutil.rmtree(directory)
+        except (OSError, RuntimeError) as exc:
+            errors.append(f'{directory}：{exc}')
+        else:
+            del owned[directory]
+    if errors:
+        raise RuntimeError('暂存清理失败：' + '；'.join(errors))
+
+
+def publish_staged(movies, sidecar_path, sidecar, label, *, preflight=None, cleanup=None):
     """Move private rendered movies and JSON to per-destination staging.
 
     A Path sidecar is an already completed private JSON file.
@@ -405,6 +426,8 @@ def publish_staged(movies, sidecar_path, sidecar, label, *, preflight=None):
         elif requested != tuple(output.requested for output in preflight):
             raise ValueError('视频输出目标与预检路径不一致')
         staged, retained = [], set()
+        owned = {} if cleanup is None else cleanup
+        failure = None
         try:
             for output in preflight:
                 _verify_publish_target(output)
@@ -412,6 +435,7 @@ def publish_staged(movies, sidecar_path, sidecar, label, *, preflight=None):
                 target = output.path
                 target.parent.mkdir(parents=True, exist_ok=True)
                 directory = Path(tempfile.mkdtemp(prefix='.wfrl-down-', dir=target.parent))
+                owned[directory] = directory.lstat()
                 temporary = directory / 'new'
                 staged.append((temporary, output))
                 if source is None:
@@ -419,12 +443,21 @@ def publish_staged(movies, sidecar_path, sidecar, label, *, preflight=None):
                 else:
                     shutil.move(str(source), str(temporary))
             _commit_down_outputs(staged, retained)
-        except (OSError, ValueError, TypeError, RuntimeError) as exc:
-            raise RuntimeError(f'{label}写出失败：{exc}') from exc
+        except BaseException as exc:
+            failure = exc
+            if isinstance(exc, (OSError, ValueError, TypeError, RuntimeError)):
+                raise RuntimeError(f'{label}写出失败：{exc}') from exc
+            raise
         finally:
-            for temporary, _target in staged:
-                if temporary.parent not in retained:
-                    shutil.rmtree(temporary.parent, ignore_errors=True)
+            # Recovery backups require user inspection and are never deletion retries.
+            for directory in retained:
+                owned.pop(directory, None)
+            try:
+                cleanup_owned_directories(owned)
+            except RuntimeError as exc:
+                if failure is not None:
+                    raise RuntimeError(f'{label}写出失败：{failure}；{exc}') from failure
+                raise
 
 
 def _commit_export(source, destination):

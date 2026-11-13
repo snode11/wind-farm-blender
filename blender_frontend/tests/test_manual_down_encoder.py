@@ -26,7 +26,7 @@ def test_encoder_reports_ffmpeg_reason_when_it_exits_mid_stream(manual_down):
     chunk = b'\0' * (1 << 20)
     started = time.monotonic()
     with pytest.raises(RuntimeError) as failure:
-        with manual_down._offscreen_encoder(_encoder(script)) as send:
+        with manual_down._offscreen_encoder(_encoder(script), job={}) as send:
             for _ in range(10_000):
                 send(chunk)
     message = str(failure.value)
@@ -40,7 +40,7 @@ def test_encoder_reports_ffmpeg_reason_after_reading_all_input(manual_down):
     script = ("import sys; sys.stdin.buffer.read(); "
               "sys.stderr.write('No space left on device\\n'); sys.exit(1)")
     with pytest.raises(RuntimeError) as failure:
-        with manual_down._offscreen_encoder(_encoder(script)) as send:
+        with manual_down._offscreen_encoder(_encoder(script), job={}) as send:
             send(b'frame' * 1000)
     message = str(failure.value)
     assert 'No space left on device' in message and '（1）' in message
@@ -51,7 +51,7 @@ def test_encoder_finishes_after_ffmpeg_consumes_every_frame(manual_down, tmp_pat
     output = tmp_path / 'frames.bin'
     script = ("import sys; open(sys.argv[1], 'wb').write(sys.stdin.buffer.read())")
     frames = [bytes([index]) * 4096 for index in range(8)]
-    with manual_down._offscreen_encoder([*_encoder(script), str(output)]) as send:
+    with manual_down._offscreen_encoder([*_encoder(script), str(output)], job={}) as send:
         for frame in frames:
             send(frame)
     assert output.read_bytes() == b''.join(frames)

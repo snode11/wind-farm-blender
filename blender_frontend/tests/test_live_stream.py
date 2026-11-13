@@ -136,8 +136,15 @@ class _TestImages(list):
 
 
 def _stream_area(pointer, x):
-    space = NS(type='VIEW_3D', as_pointer=lambda: pointer + 100, ui_mode='VIEW', image=None)
-    return _StreamArea(type='VIEW_3D', spaces=_TestSpaces(active=space), regions=[], as_pointer=lambda: pointer,
+    region = NS(type='WINDOW', x=x, y=0, width=100, height=80)
+    view = NS(view_matrix=[(1, 0, 0, pointer), (0, 1, 0, 2), (0, 0, 1, 3), (0, 0, 0, 1)],
+              view_location=[pointer, 2, 3], view_rotation=[1, 0, 0, 0], view_distance=12 + pointer,
+              view_perspective='PERSP', view_camera_zoom=pointer + 5, view_camera_offset=(.1, -.2))
+    space = NS(type='VIEW_3D', as_pointer=lambda: pointer + 100, ui_mode='VIEW', image=None,
+               region_3d=view, use_local_camera=False, camera=object(), clip_start=.1, clip_end=1000,
+               shading=NS(type='SOLID', color_type='MATERIAL', use_scene_world=False, use_scene_lights=True),
+               overlay=NS(show_overlays=True), show_region_ui=False)
+    return _StreamArea(type='VIEW_3D', spaces=_TestSpaces(active=space), regions=[region], as_pointer=lambda: pointer,
                        x=x, y=0, width=100, height=80, tag_redraw=Mock())
 
 
@@ -153,7 +160,6 @@ def stream_view(frontend_module, stub_module, monkeypatch):
     stub_module('wfrl_blender.manual_control', is_manual=lambda scene: True)
     worker = Mock(return_value=_mock_reader())
     monkeypatch.setattr(live_stream, 'LiveStream', worker)
-    monkeypatch.setattr(view, '_view_state', lambda space: {})
     left, right = _stream_area(1, 0), _stream_area(2, 107)
     screen = _TestScreen(20, [left])
     workspace = NS(session_uid=30, screens=[screen])
@@ -165,7 +171,8 @@ def stream_view(frontend_module, stub_module, monkeypatch):
     bpy.data.screens = [screen]
     bpy.data.images = _TestImages()
     bpy.data.user_map.return_value = {}
-    context = NS(area=left, window=window, scene=object(), window_manager=NS(),
+    scene = NS(render=NS(resolution_x=640, resolution_y=480, resolution_percentage=75), camera=object())
+    context = NS(area=left, region=left.regions[0], screen=screen, window=window, scene=scene, window_manager=NS(),
                  temp_override=bpy.context.temp_override)
 
     def split(**kwargs):

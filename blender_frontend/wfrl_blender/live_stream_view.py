@@ -188,6 +188,7 @@ def _arrange(window, area):
         area.spaces.active.image = None
         area.type = 'VIEW_3D'
         _copy_view(_SESSION['view'], area.spaces.active)
+        area.spaces.active.show_region_ui = True
         _SESSION.update(area=other.as_pointer(), partner=area.as_pointer(),
                         partner_space=area.spaces.active.as_pointer())
         _SESSION['editor'] = _prepare_stream_area(other, _SESSION['marker'])
@@ -199,18 +200,20 @@ def _arrange(window, area):
 def _view_state(space):
     region, shading = space.region_3d, space.shading
     return dict(local=space.use_local_camera, camera=space.camera, perspective=region.view_perspective,
+                matrix=region.view_matrix.copy(),
                 location=region.view_location.copy(), rotation=region.view_rotation.copy(),
                 distance=region.view_distance, camera_zoom=region.view_camera_zoom,
                 camera_offset=tuple(region.view_camera_offset), clip=(space.clip_start, space.clip_end),
                 shading=(shading.type, shading.color_type, shading.use_scene_world, shading.use_scene_lights),
-                overlays=space.overlay.show_overlays)
+                overlays=space.overlay.show_overlays, region_ui=space.show_region_ui)
 
 
 def _copy_view(saved, space):
-    """Give the new 3D view the simulated view's camera, framing, shading and overlays."""
+    """Apply a 3D view snapshot to its owner or the split's simulated view."""
     region, shading = space.region_3d, space.shading
     space.use_local_camera = saved['local']
     space.camera = saved['camera']
+    region.view_matrix = saved['matrix']
     region.view_location, region.view_rotation = saved['location'], saved['rotation']
     region.view_distance = saved['distance']
     region.view_perspective = saved['perspective']
@@ -218,7 +221,7 @@ def _copy_view(saved, space):
     space.clip_start, space.clip_end = saved['clip']
     shading.type, shading.color_type, shading.use_scene_world, shading.use_scene_lights = saved['shading']
     space.overlay.show_overlays = saved['overlays']
-    space.show_region_ui = True
+    space.show_region_ui = saved['region_ui']
 
 
 def _prepare_stream_area(area, marker):
@@ -270,25 +273,31 @@ def start(context, url, *, turbine='T1', size='1280x720'):
     if _closing():
         raise RuntimeError('上一路现场视频正在停止，请稍后重试')
     _restore_ready_layouts()
-    if manual_control.is_manual(context.scene):
-        result = bpy.ops.wfrl.manual_down_view(turbine=turbine, side='CENTER')
-        if 'FINISHED' not in result:
-            raise ValueError(f'无法切换到 {turbine} Down 相机')
     space = area.spaces.active
-    view = _view_state(space)
+    saved_view = _view_state(space)
     partner = area.as_pointer()
     screen = window.screen
     before = {item.as_pointer() for item in screen.areas}
-    with context.temp_override(window=window, screen=screen, area=area):
-        result = bpy.ops.screen.area_split(direction='VERTICAL', factor=.5)
-    added = [item for item in screen.areas if item.as_pointer() not in before]
-    if len(added) != 1:
-        raise ValueError('无法分割当前视图')
-    stream_area = added[0]
-    _SESSION.update(stream=None, origin=_origin(window), area=stream_area.as_pointer(), editor=None, marker=None,
-                    partner=partner, partner_space=space.as_pointer(), view=view, shown=0,
-                    texture=None, arranged=False, turbine=turbine, label=label)
     try:
+        if manual_control.is_manual(context.scene):
+            with context.temp_override(window=window, screen=screen, area=area,
+                                       region=context.region):
+                result = bpy.ops.wfrl.manual_down_view(turbine=turbine, side='CENTER')
+            if 'FINISHED' not in result:
+                raise ValueError(f'无法切换到 {turbine} Down 相机')
+        view = _view_state(space)
+        try:
+            with context.temp_override(window=window, screen=screen, area=area):
+                result = bpy.ops.screen.area_split(direction='VERTICAL', factor=.5)
+        finally:
+            added = [item for item in screen.areas if item.as_pointer() not in before]
+            if len(added) == 1:
+                stream_area = added[0]
+                _SESSION.update(stream=None, origin=_origin(window), area=stream_area.as_pointer(),
+                                editor=None, marker=None, partner=partner, partner_space=space.as_pointer(),
+                                view=view, shown=0, texture=None, arranged=False, turbine=turbine, label=label)
+        if len(added) != 1:
+            raise ValueError('无法分割当前视图')
         if 'FINISHED' not in result:
             raise ValueError('无法分割当前视图')
         marker = bpy.data.images.new('.WFRL Live Split', width=1, height=1, alpha=False)
@@ -301,7 +310,11 @@ def start(context, url, *, turbine='T1', size='1280x720'):
             _HANDLE = bpy.types.SpaceImageEditor.draw_handler_add(_draw, (), 'WINDOW', 'POST_PIXEL')
         _ensure_tick(_TICK_S)
     except Exception:
-        stop()
+        try:
+            stop()
+        finally:
+            _copy_view(saved_view, space)
+            area.tag_redraw()
         raise
 
 

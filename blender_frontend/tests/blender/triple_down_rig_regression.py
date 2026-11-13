@@ -118,10 +118,13 @@ for side, cam, az in (('Left', left, 180.0 + step), ('Right', right, 180.0 - ste
 # ── View switch does not disturb the rotor ────────────────────────────────────
 t1.azimuth_deg = 137.0
 bpy.context.view_layer.update()
-assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='LEFT') == {'FINISHED'}
-assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
-assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='CENTER') == {'FINISHED'}
-assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
+view_area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+view_region = next(region for region in view_area.regions if region.type == 'WINDOW')
+with bpy.context.temp_override(area=view_area, region=view_region):
+    assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='LEFT') == {'FINISHED'}
+    assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
+    assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='CENTER') == {'FINISHED'}
+    assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
 
 # Only CENTER is implied by a button that does not set ``side``.
 side_prop = bpy.ops.wfrl.manual_down_view.get_rna_type().properties['side']

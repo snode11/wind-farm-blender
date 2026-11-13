@@ -174,9 +174,14 @@ def round_trip(source, source_before, case, *, damage=False, reopen_damaged=Fals
     case_result['saved_return_view_retained'] = json.loads(manual.get('wfrl_manual_return_views', '[]')) == json.loads(original_return_data)
     manual_name = manual.name
     # The Down view changes camera framing in the manual scene; leaving must undo it.
-    assert bpy.ops.wfrl.manual_down_view(turbine='T1') == {'FINISHED'}
+    manual_views = view_snapshot()
+    view_area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+    view_region = next(region for region in view_area.regions if region.type == 'WINDOW')
+    with bpy.context.temp_override(area=view_area, region=view_region):
+        assert bpy.ops.wfrl.manual_down_view(turbine='T1') == {'FINISHED'}
     down_views = view_snapshot()
-    assert all(view['perspective'] == 'CAMERA' for view in down_views)
+    assert down_views[0]['perspective'] == 'CAMERA'
+    assert down_views[1:] == manual_views[1:]
     assert any(before['camera_zoom'] != after['camera_zoom']
                or before['camera_offset'] != after['camera_offset']
                for before, after in zip(expected_view, down_views)), 'Down did not exercise camera framing'
