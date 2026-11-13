@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import numpy as np
 from . import performance
+from .mechanical_details import _rollback_new_resources
 
 
 def rotation(axis, degrees):
@@ -180,27 +181,46 @@ class ComparisonView:
             elif isinstance(data, bpy.types.Curve):
                 bpy.data.curves.remove(data)
 
+    @_rollback_new_resources
     def __init__(self, owner, data, vertices, faces):
         import bpy
         from .scene_builder import _mesh_object, _primitive
-        from .tip_tracking import _material
         self.owner, self.data = owner, data
         self.rows = {}
         self.labels = []
         self.objects = []
+        self.handle = None
+        self.owned_materials = []
         self.rest = np.asarray(vertices, dtype=float)
         self.collection = owner.blades[0][0].users_collection[0]
         # Saved .blend files already contain the previous comparison geometry.
-        for obj in list(owner.scene.objects):
-            if obj.name.startswith('WFRL.Deflection.T1.'):
-                previous = obj.data
-                owned = (obj.get('wfrl_deflection_owned') or
-                         obj.get('provenance') == data['reference'] + '; true scale in metres')
-                bpy.data.objects.remove(obj, do_unlink=True)
-                if owned:
-                    self._release_data(previous)
-        self.materials = {key: _material('WFRL.Deflection.' + key, color) for key, color in COLORS.items()}
-        mat = _material('WFRL.Deflection.Ghost', COLORS['Reference'])
+        previous_objects = [obj for obj in owner.scene.objects
+                            if obj.name.startswith('WFRL.Deflection.T1.') and
+                            (obj.get('wfrl_deflection_owned') or
+                             obj.get('provenance') == data['reference'] + '; true scale in metres')]
+        if any(obj.library or any(scene != owner.scene for scene in obj.users_scene)
+               for obj in previous_objects):
+            raise ValueError('Deflection comparison objects are shared with another scene')
+        previous_materials = {mat.as_pointer(): mat for obj in previous_objects
+                              for mat in getattr(obj.data, 'materials', ())
+                              if mat is not None and mat.get('wfrl_deflection_owned')}
+
+        def material(key, color):
+            # Names do not establish ownership of existing user materials.
+            mat = bpy.data.materials.new('WFRL.Deflection.' + key)
+            self.owned_materials.append(mat)
+            mat['wfrl_deflection_owned'] = True
+            mat.diffuse_color = color
+            mat.use_nodes = True
+            node = mat.node_tree.nodes.get('Principled BSDF')
+            node.inputs['Base Color'].default_value = color
+            node.inputs['Emission Color'].default_value = color
+            node.inputs['Emission Strength'].default_value = 2.0
+            node.inputs['Roughness'].default_value = .35
+            return mat
+
+        self.materials = {key: material(key, color) for key, color in COLORS.items()}
+        mat = material('Ghost', COLORS['Reference'])
         mat.diffuse_color = (*COLORS['Reference'][:3], .38)
         node = mat.node_tree.nodes.get('Principled BSDF')
         node.inputs['Alpha'].default_value = .38
@@ -233,6 +253,23 @@ class ComparisonView:
             obj['wfrl_deflection_owned'] = True
             obj['provenance'] = data['reference'] + '; true scale in metres'
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_labels, (), 'WINDOW', 'POST_PIXEL')
+        try:
+            for obj in previous_objects:
+                previous = obj.data
+                bpy.data.objects.remove(obj, do_unlink=True)
+                self._release_data(previous)
+            for old in previous_materials.values():
+                if old.library is None and old.users == 0 and not old.use_fake_user:
+                    bpy.data.materials.remove(old)
+            for key, obj in {'Ghost': self.ghost, **self.markers, **self.lines}.items():
+                obj.name = 'WFRL.Deflection.T1.' + key
+                obj.data.name = ('WFRL.Deflection.' + key if key in self.lines else obj.name + '.Mesh')
+            for key, material in {**self.materials, 'Ghost': mat}.items():
+                material.name = 'WFRL.Deflection.' + key
+        except Exception:
+            bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
+            self.handle = None
+            raise
 
     @performance.timed("comparison.visibility")
     def visible(self, value):
@@ -350,18 +387,30 @@ class ComparisonView:
     def close(self):
         import bpy
         if self.handle is not None:
-            bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
+            try:
+                bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
+            except (ReferenceError, ValueError):
+                pass
             self.handle = None
         self.labels = []
         self.rows.clear()
         for obj in self.objects:
             try:
+                if obj.library or any(scene != self.owner.scene for scene in obj.users_scene):
+                    continue
                 data = obj.data
                 bpy.data.objects.remove(obj, do_unlink=True)
                 self._release_data(data)
             except ReferenceError:
                 pass
         self.objects.clear()
+        for mat in getattr(self, 'owned_materials', ()):
+            try:
+                if mat.library is None and mat.users == 0 and not mat.use_fake_user:
+                    bpy.data.materials.remove(mat)
+            except ReferenceError:
+                pass
+        self.owned_materials = []
 
 
 def refresh(scene, context):

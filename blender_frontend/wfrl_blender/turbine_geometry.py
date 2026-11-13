@@ -166,6 +166,8 @@ def blade_mesh(subdiv=8, ring_points=96, model=DEFAULT_MODEL):
 
 
 def tower_mesh(ring_points=64):
+    if ring_points < 3:
+        raise ValueError('Tower rings require at least three vertices')
     stations = geometry_data()["tower_stations"]
     vertices = [(diameter * 0.5 * math.cos(2 * math.pi * i / ring_points),
                  diameter * 0.5 * math.sin(2 * math.pi * i / ring_points), elevation)
@@ -175,6 +177,8 @@ def tower_mesh(ring_points=64):
 
 def tower_side_polygon_ids(mesh, ring_points=64):
     """Match the canonical ring construction before mapping side polygons to triangles."""
+    if ring_points < 3:
+        raise ValueError('Tower rings require at least three vertices')
     stations = geometry_data()['tower_stations']
     expected = _ring_faces(len(stations), ring_points)
     actual = [tuple(p.vertices) for p in mesh.polygons]

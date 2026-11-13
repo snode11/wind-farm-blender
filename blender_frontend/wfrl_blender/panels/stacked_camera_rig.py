@@ -25,8 +25,10 @@ class Placement:
     def same_session(self):
         from .custom_cameras import session_identity
         try:
-            return session_identity(self.scene) == self.identity and core.model_identity(self.scene) == self.model
-        except (ReferenceError,RuntimeError):
+            return (session_identity(self.scene) == self.identity and core.model_identity(self.scene) == self.model
+                    and all(core.get_camera(self.scene, slot) == camera
+                            for slot, camera in self.originals.items()))
+        except (ReferenceError, RuntimeError, KeyError, ValueError):
             return False
 
     def preview(self, anchor, spin, aim=0.):
@@ -35,12 +37,23 @@ class Placement:
         proposed = rig.surface_pose(self.scene, anchor, spin, aim=aim)
         # Validate everything before changing any object; camera IDs stay stable.
         layout = rig.transformed_layout(self.scene, self.before[1], proposed)
-        for record in layout['cameras']:
-            params = core.CameraParameters(**record['parameters'])
-            core.apply_research(self.scene, self.originals[record['slot_id']], params, confirmed=True)
-        rig.apply_pose(self.scene, proposed)
-        bpy.context.view_layer.update()
-        custom_camera_preview.changed()
+        previous = core.layout_dict(self.scene)
+        try:
+            for record in layout['cameras']:
+                params = core.CameraParameters(**record['parameters'])
+                core.apply_research(self.scene, self.originals[record['slot_id']], params, confirmed=True)
+            rig.apply_pose(self.scene, proposed)
+            bpy.context.view_layer.update()
+            custom_camera_preview.changed()
+        except Exception as error:
+            self.ready, self.error = False, str(error)
+            try:
+                core.restore_layout(self.scene, previous)
+                self.originals = {slot: core.get_camera(self.scene, slot) for slot in core.SLOTS}
+            except Exception as rollback_error:
+                self.error += '; 恢复安装布局失败，请重试取消：' + str(rollback_error)
+                raise RuntimeError(self.error) from error
+            raise
         self.anchor, self.ready, self.error = anchor, True, ''
 
     def finish(self, confirm=False):
@@ -59,12 +72,25 @@ class Placement:
 def shutdown(restore=True):
     op = _ACTIVE
     if op:
-        try:
-            if restore:op.transaction.finish()
-            else:op.transaction.closed = True
-        finally:
+        if restore:
+            try:
+                op.transaction.finish()
+            except Exception as error:
+                op.transaction.error = '恢复安装布局失败，请重试取消：' + str(error)
+                raise
+        else:
             op.transaction.closed = True
-            op.cleanup()
+        op.cleanup()
+
+
+def _failed_confirmation(operator, error):
+    message = str(error)
+    try:
+        shutdown()
+    except Exception as rollback_error:
+        message += '; ' + str(rollback_error)
+    operator.report({'ERROR'}, message)
+    return {'CANCELLED'}
 
 
 def spin_changed(wm, context):
@@ -169,29 +195,40 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
         if reason:
             self.report({'ERROR'},reason)
             return {'CANCELLED'}
-        finish_view()
         self.area=context.area
         self.scene=context.scene
         self.window=context.window
         self.wm=context.window_manager
-        self.region=next(r for r in self.area.regions if r.type=='WINDOW')
-        playback.cancel(self.scene)
-        # Reuse the existing external nacelle view, then detach its controller.
-        bpy.ops.wfrl.custom_camera('INVOKE_DEFAULT',mode='LAYOUT')
-        from . import custom_cameras as panel
-        if panel._ACTIVE:panel._ACTIVE.finish(restore=False,resume=False)
-        self.transaction=Placement(self.scene)
-        mount=(rig.pose(self.scene) or {}).get('surface_mount', {})
-        self.wm.wfrl_box_spin=mount.get('spin_deg',0.)
-        self.wm.wfrl_box_aim=mount.get('aim_deg',0.)
-        _ACTIVE=self
-        if mount.get('type') == 'SUPPORT':
-            self.update(core.SurfaceAnchor(tuple(mount['point']),tuple(mount['normal']),0.,mount['surface_name']))
-        self.timer=self.wm.event_timer_add(.15,window=self.window)
-        self.area.header_text_set('点击机舱安装支架；盒体保持外伸；侧栏调整方向；Enter 确认；Esc 取消')
-        context.window_manager.modal_handler_add(self)
-        self.area.tag_redraw()
-        return {'RUNNING_MODAL'}
+        self.timer = self.transaction = None
+        try:
+            finish_view()
+            self.region=next(r for r in self.area.regions if r.type=='WINDOW')
+            playback.cancel(self.scene)
+            # Reuse the existing external nacelle view, then detach its controller.
+            bpy.ops.wfrl.custom_camera('INVOKE_DEFAULT',mode='LAYOUT')
+            from . import custom_cameras as panel
+            if panel._ACTIVE:panel._ACTIVE.finish(restore=False,resume=False)
+            self.transaction=Placement(self.scene)
+            mount=(rig.pose(self.scene) or {}).get('surface_mount', {})
+            self.wm.wfrl_box_spin=mount.get('spin_deg',0.)
+            self.wm.wfrl_box_aim=mount.get('aim_deg',0.)
+            _ACTIVE=self
+            if mount.get('type') == 'SUPPORT':
+                self.update(core.SurfaceAnchor(tuple(mount['point']),tuple(mount['normal']),0.,mount['surface_name']))
+            self.timer=self.wm.event_timer_add(.15,window=self.window)
+            self.area.header_text_set('点击机舱安装支架；盒体保持外伸；侧栏调整方向；Enter 确认；Esc 取消')
+            context.window_manager.modal_handler_add(self)
+            self.area.tag_redraw()
+            return {'RUNNING_MODAL'}
+        except Exception as error:
+            try:
+                if self.transaction is not None:
+                    self.transaction.finish()
+                self.cleanup()
+            except Exception as rollback_error:
+                error = RuntimeError(f'{error}; 恢复安装布局失败，请重试取消：{rollback_error}')
+            self.report({'ERROR'}, str(error))
+            return {'CANCELLED'}
 
     def update(self, anchor):
         try:
@@ -226,7 +263,10 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
             return {'CANCELLED'}
         if event.type in {'RET','NUMPAD_ENTER'} and event.value=='PRESS':
             if self.transaction.ready and not self.transaction.error:
-                self.transaction.finish(confirm=True)
+                try:
+                    self.transaction.finish(confirm=True)
+                except Exception as error:
+                    return _failed_confirmation(self, error)
                 self.cleanup()
                 return {'FINISHED'}
             return {'RUNNING_MODAL'}
@@ -276,9 +316,8 @@ class WFRL_OT_BoxAction(bpy.types.Operator):
         if self.action=='CANCEL':shutdown()
         elif self.action=='CONFIRM':
             try:op.transaction.finish(confirm=True)
-            except ValueError as exc:
-                self.report({'ERROR'},str(exc))
-                return {'CANCELLED'}
+            except Exception as error:
+                return _failed_confirmation(self, error)
             op.cleanup()
         elif self.action in {'LEFT','RIGHT'}:
             op.wm.wfrl_box_spin += -15. if self.action=='LEFT' else 15.
