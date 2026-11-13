@@ -32,7 +32,8 @@ from stable_baselines3.common.vec_env import VecEnv, VecNormalize
 from wfcrl import environments as envs
 
 from wfrl import paths
-from wfrl.training_integrity import atomic_write, capture_rng, restore_rng, file_digest
+from wfrl.training_integrity import (atomic_write, capture_rng, restore_rng, file_digest,
+                                     read_checkpoint_manifest, validate_checkpoint_location)
 
 ENV_ID     = "Dec_Ablaincourt_Floris"
 LOG_DIR    = os.path.join(paths.LOGS, "mappo")
@@ -164,10 +165,9 @@ def _generation_paths(generation):
 
 def _checkpoint_paths():
     """Resolve one immutable pair; legacy fixed paths apply only without a manifest."""
-    manifest = _manifest_path()
-    if not manifest.exists():
+    document = read_checkpoint_manifest(_manifest_path())
+    if document is None:
         return Path(str(MODEL_PATH) + ".zip"), Path(VECNORM_PATH)
-    document = json.loads(manifest.read_text(encoding="utf-8"))
     generation = document.get("generation") if isinstance(document, dict) else None
     if (not isinstance(generation, str) or len(generation) != 32
             or any(c not in "0123456789abcdef" for c in generation)
@@ -177,6 +177,7 @@ def _checkpoint_paths():
     for key, filename in zip(("model", "normalization"), pair):
         if not filename.is_file():
             raise FileNotFoundError(f"Required MAPPO checkpoint file is missing: {filename}")
+        validate_checkpoint_location(filename)
         if (document.get(key) != filename.name
                 or document.get(key + "_sha256") != file_digest(filename)):
             raise ValueError(f"MAPPO checkpoint manifest does not match {key}")

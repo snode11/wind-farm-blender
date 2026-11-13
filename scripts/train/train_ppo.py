@@ -39,7 +39,8 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from wfcrl import environments as envs
 from wfrl.sb3_wrapper import WFCRLSB3Wrapper
 from wfrl.sb3_checkpoint import validate_model_normalization
-from wfrl.training_integrity import atomic_write, capture_rng, restore_rng, file_digest
+from wfrl.training_integrity import (atomic_write, capture_rng, restore_rng, file_digest,
+                                     read_checkpoint_manifest, validate_checkpoint_location)
 
 from wfrl import paths
 
@@ -67,9 +68,9 @@ class CheckpointPair:
 
     def resolve(self):
         """Pin one validated generation; use legacy paths only without a manifest."""
-        if not os.path.lexists(self.manifest):
+        document = read_checkpoint_manifest(self.manifest)
+        if document is None:
             return Path(str(self.model_path) + ".zip"), self.normalization_path
-        document = json.loads(self.manifest.read_text(encoding="utf-8"))
         generation = document.get("generation") if isinstance(document, dict) else None
         if (not isinstance(generation, str) or len(generation) != 32
                 or any(c not in "0123456789abcdef" for c in generation)
@@ -79,6 +80,7 @@ class CheckpointPair:
         for key, filename in zip(("model", "normalization"), pair):
             if not filename.is_file():
                 raise FileNotFoundError(f"Required checkpoint file is missing: {filename}")
+            validate_checkpoint_location(filename)
             if (document.get(key) != filename.name
                     or document.get(key + "_sha256") != file_digest(filename)):
                 raise ValueError(f"Checkpoint manifest does not match {key}")

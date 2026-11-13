@@ -40,6 +40,27 @@ def file_digest(path):
     return digest.hexdigest()
 
 
+def validate_checkpoint_location(path):
+    """Require an artifact to resolve within its configured checkpoint directory."""
+    path = Path(path)
+    if not path.resolve(strict=True).is_relative_to(path.parent.resolve(strict=True)):
+        raise ValueError(f"Checkpoint file resolves outside its directory: {path}")
+
+
+def read_checkpoint_manifest(path):
+    """Return None only for an absent entry; unreadable or invalid manifests raise."""
+    path = Path(path)
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return None
+    validate_checkpoint_location(path)
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(document, dict):
+        raise ValueError("Invalid checkpoint manifest")
+    return document
+
+
 def source_input_identity(root, scene=None):
     """Hash executable Python, simulator/template inputs, configuration, and versions."""
     root = Path(root)
