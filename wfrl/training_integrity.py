@@ -3,12 +3,14 @@ from copy import deepcopy
 import hashlib
 import importlib.metadata
 import importlib.util
+import os
 import pickle
 import json
 from pathlib import Path
 import platform
 import random
 import re
+import tempfile
 import uuid
 
 import numpy as np
@@ -102,12 +104,37 @@ def artifact_tag(run):
     return f"{label}_{run['experiment_id'][:16]}_{run['run_id']}"
 
 
-def save_checkpoint_exclusive(payload, path):
-    """A run never replaces an existing artifact, including a partial artifact."""
+def atomic_write(path, write, validate, *, exclusive=False):
+    """Stage beside the destination, validate closed bytes, then atomically publish."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("xb") as stream:
-        torch.save(payload, stream)
+    descriptor, name = tempfile.mkstemp(prefix=f".{path.stem}-", suffix=path.suffix,
+                                        dir=path.parent)
+    temporary = Path(name)
+    os.close(descriptor)
+    try:
+        write(temporary)
+        with temporary.open("rb") as stream:
+            os.fsync(stream.fileno())
+        validate(temporary)
+        # Exclusive CLI artifacts must still be absent at publication time.
+        if exclusive and os.path.lexists(path):
+            raise FileExistsError(f"Checkpoint already exists: {path}")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def save_checkpoint_atomic(payload, path, *, exclusive=False):
+    """Publish only a fully serialized, readable Torch checkpoint."""
+    atomic_write(path, lambda temporary: torch.save(payload, temporary),
+                 lambda temporary: torch.load(temporary, map_location="cpu", weights_only=False),
+                 exclusive=exclusive)
+
+
+def save_checkpoint_exclusive(payload, path):
+    """Publish a validated checkpoint without replacing an existing artifact."""
+    save_checkpoint_atomic(payload, path, exclusive=True)
 
 
 def capture_rng():
@@ -237,7 +264,7 @@ def validate_resume(checkpoint, config, source_identity):
     if (previous != target or not isinstance(old_budget, int) or new_budget < old_budget):
         raise ValueError("resume effective configuration is incompatible; only iters may increase")
     run = checkpoint["run"]
-    if (run.get("schema") != SCHEMA or run.get("status") not in {"running", "completed"} or
+    if (run.get("schema") != SCHEMA or run.get("status") not in {"running", "completed", "interrupted"} or
             run.get("source_identity") != source_identity or
             run.get("experiment_id") != experiment_identity(checkpoint["cfg"], source_identity)):
         raise ValueError("resume source/input identity or experiment configuration is incompatible")

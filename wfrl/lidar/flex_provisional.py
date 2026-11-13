@@ -5,6 +5,7 @@ published ReplayPackage validator or claim numerical refinement validation.
 """
 import hashlib
 import json
+import math
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -41,12 +42,14 @@ def build(run, destination):
                     validation='source completion and discrete collision checks only; no refinement comparison',
                     raw_sources={name:hashlib.sha256((run/name).read_bytes()).hexdigest()
                                  for name in ('run_config.json','processed.json','exit_status.json','solver.log','surface_hashes.json')})
-    destination.mkdir(parents=True)
     payload=json.dumps(contents,allow_nan=False).encode()
-    (destination/'data.json').write_bytes(payload)
     manifest['data_sha256']=hashlib.sha256(payload).hexdigest()
-    (destination/'manifest.json').write_text(json.dumps(manifest,indent=2), encoding='utf-8')
-    return load(destination)
+    manifest_payload=json.dumps(manifest,indent=2,allow_nan=False)
+    reader=_reader(manifest,contents)
+    destination.mkdir(parents=True)
+    (destination/'data.json').write_bytes(payload)
+    (destination/'manifest.json').write_text(manifest_payload, encoding='utf-8')
+    return reader
 
 
 def load(path):
@@ -55,8 +58,13 @@ def load(path):
     if manifest.get('schema')!='wfrl.flex-review.v1' or manifest.get('status')!='REVIEW_ONLY':
         raise ValueError('Expected an explicitly provisional flexibility preview')
     data=json.loads(checked_bytes(path/'data.json',manifest['data_sha256']))
+    return _reader(manifest,data)
+
+
+def _reader(manifest,data):
     times=[r['time_s'] for r in data['motion']]
-    if (not times or any(b<=a for a,b in zip(times,times[1:]))
+    if (not times or any(not math.isfinite(t) for t in times)
+            or any(b<=a for a,b in zip(times,times[1:]))
             or times[0]!=manifest['segment']['start_s'] or times[-1]!=manifest['segment']['end_s']):
         raise ValueError('Preview motion must cover its full interval')
     package=SimpleNamespace(manifest=manifest,**data)

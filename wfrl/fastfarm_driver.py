@@ -197,7 +197,10 @@ class FastFarmDriver:
         self.obs_keys = list(self.env.observation_space(self.agents[0]).keys())
         self.done = False
         self._steps = 0
+        self._solver_owned = False
         self._started = False
+        self.cleanup_confirmed = False
+        self.cleanup_error = None
         self._prepare_solver_outputs()
 
         # 偏航占空比：滑动窗口接管。把 yaw 从 mdp.ACTUATORS_RATE 移除 ⇒ env 的
@@ -241,6 +244,10 @@ class FastFarmDriver:
         """
         from wfcrl.interface import FastFarmInterface, WindRequestError, _wind_json
         itf = getattr(self.env.mdp, "interface", None)
+        if getattr(self, "cleanup_error", None) is not None:
+            raise RuntimeError("FAST.Farm cleanup is unconfirmed") from self.cleanup_error
+        self._started = False
+        self.cleanup_confirmed = False
         upstream_request = _wind_json(upstream_request)
         options = {}
         if isinstance(itf, FastFarmInterface):
@@ -288,6 +295,8 @@ class FastFarmDriver:
             reset_error = exc
             raise
         finally:
+            # Spawn can succeed before env.reset or its metadata writes fail.
+            self._solver_owned = self._has_solver()
             record = getattr(itf, "wind_record", None)
             if (isinstance(itf, FastFarmInterface) and upstream_request is not None
                     and record is not None and record is not previous_record):
@@ -300,12 +309,13 @@ class FastFarmDriver:
         self._telemetry_servo_steps = None
         if getattr(self, '_solver_outputs', None) is not None:
             self._solver_outputs.start(itf.wind_record['loaded_inputs'])
-        self.done = False
         self._steps = 0
-        self._started = True
+        self.done = self._episode_ended()
         self._yaw_win.clear()          # 新回合：偏航占空比窗口清空
         self.u_inf = self._freestream(fallback=wind_speed)
-        return self._read(reward=0.0)
+        measurement = self._read(reward=0.0)
+        self._started = True
+        return measurement
 
     def _freestream(self, fallback=None):
         """用于归一化的输入参考风速 (m/s)。
@@ -405,24 +415,34 @@ class FastFarmDriver:
         return out
 
     def _read(self, reward):
-        """一轮结束后回读全场真实测量。"""
+        """Read a physical round; *_valid masks describe each turbine's sample.
+
+        load_valid requires all supplied load components to be finite. yaw is
+        the command in degrees when controlled, otherwise the observation in
+        degrees; yaw_command and yaw_measured keep these roles separate.
+        Missing samples stay NaN, including the reset infos before any action.
+        """
         n = self.n
-        yaw = np.zeros(n); power = np.zeros(n); load = np.zeros(n)
+        yaw = np.full(n, np.nan); power = np.full(n, np.nan); load = np.full(n, np.nan)
         ws = np.zeros(n); wd = np.zeros(n); pitch = np.zeros(n)
         mflap = np.full((n, 3), np.nan); medge = np.full((n, 3), np.nan)
         for ag in self.agents:
             i = self._idx[ag]
             obs = self.env.observe(ag)
             info = self.env.infos.get(ag, {})
-            yaw[i] = float(np.ravel(obs.get("yaw", [0.0]))[0])
+            yaw[i] = _power_scalar(obs.get("yaw"))
             ws[i] = float(np.ravel(obs.get("wind_speed", [np.nan]))[0])
             wd[i] = float(np.ravel(obs.get("wind_direction", [np.nan]))[0])
             pitch[i] = float(np.ravel(obs.get("pitch", [np.nan]))[0])
             power[i] = _power_scalar(info.get("power"))
             # 保留 info 载荷的 mean|·| 标量；逐叶片弯矩优先使用下方 MPI 六分量原值。
             if "load" in info:
-                lv = np.ravel(info["load"]).astype(float)
-                load[i] = float(np.abs(lv).mean())
+                try:
+                    lv = np.ma.asarray(info["load"], dtype=float).filled(np.nan).ravel()
+                except (TypeError, ValueError, OverflowError):
+                    lv = np.array([np.nan])
+                if lv.size and np.isfinite(lv).all():
+                    load[i] = float(np.abs(lv).mean())
                 if lv.size == 6:
                     mflap[i] = lv[:3] * LOAD_SCALE
                     medge[i] = lv[3:] * LOAD_SCALE
@@ -441,8 +461,12 @@ class FastFarmDriver:
         pitch_meas = np.degrees(pm) if pm is not None else np.full(n, np.nan)
         ym = self._raw_measure("yaw")
         from wfcrl.interface import FastFarmInterface
+        native_yaw_radians = isinstance(getattr(self.env.mdp, "interface", None), FastFarmInterface)
+        if "yaw" not in self.controls and native_yaw_radians:
+            yaw = np.degrees(yaw)
         yaw_measured = np.full(n, np.nan) if ym is None else (
-            np.degrees(ym) if isinstance(self.env.mdp.interface, FastFarmInterface) else ym)
+            np.degrees(ym) if native_yaw_radians else ym)
+        yaw_command = yaw.copy() if "yaw" in self.controls else None
         tq = self._raw_measure("torque")
         torque = tq if tq is not None else np.full(n, np.nan)
         duty = self._duty()
@@ -458,8 +482,11 @@ class FastFarmDriver:
         clock = self._solver_clock()
         measurement = {
             "yaw": yaw, "power": power, "load": load,
-            "yaw_command": yaw.copy() if "yaw" in self.controls else None,
+            "load_valid": np.isfinite(load), "yaw_valid": np.isfinite(yaw),
+            "yaw_command": yaw_command,
+            "yaw_command_valid": np.isfinite(yaw) if yaw_command is not None else np.zeros(n, dtype=bool),
             "yaw_measured": yaw_measured,
+            "yaw_measured_valid": np.isfinite(yaw_measured),
             "m_flap": mflap, "m_edge": medge,
             "wind_speed": ws, "wind_direction": wd, "pitch": pitch,
             "pitch_meas": pitch_meas,
@@ -492,6 +519,27 @@ class FastFarmDriver:
         return stamp
 
     # ------------------------------------------------------------------
+    def _has_solver(self):
+        """A live child communicator owns solver resources independently of reset."""
+        from wfcrl.interface import MPI
+        env = getattr(self, "_uenv", getattr(self, "env", None))
+        interface = getattr(getattr(env, "mdp", None), "interface", None)
+        comm = getattr(interface, "_comm", None)
+        return MPI is not None and isinstance(comm, MPI.Intercomm) and bool(comm)
+
+    def _episode_ended(self):
+        """AEC flags and the exchange budget both end physical transitions.
+
+        WFCRL reset uses start_iter + 1 exchanges out of start_iter + max_steps,
+        leaving max_steps - 1 control rounds. Dead-agent cleanup is not a round.
+        """
+        for name in ("terminations", "truncations"):
+            if any(getattr(self.env, name, {}).values()):
+                return True
+        interface = getattr(getattr(self.env, "mdp", None), "interface", None)
+        count, budget = getattr(interface, "_num_iter", None), getattr(interface, "max_iter", None)
+        return count is not None and budget is not None and count >= budget
+
     def _clip(self, name, delta):
         """把某个控制量的增量补齐成 (n,) 并裁到它自己的动作边界。"""
         try:
@@ -529,7 +577,8 @@ class FastFarmDriver:
         FLORIS 后端只实现了 yaw（interface.py:576-581），给 pitch/torque 会在
         构造 env 时就报错，不会静默吞掉。
         """
-        if self.done:
+        if self.done or self._episode_ended():
+            self.done = True
             return self._read(reward=0.0)
         deltas = {"yaw": yaw_delta, "pitch": pitch_delta,
                   "torque": torque_delta}
@@ -551,18 +600,14 @@ class FastFarmDriver:
             _, _, term, trunc, _ = self.env.last()
             if term or trunc:
                 self.done = True
-                self.env.step(None)
-                continue
+                return self._read(reward=0.0)
             i = self._idx[ag]
             self.env.step({c: np.array([v[i]], dtype=np.float32)
                            for c, v in cmd.items()})
         self._steps += 1
-        # 截断轮里 AEC 会清空 rewards 字典 → 用 .get 防御
+        self.done = self._episode_ended() or self._steps >= self.max_steps
         rw = self.env.rewards.get(self.agents[0], 0.0)
         reward = float(np.ravel(rw)[0]) if np.size(rw) else 0.0
-        # 回合预算耗尽 → 截断
-        if self._steps >= self.max_steps:
-            self.done = True
         return self._read(reward=reward)
 
     # ------------------------------------------------------------------
@@ -572,44 +617,77 @@ class FastFarmDriver:
         早退时调用；用零增量把回合走完（有上限，防止极长回合把关闭卡死）。
         `purge=True` 额外删掉本次 `envs.make()` 建的算例目录 —— 按回合重启训练时
         每回合一个 ~37 MB 的目录，不清会把 `__simul__/` 撑爆（README §8 第 5 条）。
-        `strict=True` 要求排空完成、环境关闭成功且 MPI 子通信器已断开；失败后
-        禁止重复排空不确定的 AEC 状态，由拥有工作进程的调用方处理取消。
+        返回值和 cleanup_confirmed 表示排空、环境关闭和 MPI 断开均已确认。
+        失败时 cleanup_error 保留原因，任何 strict 值都禁止 purge 和重复排空；
+        strict=True 重新抛出异常，非 strict 返回 False，中断始终重新抛出。
         """
-        prior_error = getattr(self, "_strict_close_error", None)
-        if strict and prior_error is not None:
-            raise RuntimeError("FAST.Farm close previously failed; cleanup is unconfirmed") from prior_error
+        prior_error = getattr(self, "cleanup_error", None)
+        if prior_error is not None:
+            if strict:
+                raise RuntimeError("FAST.Farm close previously failed; cleanup is unconfirmed") from prior_error
+            return False
+        if getattr(self, "cleanup_confirmed", False):
+            if purge:
+                self._purge_case()
+            return True
+        self.cleanup_confirmed = False
         cap = drain_cap if drain_cap is not None else getattr(self, "max_steps", 0)
         drained = 0
         close_error = None
+        interruption = None
         try:
-            while getattr(self, "_started", False) and not self.done and drained < cap:
-                for _ in range(self.n):
-                    _, _, term, trunc, _ = self.env.last()
-                    if term or trunc:
+            self._solver_owned = getattr(self, "_solver_owned", False) or self._has_solver()
+            interface = getattr(getattr(getattr(self, "env", None), "mdp", None), "interface", None)
+            if self._solver_owned and callable(getattr(interface, "update_command", None)):
+                # A partial reset need not have an AEC selector or observations.
+                # Hold the interface's last commands until its fixed MPI budget ends.
+                while interface._num_iter < interface.max_iter and drained < cap:
+                    interface.update_command()
+                    drained += 1
+                if interface._num_iter < interface.max_iter:
+                    raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
+                self.done = True
+            elif getattr(self, "_started", False):
+                while not self.done and drained < cap:
+                    if self._episode_ended():
                         self.done = True
-                        self.env.step(None)
-                        continue
-                    self.env.step({c: np.array([0.0], dtype=np.float32)
-                                   for c in self.controls})
-                drained += 1
-                if self._steps + drained >= self.max_steps:
-                    self.done = True
-            if strict and getattr(self, "_started", False) and not self.done:
-                raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
-        except Exception as e:                       # noqa: BLE001
+                        break
+                    for _ in range(self.n):
+                        _, _, term, trunc, _ = self.env.last()
+                        if term or trunc:
+                            self.done = True
+                            break
+                        self.env.step({c: np.array([0.0], dtype=np.float32)
+                                       for c in self.controls})
+                    drained += 1
+                    self.done = (self.done or self._episode_ended()
+                                 or self._steps + drained >= self.max_steps)
+                if not self.done:
+                    raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
+        except BaseException as e:
             _LOG.exception("FAST.Farm 排空失败（strict=%s）", strict)
-            if strict:
-                close_error = e
+            close_error = e
+            if not isinstance(e, Exception):
+                interruption = e
         try:
-            self._safe_close(strict=strict)
-        except Exception as e:                       # noqa: BLE001
+            self._safe_close(strict=True)
+        except BaseException as e:
             _LOG.exception("FAST.Farm 环境关闭未完成")
             close_error = close_error or e
+            if interruption is None and not isinstance(e, Exception):
+                interruption = e
         if close_error is not None:
-            self._strict_close_error = close_error
-            raise close_error
+            self.cleanup_error = close_error
+            if interruption is not None:
+                raise interruption
+            if strict:
+                raise close_error
+            return False
+        self._solver_owned = self._started = False
+        self.cleanup_confirmed = True
         if purge:
             self._purge_case()
+        return True
 
     def _purge_case(self):
         """删掉本次算例目录，连同之前删不掉的那些一起重试。
@@ -653,10 +731,7 @@ class FastFarmDriver:
             if strict:
                 # WFCRL 的 env.close 可以是空操作；FAST.Farm 的最后一次通信负责
                 # Disconnect。仍有效的子通信器表示不能确认旧求解器已释放。
-                from wfcrl.interface import MPI
-                mdp = getattr(getattr(self, "_uenv", env), "mdp", None)
-                comm = getattr(getattr(mdp, "interface", None), "_comm", None)
-                if MPI is not None and isinstance(comm, MPI.Intercomm) and bool(comm):
+                if self._has_solver():
                     raise RuntimeError("FAST.Farm MPI communicator is still connected")
         except Exception:                            # noqa: BLE001
             if strict:

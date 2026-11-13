@@ -170,7 +170,7 @@ def test_cli_resume_restores_statistics_and_adds_timesteps(monkeypatch, isolated
     assert restored[0].ret_rms.count > 125
     assert len(isolated) == 2
     assert all(env.close_calls == 1 for env in isolated)
-    saved = PPO.load(sb3.MODEL_PATH)
+    saved = PPO.load(sb3._require_checkpoint_files()[0])
     assert saved.num_timesteps == 48
     assert saved._wfrl_checkpoint_id != "pair-a"
     check = sb3.make_venv(training=False, norm_reward=False, norm_path=sb3.VECNORM_PATH)

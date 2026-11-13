@@ -9,6 +9,8 @@ import os
 import copy
 import inspect
 import random
+import signal
+import threading
 
 import numpy as np
 import torch
@@ -359,6 +361,29 @@ def _training_components(obs_dim, act_dim, state_dim, recurrent, lr, checkpoint=
             restore_rng(saved_rng)
 
 
+class _TrainingCancellation:
+    """Signals request a stop at a complete update; cleanup restores prior handlers."""
+
+    def __init__(self):
+        self.requested = False
+        self.handlers = {}
+
+    def _request(self, signum, frame):
+        self.requested = True
+
+    def install(self):
+        if threading.current_thread() is threading.main_thread():
+            for name in ("SIGINT", "SIGBREAK"):
+                signum = getattr(signal, name, None)
+                if signum is not None:
+                    self.handlers[signum] = signal.getsignal(signum)
+                    signal.signal(signum, self._request)
+
+    def restore(self):
+        for signum, handler in self.handlers.items():
+            signal.signal(signum, handler)
+
+
 def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
           gamma=0.99, lam=0.95, clip=0.2, lr=3e-4, ent_coef=0.005,
           vf_coef=0.5, max_grad=0.5, recurrent=False, seed=0,
@@ -400,8 +425,11 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
         if not {"actor", "critic", "optimizer"} <= ckpt.keys():
             raise ValueError("resume requires a full training checkpoint with actor/critic/optimizer")
     components = None
+    counts = (0, 0)
     if ckpt is not None:
         recovery = validate_resume(ckpt, config, source_identity)
+        from wfrl.blender_bridge.training_progress import resume_counts
+        counts = resume_counts(ckpt)
         expected_obs_dim = len(OBS_KEYS) + int(obs_duty)
         if (ckpt["obs_dim"] != expected_obs_dim or ckpt.get("act_dim") != 1 or
                 ckpt.get("obs_keys") != OBS_KEYS or
@@ -419,19 +447,10 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
     tag = artifact_tag(run)
     progress = None
     if training_progress:
-        from wfrl.blender_bridge.training_progress import TrainingProgressWriter, resume_counts
+        from wfrl.blender_bridge.training_progress import TrainingProgressWriter
         import uuid
-        counts = (0, 0)
-        if resume_from:
-            checkpoint = ckpt
-            counts = resume_counts(checkpoint)
-            required = {'actor', 'critic', 'optimizer', 'obs_mean', 'obs_var'}
-            if not required <= checkpoint.keys():
-                raise ValueError('Observability resume requires a full training checkpoint')
-            if checkpoint['iteration'] >= iters:
-                raise ValueError('Observability resume requires remaining training iterations')
         progress = TrainingProgressWriter(training_progress, run_id or uuid.uuid4().hex, *counts)
-        progress.iteration = checkpoint['iteration'] + 1 if resume_from else 1
+        progress.iteration = ckpt['iteration'] + 1 if ckpt is not None else 1
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -446,7 +465,9 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
 
     smp = None
     sampler_closed = False
+    cancellation = _TrainingCancellation()
     try:
+        cancellation.install()
         smp = FastFarmSampler(env_id, episode_steps=episode_steps,
                               warmup_steps=warmup_steps,
                               total_steps=(iters - ckpt["iteration"]) * n_steps if ckpt else total_steps,
@@ -537,7 +558,10 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                     **({"training_progress": {"step": progress.step, "agent_step": progress.agent_step}}
                        if progress is not None else {})}
 
+        completed_iteration = start_iter - 1
         for it in range(start_iter, iters + 1):
+            if cancellation.requested and completed_iteration >= start_iter:
+                break
             if progress is not None: progress.progress("sampling", it)
             B_obs = np.zeros((n_steps, n, smp.obs_dim), np.float32)
             B_act = np.zeros((n_steps, n, smp.act_dim), np.float32)
@@ -684,6 +708,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
             hist["pg"].append(mpg)
             hist["vloss"].append(mvl)
             hist["episodes"].append(int(np.count_nonzero(B_done)))
+            completed_iteration = it
             print(f"[{tag}] it {it}/{iters}  steps {global_step}  "
                   f"rew(1step) {B_rew.mean():+.4f}  raw {raw_mean:.3f}  "
                   f"farm_power {B_power.mean():.2f}MW  "
@@ -699,32 +724,42 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                 save_checkpoint_exclusive(checkpoint_payload(it), ckpt_path)
                 print(f"[{tag}] 定期保存 iter {it} -> {ckpt_path}", flush=True)
 
+            if cancellation.requested:
+                break
+
         hist["shaper_stats"] = smp.shaper.stats() if hasattr(smp.shaper, "stats") else {}
         hist["n_spawns"] = smp.n_spawns
         os.makedirs(CKPT_DIR, exist_ok=True)
         safe = env_id.replace("/", "_")
         model_path = os.path.abspath(os.path.join(CKPT_DIR, f"mappo_fastfarm_{safe}_{tag}.pt"))
-        run["status"] = "completed"
+        interrupted = cancellation.requested and completed_iteration < iters
+        run["status"] = "interrupted" if interrupted else "completed"
         run["checkpoint"] = model_path
-        payload = checkpoint_payload(iters)
+        payload = checkpoint_payload(completed_iteration)
         # Closing drains physics; recovery state belongs to the last training update.
+        if interrupted:
+            save_checkpoint_exclusive(payload, model_path)
         sampler_closed = True
         smp.close()
-        save_checkpoint_exclusive(payload, model_path)
+        if not interrupted:
+            save_checkpoint_exclusive(payload, model_path)
         print(f"[{tag}] saved -> {model_path}", flush=True)
 
         _dump_hist(hist, env_id, tag)
         _plot_curves(hist, env_id, tag)
         if progress is not None:
-            progress.progress("done", iters)
+            progress.progress("done", completed_iteration)
         return hist
     finally:
         try:
             if smp is not None and not sampler_closed:
                 smp.close()
         finally:
-            if progress is not None:
-                progress.close()
+            try:
+                if progress is not None:
+                    progress.close()
+            finally:
+                cancellation.restore()
 
 
 def _dump_hist(hist, env_id, tag):
@@ -830,7 +865,7 @@ def main():
 
     # ---- 定期保存与恢复 ----
     ap.add_argument("--save-interval", type=int, default=0,
-                    help="每 N 轮保存一次 checkpoint（0=关闭，只在最后保存）")
+                    help="每 N 轮保存一次 checkpoint（0=关闭定期保存；结束或协作式中断仍保存）")
     ap.add_argument("--resume-from", type=str, default=None,
                     help="从完整 checkpoint 恢复软件状态，另起物理回合与 run；仅允许增加 iters")
 

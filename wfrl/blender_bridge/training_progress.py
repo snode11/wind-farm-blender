@@ -17,6 +17,8 @@ def resume_counts(checkpoint):
         raise ValueError('Observability resume requires a safe checkpoint iteration')
     metadata = checkpoint.get('training_progress')
     if metadata is not None:
+        if not isinstance(metadata, dict):
+            raise ValueError('Observability resume training_progress must be an object')
         step, agent_step = metadata.get('step'), metadata.get('agent_step')
     else:
         hist = checkpoint.get('history', {})
@@ -32,6 +34,15 @@ def resume_counts(checkpoint):
         agent_step = step * (state_dim // obs_dim)
     if any(type(v) is not int or not 0 <= v <= MAX_SAFE for v in (step, agent_step)):
         raise ValueError('Observability resume counts must be nonnegative safe integers')
+    for name in ('recovery', 'run'):
+        record = checkpoint.get(name)
+        if record is not None:
+            if not isinstance(record, dict):
+                raise ValueError(f'Observability resume {name} must be an object')
+            counts = record.get('control_steps'), record.get('agent_steps')
+            if (any(type(v) is not int or not 0 <= v <= MAX_SAFE for v in counts)
+                    or counts != (step, agent_step)):
+                raise ValueError(f'Observability resume counts disagree with {name} counters')
     return step, agent_step
 
 

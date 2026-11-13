@@ -105,13 +105,15 @@ def test_strict_close_confirms_disconnection_before_purge(driver_factory):
 
 
 @pytest.mark.parametrize("failure", ["drain", "env", "connected"])
-def test_default_close_preserves_non_strict_callers(driver_factory, failure):
+def test_default_close_preserves_case_and_exposes_unconfirmed_driver_cleanup(driver_factory, failure):
     runtime = SceneRuntime.__new__(SceneRuntime)
     runtime.driver = driver_factory(failure)
-    env = runtime.driver.env
+    driver = runtime.driver
+    env = driver.env
     runtime.close(purge=True)
     assert runtime.driver is None
-    assert env.close_calls == 1 and env.purged
+    assert env.close_calls == 1 and not env.purged
+    assert not driver.cleanup_confirmed and driver.cleanup_error is not None
 
 
 @pytest.mark.parametrize("failure", [None, "drain", "env", "connected"])

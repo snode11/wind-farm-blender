@@ -171,8 +171,9 @@ def test_drain_and_close_failures_are_both_logged_and_close_is_attempted(caplog,
             driver.close(strict=True)
         driver.env.last.assert_called_once()
     else:
-        driver.close(purge=True)
-        driver._purge_case.assert_called_once()
+        assert driver.close(purge=True) is False
+        driver._purge_case.assert_not_called()
+    assert driver.cleanup_error is drain_error and not driver.cleanup_confirmed
     driver.env.close.assert_called_once()
     assert_logged(caplog, drain_error, "排空")
     assert_logged(caplog, close_error, "关闭")

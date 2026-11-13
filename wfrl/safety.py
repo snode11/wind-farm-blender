@@ -163,6 +163,8 @@ class SafetyLimiter:
         self.controls = list(scene.controls)
         self.ids = [t.id for t in scene.turbines]
         self.max_events = int(max_events)
+        if self.max_events < 0:
+            raise ValueError("max_events 必须为非负整数")
         self.events: List[Event] = []
         self.counts: Dict[str, int] = {}
         self._step = 0
@@ -220,6 +222,7 @@ class SafetyLimiter:
                 v = np.repeat(v, self.n)
             if v.size != self.n:
                 raise ValueError(f"控制量 {c} 长度 {v.size} != 机组数 {self.n}")
+            finite = np.isfinite(v)
             v = self._nan_guard(c, v, evs)
             v = self._step_bound(c, v, evs)
             v = self._state_bound(c, v, evs)
@@ -227,7 +230,7 @@ class SafetyLimiter:
             if c == "pitch":
                 self._pitch_semantics(v, measure, evs)
             if c == "torque":
-                v = self._torque_semantics(v, measure, evs)
+                v = self._torque_semantics(v, measure, evs, finite)
             out[c] = v
             self.state[c] = self.state[c] + v
         self._record(evs)
@@ -237,15 +240,28 @@ class SafetyLimiter:
         """按直接转速回读报告超速；缺测不推断，低转矩不撤销超速报警。"""
         evs: List[Event] = []
         m = measure or {}
-        rpm = np.asarray(m.get("rotor_speed", np.full(self.n, np.nan)), float)
+        nan = np.full(self.n, np.nan)
+        latest = np.asarray(m.get("rotor_speed", nan), float).ravel()
+        # 区间内全部有效原生样本的峰值及其仿真时刻（solver_outputs.SolverOutputs.sample）；
+        # 没有原生输出读取器的后端不提供这三项。
+        peak = np.asarray(m.get("rotor_speed_interval_max", nan), float).ravel()
+        peak_time = np.asarray(m.get("rotor_speed_interval_max_time", nan), float).ravel()
+        samples = np.asarray(m.get("rotor_speed_interval_samples", np.zeros(self.n)), float).ravel()
         for i in range(self.n):
-            r = float(rpm[i]) if i < rpm.size else float("nan")
+            r = float(latest[i]) if i < latest.size else float("nan")
+            when = None
+            if (i < samples.size and samples[i] > 0
+                    and i < peak.size and np.isfinite(peak[i])):
+                r = float(peak[i])
+                if i < peak_time.size and np.isfinite(peak_time[i]):
+                    when = float(peak_time[i])
             if not np.isfinite(r) or r <= RPM_ALARM:
                 continue
+            at = "" if when is None else f"，峰值时刻 t={when:.2f} s"
             evs.append(Event(self._step, self.ids[i], "rotor_speed",
                              "超速", r, r, "block",
                              f"额定 {RATED_RPM:.2f} rpm，报警线 "
-                             f"{RPM_ALARM:.2f} rpm"))
+                             f"{RPM_ALARM:.2f} rpm{at}"))
         self._record(evs)
         return evs
 
@@ -326,11 +342,12 @@ class SafetyLimiter:
                     f"PitchRef = MAX(PitchRef, PitComT)（DISCON.F90:523），"
                     f"基线在 {pm[i]:.2f}°，外部 {cmd_abs[i]:.2f}° 无效"))
 
-    def _torque_semantics(self, v, measure, evs):
+    def _torque_semantics(self, v, measure, evs, finite):
         """向基线 VS 包线修正转矩，受单步及累加指令边界约束。
 
         当前值距包线过远时只能逐步接近，不能保证一步进入包线。
         事件和内部状态使用 Driver 可提交的 float32 增量；实际转矩仍取决于后端。
+        非有限原始指令对应的增量保持为零，不参与包线修正或生成修正事件。
         """
         tq = np.asarray((measure or {}).get("torque",
                                             np.full(self.n, np.nan)), float)
@@ -346,7 +363,8 @@ class SafetyLimiter:
         lower = np.maximum(-bound, lo - self.state["torque"])
         upper = np.minimum(bound, hi - self.state["torque"])
         adj = np.clip(target - base, lower, upper).astype(np.float32).astype(float)
-        changed = (np.abs(target - (base + v)) > 1e-6) | (np.abs(adj - v) > 1e-6)
+        adj = np.where(finite, adj, 0.0)
+        changed = finite & ((np.abs(target - (base + v)) > 1e-6) | (np.abs(adj - v) > 1e-6))
         for i in np.where(changed)[0]:
             over = (base[i] + v[i]) > t_hi[i]
             incomplete = not t_lo[i] - 1e-6 <= base[i] + adj[i] <= t_hi[i] + 1e-6
@@ -367,13 +385,15 @@ class SafetyLimiter:
         self.events.extend(evs)
         if len(self.events) > self.max_events:
             # 只丢最老的：训练跑几千步时事件量会很大，但最近的那些才是要看的
-            self.events = self.events[-self.max_events:]
+            del self.events[:len(self.events) - self.max_events]
 
     def summary(self) -> List[tuple]:
         """(规则, 次数) 按次数降序，训练面板直接渲染。"""
         return sorted(self.counts.items(), key=lambda kv: -kv[1])
 
     def recent(self, k: int = 20) -> List[Event]:
+        if k == 0:
+            return []
         return self.events[-k:]
 
     def reachable(self, control: str, n_steps: int) -> float:
@@ -423,10 +443,13 @@ class SafetyLimiter:
             if math.isinf(s):
                 out.append(f"{c}: 不受执行机构占空比约束（mdp.py:52 无条目）")
                 continue
-            line = (f"{c}: 动作空间 ±{STEP_BOUND.get(c, float('nan')):g}/步，"
-                    f"但占空比可持续量仅 {s:.3g}/步（差 "
-                    f"{STEP_BOUND.get(c, float('nan')) / s:.0f} 倍），"
-                    f"持续满幅动作必被清零")
+            bound = STEP_BOUND.get(c, float("nan"))
+            line = f"{c}: 动作空间 ±{bound:g}/步，"
+            if bound > s:
+                line += (f"但占空比可持续量仅 {s:.3g}/步（差 {bound / s:.0f} 倍），"
+                         f"持续满幅动作必被清零")
+            else:
+                line += f"占空比可持续量 {s:.3g}/步，满幅动作不超过占空比可持续量"
             if n_steps:
                 line += (f"；{n_steps} 步回合内最多累积 "
                          f"{self.reachable(c, n_steps):.3g}")

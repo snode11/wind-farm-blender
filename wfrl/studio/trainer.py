@@ -28,6 +28,7 @@ import torch
 from wfrl.mappo_central import Actor, Critic, RunningMeanStd
 from wfrl.policy_actions import PolicyActionContract, load_action_contract
 from wfrl.safety import SafetyLimiter
+from wfrl.training_integrity import save_checkpoint_atomic
 
 DEVICE = torch.device("cpu")
 
@@ -804,7 +805,7 @@ class Trainer:
             raise ValueError("saving a policy requires its training action_contract")
         os.makedirs(os.path.dirname(self.ckpt_path) or ".", exist_ok=True)
         obs_dim = len(self.obs_keys)
-        torch.save({"actor": self.actor.state_dict(),
+        save_checkpoint_atomic({"actor": self.actor.state_dict(),
                     "critic": self.critic.state_dict(),
                     "obs_mean": rms.mean, "obs_var": rms.var,
                     "obs_keys": list(self.obs_keys),

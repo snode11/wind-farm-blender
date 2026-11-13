@@ -2,6 +2,7 @@
 from collections import deque
 from pathlib import Path
 import math
+import os
 import shutil
 
 import numpy as np
@@ -68,30 +69,50 @@ class OutputReader:
         self.offset = 0
         self.partial = b''
         self.identity = None
+        self._header_lines = []
+        self._read_tail = b''
         self.names = self.units = None
         self.last_time = None
         self.latest = None
         self.future = deque()
+        self.interval = []
         self.error = None
 
     def advance(self, target):
+        """Return the latest row at or before target; ``interval`` keeps every row consumed by this call."""
+        self.interval = []
         if self.error:
             return None
         try:
             with self.path.open('rb') as stream:
-                stat = self.path.stat()
+                stat = os.fstat(stream.fileno())
                 identity = (stat.st_dev, stat.st_ino)
                 if self.identity is not None and (identity != self.identity or stat.st_size < self.offset):
                     raise ValueError('Output file was replaced or truncated within this run')
                 self.identity = identity
+                # Cached rows belong to the same header and already-read file content.
+                checkpoints = self._header_lines + [(self.offset - len(self._read_tail), self._read_tail)]
+                for position, expected in checkpoints:
+                    stream.seek(position)
+                    if stream.read(len(expected)) != expected:
+                        raise ValueError('Output file was rewritten within this run')
+                while self.future and self.future[0][0] <= target + 1e-9:
+                    row = self.future.popleft()
+                    self.interval.append(row)
+                    if self.latest is None or row[0] > self.latest[0]:
+                        self.latest = row
+                line_end = self.offset - len(self.partial)
                 stream.seek(self.offset)
                 chunk = stream.read(self.READ_LIMIT)
                 self.offset += len(chunk)
+                self._read_tail = (self._read_tail + chunk[-self.LINE_LIMIT:])[-self.LINE_LIMIT:]
             lines = (self.partial + chunk).split(b'\n')
             self.partial = lines.pop()
             if len(self.partial) > self.LINE_LIMIT:
                 raise ValueError('Incomplete output row exceeds the size limit')
             for line in lines:
+                line_start = line_end
+                line_end += len(line) + 1
                 words = line.decode('utf-8', errors='replace').split()
                 if not words:
                     continue
@@ -100,11 +121,13 @@ class OutputReader:
                         if len(set(words)) != len(words):
                             raise ValueError('Duplicate output column names')
                         self.names = words
+                        self._header_lines.append((line_start, line + b'\n'))
                     continue
                 if self.units is None:
                     if len(words) != len(self.names) or words[0] != '(s)':
                         raise ValueError('Invalid output units header')
                     self.units = [word.strip('()') for word in words]
+                    self._header_lines.append((line_start, line + b'\n'))
                     continue
                 if len(words) != len(self.names):
                     raise ValueError('Complete output row has the wrong column count')
@@ -115,14 +138,11 @@ class OutputReader:
                 row = (time, words)
                 if time <= target + 1e-9:
                     self.latest = row
+                    self.interval.append(row)
                 else:
                     self.future.append(row)
                     if len(self.future) > self.FUTURE_LIMIT:
                         raise ValueError('Future output backlog exceeds the bounded reader capacity')
-            while self.future and self.future[0][0] <= target + 1e-9:
-                row = self.future.popleft()
-                if self.latest is None or row[0] > self.latest[0]:
-                    self.latest = row
             return self.latest
         except FileNotFoundError:
             return None
@@ -130,6 +150,7 @@ class OutputReader:
             self.error = str(exc)
             self.latest = None
             self.future.clear()
+            self.interval = []
             return None
 
 
@@ -150,9 +171,15 @@ class SolverOutputs:
             raise RuntimeError('Native output readers require a started solver run')
         records = []
         values = {key: np.full(len(self.readers), np.nan) for key in SOLVER_OUTPUT_CHANNELS}
+        # Latest rows feed display; the interval peak feeds overspeed checks between control steps.
+        values.update({key: np.full(len(self.readers), np.nan) for key in
+                       ('rotor_speed_interval_max', 'rotor_speed_interval_max_time')})
+        values['rotor_speed_interval_samples'] = np.zeros(len(self.readers), dtype=int)
         for ti, (reader, definition) in enumerate(zip(self.readers, self.definitions)):
             row = reader.advance(solver_time)
             columns = {name: j for j, name in enumerate(reader.names or ())}
+            units_ready = (reader.units is not None and reader.names is not None
+                           and len(reader.units) == len(reader.names))
             turbine = {}
             for key, spec in SOLVER_OUTPUT_CHANNELS.items():
                 provenance = dict(source='OpenFAST native text output', channel=spec['native'],
@@ -171,7 +198,7 @@ class SolverOutputs:
                               source_age_seconds=0., stale_after_seconds=2.)
                 if reader.error:
                     record.update(validity='invalid', error=reader.error)
-                elif row is not None:
+                elif row is not None and units_ready:
                     time, words = row
                     record['timestamp'] = dict(value=time, timebase='simulation_seconds', source='openfast_output')
                     provenance['simulation_lag_seconds'] = max(0., solver_time - time)
@@ -195,4 +222,31 @@ class SolverOutputs:
                             record.update(validity='invalid', error='Invalid native measurement')
                 turbine[key] = record
             records.append(turbine)
+            peak, peak_time, count = self._interval_peak(reader, columns, 'rotor_speed')
+            values['rotor_speed_interval_max'][ti] = peak
+            values['rotor_speed_interval_max_time'][ti] = peak_time
+            values['rotor_speed_interval_samples'][ti] = count
         return values, records
+
+    @staticmethod
+    def _interval_peak(reader, columns, key):
+        """Largest finite native sample consumed in this coupling interval, with its time."""
+        if (not reader.interval or reader.error or reader.units is None or reader.names is None
+                or len(reader.units) != len(reader.names)):
+            return np.nan, np.nan, 0
+        spec = SOLVER_OUTPUT_CHANNELS[key]
+        index = columns.get(spec['native'])
+        if index is None or reader.units[index] != spec['native_unit']:
+            return np.nan, np.nan, 0
+        peak, peak_time, count = np.nan, np.nan, 0
+        for time, words in reader.interval:
+            try:
+                value = float(words[index].replace('D', 'E')) * spec['scale']
+            except (ValueError, OverflowError):
+                continue
+            if not math.isfinite(value):
+                continue
+            count += 1
+            if not peak >= value:  # also true while peak is still NaN
+                peak, peak_time = value, time
+        return peak, peak_time, count
