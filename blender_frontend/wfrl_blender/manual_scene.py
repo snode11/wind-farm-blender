@@ -42,7 +42,9 @@ def _remember_view(context):
             location=region.view_location.copy(), rotation=region.view_rotation.copy(),
             distance=region.view_distance, perspective=region.view_perspective,
             camera_zoom=region.view_camera_zoom, camera_offset=tuple(region.view_camera_offset),
-            camera=space.camera, local_camera=space.use_local_camera,
+            camera=space.camera.name if space.camera else None,
+            _camera_pointer=space.camera.as_pointer() if space.camera else None,
+            local_camera=space.use_local_camera,
             clip_start=space.clip_start, clip_end=space.clip_end,
             shading=space.shading.type, color_type=space.shading.color_type,
             scene_world=space.shading.use_scene_world,
@@ -58,7 +60,7 @@ def _save_return_view(context, scene, fallback_scene=None):
         record = dict(saved)
         record['location'] = list(saved['location'])
         record['rotation'] = list(saved['rotation'])
-        record['camera'] = saved['camera'].name if saved['camera'] else None
+        record.pop('_camera_pointer', None)
         record['area_index'] = areas.index(area)
         records.append(record)
     if records:
@@ -76,12 +78,17 @@ def _restore_view(context, saved_scene=None):
         try:
             records = json.loads(saved_scene.get('wfrl_manual_return_views', '[]'))
             areas = list(context.screen.areas)
+            required = {'area_index', 'location', 'rotation', 'distance', 'perspective',
+                        'camera', 'local_camera', 'clip_start', 'clip_end', 'shading',
+                        'color_type', 'overlays', 'sidebar'}
             for saved in records:
+                if not isinstance(saved, dict) or not required <= saved.keys():
+                    continue
                 index = saved['area_index']
-                if index < 0 or index >= len(areas) or areas[index].type != 'VIEW_3D':
+                if (type(index) is not int or index < 0 or index >= len(areas)
+                        or areas[index].type != 'VIEW_3D'):
                     continue
                 area = areas[index]
-                saved['camera'] = context.scene.objects.get(saved['camera']) if saved['camera'] else None
                 snapshots.append((area, area.spaces.active, saved))
         except (ValueError, TypeError, KeyError):
             snapshots = []
@@ -99,7 +106,11 @@ def _restore_view(context, saved_scene=None):
                 region.view_camera_zoom = saved['camera_zoom']
             if 'camera_offset' in saved:
                 region.view_camera_offset = saved['camera_offset']
-            space.camera = saved['camera']
+            camera = context.scene.objects.get(saved['camera']) if saved['camera'] else None
+            pointer = saved.get('_camera_pointer')
+            if pointer is not None and (camera is None or camera.as_pointer() != pointer):
+                camera = next((obj for obj in context.scene.objects if obj.as_pointer() == pointer), camera)
+            space.camera = camera
             space.use_local_camera = saved['local_camera']
             space.clip_start, space.clip_end = saved['clip_start'], saved['clip_end']
             space.shading.type = saved['shading']
@@ -187,7 +198,9 @@ def _environment(scene, collection, prefix):
         mesh.from_pydata(vertices, [], faces)
         mesh.materials.append(terrain)
         ground.data = mesh
-        if old_mesh.users == 0:
+        if (old_mesh.name.startswith(prefix + '.') and old_mesh.users == 0
+                and not old_mesh.library and not old_mesh.use_fake_user
+                and old_mesh.shape_keys is None and old_mesh.animation_data is None):
             bpy.data.meshes.remove(old_mesh)
     for face in ground.data.polygons:
         face.use_smooth = True
@@ -248,19 +261,40 @@ def _ensure_environment(scene):
     _environment(scene, collection, prefix)
 
 
-def _discard(scene, collection, prefix):
+_CONSTRUCTION_POOLS = ('objects', 'collections', 'meshes', 'curves', 'lights',
+                       'cameras', 'materials', 'worlds', 'images')
+
+
+def _discard(scene, prefix, existing, error):
     """Remove only this failed construction's owned data."""
     import bpy
-    if collection is not None:
-        for obj in list(collection.objects):
-            bpy.data.objects.remove(obj, do_unlink=True)
-        bpy.data.collections.remove(collection)
-    bpy.data.scenes.remove(scene)
-    for blocks in (bpy.data.meshes, bpy.data.curves, bpy.data.lights,
-                   bpy.data.cameras, bpy.data.materials, bpy.data.worlds, bpy.data.images):
+    scene_pointer = scene.as_pointer() if scene is not None else None
+    if scene is not None:
+        try:
+            bpy.data.scenes.remove(scene)
+        except ReferenceError:
+            pass
+        except Exception as cleanup_error:
+            error.add_note(f'Manual scene cleanup failed: {cleanup_error}')
+    for name in _CONSTRUCTION_POOLS:
+        blocks = getattr(bpy.data, name)
         for block in list(blocks):
-            if block.name.startswith(prefix) and block.users == 0:
-                blocks.remove(block)
+            try:
+                if (block.as_pointer() in existing[name] or not block.name.startswith(prefix + '.')
+                        or block.library or block.use_fake_user):
+                    continue
+                if name == 'objects':
+                    if (any(owner.as_pointer() != scene_pointer for owner in block.users_scene)
+                            or any(owner.as_pointer() in existing['collections']
+                                   for owner in block.users_collection)):
+                        continue
+                    blocks.remove(block, do_unlink=True)
+                elif block.users == 0 and getattr(block, 'shape_keys', None) is None:
+                    blocks.remove(block)
+            except ReferenceError:
+                pass
+            except Exception as cleanup_error:
+                error.add_note(f'Manual resource cleanup failed ({name}): {cleanup_error}')
 
 
 def create(context):
@@ -276,15 +310,17 @@ def create(context):
     if is_manual(source):
         return source
     prefix = 'WFRLManual.' + uuid.uuid4().hex[:12]
-    scene = bpy.data.scenes.new('风机手动控制')
-    scene['wfrl_scene_kind'] = 'manual'
-    scene['wfrl_manual_owner'] = prefix
-    scene['wfrl_fidelity'] = 'SYNTH'
-    scene.use_fake_user = True
-    scene.wfrl_manual_return_scene = source
-    collection = None
+    existing = {name: {block.as_pointer() for block in getattr(bpy.data, name)}
+                for name in _CONSTRUCTION_POOLS}
+    scene = None
     material = partial(get_material, namespace=prefix)
     try:
+        scene = bpy.data.scenes.new('风机手动控制')
+        scene['wfrl_scene_kind'] = 'manual'
+        scene['wfrl_manual_owner'] = prefix
+        scene['wfrl_fidelity'] = 'SYNTH'
+        scene.use_fake_user = True
+        scene.wfrl_manual_return_scene = source
         context.window.scene = scene
         collection = bpy.data.collections.new(prefix + '.Scene')
         scene.collection.children.link(collection)
@@ -307,7 +343,6 @@ def create(context):
         for obj in collection.objects:
             obj['wfrl_manual_owner'] = prefix
         _environment(scene, collection, prefix)
-        source.wfrl_manual_scene = scene
         if not manual_control.apply_scene(scene):
             raise ValueError(manual_control.validate_scene(scene)[1])
         manual_control.sync_batch(scene)
@@ -315,10 +350,14 @@ def create(context):
         for obj in scene.objects:
             obj.select_set(False)
         context.view_layer.update()
+        source.wfrl_manual_scene = scene
         return scene
-    except Exception:
-        context.window.scene = source
-        _discard(scene, collection, prefix)
+    except BaseException as error:
+        try:
+            context.window.scene = source
+        except Exception as restore_error:
+            error.add_note(f'Manual source scene restoration failed: {restore_error}')
+        _discard(scene, prefix, existing, error)
         raise
 
 
@@ -362,9 +401,9 @@ def enter(context):
                 context.window.scene = scene
                 _ensure_environment(scene)
         manual_control.pause_scene(scene)
-        _RESUME[context.window.as_pointer()] = (source, playing)
         _save_return_view(context, scene)
         focus(context)
+        _RESUME[context.window.as_pointer()] = (source.as_pointer(), playing)
         return scene
     except Exception:
         context.window.scene = source
@@ -388,7 +427,7 @@ def leave(context):
     context.window.scene = source
     _restore_view(context, scene)
     previous, playing = _RESUME.pop(context.window.as_pointer(), (None, False))
-    if previous == source and playing and not playback.any_playing():
+    if previous == source.as_pointer() and playing and not playback.any_playing():
         bpy.ops.screen.animation_play()
     return source
 

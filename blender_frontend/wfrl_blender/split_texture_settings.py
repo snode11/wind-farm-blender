@@ -6,6 +6,7 @@ saved copy in ordinary Scene metadata, so it survives file save and reopening.
 from __future__ import annotations
 
 import json
+import struct
 from contextlib import contextmanager
 
 
@@ -49,6 +50,26 @@ def _write(scene, values):
 
 def _encode(values):
     return json.dumps(dict(version=1, values=values), sort_keys=True)
+
+
+def _valid_saved_values(values):
+    """Saved choices must satisfy the display RNA types and bounds."""
+    if not isinstance(values, dict) or set(values) != set(FIELDS):
+        return False
+    if any(type(values[name]) is not bool for name in ('wfrl_recon_show_texture', 'wfrl_recon_inspect_box')):
+        return False
+    if (values['wfrl_recon_texture_mode'] not in ('ORIGINAL', 'CONTRAST', 'FALSE_COLOR')
+            or values['wfrl_recon_inspect_blade'] not in ('1', '2', '3')):
+        return False
+    bounds = {'wfrl_recon_texture_gain': (1., 20.), 'wfrl_recon_texture_threshold': (.005, .3),
+              'wfrl_recon_inspect_radius': (0., 1000.), 'wfrl_recon_inspect_tau': (0., 1.),
+              'wfrl_recon_inspect_size': (.3, 20.)}
+    # RNA float properties can serialize their single-precision boundary values.
+    bounds = {name: (min(low, struct.unpack('f', struct.pack('f', low))[0]),
+                     max(high, struct.unpack('f', struct.pack('f', high))[0]))
+              for name, (low, high) in bounds.items()}
+    return all(type(values[name]) in (int, float) and low <= values[name] <= high
+               for name, (low, high) in bounds.items())
 
 
 def _store(scene, key, value):
@@ -95,7 +116,7 @@ def activate(scene, source, defaults, commit, *, new=False):
         if raw:
             try:
                 record = json.loads(raw)
-                if record.get('version') == 1 and set(record.get('values', {})) == set(FIELDS):
+                if record.get('version') == 1 and _valid_saved_values(record.get('values')):
                     target = record['values']
             except (ValueError, TypeError, AttributeError):
                 pass

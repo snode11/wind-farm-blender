@@ -118,15 +118,18 @@ class RootFittingBindings:
 
     def rollback(self):
         for obj, source, mesh, provenance in reversed(self.applied):
-            if obj.data == mesh:
-                obj.data = source
-                if provenance is None:
-                    obj.pop('geometry_source', None)
-                else:
-                    obj['geometry_source'] = provenance
+            try:
+                if obj.data == mesh:
+                    obj.data = source
+                    if provenance is None:
+                        obj.pop('geometry_source', None)
+                    else:
+                        obj['geometry_source'] = provenance
+            except ReferenceError:
+                continue
         self.applied.clear()
         for mesh in self.created:
-            self._release(mesh)
+            self._release(mesh, verified=True)
         self.created.clear()
         self.bindings.clear()
 

@@ -34,7 +34,8 @@ class HealthResult:
 
 class HealthChecker:
     def __init__(self, timeout=2.0):
-        if timeout <= 0 or timeout > 30:
+        if (isinstance(timeout, bool) or not isinstance(timeout, (int, float))
+                or not 0 < timeout <= 30):
             raise ValueError('Probe timeout must be between 0 and 30 seconds')
         self.timeout = timeout
         self._thread = None
@@ -51,8 +52,13 @@ class HealthChecker:
             return False
         self.poll()
         self._cancel = threading.Event()
-        self._thread = threading.Thread(target=self._run, args=(config, tuple(blender_version)), daemon=True, name='WFRL-health')
-        self._thread.start()
+        try:
+            self._thread = threading.Thread(target=self._run, args=(config, tuple(blender_version)), daemon=True, name='WFRL-health')
+            self._thread.start()
+        except Exception as exc:
+            self._thread = None
+            self._results.put(HealthResult('environment', 'ERROR', str(exc)))
+            return False
         return True
 
     def cancel(self):
@@ -93,31 +99,15 @@ class HealthChecker:
         # project imports, MPI ranks or training jobs are started by these probes.
         argv = [str(file), '--version']
         process = None
+        cleanup_errors = []
         try:
             # File-backed output avoids pipe deadlocks and unbounded RAM use.
             with tempfile.TemporaryFile() as output:
                 process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=output, stderr=subprocess.STDOUT,
                     start_new_session=(os.name == 'posix'))
-                deadline = time.monotonic() + self.timeout
-                while process.poll() is None:
-                    if self._cancel.wait(.025):
-                        return HealthResult(component, 'CANCELLED', 'Environment check cancelled')
-                    if time.monotonic() >= deadline:
-                        return HealthResult(component, 'TIMEOUT', 'Version probe timed out')
-                output.seek(0)
-                raw = output.read(65537)
-                detail = raw[:65536].decode('utf-8', errors='replace').strip()
-                if len(raw) > 65536:
-                    detail += '\n[Probe output exceeds 64 KiB; remaining output omitted.]'
-                if process.returncode != 0 or not detail:
-                    return HealthResult(component, 'ERROR', f'Version probe exited {process.returncode}: {detail}')
-                if component == 'python':
-                    version = re.match(r'Python (\d+)\.(\d+)(?:\.|$)', detail)
-                    if not version or tuple(map(int, version.groups())) < (3, 11):
-                        return HealthResult(component, 'UNSUPPORTED', detail + '; requires Python >=3.11')
-                return HealthResult(component, 'READY', detail)
+                result = self._read_version(component, process, output)
         except OSError as exc:
-            return HealthResult(component, 'ERROR', str(exc))
+            result = HealthResult(component, 'ERROR', str(exc))
         finally:
             if process is not None:
                 # Kill the whole probe process group, including children retaining
@@ -129,7 +119,32 @@ class HealthChecker:
                         process.kill()
                 except ProcessLookupError:
                     pass
+                except OSError as exc:
+                    cleanup_errors.append(str(exc))
                 try:
                     process.wait(timeout=.5)
-                except subprocess.TimeoutExpired:
-                    pass
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    cleanup_errors.append(str(exc))
+        if cleanup_errors:
+            return HealthResult(component, 'ERROR', result.detail + '\nProbe cleanup failed: ' + '; '.join(cleanup_errors))
+        return result
+
+    def _read_version(self, component, process, output):
+        deadline = time.monotonic() + self.timeout
+        while process.poll() is None:
+            if self._cancel.wait(.025):
+                return HealthResult(component, 'CANCELLED', 'Environment check cancelled')
+            if time.monotonic() >= deadline:
+                return HealthResult(component, 'TIMEOUT', 'Version probe timed out')
+        output.seek(0)
+        raw = output.read(65537)
+        detail = raw[:65536].decode('utf-8', errors='replace').strip()
+        if len(raw) > 65536:
+            detail += '\n[Probe output exceeds 64 KiB; remaining output omitted.]'
+        if process.returncode != 0 or not detail:
+            return HealthResult(component, 'ERROR', f'Version probe exited {process.returncode}: {detail}')
+        if component == 'python':
+            version = re.match(r'Python (\d+)\.(\d+)(?:\.|$)', detail)
+            if not version or tuple(map(int, version.groups())) < (3, 11):
+                return HealthResult(component, 'UNSUPPORTED', detail + '; requires Python >=3.11')
+        return HealthResult(component, 'READY', detail)

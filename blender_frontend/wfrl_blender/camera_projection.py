@@ -11,7 +11,11 @@ DEFAULT_VFOV = math.degrees(2 * math.atan(math.tan(math.radians(75 / 2)) / (16 /
 
 
 def finite(*values):
-    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) for v in values):
+    try:
+        valid = all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) for v in values)
+    except OverflowError:
+        valid = False
+    if not valid:
         raise ValueError('投影参数必须是有限数值')
 
 
@@ -32,6 +36,9 @@ def resolution(hfov, vfov, long_edge=DEFAULT_LONG_EDGE, max_size=None):
     ratio = aspect(hfov, vfov)
     if isinstance(long_edge, bool) or not isinstance(long_edge, int) or long_edge < MIN_SHORT_EDGE:
         raise ValueError('输出长边须为至少 16 的整数像素')
+    finite(long_edge)
+    if max_size is not None:
+        finite(max_size)
     w, h = (long_edge, round(long_edge / ratio)) if ratio >= 1 else (round(long_edge * ratio), long_edge)
     if min(w, h) < MIN_SHORT_EDGE:
         raise ValueError('画幅比例过大，短边不足 16 px；请提高长边预算或修改视场角')
@@ -64,6 +71,7 @@ def pixel_scales(hfov, vfov, width, height):
 def _image_size(width, height):
     if any(isinstance(v, bool) or not isinstance(v, int) or v <= 0 for v in (width, height)):
         raise ValueError('图像宽高须为正整数像素')
+    finite(width, height)
 
 
 def projection(hfov, vfov, near=.005, far=30000):
@@ -121,7 +129,26 @@ def linked_fov(hfov, vfov, factor):
 
 
 def cv_from_world(view_matrix):
-    return tuple(tuple(v * (1 if i in (0, 3) else -1) for v in row) for i, row in enumerate(view_matrix))
+    """Convert a finite, invertible 3×4 or homogeneous 4×4 view transform."""
+    try:
+        rows = tuple(tuple(row) for row in view_matrix)
+    except TypeError as exc:
+        raise ValueError('视图变换须为 3×4 或 4×4 矩阵') from exc
+    if len(rows) not in (3, 4) or any(len(row) != 4 for row in rows):
+        raise ValueError('视图变换须为 3×4 或 4×4 矩阵')
+    finite(*(v for row in rows for v in row))
+    if len(rows) == 4 and rows[3] != (0, 0, 0, 1):
+        raise ValueError('视图变换的齐次行必须为 (0, 0, 0, 1)')
+    scaled = []
+    for row in rows[:3]:
+        scale = max(abs(v) for v in row[:3])
+        if not scale:
+            raise ValueError('视图变换不可退化')
+        scaled.append(tuple(v / scale for v in row[:3]))
+    (a, b, c), (d, e, f), (g, h, i) = scaled
+    if a * (e*i - f*h) - b * (d*i - f*g) + c * (d*h - e*g) == 0:
+        raise ValueError('视图变换不可退化')
+    return tuple(tuple(v * (1 if i in (0, 3) else -1) for v in row) for i, row in enumerate(rows))
 
 
 MAX_SAMPLES = 100000
@@ -129,9 +156,16 @@ MAX_SAMPLES = 100000
 
 def sample_times(start, end, step, limit=MAX_SAMPLES):
     finite(start, end, step)
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+        raise ValueError('采样数量上限须为正整数')
     if step <= 0 or end < start:
         raise ValueError('采样间隔须大于零，结束时间不能早于开始时间')
-    count = math.floor((end - start) / step + 1e-9) + 1
+    intervals = (end - start) / step
+    finite(intervals)
+    count = math.floor(intervals + 1e-9) + 1
     if count > limit:
         raise ValueError(f'一次最多采集 {limit} 个时刻')
-    return [min(end, start + i * step) for i in range(count)]
+    times = [min(end, start + i * step) for i in range(count)]
+    if any(current <= previous for previous, current in zip(times, times[1:])):
+        raise ValueError('采样间隔小于当前时间值的数值精度')
+    return times

@@ -51,10 +51,16 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
     preset = get_preset(name)
     if quality not in {"realtime", "render"}:
         raise ValueError("quality must be realtime or render")
-    scene["wfrl_atmosphere_preset"] = preset.name
-    scene["wfrl_atmosphere_enabled"] = bool(enabled)
-    scene["wfrl_atmosphere_quality"] = quality
-    scene["wfrl_atmosphere_fog_density"] = preset.fog_density if enabled else 0.0
+    current_world = getattr(scene, 'world', None)
+    clear_image = None
+    if (preset.name == 'clear' and current_world is not None
+            and getattr(current_world, 'use_nodes', False)
+            and any(node.type == 'BACKGROUND' for node in current_world.node_tree.nodes)):
+        from pathlib import Path
+        import bpy
+        path = Path(__file__).parent / 'assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr'
+        clear_image = (image_loader(path) if image_loader else
+                       bpy.data.images.load(str(path), check_existing=True))
     world = private_world(scene)
     if world is not None and getattr(world, "use_nodes", False):
         nodes = world.node_tree.nodes
@@ -79,13 +85,9 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
                 if link.to_node == background and link.to_socket == background.inputs["Color"]:
                     links.remove(link)
             if preset.name == "clear":
-                from pathlib import Path
-                import bpy
                 env = nodes.get('WFRL.Atmosphere.HDRI') or nodes.new('ShaderNodeTexEnvironment')
                 env.name = 'WFRL.Atmosphere.HDRI'
-                path = Path(__file__).parent / 'assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr'
-                env.image = (image_loader(path) if image_loader else
-                             bpy.data.images.load(str(path), check_existing=True))
+                env.image = clear_image
                 links.new(env.outputs['Color'], background.inputs['Color'])
             else:
                 background.inputs["Color"].default_value = preset.world_color
@@ -110,6 +112,10 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
                 links.new(volume.outputs["Volume"], output.inputs["Volume"])
     if hasattr(scene, "view_settings"):
         scene.view_settings.look = "AgX - Medium High Contrast"
+    scene["wfrl_atmosphere_preset"] = preset.name
+    scene["wfrl_atmosphere_enabled"] = bool(enabled)
+    scene["wfrl_atmosphere_quality"] = quality
+    scene["wfrl_atmosphere_fog_density"] = preset.fog_density if enabled else 0.0
     # Eevee's world volume is intentionally omitted: a compositor/world node
     # setup is version-sensitive, while the metadata and switches remain stable.
     return preset
@@ -121,8 +127,9 @@ def set_enabled(scene, enabled: bool) -> None:
 
 def set_feature_visibility(scene, enabled: bool) -> None:
     """Toggle sun/cloud geometry without affecting simulation objects."""
-    import bpy
-    for obj in bpy.data.objects:
+    for obj in scene.objects:
         if obj.name.startswith("WFRL.Atmosphere."):
             obj.hide_render = not enabled
-            obj.hide_set(not enabled)
+            for layer in scene.view_layers:
+                if obj.name in layer.objects:
+                    obj.hide_set(not enabled, view_layer=layer)
