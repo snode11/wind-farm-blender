@@ -1,11 +1,14 @@
 """Strict allowlisted video handoff and streaming RGB decoding."""
 from __future__ import annotations
 
+from .artifact_paths import atomic_write_text, save_image
+
 import csv
 import json
 import math
 from pathlib import Path
 import subprocess
+import tempfile
 import numpy as np
 
 from wfrl.camera_video.media import sha256
@@ -31,7 +34,7 @@ REFERENCE_KEYS = {'t_ref_sim_time_s', 'frame_id', 'selection_basis', 'fit_frame_
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n', encoding='utf-8')
+    atomic_write_text(path, json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n', encoding='utf-8')
 
 
 def probe_video(path):
@@ -44,33 +47,47 @@ def probe_video(path):
 
 def iter_rgb(path, width, height):
     """Yield one actual MP4 decoded RGB8 frame; never allocate a full video."""
+    if any(not isinstance(value, (int, np.integer)) or isinstance(value, bool) or value <= 0
+           for value in (width, height)):
+        raise ValueError('Decoded RGB dimensions must be positive integers')
     args = ['ffmpeg', '-v', 'error', '-nostdin', '-i', str(path), '-an',
             '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-threads', '1', 'pipe:1']
-    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     size = int(width) * int(height) * 3
-    try:
-        while True:
-            chunks, remaining = [], size
-            while remaining:
-                chunk = proc.stdout.read(remaining)
-                if not chunk:
+    # Stderr must drain independently of stdout, including decoder failures.
+    with tempfile.TemporaryFile() as errors:
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=errors)
+        try:
+            while True:
+                chunks, remaining = [], size
+                while remaining:
+                    chunk = proc.stdout.read(remaining)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    remaining -= len(chunk)
+                if not chunks:
                     break
-                chunks.append(chunk)
-                remaining -= len(chunk)
-            if not chunks:
-                break
-            if remaining:
-                raise ValueError('Truncated decoded RGB frame')
-            yield np.frombuffer(b''.join(chunks), dtype=np.uint8).reshape(height, width, 3).copy()
-        stderr = proc.stderr.read().decode(errors='replace')
-        if proc.wait() != 0:
-            raise ValueError(f'FFmpeg decode failed: {stderr}')
-    finally:
-        if proc.poll() is None:
-            proc.terminate()
-            proc.wait()
-        proc.stdout.close()
-        proc.stderr.close()
+                if remaining:
+                    raise ValueError(f'Truncated decoded RGB frame: {path}')
+                yield np.frombuffer(b''.join(chunks), dtype=np.uint8).reshape(height, width, 3).copy()
+            if proc.wait(timeout=5) != 0:
+                errors.seek(0)
+                stderr = errors.read().decode(errors='replace')
+                raise ValueError(f'FFmpeg decode failed for {path}: {stderr}')
+        finally:
+            try:
+                if proc.poll() is None:
+                    try:
+                        proc.terminate()
+                    except ProcessLookupError:
+                        pass
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        proc.wait(timeout=5)
+            finally:
+                proc.stdout.close()
 
 
 def _matrix(value, shape):
@@ -199,7 +216,9 @@ def decode_inspection(directory, output, selected_ids=None):
         stream, frames = info['streams'][0], info['frames']
         if any((cal[(camera, i)]['width'], cal[(camera, i)]['height']) != (stream['width'], stream['height']) for i in range(n)):
             raise ValueError('Video and calibration dimensions differ')
-        if len(frames) != n or any(abs(float(f['best_effort_timestamp_time']) - i / fps) > 1e-6 for i, f in enumerate(frames)):
+        if len(frames) != n or any(not math.isfinite(float(f['best_effort_timestamp_time']))
+                                  or abs(float(f['best_effort_timestamp_time']) - i / fps) > 1e-6
+                                  for i, f in enumerate(frames)):
             raise ValueError(f'Actual decoded PTS mismatch: {camera}')
         count = 0; thumbnails = []
         for i, rgb in enumerate(iter_rgb(path, stream['width'], stream['height'])):
@@ -207,7 +226,7 @@ def decode_inspection(directory, output, selected_ids=None):
             if i in ids:
                 im = Image.fromarray(rgb)
                 im.thumbnail((480, 270)); thumbnails.append((i, im.copy()))
-                im.save(out / f'{camera}_{i:06d}.jpg', quality=92)
+                save_image(im, out / f'{camera}_{i:06d}.jpg', quality=92)
         if count != n:
             raise ValueError(f'Complete decode frame count mismatch: {camera}')
         report['videos'][camera] = {'sha256': sha256(path), 'frame_count': count,
@@ -219,7 +238,7 @@ def decode_inspection(directory, output, selected_ids=None):
         for j, (i, im) in enumerate(thumbnails):
             x, y = j % cols * tile_w, j // cols * tile_h
             canvas.paste(im, (x, y)); draw.text((x+6, y+272), f'{camera} n={i} t={motion[i]["sim_time_s"]:.3f}s', fill='black')
-        canvas.save(out / f'{camera}_contact.jpg', quality=90)
+        save_image(canvas, out / f'{camera}_contact.jpg', quality=90)
     report['decoder'] = subprocess.run(['ffmpeg', '-version'], check=True, capture_output=True, text=True, encoding='utf-8').stdout.splitlines()[0]
     write_json(out / 'decode_manifest.json', report)
     return report

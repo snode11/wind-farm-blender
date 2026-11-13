@@ -1,4 +1,4 @@
-"""Resolve paths recorded before the NREL result-directory consolidation.
+"""Locate signed NREL artifacts and publish complete output files atomically.
 
 Frozen records keep their original spelling and bytes.  Only callers' paths
 are relocated; verifying historical code may return a saved snapshot rather
@@ -6,9 +6,12 @@ than the current, subsequently edited implementation.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 import hashlib
 import os
 from pathlib import Path
+import stat
+import uuid
 
 
 NREL_DIRECTORY = Path("outputs/nrel-video-single-blade")
@@ -129,3 +132,79 @@ def frozen_path(value: str | os.PathLike, expected_sha256: str, *,
         if candidate.is_file() and _sha256(candidate) == expected_sha256:
             return candidate
     raise RuntimeError(f"No saved artifact matches frozen SHA256 {expected_sha256}: {value}")
+
+
+@contextmanager
+def atomic_path(path, *, exclusive=False):
+    """Yield an owned staging path; publish only after its writer has closed it.
+
+    Each artifact is atomic independently. This is not a multi-file transaction.
+    Exclusive publication preserves create-only semantics without a check race.
+    """
+    path = Path(path)
+    temporary = None
+    try:
+        while temporary is None:
+            candidate = path.with_name(f".{path.stem}-{uuid.uuid4().hex}{path.suffix}")
+            try:
+                descriptor = os.open(candidate, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o666)
+            except FileExistsError:
+                continue
+            temporary = candidate
+            os.close(descriptor)
+        yield temporary
+        if not exclusive:
+            try:
+                mode = path.lstat().st_mode
+            except FileNotFoundError:
+                pass
+            else:
+                if stat.S_ISREG(mode):
+                    temporary.chmod(stat.S_IMODE(mode))
+        with temporary.open("rb") as handle:
+            os.fsync(handle.fileno())
+        if exclusive:
+            os.link(temporary, path)
+        else:
+            os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+@contextmanager
+def atomic_open(path, mode="w", **kwargs):
+    """Open a text or binary artifact for atomic replacement or exclusive creation."""
+    if mode not in {"w", "wb", "x", "xb"}:
+        raise ValueError("Atomic artifact mode must be w, wb, x or xb")
+    with atomic_path(path, exclusive=mode.startswith("x")) as temporary:
+        if mode.endswith("b"):
+            handle = temporary.open("wb", **kwargs)
+        else:
+            handle = temporary.open("w", encoding=kwargs.pop("encoding", "utf-8"), **kwargs)
+        with handle:
+            yield handle
+
+
+def atomic_write_text(path, text, **kwargs):
+    with atomic_open(path, **kwargs) as handle:
+        return handle.write(text)
+
+
+def save_image(image, path, **kwargs):
+    with atomic_path(path) as temporary:
+        image.save(temporary, **kwargs)
+
+
+def save_numpy(writer, path, *args, **kwargs):
+    with atomic_open(path, "wb") as handle:
+        writer(handle, *args, **kwargs)
+
+
+def save_figure(figure, path, **kwargs):
+    from matplotlib import pyplot as plt
+    try:
+        with atomic_path(path) as temporary:
+            figure.savefig(temporary, **kwargs)
+    finally:
+        plt.close(figure)

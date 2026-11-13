@@ -1,6 +1,8 @@
 """Generation-side adapter. Not imported by the reconstruction process."""
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text
+
 import csv
 import json
 import math
@@ -83,7 +85,7 @@ def pack_capture(capture_dir, output_dir, start_s, duration_s, fps=20):
         adapter = out / 'encoding-adapter' / camera
         adapter.mkdir(parents=True, exist_ok=False)
         (adapter / 'master_frames').symlink_to(capture / camera, target_is_directory=True)
-        with (adapter / 'frames.csv').open('w', newline='', encoding='utf-8') as f:
+        with atomic_open(adapter / 'frames.csv', 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=['frame_id', 'video_pts'])
             writer.writeheader(); writer.writerows({'frame_id': i, 'video_pts': i} for i in range(n))
         report = encode_video(adapter, fps, pattern='frame_%06d.png', crf=18, preset='medium')
@@ -100,10 +102,10 @@ def pack_capture(capture_dir, output_dir, start_s, duration_s, fps=20):
                              'T_camera_cv_from_world': r['T_camera_cv_from_world'],
                              'pixel_convention': 'top-left pixel centre (0,0); boundaries -.5,W/H-.5',
                              'distortion': 'ideal undistorted pinhole'})
-    with (alg / 'frame_map.csv').open('w', newline='', encoding='utf-8') as f:
+    with atomic_open(alg / 'frame_map.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=list(frame_rows[0])); writer.writeheader(); writer.writerows(frame_rows)
-    (alg / 'camera_calibration.jsonl').write_text(''.join(json.dumps(r, allow_nan=False)+'\n' for r in cal_rows), encoding='utf-8')
-    with (alg / 'motion_observations.csv').open('w', newline='', encoding='utf-8') as f:
+    atomic_write_text(alg / 'camera_calibration.jsonl', ''.join(json.dumps(r, allow_nan=False)+'\n' for r in cal_rows), encoding='utf-8')
+    with atomic_open(alg / 'motion_observations.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=['frame_id', 'sim_time_s', 'T_world_from_blade_root', 'source', 'units'])
         writer.writeheader()
         for i, t in enumerate(times):

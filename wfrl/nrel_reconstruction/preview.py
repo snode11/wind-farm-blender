@@ -1,6 +1,8 @@
 """Self-contained previews of reconstruction output; never reads evaluation truth."""
 from __future__ import annotations
 
+from .artifact_paths import atomic_write_text, save_figure
+
 import argparse
 import json
 from pathlib import Path
@@ -144,8 +146,7 @@ def _static_preview(models: dict[str, Mesh], metadata: dict, path: Path) -> None
     fig.suptitle(f"NREL 5MW / T1 B1 · blade-root coordinates (m) · t_ref={float(metadata['t_ref_sim_time_s']):.6f} s",fontsize=14)
     fig.text(.5,.04,"Closed mesh does not establish full recovery. Backside, thickness and twist remain prior-dependent.\nReconstruction outputs only; no evaluation truth used in this preview.",ha="center",fontsize=11,color="#535f70")
     fig.subplots_adjust(left=.01,right=.99,bottom=.11,top=.91,wspace=0)
-    fig.savefig(path,dpi=150)
-    plt.close(fig)
+    save_figure(fig, path,dpi=150)
 
 
 def create_preview(reconstruction_dir: str | Path, *, static_png: bool = True) -> dict:
@@ -169,7 +170,7 @@ def create_preview(reconstruction_dir: str | Path, *, static_png: bool = True) -
                "models":{name:{"vertices":mesh.vertices.tolist(),"faces":mesh.faces.tolist()} for name,mesh in models.items()}}
     json_data = json.dumps(payload,ensure_ascii=False,separators=(",",":"),allow_nan=False).replace("<","\\u003c")
     html_path = root/"model_preview.html"
-    html_path.write_text(_HTML.replace("__PAYLOAD__",json_data),encoding="utf-8")
+    atomic_write_text(html_path, _HTML.replace("__PAYLOAD__",json_data),encoding="utf-8")
     result = {"status":"WRITTEN", "html":str(html_path), "source":"reconstruction models only", "truth_read":False}
     if static_png:
         png_path = root/"model_preview.png"

@@ -6,6 +6,8 @@ truth. Observed-point span bins are assigned once from the frozen baseline.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text
+
 import argparse
 import copy
 import csv
@@ -39,6 +41,8 @@ def restore_model(metadata):
                        len(metadata["control_z_m"]), interpolation=metadata["interpolation"])
     centers = torch.tensor(metadata["center_offsets_m"], dtype=torch.float32)
     chord = torch.tensor(metadata["control_chord_log_scale"], dtype=torch.float32)
+    if not bool(torch.isfinite(centers).all() and torch.isfinite(chord).all()):
+        raise ValueError("Frozen controls must be finite")
     if not torch.equal(centers[0], torch.zeros(2)):
         raise ValueError("Frozen model violates anchored root")
     if bool((centers.abs() >= 5).any()) or bool((chord.abs() >= .35).any()):
@@ -355,8 +359,8 @@ def run_audit(source_dir, output_dir):
                   "Cross-resolution changes mix mask resampling, scale, deadband, working-pixel robust scales, visibility probes and sampling budgets.",
                   "Raw O2C response SVD does not prove global identifiability, measurement confidence or a unique cause.",
                   "Local finite differences may cross nearest-segment, visibility, mask and sample cases."]}
-    (output / "parameter_audit.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
-    (output / "observed_response_vectors.json").write_text(json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n", encoding='utf-8')
+    atomic_write_text(output / "parameter_audit.json", json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
+    atomic_write_text(output / "observed_response_vectors.json", json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n", encoding='utf-8')
     flat = []
     for i, record in enumerate(records):
         for region in record["regions"]:
@@ -365,7 +369,7 @@ def run_audit(source_dir, output_dir):
             for direction in ("c2o", "o2c"):
                 row.update({f"{direction}_{key}": value for key, value in region[direction].items()})
             flat.append(row)
-    with (output / "per_observation.csv").open("w", newline="", encoding='utf-8') as handle:
+    with atomic_open(output / "per_observation.csv", "w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(flat[0])); writer.writeheader(); writer.writerows(flat)
     return report
 
@@ -484,8 +488,8 @@ def run_combination(source_dir, output_dir):
                   "The direction was generated from previously inspected fit image responses, then fixed for all forward checks.",
                   "Actual plus/minus distances can change asymmetrically; a small symmetric difference alone does not mean both models equal baseline.",
                   "The same 640 production mask/sampling/visibility cases remain active; disagreement with the linear prediction is retained."]}
-    destinations[0].write_text(json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
-    destinations[1].write_text(json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n", encoding='utf-8')
+    atomic_write_text(destinations[0], json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
+    atomic_write_text(destinations[1], json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n", encoding='utf-8')
     flat = []
     for i, record in enumerate(records):
         for region in record["regions"]:
@@ -494,7 +498,7 @@ def run_combination(source_dir, output_dir):
             for parameter, component in zip(PARAMETERS, record["parameter_components_m"]): row[parameter+"_m"] = component
             for d in ("c2o", "o2c"): row.update({d+"_"+key: value for key, value in region[d].items()})
             flat.append(row)
-    with destinations[2].open("w", newline="", encoding='utf-8') as handle:
+    with atomic_open(destinations[2], "w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(flat[0])); writer.writeheader(); writer.writerows(flat)
     return report
 

@@ -7,6 +7,8 @@ declared OS isolation policy; ``nonblind`` requires both final mesh freezes.
 """
 from __future__ import annotations
 
+from .artifact_paths import save_numpy
+
 import argparse
 import copy
 import json
@@ -284,7 +286,7 @@ def _save_model(destination, kind, model, sidecar):
     vertices = model().detach().cpu().numpy()
     faces = model.faces.detach().cpu().numpy()
     write_ply(destination / f'{kind}.ply', vertices, faces)
-    np.savez_compressed(destination / f'{kind}_exact.npz', vertices=vertices, faces=faces,
+    save_numpy(np.savez_compressed, destination / f'{kind}_exact.npz', vertices=vertices, faces=faces,
                         center_raw=model.center_raw.detach().cpu().numpy(),
                         chord_raw=model.chord_raw.detach().cpu().numpy())
     write_json(destination / f'{kind}.json', {**sidecar, **model.metadata(), 'model_name': kind})

@@ -6,6 +6,8 @@ and half-pixel resize. No scoring truth, replay or original capture is read.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_write_text, save_image
+
 import json
 from pathlib import Path
 
@@ -30,6 +32,7 @@ def read_mesh_ply(path):
         if handle.readline().strip() != "ply" or handle.readline().strip() != "format ascii 1.0":
             raise ValueError("Projection check expects optimizer ASCII PLY")
         vertices_count = faces_count = None
+        header_complete = False
         for line in handle:
             fields = line.strip().split()
             if fields[:2] == ["element", "vertex"]:
@@ -37,18 +40,27 @@ def read_mesh_ply(path):
             elif fields[:2] == ["element", "face"]:
                 faces_count = int(fields[2])
             elif fields == ["end_header"]:
+                header_complete = True
                 break
-        if vertices_count is None or faces_count is None:
-            raise ValueError("Missing mesh element sizes")
-        vertices = np.array([[float(value) for value in handle.readline().split()[:3]]
-                             for _ in range(vertices_count)], dtype=float)
+        if not header_complete or vertices_count is None or faces_count is None or min(vertices_count, faces_count) < 0:
+            raise ValueError(f"Missing or invalid mesh element sizes/header: {path}")
+        vertices = []
+        for _ in range(vertices_count):
+            fields = handle.readline().split()
+            if len(fields) < 3:
+                raise ValueError(f"Truncated mesh vertices: {path}")
+            vertices.append([float(value) for value in fields[:3]])
+        vertices = np.asarray(vertices, dtype=float).reshape((-1, 3))
         faces = []
         for _ in range(faces_count):
             fields = [int(value) for value in handle.readline().split()]
             if len(fields) != 4 or fields[0] != 3:
                 raise ValueError("Only triangular optimizer meshes are supported")
             faces.append(fields[1:])
-    return vertices, np.asarray(faces, dtype=int)
+    faces = np.asarray(faces, dtype=int).reshape((-1, 3))
+    if not np.isfinite(vertices).all() or (faces.size and (faces.min() < 0 or faces.max() >= len(vertices))):
+        raise ValueError(f"Invalid finite mesh vertices or face indices: {path}")
+    return vertices, faces
 
 
 def _clip_triangle_near(triangle, near):
@@ -67,6 +79,8 @@ def _clip_triangle_near(triangle, near):
 def hard_silhouette(vertices, faces, K, camera, root, image_size, near_m=0.01):
     """Hard triangle union at integer pixel centres; image_size=(W,H)."""
     width, height = map(int, image_size)
+    if not all(np.isfinite(value).all() for value in (vertices, K, camera, root, near_m)):
+        raise ValueError("Projection geometry and calibration must be finite")
     transform = np.asarray(camera) @ np.asarray(root)
     camera_vertices = np.asarray(vertices) @ transform[:3, :3].T + transform[:3, 3]
     mask = np.zeros((height, width), dtype=bool)
@@ -180,15 +194,15 @@ def generate_projection_checks(observations_file, model_dir, output_dir,
             contact_draw.text((column * width + 6, row_top + 6), f"{label} | {title}", fill="white")
         separate = Image.new("RGB", (3 * width, height + heading), (20, 22, 26))
         separate.paste(contact.crop((0, row_top, 3 * width, row_top + height + heading)), (0, 0))
-        separate.save(output_dir / f"{observation['camera_id']}_{int(observation['frame_id']):06d}_projection.jpg", quality=92)
+        save_image(separate, output_dir / f"{observation['camera_id']}_{int(observation['frame_id']):06d}_projection.jpg", quality=92)
         statistics.append(item_statistics)
     contact_path = output_dir / "projection_checks.jpg"
-    contact.save(contact_path, quality=92)
+    save_image(contact, contact_path, quality=92)
     report = {"contact_sheet": str(contact_path.resolve()), "rasterizer": "hard_cpu_triangle_union_at_pixel_centres",
               "inputs": "optimizer PLY + RGB-derived FBU + declared calibration/root motion; no truth",
               "resize": "half_pixel_intrinsic_resize", "statistics": statistics,
               "limits": "hard low-resolution silhouettes are inspection metrics, not geometry scores; U excluded; frame clipping unconstrained"}
-    (output_dir / "projection_checks.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    atomic_write_text(output_dir / "projection_checks.json", json.dumps(report, indent=2), encoding="utf-8")
     return report
 
 

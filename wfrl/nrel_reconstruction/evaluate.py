@@ -7,6 +7,8 @@ samples are a numerical estimate of source-area-weighted surface statistics.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text, save_figure
+
 import argparse
 from dataclasses import dataclass
 import hashlib
@@ -25,11 +27,14 @@ class Mesh:
 
     def __post_init__(self) -> None:
         vertices = np.asarray(self.vertices, dtype=np.float64).reshape((-1, 3))
-        faces = np.asarray(self.faces, dtype=np.int64).reshape((-1, 3))
+        faces = np.asarray(self.faces).reshape((-1, 3))
+        if not np.isfinite(faces).all() or not np.equal(faces, np.floor(faces)).all():
+            raise ValueError("Mesh face indices must be finite integers")
         if not np.isfinite(vertices).all():
             raise ValueError("Mesh vertices must be finite")
         if faces.size and (faces.min() < 0 or faces.max() >= len(vertices)):
             raise ValueError("Mesh face index outside vertex array")
+        faces = faces.astype(np.int64)
         object.__setattr__(self, "vertices", vertices)
         object.__setattr__(self, "faces", faces)
 
@@ -74,6 +79,8 @@ def read_ply(path: str | Path) -> Mesh:
                     raise ValueError("Unsupported PLY format version")
                 format_name = fields[1]
             elif fields[0] == "element":
+                if len(fields) != 3 or int(fields[2]) < 0:
+                    raise ValueError("Invalid PLY element count")
                 elements.append({"name": fields[1], "count": int(fields[2]), "properties": []})
             elif fields[0] == "property":
                 if not elements:
@@ -141,7 +148,7 @@ def write_ply(path: str | Path, vertices: Mesh | np.ndarray, faces: np.ndarray |
     mesh = vertices if isinstance(vertices, Mesh) else Mesh(vertices, np.empty((0, 3), dtype=int) if faces is None else faces)
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="ascii", newline="\n") as handle:
+    with atomic_open(path, "w", encoding="ascii", newline="\n") as handle:
         handle.write(f"ply\nformat ascii 1.0\nelement vertex {len(mesh.vertices)}\n")
         handle.write("property double x\nproperty double y\nproperty double z\n")
         handle.write(f"element face {len(mesh.faces)}\nproperty list uchar int vertex_indices\nend_header\n")
@@ -570,8 +577,7 @@ def _plot_comparison(scores: Mapping[str, Any], output: Path) -> dict[str, Any]:
     axes[2].set_ylabel("Chord error (m)")
     axes[2].set_title("Fixed-section shape check")
     axes[2].legend()
-    fig.savefig(output, dpi=150)
-    plt.close(fig)
+    save_figure(fig, output, dpi=150)
     return {"status": "WRITTEN", "path": output.name}
 
 
@@ -633,7 +639,7 @@ def evaluate_run(reconstruction_dir: str | Path, truth_ply: str | Path,
         result["file_signatures"] = {**{name: {"file": path.name, "sha256": _sha256(path)} for name, path in paths.items()},
                                      "truth": {"file": str(truth_ply), "sha256": _sha256(truth_ply)}}
         result["comparison_plot"] = _plot_comparison(result["models"], output_dir / "comparison.png")
-    (output_dir / "scores.json").write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    atomic_write_text(output_dir / "scores.json", json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     return result
 
 

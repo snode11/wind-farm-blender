@@ -7,12 +7,15 @@ only projection consistency. It is never a reconstructed-surface percentage.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text
+
 from .artifact_paths import relocated_path
 
 import argparse
 import csv
 import gzip
 import hashlib
+import io
 import json
 import sys
 from collections import Counter
@@ -287,7 +290,7 @@ def section_summary(states, weights, indices):
 
 def dump_csv(path, rows):
     fields = list(dict.fromkeys(key for row in rows for key in row))
-    with gzip.open(path, 'wt', newline='', encoding='utf-8') as handle:
+    with atomic_open(path, 'wb') as raw, gzip.GzipFile(filename=str(path), mode='wb', fileobj=raw) as compressed, io.TextIOWrapper(compressed, newline='', encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader(); writer.writerows(rows)
 
@@ -475,7 +478,7 @@ def run_audit(root, output):
     dump_csv(output/'contour_edge_samples.csv.gz', edge_rows)
     dump_csv(output/'section_samples.csv.gz', section_rows)
     dump_csv(output/'model_disagreement.csv.gz', disagreement_rows)
-    (output/'surface_audit.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+    atomic_write_text(output/'surface_audit.json', json.dumps(report, indent=2, allow_nan=False)+'\n', encoding='utf-8')
     print(json.dumps({'output': str(output), 'surface_rows': len(all_rows), 'contour_rows': len(edge_rows),
                       'section_rows': len(section_rows), 'disagreement': disagreements}, indent=2), flush=True)
     return report

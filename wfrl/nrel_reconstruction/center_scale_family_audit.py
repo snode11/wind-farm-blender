@@ -6,6 +6,8 @@ existing rooted center-field space; it is not a reconstruction fit.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text
+
 from .artifact_paths import relocated_path
 
 import argparse
@@ -248,7 +250,7 @@ def run(root, output, protocol_path=None, addendum_path=None):
             raise ValueError("Addendum does not extend this frozen protocol")
         run_record.update({"addendum_path": str(addendum_path), "addendum_sha256": _hash(addendum_path)})
     output.mkdir(parents=True, exist_ok=True)
-    with (output / "run_record.json").open("x", encoding='utf-8') as handle:
+    with atomic_open(output / "run_record.json", "x", encoding='utf-8') as handle:
         json.dump(run_record, handle, indent=2); handle.write("\n")
     state_path = root / "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/model_state.json"
     state = json.loads(state_path.read_text(encoding='utf-8'))
@@ -261,8 +263,8 @@ def run(root, output, protocol_path=None, addendum_path=None):
     result["inputs_unchanged"] = result["input_hashes_before"] == result["input_hashes_after"]
     if not result["inputs_unchanged"] or not result["source_unchanged_since_run_started"]:
         raise ValueError("Frozen inputs or audit source changed during audit")
-    (output / "family_audit.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
-    with (output / "ring_residuals.csv").open("w", newline="", encoding='utf-8') as handle:
+    atomic_write_text(output / "family_audit.json", json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
+    with atomic_open(output / "ring_residuals.csv", "w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader(); writer.writerows(rows)
     print(json.dumps({"output": str(output), "cases": len(result["cases"]), "ring_rows": len(rows),

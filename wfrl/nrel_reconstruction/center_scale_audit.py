@@ -6,6 +6,8 @@ interventions, not a claimed reparameterization of the seven-control model.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text, save_numpy
+
 import argparse
 import csv
 import datetime as dt
@@ -270,11 +272,11 @@ def run_audit(source_dir, output_dir):
         geometry_checks=geometry_checks,
         predeclared_interpretation="Persistent weak response after removing center drift means the parameter convention alone is insufficient; it does not identify the unique cause or establish confidence intervals.")
     protocol_path = output/"frozen_protocol.json"
-    protocol_path.write_text(json.dumps(protocol, indent=2, allow_nan=False)+"\n", encoding='utf-8')
+    atomic_write_text(protocol_path, json.dumps(protocol, indent=2, allow_nan=False)+"\n", encoding='utf-8')
     protocol_hash = sha256(protocol_path)
-    (output/"frozen_protocol.sha256").write_text(protocol_hash+"  frozen_protocol.json\n", encoding='utf-8')
+    atomic_write_text(output/"frozen_protocol.sha256", protocol_hash+"  frozen_protocol.json\n", encoding='utf-8')
     # This is saved before _prepare and before a single real image evaluation.
-    np.savez_compressed(output/"geometry_variants.npz", vertices=np.stack([m().numpy() for _, _, m in variants]),
+    save_numpy(np.savez_compressed, output/"geometry_variants.npz", vertices=np.stack([m().numpy() for _, _, m in variants]),
                         faces=model.faces.numpy(), mode=np.array([x[0] for x in variants]),
                         amplitude_m=np.array([x[1] for x in variants]))
     torch.set_num_threads(2)
@@ -335,11 +337,11 @@ def run_audit(source_dir, output_dir):
             "Raw unsigned O2C derivatives/SVD are local diagnostic responses, not uncertainty or global identifiability.",
             "Fit/nonblind are always separate; 44/45 are previously viewed and cannot become blind validation.",
             "No geometric accuracy, acceptable application tolerance or unique degeneration cause is established by this forward suite."])
-    (output/"center_scale_audit.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
+    atomic_write_text(output/"center_scale_audit.json", json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
     arrays = {}
     for i, vector in enumerate(vectors):
         for key, value in vector.items(): arrays[f"r{i:04d}_{key}"] = value
-    np.savez_compressed(output/"observed_response_vectors.npz", **arrays)
+    save_numpy(np.savez_compressed, output/"observed_response_vectors.npz", **arrays)
     flat = []
     for r in records:
         for region in r["regions"]:
@@ -349,7 +351,7 @@ def run_audit(source_dir, output_dir):
             for direction in ("c2o", "o2c"):
                 row.update({f"{direction}_{k}": v for k, v in region[direction].items()})
             flat.append(row)
-    with (output/"per_observation.csv").open("w", newline="", encoding='utf-8') as handle:
+    with atomic_open(output/"per_observation.csv", "w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(flat[0])); writer.writeheader(); writer.writerows(flat)
     return report
 
