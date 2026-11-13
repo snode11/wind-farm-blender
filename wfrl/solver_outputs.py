@@ -1,5 +1,6 @@
 """Bounded consumption of native OpenFAST measurements alongside MPI control."""
 from collections import deque
+from numbers import Real
 from pathlib import Path
 import math
 import os
@@ -8,6 +9,18 @@ import shutil
 import numpy as np
 
 from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS
+
+
+def _time_value(value, name, *, positive=False):
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+        raise ValueError(f'{name} must be finite seconds')
+    try:
+        value = float(value)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError(f'{name} must be finite seconds') from exc
+    if not math.isfinite(value) or value < 0 or (positive and value == 0):
+        raise ValueError(f'{name} must be finite and {"positive" if positive else "nonnegative"}')
+    return value
 
 
 def prepare_case(farm_path):
@@ -73,13 +86,18 @@ class OutputReader:
         self._read_tail = b''
         self.names = self.units = None
         self.last_time = None
+        self._last_target = None
         self.latest = None
         self.future = deque()
         self.interval = []
         self.error = None
 
     def advance(self, target):
-        """Return the latest row at or before target; ``interval`` keeps every row consumed by this call."""
+        """Read through a finite, nondecreasing target; ``interval`` keeps every consumed row."""
+        target = _time_value(target, 'target')
+        if self._last_target is not None and target < self._last_target:
+            raise ValueError('Output target must be nondecreasing within this run')
+        self._last_target = target
         self.interval = []
         if self.error:
             return None
@@ -144,10 +162,11 @@ class OutputReader:
                     if len(self.future) > self.FUTURE_LIMIT:
                         raise ValueError('Future output backlog exceeds the bounded reader capacity')
             return self.latest
-        except FileNotFoundError:
-            return None
         except (OSError, ValueError, OverflowError) as exc:
-            self.error = str(exc)
+            if isinstance(exc, FileNotFoundError) and self.identity is None:
+                return None
+            self.error = ('Output file disappeared within this run'
+                          if isinstance(exc, FileNotFoundError) else str(exc))
             self.latest = None
             self.future.clear()
             self.interval = []
@@ -167,6 +186,8 @@ class SolverOutputs:
                         for i in range(len(self.definitions))]
 
     def sample(self, solver_time, coupling_interval):
+        solver_time = _time_value(solver_time, 'solver_time')
+        coupling_interval = _time_value(coupling_interval, 'coupling_interval', positive=True)
         if len(self.readers) != len(self.definitions):
             raise RuntimeError('Native output readers require a started solver run')
         records = []

@@ -93,6 +93,13 @@ def _indexed_schedule(sample):
     return schedule
 
 
+def _positive_wind_speed(value):
+    speed = float(value)
+    if not _np.isfinite(speed) or speed <= 0:
+        raise ValueError("风速必须为有限正数，单位 m/s")
+    return speed
+
+
 # ---------------------------------------------------------------------------
 # 逐回合的来流调度 —— 训练用
 # ---------------------------------------------------------------------------
@@ -107,7 +114,8 @@ def make_wind_schedule(spec, seed=0, backend="fastfarm"):
       none         不指定风速，交给 mdp 抽样
 
     回合索引从 0 开始，不设回合总数或时长。preset 的风向由 resolve 决定；
-    其他调度不指定风向。此二元返回接口不传递 BTS 文件选择。
+    其他调度不指定风向。显式风速须为有限正数，不按抽样边界裁剪。
+    此二元返回接口不传递 BTS 文件选择。
     """
     _check_backend(backend)
     if spec is not None and not isinstance(spec, str):
@@ -122,7 +130,7 @@ def make_wind_schedule(spec, seed=0, backend="fastfarm"):
         return _indexed_schedule(lambda ep: (None, None))
 
     if head == "pin":
-        u = float(arg)
+        u = _positive_wind_speed(arg)
         return _indexed_schedule(lambda ep: (u, None))
 
     if head == "preset":
@@ -132,7 +140,7 @@ def make_wind_schedule(spec, seed=0, backend="fastfarm"):
     if head == "cycle":
         if not arg or any(not x.strip() for x in arg.split(",")):
             raise ValueError("cycle: 后面要给非空风速列表，例如 cycle:6,8,10")
-        us = [float(x) for x in arg.split(",")]
+        us = [_positive_wind_speed(x) for x in arg.split(",")]
         return _indexed_schedule(lambda ep: (us[ep % len(us)], None))
 
     if head == "weibull":

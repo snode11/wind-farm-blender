@@ -10,9 +10,11 @@
 
 对外主接口：
     vibration_features(fi)            -> (n_turb, VIB_DIM)  float32
-    wake_images(fi, hub_h)            -> (n_turb, 1, H, W)  float32  (0..1)
+    wake_images(fi, hub_h)            -> (n_turb, 1, H, W)  float32  (0..1.5)
     vibration_waveform(fi, i, n=128)  -> (n,)  合成时序，仅用于可视化/VLM demo
 """
+from numbers import Integral, Real
+
 import numpy as np
 
 VIB_DIM = 6                 # 振动特征向量维度
@@ -27,11 +29,18 @@ YAW_MAX = 40.0             # yaw 归一化基准（度）
 # 振动 / 载荷代理量
 # ---------------------------------------------------------------------------
 def _turbine_scalars(fi):
-    """取每台机组的 (TI, a, power, yaw)；均为 (n_turb,) 一维数组。"""
+    """取单风况下每台机组的有限 (TI, a, power, yaw)，TI 不得为负。"""
     ti = np.ravel(fi.get_turbine_TIs()).astype(np.float64)
     a = np.ravel(fi.get_turbine_ais()).astype(np.float64)
     power = np.ravel(fi.get_turbine_powers()).astype(np.float64)
     yaw = np.ravel(fi.floris.farm.yaw_angles).astype(np.float64)
+    n_turb = np.asarray(fi.layout_x).size
+    if not n_turb or any(values.shape != (n_turb,) for values in (ti, a, power, yaw)):
+        raise ValueError("FLORIS 每个标量须在单风况下为每台机组提供一个值")
+    if not all(np.isfinite(values).all() for values in (ti, a, power, yaw)):
+        raise ValueError("FLORIS TI、a、power、yaw 必须有限")
+    if np.any(ti < 0):
+        raise ValueError("FLORIS TI 不得为负")
     return ti, a, power, yaw
 
 
@@ -42,22 +51,46 @@ def vibration_features(fi):
       Ct      = 4a(1-a)                 推力系数（轴向载荷）
       load_1P ∝ Ct·(TI + |sin yaw|)     1P 非对称载荷（yaw 失准 + 湍流）
       load_3P ∝ Ct·TI                   3P/叶片通过载荷（湍流驱动）
+    输入须为单风况的有限机组标量，TI 不得为负；float32 溢出时抛出 ValueError。
     """
     ti, a, power, yaw = _turbine_scalars(fi)
-    ct = 4.0 * a * (1.0 - a)
-    yaw_abs = np.abs(yaw) / YAW_MAX
-    p_norm = np.clip(power / P_RATED, 0.0, 1.5)
-    load_1p = ct * (ti + np.abs(np.sin(np.deg2rad(yaw))))
-    load_3p = ct * ti
-    feats = np.stack([ti, ct, yaw_abs, p_norm, load_1p, load_3p], axis=1)
-    return feats.astype(np.float32)
+    try:
+        with np.errstate(over="raise", invalid="raise"):
+            ct = 4.0 * a * (1.0 - a)
+            yaw_abs = np.abs(yaw) / YAW_MAX
+            p_norm = np.clip(power / P_RATED, 0.0, 1.5)
+            load_1p = ct * (ti + np.abs(np.sin(np.deg2rad(yaw))))
+            load_3p = ct * ti
+            feats = np.stack([ti, ct, yaw_abs, p_norm, load_1p, load_3p], axis=1)
+            return feats.astype(np.float32)
+    except FloatingPointError as exc:
+        raise ValueError("FLORIS 振动观测必须为有限 float32 数值") from exc
 
 
 def vibration_waveform(fi, i, n=128, fs=50.0, rotor_hz=0.2):
     """为第 i 台机组合成一段"振动传感器"时序（仅可视化/VLM demo 用，不进 RL 观测）。
 
     1P = 转子频率，3P = 叶片通过频率；幅值由该机组的载荷签名调制。
+    fs 为有限正采样率，rotor_hz 须有限，单位均为 Hz；n 为非负整数。
     """
+    if isinstance(n, (bool, np.bool_)) or not isinstance(n, Integral) or n < 0:
+        raise ValueError("n 必须为非负整数样本数")
+    if isinstance(fs, (bool, np.bool_)) or not isinstance(fs, Real):
+        raise ValueError("fs 必须为有限正采样率，单位 Hz")
+    try:
+        fs = float(fs)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError("fs 必须为有限正采样率，单位 Hz") from exc
+    if not np.isfinite(fs) or fs <= 0:
+        raise ValueError("fs 必须为有限正采样率，单位 Hz")
+    if isinstance(rotor_hz, (bool, np.bool_)) or not isinstance(rotor_hz, Real):
+        raise ValueError("rotor_hz 必须为有限频率，单位 Hz")
+    try:
+        rotor_hz = float(rotor_hz)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError("rotor_hz 必须为有限频率，单位 Hz") from exc
+    if not np.isfinite(rotor_hz):
+        raise ValueError("rotor_hz 必须为有限频率，单位 Hz")
     feats = vibration_features(fi)[i]
     ti, ct, yaw_abs, p_norm, load_1p, load_3p = feats
     t = np.arange(n) / fs
@@ -76,6 +109,14 @@ def _det_noise(n, seed_idx):
 # ---------------------------------------------------------------------------
 # 视觉：局部 wake 图像
 # ---------------------------------------------------------------------------
+def _layout_coordinates(fi):
+    lx, ly = np.asarray(fi.layout_x), np.asarray(fi.layout_y)
+    if (lx.ndim != 1 or ly.shape != lx.shape or not lx.size
+            or not np.isfinite(lx).all() or not np.isfinite(ly).all()):
+        raise ValueError("FLORIS 机组 X/Y 坐标须为等长、非空、有限的一维数组")
+    return lx, ly
+
+
 def farm_wake_plane(fi, hub_h, res=PLANE_RES, margin=PATCH_M):
     """算一张覆盖全场（+margin）的低分辨率水平风速切面。
 
@@ -83,7 +124,7 @@ def farm_wake_plane(fi, hub_h, res=PLANE_RES, margin=PATCH_M):
     按已知分辨率 reshape 即可（df 为 C-order，x1 变化最快 → [y, x]）。
     返回 (U, x0, x1, y0, y1)，U 形状 (y_res, x_res)，U[iy, ix]。
     """
-    lx, ly = np.asarray(fi.layout_x), np.asarray(fi.layout_y)
+    lx, ly = _layout_coordinates(fi)
     x0, x1 = lx.min() - margin, lx.max() + margin
     y0, y1 = ly.min() - margin, ly.max() + margin
     xr, yr = res
@@ -92,7 +133,14 @@ def farm_wake_plane(fi, hub_h, res=PLANE_RES, margin=PATCH_M):
         x_bounds=(x0, x1), y_bounds=(y0, y1),
     )
     U = plane.df["u"].values.reshape(yr, xr)   # [x2(y) 慢, x1(x) 快]
-    return U.astype(np.float32), float(x0), float(x1), float(y0), float(y1)
+    if not np.isfinite(U).all():
+        raise ValueError("FLORIS 尾流观测风速必须有限")
+    try:
+        with np.errstate(over="raise", invalid="raise"):
+            U = U.astype(np.float32)
+    except FloatingPointError as exc:
+        raise ValueError("FLORIS 尾流观测必须为有限 float32 数值") from exc
+    return U, float(x0), float(x1), float(y0), float(y1)
 
 
 def _resize_nn(arr, out_hw):
@@ -107,11 +155,14 @@ def wake_images(fi, hub_h, res=PLANE_RES, patch_m=PATCH_M, out_hw=IMG_HW):
     """返回 (n_turb, 1, H, W)：每台机组 ±patch_m 的局部风速图像，按自由来流归一化 ~[0,1]。
 
     小风偏（网格轻微剪切）忽略，用线性索引把机组位置映射到网格再切固定窗口。
+    自由来流须为有限正风速，切面须能表示为有限 float32 数值。
     """
+    u_free = float(np.ravel(fi.floris.flow_field.wind_speeds)[0])
+    if not np.isfinite(u_free) or u_free <= 0:
+        raise ValueError("FLORIS 自由来流风速必须为有限正数")
     U, x0, x1, y0, y1 = farm_wake_plane(fi, hub_h, res=res)
     ny, nx = U.shape
-    lx, ly = np.asarray(fi.layout_x), np.asarray(fi.layout_y)
-    u_free = float(np.ravel(fi.floris.flow_field.wind_speeds)[0])
+    lx, ly = _layout_coordinates(fi)
     dx, dy = (x1 - x0) / (nx - 1), (y1 - y0) / (ny - 1)
     half_x, half_y = int(round(patch_m / dx)), int(round(patch_m / dy))
 

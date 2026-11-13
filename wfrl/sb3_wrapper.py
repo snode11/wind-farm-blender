@@ -61,8 +61,8 @@ class WFCRLSB3Wrapper(gym.Wrapper):
         return obs, {}
 
     def step(self, action: np.ndarray):
-        # Re-wrap flat yaw array into the Dict the inner env expects
-        obs, reward, terminated, truncated, info = self.env.step({"yaw": action})
+        # WFCRL applies actuator limits in place; its action buffer must be owned by this call.
+        obs, reward, terminated, truncated, info = self.env.step({"yaw": np.array(action, copy=True)})
         # Squeeze np.array([float]) → scalar float
         scalar_reward = float(np.asarray(reward).squeeze())
         return obs, scalar_reward, terminated, truncated, info
