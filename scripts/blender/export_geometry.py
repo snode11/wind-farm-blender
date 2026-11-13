@@ -7,12 +7,53 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
+import math
+import os
 from pathlib import Path
 import re
+import shutil
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 NUMBER = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[EeDd][-+]?\d+)?")
+_spec = importlib.util.spec_from_file_location(
+    '_wfrl_export_atomic_json', ROOT / 'blender_frontend/wfrl_blender/atomic_json.py')
+atomic_json = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(atomic_json)
+
+
+def write_export_files(outputs):
+    """Publish related UTF-8 files together, restoring old files on write failure.
+
+    Each replacement is atomic. Rollback covers caught failures, not process
+    termination or concurrent writers; callers must own the output directory.
+    """
+    paths = [Path(path) for path in outputs]
+    if not paths or len({path.parent for path in paths}) != 1:
+        raise ValueError('Export files must share one output directory')
+    with tempfile.TemporaryDirectory(prefix='.wfrl-export-', dir=paths[0].parent) as directory:
+        staged, backups = {}, {}
+        for index, (path, text) in enumerate(zip(paths, outputs.values())):
+            staged[path] = Path(directory) / f'{index}.new'
+            atomic_json.write_text(staged[path], text)
+            if path.exists():
+                backups[path] = Path(directory) / f'{index}.old'
+                shutil.copy2(path, backups[path])
+                shutil.copymode(path, staged[path])
+        replaced = []
+        try:
+            for path in paths:
+                os.replace(staged[path], path)
+                replaced.append(path)
+        except BaseException:
+            for path in reversed(replaced):
+                if path in backups:
+                    os.replace(backups[path], path)
+                else:
+                    path.unlink()
+            raise
 
 
 def nums(line):
@@ -33,17 +74,28 @@ def table(lines, header, columns, count):
         if not active:
             active = header in line
             continue
-        row = nums(line)
-        if len(row) >= columns:
-            result.append(row[:columns])
-            if len(result) == count:
-                return result
+        fields = line.split('!', 1)[0].split()
+        if not fields or fields[0].startswith('('):
+            continue
+        try:
+            row = [float(value.replace('D', 'E').replace('d', 'e')) for value in fields[:columns]]
+        except ValueError as exc:
+            raise ValueError(f'Invalid numeric row in {header} table: {line}') from exc
+        if len(row) != columns or not all(math.isfinite(value) for value in row):
+            raise ValueError(f'Invalid or nonfinite row in {header} table: {line}')
+        result.append(row)
+        if len(result) == count:
+            return result
     raise ValueError(f"Incomplete {header} table")
 
 
 def export(template, output, shell=None, source=None):
     shell = shell or ROOT / "wfrl/turbines/nrel5mw.yaml"
     sources = {}
+
+    def source_path(path):
+        path = path.absolute()
+        return path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.as_posix()
 
     def read(path):
         raw = path.read_bytes()
@@ -64,8 +116,18 @@ def export(template, output, shell=None, source=None):
         coord_name = next(re.search(r'@\s*"([^"]+)"', ln).group(1)
                           for ln in polar_lines if "NumCoords" in ln and "@" in ln)
         coords = read(polar.parent / Path(coord_name).name)
-        pairs = [nums(ln)[:2] for ln in coords
-                 if ln.strip() and not ln.lstrip().startswith("!") and len(nums(ln)) >= 2]
+        pairs = []
+        for line in coords:
+            fields = line.split('!', 1)[0].split()
+            if not fields or 'NumCoords' in fields:
+                continue
+            try:
+                pair = [float(value.replace('D', 'E').replace('d', 'e')) for value in fields[:2]]
+            except ValueError as exc:
+                raise ValueError(f'Invalid airfoil coordinate in {polar.name}: {line}') from exc
+            if len(pair) != 2 or not all(math.isfinite(value) for value in pair):
+                raise ValueError(f'Nonfinite or missing airfoil coordinate in {polar.name}: {line}')
+            pairs.append(pair)
         airfoils.append({"name": polar.stem, "reference": pairs[0], "coordinates": pairs[1:]})
     shell_raw = shell.read_bytes()
     shell_lines = shell_raw.decode().splitlines()
@@ -75,8 +137,8 @@ def export(template, output, shell=None, source=None):
         shell_dimensions[key] = float(line.split(":", 1)[1].split("#")[0])
     result = {
         "schema_version": 1,
-        "source": source or (f"Local FAST.Farm template {template.relative_to(ROOT).as_posix()}; "
-                             f"shell dimensions from {shell.relative_to(ROOT).as_posix()}"),
+        "source": source or (f"Local FAST.Farm template {source_path(template)}; "
+                             f"shell dimensions from {source_path(shell)}"),
         "source_sha256": dict(sorted(sources.items())),
         "shell_source_sha256": hashlib.sha256(shell_raw).hexdigest(),
         "units": {"length": "m", "angle": "deg"},
@@ -92,7 +154,8 @@ def export(template, output, shell=None, source=None):
     assert len(result["blade_stations"]) == 19 and len(airfoils) == 8
     assert all(len(af["coordinates"]) == 399 for af in airfoils)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, separators=(",", ":"), ensure_ascii=False) + "\n", encoding='utf-8')
+    atomic_json.write_text(output, json.dumps(result, separators=(",", ":"),
+                                             ensure_ascii=False, allow_nan=False) + "\n")
     print(f"Exported {output}: {output.stat().st_size} bytes, {len(sources)} source hashes")
 
 
