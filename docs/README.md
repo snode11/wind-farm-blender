@@ -1,6 +1,6 @@
 # 文档索引
 
-发布版本为 **0.5.0**（GitHub 标签 `v0.5.0`，Blender manifest 为 `0.5.0`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
+发布版本为 **0.5.0.0.1**（GitHub 标签 `v0.5.0.0.1`，Blender manifest 为 `0.5.0+0.1`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
 项目仓库为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)。文档按功能、使用、实现、约束和验证对象组织；包身份、实际安装和研究接受状态分别说明。
 
@@ -28,9 +28,9 @@
 
 | 对象 | 当前范围 |
 | --- | --- |
-| NREL 公开安装包 | **0.5.0**；安装使用 [v0.5.0 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0/wfrl_blender-0.5.0.zip)，包身份与适用验证见[交付身份](../publication/blender-0.5.0.json)。 |
+| NREL 公开安装包 | **0.5.0.0.1**；安装使用 [v0.5.0.0.1 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip)，包身份与适用验证见[交付身份](../publication/blender-0.5.0.0.1.json)。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷；本地工作区提交的检查范围见[工作区源码验证](blender/发布状态与验证范围.md#工作区源码验证提交-bb470611)。 |
-| 发布源码 | `v0.5.0` 源码标签及匹配归档；扩展 ZIP 可由该归档独立重建；软件合同、保存证据及适用范围见[源码软件合同与验证](blender/发布状态与验证范围.md#源码软件合同与验证)。 |
+| 发布源码 | `v0.5.0.0.1` 源码标签及匹配归档；扩展 ZIP 可由该归档独立重建；软件合同、保存证据及适用范围见[源码软件合同与验证](blender/发布状态与验证范围.md#源码软件合同与验证)。 |
 | 本地日常安装 | **0.5.0 公开 ZIP 载荷**，实际模块 `bl_ext.user_default.wfrl_blender`；239 个文件与本地安装归档匹配。149 个新后台进程模块来源、持久启用及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
 | X100 观测研究 | 扩展提供面积材料采样、工程检测、安装报告导入和有拒绝条件的叶片估计；配套源码提供有限候选搜索与离线评价。同源几何数值与原生画布证据见[研究验证](blender/发布状态与验证范围.md#x100-观测研究工作区验证)。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
