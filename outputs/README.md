@@ -17,7 +17,7 @@
 | GW184 试片 | `gw184-single/review/index.html`（本地查看页，来源及使用见[项目说明](../projects/gw184-single/README.md)）：试片、参数、参考帧与几何检查；下载入口使用 `delivery/GW184-trials.zip` |
 | 前端验证 | [`frontend-reliability-20261011-a01/`](frontend-reliability-20261011-a01/)、`reconstruction-*`、`blender-validation/`、`release-*` 等：按包身份解释的软件检查、截图和日志 |
 | 当前公开扩展 | [安装与下载](../docs/blender/INSTALL.md)、[发布身份与验证范围](../docs/blender/发布状态与验证范围.md)；使用对应版本的专用 ZIP、inventory 和 SHA-256 |
-| 日常安装 | [安装核对](../publication/daily-installation.json)；0.5.0 安装载荷的文件身份、启用和后台注册按安装记录核对，正式归档由 `source_archive` 标识；恢复备份按安装记录保留，临时配置及检查脚本不作为运行依赖 |
+| 日常安装 | [安装核对](../publication/daily-installation.json)；0.5.0.0.1 安装载荷的文件身份、启用和后台注册按安装记录核对，正式归档由 `source_archive` 标识；恢复备份按安装记录保留，临时配置及检查脚本不作为运行依赖 |
 
 目录名中的编号和日期属于现有资源定位符，不代表当前软件开发顺序。根目录的部分别名是符号链接，不是另一份数据。
 

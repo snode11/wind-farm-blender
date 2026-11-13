@@ -1,15 +1,15 @@
 {
   "schema": "wfrl.daily-installation.v1",
   "status": "PASS",
-  "version": "0.5.0",
-  "extension_version": "0.5.0",
+  "version": "0.5.0.0.1",
+  "extension_version": "0.5.0+0.1",
   "installation_kind": "PUBLIC_RELEASE_ARCHIVE",
   "module": "bl_ext.user_default.wfrl_blender",
   "module_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
   "blender": "5.2.1 LTS",
   "platform": "macOS",
-  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.5.0/package/wfrl_blender-0.5.0.zip",
-  "archive_sha256": "db4cf8e06bfda5e454989d411e37f47bf7e6cf1d17027a40981c3795dc12241a",
+  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.5.0.0.1/package/wfrl_blender-0.5.0+0.1.zip",
+  "archive_sha256": "37a79a7ad3d861386313dd4920d5d553de4e51667788afbb5201961a4e8928f9",
   "installed_files_checked": 239,
   "loaded_module_files_checked": 149,
   "file_mismatches": 0,
@@ -25,12 +25,12 @@
   "native_window_status": "NOT_RUN",
   "physical_input_status": "NOT_RUN",
   "evidence": {
-    "installation": "publication/blender-0.5.0/installation.json"
+    "installation": "publication/blender-0.5.0.0.1/installation.json"
   },
   "backups": {
-    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.5.0.ead88r_b"
+    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.5.0.0.1.s_g7vv1x"
   },
-  "limits": "The installed files match the local archive used for the 0.5.0 release. Verification covers saved enablement, module origins in a fresh Blender background process, and unchanged SHA-256 hashes for 6 configuration files, including startup and preferences.",
+  "limits": "The installed files match the 0.5.0.0.1 release ZIP. A fresh Blender background process verified saved enablement and module origins. All six configuration files and eleven WFRL preference values matched their pre-installation state.",
   "artifact_availability": {
     "final_archive": true,
     "result_records": true,
@@ -45,5 +45,5 @@
   "existing_processes_preserved": [],
   "restart_required_for_existing_processes": false,
   "local_source_archive_available": true,
-  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0/wfrl_blender-0.5.0.zip"
+  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip"
 }

@@ -23,7 +23,7 @@
 | 0.5.0.0.1 扩展与源码 | [v0.5.0.0.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.0.0.1) 提供 [wfrl_blender-0.5.0+0.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip)、inventory、SHA-256、标签源码归档及交付清单；大小、文件数及归档摘要见[交付身份](../publication/blender-0.5.0.0.1.json)。本版完成一次本地构建，回归、隔离安装与窗口检查未运行，范围见[发布验证记录](../publication/blender-0.5.0.0.1/verification.json)；真实输入、完整媒体、FPS 和科学精度分别验证。日常安装按其独立身份使用 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
-本机 X100 使用安装记录所列的 0.5.0 载荷，归档路径及摘要由[日常安装记录](../publication/daily-installation.json)标识；本地保留正式扩展 ZIP、inventory 和 SHA-256。安装记录保留文件身份、新进程后台注册、六项配置的核对结果与恢复备份位置。该安装载荷的功能回归、窗口／GPU、性能和科学精度检查未运行。
+本机 X100 使用安装记录所列的 0.5.0.0.1 载荷，归档路径及摘要由[日常安装记录](../publication/daily-installation.json)标识；本地保留正式扩展 ZIP、inventory 和 SHA-256。安装记录保留文件身份、新进程后台注册、六项配置的核对结果与恢复备份位置。该安装载荷的功能回归、窗口／GPU、性能和科学精度检查未运行。
 
 公开 0.5.0.0.1 扩展包含 X100 机舱 XZ、同帧侧壁距离和零载荷参考。离线覆盖与安装搜索工具通过源码归档提供。当前本地证据保留在[outputs/x100-analysis](../outputs/x100-analysis/)，关键源码摘要、几何基准、当前GPU／RGB、窗口合同／生命周期、场景历史和覆盖报告的适用范围见[源码验证](blender/发布状态与验证范围.md#x100-工作区源码验证)。该目录按本地输出规则忽略，不能据本地存在推定已进入Git或资源Release；临时测试场景、探针、重复报告和可再生缓存不属于运行依赖。
 
