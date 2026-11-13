@@ -7,6 +7,7 @@ from dataclasses import asdict
 import json
 from pathlib import Path
 import sys
+import tempfile
 import numpy as np
 
 
@@ -18,9 +19,22 @@ def _json_value(value):
     raise TypeError(type(value).__name__)
 
 
+def _write_report(path, report, *, newline=True):
+    from wfrl.camera_video.publication import commit_exclusive
+    from wfrl_blender import atomic_json
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.x100-evaluation-', dir=path.parent) as directory:
+        staged = Path(directory) / path.name
+        atomic_json.write_text(staged, json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2)
+                               + ('\n' if newline else ''))
+        commit_exclusive(staged, path)
+
+
 def error_metrics(errors, expected):
     """Missing estimates remain in the coverage denominator, never as zero error."""
     values = np.array([e for e in errors if e is not None], float)
+    if type(expected) is not int or expected < 0 or len(values) > expected:
+        raise ValueError('Invalid expected-frame denominator')
     if not np.isfinite(values).all():
         raise ValueError('Nonfinite evaluation error')
     return dict(expected_frames=expected, estimated_frames=len(values),
@@ -32,9 +46,11 @@ def error_metrics(errors, expected):
 
 def separation_metrics(truth, predicted):
     """Rows=true, columns=predicted; mixed unresolved truth (-1) is explicit."""
-    truth, predicted = np.asarray(truth, int), np.asarray(predicted, int)
-    if truth.shape != predicted.shape or np.any((predicted < 0) | (predicted > 2)):
+    truth, predicted = np.asarray(truth), np.asarray(predicted)
+    if (truth.ndim != 1 or truth.shape != predicted.shape
+            or not np.isin(truth, [-1, 0, 1, 2]).all() or not np.isin(predicted, [0, 1, 2]).all()):
         raise ValueError('Invalid separation evaluation labels')
+    truth, predicted = truth.astype(int), predicted.astype(int)
     known = truth >= 0
     matrix = np.bincount(3*truth[known]+predicted[known], minlength=9).reshape(3, 3)
     classes = {}
@@ -135,13 +151,20 @@ def collect_detection_observations(args):
     if not args.search_report:
         raise ValueError('--detections requires --search-report or --observations')
     path = args.search_report.resolve()
-    search = json.loads(path.read_text(encoding='utf-8'))
+    try:
+        raw_search = path.read_bytes()
+        search = json.loads(raw_search)
+        json.dumps(search, allow_nan=False)
+    except (OSError, ValueError) as exc:
+        raise ValueError(f'{path}: {exc}') from exc
     if search.get('evaluation_scope') != 'ALL_COMPLETE_PASSAGES' or not search.get('winner_id'):
         raise ValueError('A full-passage installation winner is required')
     winner = next(c for c in search['candidates'] if c['id'] == search['winner_id'])
     if len(winner['detection_profiles']) != 1:
         raise ValueError('Select a report with one explicit detection profile')
     profile = winner['detection_profiles'][0]
+    if not len(profile['grid_times_s']) == len(profile['source_indices']) == len(profile['frames']):
+        raise ValueError(f'{path}: detection grid/frame lengths differ')
     config = detection.DetectionConfig(**profile['model']['parameters'])
     root = Path(__file__).resolve().parents[2]
     for name, digest in search['code_identity'].items():
@@ -215,7 +238,7 @@ def collect_detection_observations(args):
                 print(f'X100_CLEARANCE_OBSERVATIONS {index+1}/{len(profile["grid_times_s"])}', flush=True)
         return dict(schema='x100-clearance-observations.v1', source_id=sampler.source_id,
             geometry_id=sampler.geometry_id, installation_report=str(path),
-            installation_report_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+            installation_report_sha256=hashlib.sha256(raw_search).hexdigest(),
             installation={k: winner[k] for k in ('id', 'location_name', 'location_m', 'rotation_deg')},
             source_code_identity=search['code_identity'], detection_config=asdict(config),
             integration_budget=profile['integration_budget'], output_point_limit=profile['output_point_limit'],
@@ -373,34 +396,48 @@ def evaluate_detection_observations(data):
 def detection_main(args):
     root = Path(__file__).resolve().parents[2]
     sys.path[:0] = [str(root/'blender_frontend'), str(root)]
-    from wfrl_blender import atomic_json
     if args.observations:
-        with gzip.open(args.observations, 'rt', encoding='utf-8') as stream:
-            data = json.load(stream)
-        if data.get('schema') != 'x100-clearance-observations.v1':
-            raise ValueError('Unsupported observation cache')
+        try:
+            raw = args.observations.read_bytes()
+            data = json.loads(gzip.decompress(raw))
+            json.dumps(data, allow_nan=False)
+        except (OSError, ValueError, EOFError) as exc:
+            raise ValueError(f'{args.observations}: {exc}') from exc
+        if not isinstance(data, dict) or data.get('schema') != 'x100-clearance-observations.v1':
+            raise ValueError(f'Unsupported observation cache: {args.observations}')
     else:
         data = collect_detection_observations(args)
     observation_identity = None
     if args.observations:
         observation_identity = dict(path=str(args.observations.resolve()),
-            sha256=hashlib.sha256(args.observations.read_bytes()).hexdigest())
+            sha256=hashlib.sha256(raw).hexdigest())
     if args.save_observations:
+        from wfrl.camera_video.publication import commit_exclusive
         args.save_observations.parent.mkdir(parents=True, exist_ok=True)
-        with gzip.open(args.save_observations, 'xt', encoding='utf-8') as stream:
-            json.dump(data, stream, default=_json_value, allow_nan=False)
-    report = evaluate_detection_observations(data)
+        with tempfile.TemporaryDirectory(prefix='.x100-observations-', dir=args.save_observations.parent) as directory:
+            staged = Path(directory) / args.save_observations.name
+            with gzip.open(staged, 'xt', encoding='utf-8') as stream:
+                json.dump(data, stream, default=_json_value, allow_nan=False)
+            commit_exclusive(staged, args.save_observations)
+    try:
+        report = evaluate_detection_observations(data)
+    except (ValueError, KeyError, TypeError, IndexError) as exc:
+        if args.observations:
+            raise ValueError(f'{args.observations}: evaluation failed: {exc}') from exc
+        raise
     if observation_identity is not None:
         report['observation_cache'] = observation_identity
     # Convert NumPy values before the common atomic writer checks strict JSON.
     report = json.loads(json.dumps(report, default=_json_value, allow_nan=False))
-    atomic_json.write_json(args.output, report, mkdir=True)
+    _write_report(args.output, report)
     print('X100_CLEARANCE_COMPLETE', args.output, json.dumps(report['overall']), flush=True)
 
 
 def distribution(values):
     if not values:
         return dict(count=0, mean_m=None, p95_m=None, max_m=None)
+    if not np.isfinite(values).all():
+        raise ValueError('Nonfinite geometric evaluation error')
     return dict(count=len(values), mean_m=float(np.mean(values)), p95_m=float(np.quantile(values,.95)), max_m=float(np.max(values)))
 
 
@@ -507,9 +544,7 @@ def main():
             inference_config=asdict(session.blade_tracker.config),metrics=metrics,unknown=unknown,frames=rows,
             truth_boundary='saved structural tip and material triangle labels used only for evaluation after estimation',
             evaluation_scope='same-source geometry experiment; no field accuracy or safety acceptance')
-        args.output.parent.mkdir(parents=True,exist_ok=True)
-        with args.output.open('x', encoding='utf-8') as stream:
-            json.dump(report,stream,ensure_ascii=False,allow_nan=False,indent=2)
+        _write_report(args.output, report, newline=False)
         print('X100_ESTIMATION_COMPLETE',args.output,flush=True)
         if unknown:
             raise RuntimeError('Evaluation contains unavailable inference frames')

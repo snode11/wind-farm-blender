@@ -25,7 +25,7 @@ def main():
         summary = write_import_summary(output, report, evidence=args.evidence,
                                        sha256=hashlib.sha256(raw).hexdigest())
     except (OSError, ValueError) as exc:
-        raise SystemExit(str(exc)) from None
+        raise SystemExit(f'{args.evidence}: {exc}') from None
     print('X100_SEARCH_SUMMARY', summary)
 
 

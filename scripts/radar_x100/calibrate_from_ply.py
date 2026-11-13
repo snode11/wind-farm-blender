@@ -15,13 +15,14 @@ the mag mapping. Vendor axes are taken as +Y boresight, +X right, +Z up.
 """
 from dataclasses import asdict, replace
 from pathlib import Path
+import argparse
 import json
 import sys
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
+sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 from wfrl.radar_x100 import ply  # noqa: E402
 from wfrl.radar_x100.detection import (DetectionConfig, generate_detections, probability_detection,  # noqa: E402
                                        received_power_w, _cell_grid)
@@ -58,6 +59,13 @@ def components(p, link):
 
 def vendor_statistics(frames):
     n = len(frames)
+    if n < 2:
+        raise ValueError('Calibration requires at least two frames')
+    for index, frame in enumerate(frames):
+        if (frame.ndim != 1 or frame.dtype.names is None
+                or not all(name in frame.dtype.names for name in ('x', 'y', 'z', 'snr', 'mag', 'rcs'))
+                or not all(np.isfinite(frame[name]).all() for name in ('x', 'y', 'z', 'snr', 'mag', 'rcs'))):
+            raise ValueError(f'Invalid calibration point fields in frame {index}')
     counts = {}
     for f in frames:
         for key in set(map(tuple, np.round(xyz(f) / VOXEL_M).astype(int))):
@@ -67,10 +75,12 @@ def vendor_statistics(frames):
     for centre in persistent:
         rows = [p[d.argmin()] for p in map(xyz, frames)
                 if len(p) and (d := np.linalg.norm(p - centre, axis=1)).min() < .6]
-        if len(rows) > n * .05:
+        if len(rows) >= 2 and len(rows) > n * .05:
             r, az, el = polar(np.array([tuple(v) for v in rows], dtype=[('x', float), ('y', float), ('z', float)]))
             jitter.append((r.std(), az.std(), el.std()))
     jitter = np.array(jitter)
+    if not len(jitter):
+        raise ValueError('Calibration requires repeated persistent scatterers for jitter')
     sizes, extents, sporadic = [], [], []
     for index, f in enumerate(frames):
         p = xyz(f)
@@ -87,6 +97,8 @@ def vendor_statistics(frames):
             extents.append((np.ptp(r[s]), np.ptp(az[s]), np.ptp(el[s])))
     sizes, extents = np.array(sizes), np.array(extents)
     big = sizes >= 10
+    if not big.any():
+        raise ValueError('Calibration requires extended objects with at least 10 points')
     # Far target: one range per frame; detection rate along the interpolated track.
     detected = {}
     far_snr, far_rcs = [], []
@@ -98,6 +110,8 @@ def vendor_statistics(frames):
             far_snr += f['snr'][far].astype(float).tolist()
             far_rcs += f['rcs'][far].astype(float).tolist()
     idx = np.array(sorted(detected))
+    if len(idx) < 2:
+        raise ValueError('Calibration requires a far-target track with at least two detections')
     span = np.arange(idx[0], idx[-1] + 1)
     track = np.interp(span, idx, [detected[i] for i in idx])
     hit = np.isin(span, idx)
@@ -107,9 +121,13 @@ def vendor_statistics(frames):
         if s.sum() >= 30:
             bins.append(dict(range_m=[lo, lo + 50], centre_m=float(np.median(track[s])),
                              frames=int(s.sum()), detected=int(hit[s].sum()), rate=float(hit[s].mean())))
+    if not bins:
+        raise ValueError('Calibration requires a far-target range bin with at least 30 frames')
     allp = np.concatenate(frames)
     snr = allp['snr'].astype(float)
     ok = np.isfinite(snr)
+    if len(snr[ok]) < 2 or np.ptp(snr[ok]) == 0:
+        raise ValueError('Calibration requires distinct finite SNR values for the magnitude fit')
     slope, intercept = np.polyfit(snr[ok], allp['mag'][ok].astype(float), 1)
     resid = allp['mag'][ok] - (slope * snr[ok] + intercept)
     return dict(
@@ -144,6 +162,29 @@ def _patch(extent, rng, count=6000, centre_m=35.):
 
 
 def fit(stats):
+    try:
+        json.dumps(stats, allow_nan=False)
+        jitter = stats['jitter_median']
+        extent = stats['extended_objects']['extent_median']
+        positive = [stats['extended_objects']['points_median']]
+        nonnegative = [jitter[key] for key in ('range_m', 'azimuth_deg', 'elevation_deg')]
+        nonnegative += [extent[key] for key in ('range_m', 'azimuth_deg', 'elevation_deg')]
+        nonnegative += [stats['sporadic_points_per_frame'], stats['mag_fit']['residual_std']]
+        finite = [stats['far_target']['rcs_median_dbsm'], stats['far_target']['snr_median'],
+                  stats['mag_fit']['slope'], stats['mag_fit']['intercept']]
+        bins = stats['far_target']['bins']
+        if not bins:
+            raise ValueError('no far-target bins')
+        for row in bins:
+            positive += [row['centre_m'], row['frames']]
+            if not 0 <= row['rate'] <= 1:
+                raise ValueError('invalid far-target detection rate')
+        if (not all(np.isfinite(value) and value > 0 for value in positive)
+                or not all(np.isfinite(value) and value >= 0 for value in nonnegative)
+                or not all(np.isfinite(value) for value in finite)):
+            raise ValueError('invalid fitted quantities')
+    except (ValueError, KeyError, TypeError) as exc:
+        raise ValueError(f'Invalid calibration statistics: {exc}') from exc
     jitter = stats['jitter_median']
     base = DetectionConfig(fluctuation_model='SWERLING_1', range_std_m=jitter['range_m'],
                            azimuth_std_deg=jitter['azimuth_deg'], elevation_std_deg=jitter['elevation_deg'])
@@ -201,22 +242,46 @@ def fit(stats):
 
 
 def main():
-    directory, report = Path(sys.argv[1]), Path(sys.argv[2])
-    cache = Path(sys.argv[3]) if len(sys.argv) > 3 else None
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('directory', type=Path)
+    parser.add_argument('report', type=Path)
+    parser.add_argument('cache', type=Path, nargs='?')
+    args = parser.parse_args()
+    directory, report, cache = args.directory, args.report, args.cache
     if cache is not None and cache.exists():
-        stats = json.loads(cache.read_text(encoding='utf-8'))
+        try:
+            stats = json.loads(cache.read_bytes())
+        except (ValueError, OSError) as exc:
+            raise ValueError(f'{cache}: {exc}') from exc
     else:
         files = sorted(directory.glob('*_RawPoints.ply'))
         if not files:
-            raise SystemExit('No *_RawPoints.ply files found')
-        stats = vendor_statistics([ply.read_ply(f) for f in files])
+            raise SystemExit(f'No *_RawPoints.ply files found: {directory}')
+        frames = []
+        for path in files:
+            try:
+                points = ply.read_ply(path)
+                if not all(np.isfinite(points[name]).all() for name in ('x', 'y', 'z', 'snr', 'mag', 'rcs')):
+                    raise ValueError('Nonfinite calibration point fields')
+                frames.append(points)
+            except (OSError, ValueError) as exc:
+                raise ValueError(f'{path}: {exc}') from exc
+        try:
+            stats = vendor_statistics(frames)
+        except ValueError as exc:
+            raise ValueError(f'{directory}: {exc}') from exc
         if cache is not None:
-            cache.write_text(json.dumps(stats, indent=1), encoding='utf-8')
-    config, details = fit(stats)
+            from wfrl_blender import atomic_json
+            atomic_json.write_text(cache, json.dumps(stats, indent=1, allow_nan=False))
+    try:
+        config, details = fit(stats)
+    except ValueError as exc:
+        raise ValueError(f'{cache or directory}: {exc}') from exc
     fitted = {k: v for k, v in asdict(config).items() if v != getattr(DetectionConfig(), k)}
     fitted.pop('calibration_status', None)
     result = dict(dataset=str(directory.name), statistics=stats, fit=details, fitted_parameters=fitted)
-    report.write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8')
+    from wfrl_blender import atomic_json
+    atomic_json.write_text(report, json.dumps(result, indent=1, ensure_ascii=False, allow_nan=False))
     print(json.dumps(result, ensure_ascii=False))
 
 

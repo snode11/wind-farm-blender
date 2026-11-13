@@ -194,6 +194,8 @@ def main():
         errors = []
         for source_index, stamp in enumerate(source_times):
             frame_index = source_lookup.get(source_index)
+            frame_fov = np.zeros_like(fov_count)
+            frame_blocked = np.zeros_like(blocked_count)
             try:
                 sample = sampler.sample(float(stamp))
                 nacelle = sampler.mount_world_at(float(stamp))
@@ -221,8 +223,10 @@ def main():
                             for blade in range(3):
                                 counts[c, p, frame_index, blade] = np.sum(mask[:budget] & inside[:budget] & (labels[seed][:budget] == blade))
                             target = (labels[seed][:budget] >= 0) & inside[:budget]
-                            fov_count[c, p] += np.sum(gate[:budget] & target)
-                            blocked_count[c, p] += np.sum(gate[:budget] & ~mask[:budget] & target)
+                            frame_fov[c, p] += np.sum(gate[:budget] & target)
+                            frame_blocked[c, p] += np.sum(gate[:budget] & ~mask[:budget] & target)
+                fov_count += frame_fov
+                blocked_count += frame_blocked
             except Exception as exc:
                 if frame_index is not None:
                     counts[:, :, frame_index] = -1
