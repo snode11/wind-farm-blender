@@ -11,7 +11,9 @@ from pathlib import Path
 from . import performance
 import json
 import math
+import os
 import struct
+import tempfile
 import uuid
 import zlib
 import time
@@ -56,7 +58,7 @@ def _progress(job):
 
 @performance.timed("camera.write_png")
 def write_png(path, width, height, rgba_bottom_up):
-    """Display transform already applied by GPU. Only row reversal, no gamma pass."""
+    """Publish complete PNG bytes exclusively; only flip GPU rows, no gamma pass."""
     if len(rgba_bottom_up) != width * height * 4:
         raise ValueError('GPU 像素长度与图像尺寸不一致')
     def chunk(kind, data):
@@ -65,8 +67,15 @@ def write_png(path, width, height, rgba_bottom_up):
     rows = b''.join(b'\0'+rgba_bottom_up[y*stride:(y+1)*stride] for y in range(height-1,-1,-1))
     payload = (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('!2I5B',width,height,8,6,0,0,0))
                + chunk(b'sRGB',b'\0') + chunk(b'IDAT',zlib.compress(rows,6)) + chunk(b'IEND',b''))
-    with Path(path).open('xb') as stream:
-        stream.write(payload)
+    from .video_output import _commit_export
+    path = Path(path)
+    with tempfile.TemporaryDirectory(prefix='.wfrl-png-', dir=path.parent) as directory:
+        staged = Path(directory) / path.name
+        with staged.open('xb') as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        _commit_export(staged, path)
 
 
 class ImageWriter:
@@ -280,9 +289,13 @@ class Capture:
         self._play(False)
         self.playback_generation = playback.generation()
         try:
-            self.path.mkdir()
-            write_json(self.path/'layout.json',self.layout)
-            write_json(self.path/'manifest.json',self.manifest)
+            from .video_output import _commit_export
+            with tempfile.TemporaryDirectory(prefix='.wfrl-capture-', dir=directory) as staging:
+                staged = Path(staging) / self.path.name
+                staged.mkdir()
+                write_json(staged/'layout.json',self.layout)
+                write_json(staged/'manifest.json',self.manifest)
+                _commit_export(staged, self.path)
         except Exception:
             self._play(self.playing)
             raise
@@ -496,8 +509,16 @@ class Capture:
             raise writer.error
         if writer.cancelled.is_set():
             raise InterruptedError('图像写入已取消，采集未完成')
-        with (self.path/'frames.jsonl').open('a',encoding='utf-8') as stream:
-            stream.write(''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+'\n' for r in records))
+        rows = ''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+os.linesep for r in records).encode('utf-8')
+        with (self.path/'frames.jsonl').open('ab', buffering=0) as stream:
+            stream.seek(0, os.SEEK_END)
+            committed = stream.tell()
+            try:
+                if stream.write(rows) != len(rows):
+                    raise OSError('采集帧索引未完整写入')
+            except Exception:
+                stream.truncate(committed)
+                raise
         self.index += 1
         self.manifest['completed_samples'] = self.index
         # The frame index tracks every group. Sparse checkpoints bound rewrites
@@ -544,11 +565,6 @@ class Capture:
             if self._writer is not None:
                 self._writer.cancel()
             self.in_group = False
-            if self.render_target is not None:
-                self.render_target.free()
-                self.manifest['gpu_target_usage'] = self.render_target.usage()
-            if getattr(self,'ui_operator',None):
-                self.ui_operator.remove_timer()
             self.error=error
             self._finish_result = success, same, error
             interval = self._publish_finish()
@@ -569,7 +585,28 @@ class Capture:
         global _ACTIVE
         if getattr(self, '_finish_result', None) is None:
             return
-        if self._writer is not None and self._writer.thread.is_alive():
+        success, same, error = self._finish_result
+        pending_cleanup = False
+        for resource in ('gpu', 'ui'):
+            flag = '_released_' + resource
+            if getattr(self, flag, False):
+                continue
+            try:
+                if resource == 'gpu' and self.render_target is not None:
+                    self.render_target.free()
+                    self.manifest['gpu_target_usage'] = self.render_target.usage()
+                elif resource == 'ui' and getattr(self, 'ui_operator', None):
+                    self.ui_operator.remove_timer()
+            except Exception as exc:
+                pending_cleanup, success = True, False
+                detail = f'{resource} 资源清理失败：{exc}'
+                if detail not in error:
+                    error = (error + '；' if error else '') + detail
+            else:
+                setattr(self, flag, True)
+        self.error = error
+        self._finish_result = success, same, error
+        if pending_cleanup or (self._writer is not None and self._writer.thread.is_alive()):
             return .03
         timer = getattr(self, '_finish_timer', None)
         if timer is not None:
@@ -591,7 +628,13 @@ class Capture:
         self.error=error or ('用户取消：已停止' if self.cancel_requested else '')
         self.manifest['status']='complete' if success and same else 'incomplete'
         self.manifest['error']=self.error or (None if success else 'cancelled / invalid session')
-        write_json(self.path/'manifest.json',self.manifest)
+        try:
+            write_json(self.path/'manifest.json',self.manifest)
+        except Exception as exc:
+            success = False
+            error = (error + '；' if error else '') + f'采集清单写入失败：{exc}'
+            self.error = self.manifest['error'] = error
+            self.manifest['status'] = 'incomplete'
         if same and self.same_session():
             from .home_state import TaskStatus
             stage = 'SUCCEEDED' if success else 'CANCELLED' if self.cancel_requested and not error else 'FAILED'

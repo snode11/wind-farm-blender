@@ -207,10 +207,29 @@ def restore_layout(scene, payload):
         by_slot = {cam['wfrl_custom_slot']: cam for cam in staged}
         rig.apply_pose(scene, payload.get('rig_pose'))
         _core._publish(scene, {slot: by_slot.get(slot) for slot in _core.SLOTS})
-    except Exception:
-        rig.apply_pose(scene, old_rig_pose)
+    except Exception as failure:
+        errors = []
+        try:
+            rig.apply_pose(scene, old_rig_pose)
+        except Exception as exc:
+            errors.append(str(exc))
         for cam in staged:
-            _core._remove(cam)
+            try:
+                data = cam.data
+            except ReferenceError:
+                continue
+            try:
+                _core._remove(cam)
+            except (RuntimeError, ValueError) as exc:
+                # Unpublished cameras remain owned by this failed transaction.
+                try:
+                    cam['wfrl_custom_draft'] = True
+                except ReferenceError:
+                    pass
+                _core._remember_retired(cam, data)
+                errors.append(str(exc))
+        if errors:
+            raise RuntimeError(str(failure) + '；布局回滚清理失败：' + '；'.join(errors)) from failure
         raise
     return staged
 

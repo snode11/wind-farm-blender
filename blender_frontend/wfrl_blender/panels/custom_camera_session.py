@@ -109,6 +109,10 @@ class EditSession:
                 _panel.bpy.ops.screen.animation_cancel(restore_frame=False)
 
     def begin(self):
+        if self.closed or self.draft is not None:
+            raise ValueError('相机编辑会话已结束或已有草稿，请勿重复开始')
+        if not self.valid():
+            raise ValueError('场景或回放会话已变化，请重新安装')
         reason = _panel.installation_block_reason(self.scene)
         if reason:
             raise ValueError(reason)
@@ -153,13 +157,22 @@ class EditSession:
 @persistent
 def cancel_on_load(_unused=None):
     from . import stacked_camera_rig as box_panel
-    box_panel.shutdown(restore=False)
-    if _panel._ACTIVE:
-        _panel._ACTIVE.finish(restore=False,resume=False)
     from .. import custom_camera_capture
-    custom_camera_capture.shutdown(restore=False)
-    _panel.preview.shutdown()
-    _panel.history.HISTORY.clear('加载文件，相机撤销历史已清理')
+    actions = [lambda: box_panel.shutdown(restore=False)]
+    if _panel._ACTIVE:
+        controller = _panel._ACTIVE
+        actions.append(lambda: controller.finish(restore=False, resume=False))
+    actions.extend((lambda: custom_camera_capture.shutdown(restore=False),
+                    _panel.preview.shutdown,
+                    lambda: _panel.history.HISTORY.clear('加载文件，相机撤销历史已清理')))
+    errors = []
+    for action in actions:
+        try:
+            action()
+        except Exception as exc:
+            errors.append(str(exc))
+    if errors:
+        raise RuntimeError('相机资源清理失败：' + '；'.join(errors))
 
 
 def lifecycle_watchdog():

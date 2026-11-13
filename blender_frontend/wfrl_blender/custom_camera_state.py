@@ -11,15 +11,19 @@ def _root(scene):
     if not _core.is_available(scene):
         raise ValueError('请先加载包含 T1 的演示场景')
     root = scene.objects[_core.ROOT_NAME]
-    if not _core._finite(tuple(v for row in root.matrix_world for v in row)):
+    _validate_root_matrix(root.matrix_world)
+    return root
+
+
+def _validate_root_matrix(matrix):
+    if not _core._finite(tuple(v for row in matrix for v in row)):
         raise ValueError('T1.YawRoot 姿态含非有限数值，无法使用米制相机参考')
-    matrix = root.matrix_world.to_3x3()
+    matrix = matrix.to_3x3()
     columns = list(matrix.col)
     if (any(abs(v.length - 1) > 1e-4 for v in columns)
             or any(abs(columns[i].dot(columns[j])) > 1e-4 for i in range(3) for j in range(i))
             or matrix.determinant() < 0):
         raise ValueError('T1.YawRoot 含非预期缩放、剪切或反射，无法使用米制相机参考')
-    return root
 
 
 def get_camera(scene, slot):
@@ -150,8 +154,7 @@ def validate_native_state(scene, cameras=None, depsgraph=None):
     from mathutils import Matrix
     root = _core._root(scene)
     depsgraph = depsgraph or bpy.context.evaluated_depsgraph_get()
-    if not _core._finite(tuple(v for row in root.evaluated_get(depsgraph).matrix_world for v in row)):
-        raise ValueError('T1.YawRoot 实际姿态含非有限数值，无法使用米制相机参考')
+    _validate_root_matrix(root.evaluated_get(depsgraph).matrix_world)
     cameras = cameras if cameras is not None else [_core.get_camera(scene, slot) for slot in _core.SLOTS]
     for cam in cameras:
         if cam is None:

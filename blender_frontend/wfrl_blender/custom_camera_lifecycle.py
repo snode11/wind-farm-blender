@@ -12,35 +12,51 @@ def begin_draft(scene, slot):
     if original is not None:
         _core.migrate_camera(scene, original)
     name = _core.camera_name(slot) + '.Draft'
-    if original is not None:
-        camera = original.copy()
-        camera.data = original.data.copy()
-        camera.name = name
-    else:
-        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-    (root.users_collection[0] if root.users_collection else scene.collection).objects.link(camera)
-    camera.parent = root
-    camera.matrix_parent_inverse.identity()
-    camera['wfrl_custom_camera'] = True
-    camera['wfrl_custom_slot'] = slot
-    camera['wfrl_custom_draft'] = True
-    camera['custom_coordinate_version'] = _core.COORDINATE_VERSION
-    camera.data.type = 'PERSP'
-    if original is None:
-        camera.data.clip_start, camera.data.clip_end = .005, 30000
-    camera.data.display_size = .15
-    from .cameras import clear_camera_mask
-    clear_camera_mask(camera)
-    camera.hide_render = True
-    camera.lock_location = (True, True, True)
-    camera.lock_rotation = (True, True, True)
-    camera.lock_scale = (True, True, True)
-    if original is None:
-        camera['custom_enabled'] = True
-        camera['custom_label'] = f'C{slot}'
-        camera['custom_mount_mode'] = 'SURFACE'
-        camera['custom_mount_validation'] = 'unverified'
-        _core.apply_parameters(camera, _core.CameraParameters((0, 0, 0)))
+    camera = data = None
+    try:
+        if original is not None:
+            camera = original.copy()
+            data = original.data.copy()
+            camera.data = data
+            camera.name = name
+        else:
+            data = bpy.data.cameras.new(name + '.Data')
+            camera = bpy.data.objects.new(name, data)
+        (root.users_collection[0] if root.users_collection else scene.collection).objects.link(camera)
+        camera.parent = root
+        camera.matrix_parent_inverse.identity()
+        camera['wfrl_custom_camera'] = True
+        camera['wfrl_custom_slot'] = slot
+        camera['wfrl_custom_draft'] = True
+        camera['custom_coordinate_version'] = _core.COORDINATE_VERSION
+        camera.data.type = 'PERSP'
+        if original is None:
+            camera.data.clip_start, camera.data.clip_end = .005, 30000
+        camera.data.display_size = .15
+        from .cameras import clear_camera_mask
+        clear_camera_mask(camera)
+        camera.hide_render = True
+        camera.lock_location = (True, True, True)
+        camera.lock_rotation = (True, True, True)
+        camera.lock_scale = (True, True, True)
+        if original is None:
+            camera['custom_enabled'] = True
+            camera['custom_label'] = f'C{slot}'
+            camera['custom_mount_mode'] = 'SURFACE'
+            camera['custom_mount_validation'] = 'unverified'
+            _core.apply_parameters(camera, _core.CameraParameters((0, 0, 0)))
+    except Exception:
+        if camera is not None:
+            camera['wfrl_custom_camera'] = False
+            camera['wfrl_custom_draft'] = True
+            try:
+                _core._remove(camera)
+            except (RuntimeError, ValueError):
+                _core._remember_retired(camera, data)
+        if data is not None:
+            _core._remember_retired(None, data)
+            _core._cleanup_retired_data()
+        raise
     return camera
 
 
@@ -147,7 +163,7 @@ def _refresh_references(scene):
 
 def _remember_retired(obj, data):
     """Keep each failed release independent of the other resource's RNA lifetime."""
-    if obj not in _core._RETIRED:
+    if obj is not None and obj not in _core._RETIRED:
         _core._RETIRED.append(obj)
     if data is not None and data not in _core._RETIRED_DATA:
         _core._RETIRED_DATA.append(data)
@@ -170,7 +186,8 @@ def _cleanup_retired_data():
 def cleanup_retired():
     for obj in tuple(_core._RETIRED):
         try:
-            if not obj.users_collection and not obj.get('wfrl_custom_camera'):
+            if (not obj.get('wfrl_custom_camera')
+                    and (not obj.users_collection or obj.get('wfrl_custom_draft'))):
                 _core._remove(obj)
             _core._RETIRED.remove(obj)
         except ReferenceError:
