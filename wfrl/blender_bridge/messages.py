@@ -8,6 +8,7 @@ import struct
 
 PROTOCOL_VERSION = 1
 MAX_FRAME_BYTES = 1024 * 1024
+MAX_DIAGNOSTIC_CHARS = 2048
 STALE_AFTER_SECONDS = {"telemetry": 2.0, "curve": 2.0, "wake": 5.0, "safety_event": 10.0}
 TRAINING_STATS_CAPABILITY = 'training_stats_v1'
 TRAINING_STATS_STALE_AFTER_SECONDS = 30.0
@@ -84,6 +85,19 @@ MESSAGE_TYPES = frozenset(('hello', 'hello_ack', 'command', 'lifecycle', 'snapsh
 
 class ProtocolError(ValueError):
     """Invalid, unsupported, oversized or out-of-order protocol input."""
+
+
+class FrameTooLarge(ProtocolError):
+    """A valid message whose frame exceeds a permanent delivery size limit."""
+
+
+def bounded_diagnostic(text):
+    """Bound server diagnostics, including JSON escaping and UTF-8 expansion."""
+    if not text.strip():
+        return 'Unspecified error'
+    if len(text) > MAX_DIAGNOSTIC_CHARS:
+        text = text[:MAX_DIAGNOSTIC_CHARS - 3] + '...'
+    return text.encode('utf-8', errors='replace').decode('utf-8')
 
 
 def _require(condition, message):
@@ -363,7 +377,9 @@ def encode_message(message):
         body = json.dumps(message, ensure_ascii=False, allow_nan=False, separators=(',', ':')).encode('utf-8')
     except (TypeError, OverflowError, RecursionError, UnicodeError) as exc:
         raise ProtocolError(str(exc)) from exc
-    _require(0 < len(body) <= MAX_FRAME_BYTES, 'Frame exceeds size limit')
+    _require(len(body) > 0, 'Empty frame')
+    if len(body) > MAX_FRAME_BYTES:
+        raise FrameTooLarge(f'Frame of {len(body)} bytes exceeds the {MAX_FRAME_BYTES}-byte limit')
     return struct.pack('!I', len(body)) + body
 
 

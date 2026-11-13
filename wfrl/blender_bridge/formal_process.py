@@ -28,6 +28,8 @@ class OwnedProcesses:
         self._last_scan = float('-inf')
         self._cleaned = False
         self._uncertain = False
+        self.rollback_error = None
+        self.stop_request_error = None
 
     @classmethod
     def recover(cls, identities, *, token, env_key):
@@ -46,19 +48,64 @@ class OwnedProcesses:
         owned._started = min(created for _, created in owned._known)
         return owned
 
-    def start(self, argv, *, cwd, env, **options):
+    def start(self, argv, *, cwd, env, on_started=None, **options):
         if sys.platform == 'win32':
             # Windows has no sessions. A new process group lets CTRL_BREAK_EVENT
             # reach this tree without the caller's console group.
             options['creationflags'] = options.get('creationflags', 0) | subprocess.CREATE_NEW_PROCESS_GROUP
-        self.process = subprocess.Popen(argv, cwd=cwd, env=dict(env, **{self.ENV_KEY: self.token}),
-                                        start_new_session=True, **options)
         try:
-            self.root = psutil.Process(self.process.pid)
-            self._owned.add(self.root)
-        except psutil.NoSuchProcess:
-            pass
+            self.process = subprocess.Popen(argv, cwd=cwd, env=dict(env, **{self.ENV_KEY: self.token}),
+                                            start_new_session=sys.platform != 'win32', **options)
+            try:
+                self.root = psutil.Process(self.process.pid)
+                self._owned.add(self.root)
+            except psutil.NoSuchProcess:
+                pass
+            if on_started is not None:
+                on_started()
+        except BaseException as exc:
+            try:
+                self._rollback_start()
+            except Exception as cleanup:
+                self.rollback_error = 'Startup rollback failed: ' + (str(cleanup) or type(cleanup).__name__)
+                exc.add_note(self.rollback_error)
+            raise
         return self.process
+
+    def _rollback_start(self):
+        """Retain the Popen handle even when process registration never succeeded."""
+        if self.process is None:
+            return
+        errors = []
+        def pending():
+            try:
+                return self.alive()
+            except Exception as exc:
+                self._uncertain = True
+                if str(exc) not in errors:
+                    errors.append(str(exc))
+                return True
+        for signum in (signals.SIGTERM, getattr(signals, 'SIGKILL', signals.SIGTERM)):
+            try:
+                self.signal(signum)
+            except Exception as exc:
+                errors.append(str(exc))
+            # Registration or descendant inspection must not prevent root cleanup.
+            try:
+                if self.process.poll() is None:
+                    if signum == signals.SIGTERM:
+                        self.process.terminate()
+                    else:
+                        self.process.kill()
+            except Exception as exc:
+                errors.append(str(exc))
+            deadline = time.monotonic() + 1.0
+            while pending() and time.monotonic() < deadline:
+                time.sleep(.02)
+            if not pending():
+                return
+        detail = ': ' + '; '.join(errors) if errors else ''
+        raise RuntimeError('owned processes remain or their cleanup is unconfirmed' + detail)
 
     @staticmethod
     def _exists(process):
@@ -109,6 +156,14 @@ class OwnedProcesses:
                 self._uncertain = True
                 continue
             self._pending.discard(identity)
+        if self.root is None and self.process is not None and self.process.poll() is None:
+            try:
+                self.root = psutil.Process(self.process.pid)
+                self._owned.add(self.root)
+            except psutil.NoSuchProcess:
+                pass
+            except psutil.AccessDenied:
+                self._uncertain = True
         for process in tuple(self._owned):
             if not self._exists(process):
                 self._owned.discard(process)
@@ -162,22 +217,27 @@ class OwnedProcesses:
             return any(process.pid == identity['pid'] and process.create_time() == identity['create_time']
                        and self._exists(process) for process in self._owned)
 
-    def signal(self, signum):
-        """Send ``signum`` to every owned process.
+    def _request_interrupt(self):
+        if self.process is None or self.process.poll() is not None:
+            return False
+        signum = signals.CTRL_BREAK_EVENT if sys.platform == 'win32' else signals.SIGINT
+        self.process.send_signal(signum)
+        return True
 
-        Windows cannot deliver SIGINT to another process. There the graceful
-        request is CTRL_BREAK_EVENT to the root's process group, which needs a
-        shared console; every other signal terminates each owned process.
-        """
+    def signal(self, signum):
+        """Request graceful stop from the controller; force signals cover the tree."""
         with self._lock:
-            self._remember(force=True)
-            if sys.platform == 'win32' and signum == signals.SIGINT:
-                if self.process is not None and self.process.poll() is None:
-                    try:
-                        self.process.send_signal(signals.CTRL_BREAK_EVENT)
-                    except OSError:
-                        pass
-                return
+            if signum == signals.SIGINT:
+                try:
+                    return self._request_interrupt()
+                except Exception as exc:
+                    request = 'CTRL_BREAK' if sys.platform == 'win32' else 'SIGINT'
+                    self.stop_request_error = f'{request} stop request failed: {exc}; 应用层收尾未确认'
+                    raise RuntimeError(self.stop_request_error) from exc
+            try:
+                self._remember(force=True)
+            except (psutil.Error, OSError):
+                self._uncertain = True
             if sys.platform == 'win32':
                 signum = signals.SIGTERM
             for process in tuple(self._owned):
@@ -185,8 +245,36 @@ class OwnedProcesses:
                     process.send_signal(signum)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
+            if self.process is not None and self.process.poll() is None:
+                try:
+                    self.process.send_signal(signum)
+                except ProcessLookupError:
+                    pass
 
 
 class FormalProcesses(OwnedProcesses):
     def __init__(self):
         super().__init__(env_key='WFRL_FORMAL_RUN_TOKEN')
+        self._training_command = None
+
+    def start(self, argv, **options):
+        # Match the Python worker's arguments, excluding the MPI launcher's prefix.
+        self._training_command = next((tuple(argv[index:]) for index, arg in enumerate(argv)
+                                       if os.path.basename(arg) == 'train_fastfarm.py'), None)
+        return super().start(argv, **options)
+
+    def _request_interrupt(self):
+        if sys.platform == 'win32' or self._training_command is None:
+            return super()._request_interrupt()
+        self._remember(force=True)
+        workers = []
+        for process in tuple(self._owned):
+            try:
+                if tuple(process.cmdline()[1:]) == self._training_command and self._exists(process):
+                    workers.append(process)
+            except psutil.NoSuchProcess:
+                continue
+        if len(workers) != 1:
+            raise RuntimeError('Cannot identify exactly one formal training main process')
+        workers[0].send_signal(signals.SIGINT)
+        return True

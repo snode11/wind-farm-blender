@@ -308,7 +308,7 @@ def test_server_retains_reliable_events_after_send_queue_overflow():
         session.emit('error', dict(code='TEST', message='retained', fatal=False))
         server.poll()
         assert server.client is None
-        assert [kind for kind, _ in server.backlog] == ['lifecycle', 'lifecycle', 'error']
+        assert [kind for kind, _, _ in server.backlog] == ['lifecycle', 'lifecycle', 'error']
 
         server.max_queue_bytes = 2048
         sock.close()
@@ -329,8 +329,8 @@ def test_fresh_session_discards_old_reliable_backlog():
     server = BridgeServer(port=0, session=session)
     server.session_claimed = True
     old_id = session.session_id
-    server.backlog.append(('lifecycle', dict(
-        run_status='DRAINING', reason=None, mode='demo', capabilities=['pause', 'single_step'])))
+    server._retain_event('lifecycle', dict(
+        run_status='DRAINING', reason=None, mode='demo', capabilities=['pause', 'single_step']))
     sock = socket.create_connection(('127.0.0.1', server.port)); sock.settimeout(.2)
     try:
         sock.sendall(encode_message(envelope(

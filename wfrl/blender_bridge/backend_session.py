@@ -6,7 +6,6 @@ import math
 import os
 import signal
 import shutil
-import subprocess
 import sys
 import threading
 import time
@@ -86,9 +85,10 @@ class _EventBuffer:
             kind, payload, queued_at = self._items.popleft()
             if kind == 'training_stats':
                 self._stats_count -= 1
-                payload = _aged_payload(payload, max(0., time.monotonic() - queued_at))
             else:
                 self._reliable_count -= 1
+            if kind in {'training_stats', 'safety_event'}:
+                payload = _aged_payload(payload, max(0., time.monotonic() - queued_at))
             return kind, payload
 
     def __len__(self):
@@ -127,6 +127,7 @@ class BackendSession:
         self._last_stats = {}
         self._trainer = self._thread = self._process = None
         self._formal_processes = None
+        self._formal_cancel_requested = False
         self._paused = False
         self._permits = 0
         self._stopping = False
@@ -216,9 +217,38 @@ class BackendSession:
 
     def _backend_error(self):
         error = self._trainer.error if self._trainer is not None else None
-        if self._process is not None and self._process.poll() is not None and self._process.returncode:
-            error = error or f'Formal process exited {self._process.returncode}'
+        process = self._formal_process()
+        if process is not None:
+            code = process.poll()
+            cancelled = (self._formal_cancel_requested and os.name == 'posix'
+                         and code in (-signal.SIGINT, 128 + signal.SIGINT))
+            if code is not None and code != 0 and not cancelled:
+                error = error or f'Formal process exited {code}'
+        if self._formal_processes is not None:
+            rollback = getattr(self._formal_processes, 'rollback_error', None)
+            if rollback:
+                error = f'{error}; {rollback}' if error else rollback
         return error
+
+    def _formal_process(self):
+        if self._formal_processes is not None:
+            return getattr(self._formal_processes, 'process', self._process)
+        return self._process
+
+    def _trainer_cleanup_error(self):
+        trainer = self._trainer
+        if trainer is None:
+            return None
+        runtime = getattr(trainer, 'runtime', None)
+        retained = []
+        # IsolatedTrainer exposes itself as a channel proxy, not a SceneRuntime.
+        if runtime is not None and runtime is not trainer:
+            retained.append('runtime')
+        if any(getattr(trainer, name, None) is not None for name in ('driver', '_driver')):
+            retained.append('driver')
+        if retained:
+            return 'Cleanup unconfirmed: trainer retains ' + '/'.join(retained) + '; restart blocked'
+        return None
 
     def _refresh_cleanup_state(self):
         before = self.cleanup_confirmed, self.worker_alive, self.status, self._lifecycle_reason
@@ -227,6 +257,13 @@ class BackendSession:
         draining = self._stop_worker is not None and self._stop_worker.is_alive()
         cleanup_ok = True
         if inactive and not alive and not draining and not self._finalizing:
+            error = self._backend_error() if self.status != 'READY' else None
+            resource_error = self._trainer_cleanup_error()
+            for reason in (error, resource_error):
+                if reason:
+                    self._lifecycle_reason = self._failure_reason(reason)
+                    self.status = 'FAILED'
+            cleanup_ok = resource_error is None
             self._finalizing = True
             try:
                 self._collect_progress(final=True)
@@ -293,8 +330,9 @@ class BackendSession:
             self._collect_progress()
             if self.status in ('RUNNING', 'PAUSED', 'STARTING'):
                 finished = self._thread is not None and not self._thread.is_alive()
-                if self._process is not None:
-                    finished = self._process.poll() is not None
+                process = self._formal_process()
+                if process is not None:
+                    finished = process.poll() is not None
                 if finished:
                     error = self._backend_error()
                     if self.alive():
@@ -378,6 +416,7 @@ class BackendSession:
             self._permits = 0
             self._trainer = self._thread = self._process = None
             self._formal_processes = None
+            self._formal_cancel_requested = False
             self.clear_observations()
             self.run_id = uuid.uuid4().hex
             self.lifecycle('STARTING')
@@ -402,8 +441,8 @@ class BackendSession:
                     from .isolated_trainer import launcher_environment
                     from .formal_process import FormalProcesses
                     self._formal_processes = FormalProcesses()
-                    self._process = self._formal_processes.start(argv, cwd=root, env=launcher_environment())
-                    self._progress_reader.start()
+                    self._process = self._formal_processes.start(argv, cwd=root, env=launcher_environment(),
+                                                                 on_started=self._progress_reader.start)
                 else:
                     factory = self.trainer_factory
                     if 'tip_package' in options:
@@ -552,12 +591,16 @@ class BackendSession:
 
     def _signal_process_group(self, signum):
         if self._formal_processes is not None:
-            self._formal_processes.signal(signum)
-            return
+            return self._formal_processes.signal(signum)
         try:
+            if signum == signal.SIGINT:
+                if self._process.poll() is not None:
+                    return False
+                self._process.send_signal(signum)
+                return True
             os.killpg(self._process.pid, signum)
-        except (ProcessLookupError, PermissionError):
-            pass
+        except ProcessLookupError:
+            return False
 
     def stop(self, timeout_seconds=120):
         try:
@@ -589,25 +632,40 @@ class BackendSession:
                 try:
                     if self._trainer is not None:
                         self._trainer.stop(timeout=timeout_seconds)
-                        if self._trainer.error:
-                            self._fail(self._trainer.error)
-                    if self._process is not None:
-                        # Formal ownership includes identified children in independent groups.
-                        self._signal_process_group(signal.SIGINT)
-                        graceful = self._wait_until_stopped(timeout_seconds)
+                    if self._formal_process() is not None:
+                        request_failed = False
+                        try:
+                            self._formal_cancel_requested = bool(self._signal_process_group(signal.SIGINT))
+                        except Exception as exc:
+                            request_failed = True
+                            reason = f'Graceful stop failed: {exc}'
+                            if '应用层收尾未确认' not in reason:
+                                reason += '; 应用层收尾未确认'
+                            self._fail(reason)
+                        graceful = not request_failed and self._wait_until_stopped(timeout_seconds)
                         if not graceful:
                             self._signal_process_group(signal.SIGTERM)
                             stopped = self._wait_until_stopped(self.kill_grace_seconds)
                             if not stopped:
                                 self._signal_process_group(getattr(signal, 'SIGKILL', signal.SIGTERM))
                                 stopped = self._wait_until_stopped(self.kill_grace_seconds)
-                            if stopped:
-                                self._fail('Stop timeout: formal backend was force terminated')
-                                return
-                    if self.alive():
-                        self._fail('Stop timeout: backend cleanup unconfirmed; restart blocked')
-                    else:
-                        self.lifecycle('FAILED' if self.status == 'FAILED' else 'STOPPED')
+                            reason = 'Graceful stop failed' if request_failed else 'Stop timeout'
+                            outcome = ('formal backend was force terminated; 应用层收尾未确认'
+                                       if stopped else 'formal process cleanup unconfirmed')
+                            self._fail(reason + ': ' + outcome)
+                    with self._condition:
+                        # Poll again after waiting: errors can arrive during shutdown.
+                        alive = self.alive()
+                        error = self._backend_error()
+                        if error:
+                            self._fail(error)
+                        if alive:
+                            self._fail('Stop timeout: backend cleanup unconfirmed; restart blocked')
+                        else:
+                            resource_error = self._trainer_cleanup_error()
+                            if resource_error:
+                                self._fail(resource_error)
+                            self.lifecycle('FAILED' if self.status == 'FAILED' else 'STOPPED')
                 except Exception as exc: self._fail('Cleanup failed: ' + (str(exc) or type(exc).__name__))
             self._stop_worker = threading.Thread(target=drain, name='wfrl-bridge-drain', daemon=True)
             self._stop_worker.start()
