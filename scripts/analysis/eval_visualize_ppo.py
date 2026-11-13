@@ -15,8 +15,12 @@ fixed ppo_ablaincourt.zip + vecnormalize.pkl are used only without a manifest):
     python eval_visualize_ppo.py
 """
 
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
+from contextvars import ContextVar
 import os
+from pathlib import Path
+import shutil
+import tempfile
 
 import matplotlib
 
@@ -44,6 +48,55 @@ MAX_STEPS = 200
 WIND = {"wind_speed": 8.0, "wind_direction": 270.0}
 OUT_DIR = paths.EVAL
 os.makedirs(OUT_DIR, exist_ok=True)
+_FIGURE_STAGING = ContextVar('evaluation_figure_staging', default=None)
+
+
+def _save_figure(fig, path, **options):
+    """Publish a complete image, or stage it for the current evaluation report."""
+    batch = _FIGURE_STAGING.get()
+    if batch is not None:
+        directory, pending = batch
+        staged = directory / Path(path).name
+        fig.savefig(staged, **options)
+        pending[Path(path)] = staged
+        return
+    with tempfile.TemporaryDirectory(prefix='.analysis-plot-',
+                                     dir=os.path.dirname(os.path.abspath(path))) as staging:
+        staged = Path(staging) / Path(path).name
+        fig.savefig(staged, **options)
+        os.replace(staged, path)
+    print(f'[saved] {path}')
+
+
+@contextmanager
+def _figure_transaction():
+    """Keep all prior report images if rendering or publication fails."""
+    with tempfile.TemporaryDirectory(prefix='.evaluation-report-', dir=OUT_DIR) as staging:
+        directory, pending = Path(staging), {}
+        token = _FIGURE_STAGING.set((directory, pending))
+        try:
+            yield
+            backups, published = {}, []
+            for index, path in enumerate(pending):
+                backup = directory / f'backup-{index}'
+                if os.path.lexists(path):
+                    shutil.copy2(path, backup, follow_symlinks=False)
+                    backups[path] = backup
+            try:
+                for path, staged in pending.items():
+                    os.replace(staged, path)
+                    published.append(path)
+            except BaseException:
+                for path in reversed(published):
+                    if path in backups:
+                        os.replace(backups[path], path)
+                    else:
+                        path.unlink()
+                raise
+            for path in pending:
+                print(f'[saved] {path}')
+        finally:
+            _FIGURE_STAGING.reset(token)
 
 
 def build_env():
@@ -75,59 +128,73 @@ def plot_wakefield(env, tag):
     fi = env.get_inner_env().mdp.interface.fi
     horizontal_plane = fi.calculate_horizontal_plane(height=90.0)
     fig, ax = plt.subplots(figsize=(12, 6))
-    wakeviz.visualize_cut_plane(
-        horizontal_plane, ax=ax, label_contours=False,
-        title=f"Wake flow field ({tag}, hub height 90 m)",
-    )
-    wakeviz.plot_turbines_with_fi(fi, ax=ax)
-    ax.set_xlabel("x (m)")
-    ax.set_ylabel("y (m)")
-    path = os.path.join(OUT_DIR, f"wakefield_{tag}.png")
-    fig.savefig(path, dpi=120, bbox_inches="tight")
-    plt.close(fig)
-    print(f"[saved] {path}")
+    try:
+        wakeviz.visualize_cut_plane(
+            horizontal_plane, ax=ax, label_contours=False,
+            title=f"Wake flow field ({tag}, hub height 90 m)",
+        )
+        wakeviz.plot_turbines_with_fi(fi, ax=ax)
+        ax.set_xlabel("x (m)")
+        ax.set_ylabel("y (m)")
+        path = os.path.join(OUT_DIR, f"wakefield_{tag}.png")
+        _save_figure(fig, path, dpi=120, bbox_inches="tight")
+    finally:
+        plt.close(fig)
 
 
 def rollout(env, model, vecnorm):
     """Deterministic policy rollout; normalize obs with saved stats before predict."""
     obs, _ = env.reset(options=WIND)
-    env.n_turbines
+    n = env.n_turbines
     yaw_hist, power_hist, reward_hist = [], [], []
     done, ep_ret = False, 0.0
     while not done:
         norm_obs = vecnorm.normalize_obs(obs)  # apply training-time obs stats
         action, _ = model.predict(norm_obs, deterministic=True)
         obs, reward, term, trunc, info = env.step(action)
-        yaw_hist.append(np.array(obs["yaw"], dtype=float).copy())
-        power_hist.append(np.array(info["power"], dtype=float).copy())
+        yaws = np.array(obs["yaw"], dtype=float).copy()
+        powers = np.array(info["power"], dtype=float).copy()
+        if (yaws.shape != (n,) or powers.shape != (n,)
+                or not np.isfinite(yaws).all() or not np.isfinite(powers).all()
+                or not np.isfinite(reward)):
+            raise ValueError('Expected finite yaw/power for every turbine and a finite reward')
+        yaw_hist.append(yaws)
+        power_hist.append(powers)
         reward_hist.append(reward)
         ep_ret += reward
+        if not np.isfinite(ep_ret):
+            raise ValueError('Episode return must be finite')
         done = term or trunc
+    with np.errstate(over='ignore', invalid='ignore'):
+        totals = np.asarray(power_hist).sum(axis=1)
+        if not np.isfinite(totals).all() or not np.isfinite(totals.mean()):
+            raise ValueError('Farm power and its episode mean must be finite')
     print(f"[eval] deterministic raw episode return = {ep_ret:.4f}")
     return np.array(yaw_hist), np.array(power_hist), np.array(reward_hist)
 
 
 def plot_timeseries(yaws, powers, rewards, n):
     fig, ax = plt.subplots(ncols=3, figsize=(20, 5))
-    for i in range(n):
-        ax[0].plot(yaws[:, i], label=f"T{i + 1}")
-    ax[0].set(title="Yaw per turbine (learned)", xlabel="Step", ylabel="Yaw (deg)")
-    ax[0].legend(fontsize=8, ncol=2)
-    ax[1].plot(powers.sum(axis=1), color="tab:green")
-    ax[1].set(title="Total farm power", xlabel="Step", ylabel="Power (kW)")
-    ax[2].plot(rewards, color="tab:red")
-    ax[2].set(title="Reward (raw)", xlabel="Step", ylabel="Reward")
-    fig.tight_layout()
-    path = os.path.join(OUT_DIR, "ppo_timeseries.png")
-    fig.savefig(path, dpi=120)
-    plt.close(fig)
-    print(f"[saved] {path}")
+    try:
+        for i in range(n):
+            ax[0].plot(yaws[:, i], label=f"T{i + 1}")
+        ax[0].set(title="Yaw per turbine (learned)", xlabel="Step", ylabel="Yaw (deg)")
+        ax[0].legend(fontsize=8, ncol=2)
+        ax[1].plot(powers.sum(axis=1), color="tab:green")
+        ax[1].set(title="Total farm power", xlabel="Step", ylabel="Power (kW)")
+        ax[2].plot(rewards, color="tab:red")
+        ax[2].set(title="Reward (raw)", xlabel="Step", ylabel="Reward")
+        fig.tight_layout()
+        path = os.path.join(OUT_DIR, "ppo_timeseries.png")
+        _save_figure(fig, path, dpi=120)
+    finally:
+        plt.close(fig)
 
 
 def main():
     model_path, norm_path = CheckpointPair(MODEL_PATH, VECNORM_PATH).require()
     model = PPO.load(model_path)
-    with ExitStack() as resources:
+    with _figure_transaction(), ExitStack() as resources:
         vecnorm = load_normalizer(norm_path)
         resources.callback(vecnorm.close)
         validate_model_normalization(model, vecnorm)

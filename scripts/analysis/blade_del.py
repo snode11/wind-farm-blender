@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import tempfile
 from typing import NamedTuple
@@ -84,6 +85,9 @@ def damage_equivalent_load(cycles, duration_s, m=10., equivalent_frequency_hz=1.
     """Range-based DEL; N_eq is elapsed time times equivalent cycle frequency."""
     if any(not math.isfinite(v) or v <= 0 for v in (duration_s, m, equivalent_frequency_hz)):
         raise ValueError('Duration, exponent, and equivalent frequency must be finite and positive')
+    equivalent_cycles = duration_s * equivalent_frequency_hz
+    if not math.isfinite(equivalent_cycles) or equivalent_cycles <= 0:
+        raise ValueError('The equivalent cycle count must be finite and positive')
     cycles = list(cycles)
     if any(not math.isfinite(c.range) or c.range < 0
            or not math.isfinite(c.count) or c.count <= 0 for c in cycles):
@@ -92,8 +96,14 @@ def damage_equivalent_load(cycles, duration_s, m=10., equivalent_frequency_hz=1.
     if scale == 0:
         return 0.
     # Normalized powers avoid overflow from large moments raised to m.
-    damage = math.fsum(c.count * (c.range / scale) ** m for c in cycles)
-    return scale * (damage / (duration_s * equivalent_frequency_hz)) ** (1. / m)
+    try:
+        damage = math.fsum(c.count * (c.range / scale) ** m for c in cycles)
+        result = scale * (damage / equivalent_cycles) ** (1. / m)
+    except OverflowError as exc:
+        raise ValueError('DEL is not representable as a finite positive value') from exc
+    if not math.isfinite(result) or result <= 0:
+        raise ValueError('DEL is not representable as a finite positive value')
+    return result
 
 
 def validate_clock(times):
@@ -107,22 +117,34 @@ def validate_clock(times):
 def read_beamdyn(path):
     """Read only Time and valid BeamDyn moments; never substitute ElastoDyn."""
     path = Path(path)
-    with path.open(encoding='utf-8') as stream:
-        header = [stream.readline() for _ in range(8)]
-    names, units = header[6].split(), header[7].split()
-    if not names or len(names) != len(units) or len(set(names)) != len(names):
-        raise ValueError('Invalid OpenFAST channel header')
-    unit_map = dict(zip(names, units))
-    selected = ('Time',) + CHANNELS
-    for name in selected:
-        expected = '(s)' if name == 'Time' else '(N-m)'
-        if unit_map.get(name) != expected:
-            raise ValueError(f'Invalid or missing channel {name}: expected {expected}, got {unit_map.get(name)!r}')
-    raw = np.loadtxt(path, skiprows=8, usecols=[names.index(n) for n in selected],
-                     ndmin=2, encoding='utf-8')
-    if not np.isfinite(raw).all():
-        raise ValueError('Non-finite time or BeamDyn moment samples')
-    times = validate_clock(raw[:, 0])
+    try:
+        with path.open(encoding='utf-8') as stream:
+            header = [stream.readline() for _ in range(8)]
+            names, units = header[6].split(), header[7].split()
+            if not names or len(names) != len(units) or len(set(names)) != len(names):
+                raise ValueError('Invalid OpenFAST channel header')
+            unit_map = dict(zip(names, units))
+            selected = ('Time',) + CHANNELS
+            for name in selected:
+                expected = '(s)' if name == 'Time' else '(N-m)'
+                if unit_map.get(name) != expected:
+                    raise ValueError(f'Invalid or missing channel {name}: expected {expected}, got {unit_map.get(name)!r}')
+
+            def rows():
+                for number, line in enumerate(stream, 9):
+                    if not line.strip():
+                        continue
+                    if len(line.split()) != len(names):
+                        raise ValueError(f'Incomplete OpenFAST row {number}')
+                    yield line
+
+            raw = np.loadtxt(rows(), usecols=[names.index(n) for n in selected],
+                             ndmin=2, encoding='utf-8')
+        if not np.isfinite(raw).all():
+            raise ValueError('Non-finite time or BeamDyn moment samples')
+        times = validate_clock(raw[:, 0])
+    except (OSError, ValueError, IndexError) as exc:
+        raise ValueError(f'Invalid OpenFAST output {path}: {exc}') from exc
     source = dict(path=str(path.resolve()), sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                   sample_count=len(times), time_span_s=[float(times[0]), float(times[-1])],
                   source_sample_rate_hz=SOURCE_HZ,
@@ -228,7 +250,10 @@ def build_report(input_dir=DEFAULT_INPUT, default_m=10.):
             window = result['windows'].setdefault(name, dict(
                 interval_s=[start, end], duration_s=end - start,
                 equivalent_cycles=end - start, turbines={}))
-            use = window_slice(times, start, end)
+            try:
+                use = window_slice(times, start, end)
+            except ValueError as exc:
+                raise ValueError(f"Invalid OpenFAST output {source['path']}: {exc}") from exc
             blades = window['turbines'][tid] = {}
             for blade in (1, 2, 3):
                 blades[f'B{blade}'] = {
@@ -249,9 +274,17 @@ def main(argv=None):
     result = build_report(args.input_dir, args.m)
     if output is None:
         output = Path(tempfile.mkdtemp(prefix='blade-del-')) / 'results.json'
-    with output.open('x', encoding='utf-8') as stream:
-        json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
-        stream.write('\n')
+    try:
+        with tempfile.TemporaryDirectory(prefix='.blade-del-write-', dir=output.parent) as staging:
+            staged = Path(staging) / 'results.json'
+            with staged.open('x', encoding='utf-8') as stream:
+                json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
+                stream.write('\n')
+            os.link(staged, output)
+    except BaseException:
+        if args.output is None:
+            output.parent.rmdir()
+        raise
     print(output.resolve())
     return output
 

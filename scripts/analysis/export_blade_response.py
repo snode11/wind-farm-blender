@@ -7,7 +7,9 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
+import tempfile
 
 import numpy as np
 
@@ -32,15 +34,29 @@ def digest(path):
 
 def read_output(path):
     """Keep invalid channel units for diagnostics, without exposing their values."""
-    with Path(path).open(encoding='utf-8') as stream:
-        header = [next(stream) for _ in range(8)]
-    channels, units = header[6].split(), header[7].split()
-    if not channels or len(channels) != len(units) or len(set(channels)) != len(channels):
-        raise ValueError('Invalid OpenFAST channel header')
-    valid = [i for i, unit in enumerate(units) if unit.upper().strip('()') != 'INVALID']
-    if not valid:
-        raise ValueError('No valid OpenFAST channels')
-    raw = np.loadtxt(path, skiprows=8, usecols=valid, ndmin=2, encoding='utf-8')
+    try:
+        with Path(path).open(encoding='utf-8') as stream:
+            header = [stream.readline() for _ in range(8)]
+            channels, units = header[6].split(), header[7].split()
+            if not channels or len(channels) != len(units) or len(set(channels)) != len(channels):
+                raise ValueError('Invalid OpenFAST channel header')
+            if dict(zip(channels, units)).get('Time') != '(s)':
+                raise ValueError('Invalid or missing Time channel: expected (s)')
+            valid = [i for i, unit in enumerate(units) if unit.upper().strip('()') != 'INVALID']
+
+            def rows():
+                for number, line in enumerate(stream, 9):
+                    if not line.strip():
+                        continue
+                    if len(line.split()) != len(channels):
+                        raise ValueError(f'Incomplete OpenFAST row {number}')
+                    yield line
+
+            raw = np.loadtxt(rows(), usecols=valid, ndmin=2, encoding='utf-8')
+        if not len(raw):
+            raise ValueError('No OpenFAST samples')
+    except (OSError, ValueError) as exc:
+        raise ValueError(f'Invalid OpenFAST output {path}: {exc}') from exc
     return {channels[i]: raw[:, j] for j, i in enumerate(valid)}, dict(zip(channels, units))
 
 
@@ -85,11 +101,23 @@ def describe(curves):
 
 
 def build(package, repo):
+    try:
+        return _build(package, repo)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, IndexError) as exc:
+        raise ValueError(f'Invalid blade response source {package}: {exc}') from exc
+
+
+def _build(package, repo):
     package, repo = Path(package), Path(repo)
     manifest = json.loads((package / 'manifest.json').read_bytes())
     if (manifest.get('structural_module') != 'BeamDyn'
             or manifest.get('schema') != 'wfrl.farm-flex-review.v3'):
         raise ValueError('Expected a BeamDyn v3 replay')
+    turbines = manifest['turbine_ids']
+    if (not isinstance(turbines, list) or not turbines
+            or any(not isinstance(tid, str) or not tid for tid in turbines)
+            or len(set(turbines)) != len(turbines)):
+        raise ValueError('Expected a nonempty list of unique turbine identifiers in manifest.json')
     names = ('manifest.json', 'data.json', 'geometry.npz', 'telemetry.json', 'deflection-t1.json')
     source_hashes = {name: digest(package / name) for name in names}
     for name in names[1:]:
@@ -99,6 +127,9 @@ def build(package, repo):
     telemetry = json.loads((package / 'telemetry.json').read_bytes())
     sidecar = json.loads((package / 'deflection-t1.json').read_bytes())
     start, end = manifest['segment']['start_s'], manifest['segment']['end_s']
+    fps = manifest['source_fps']
+    if (not np.isfinite([start, end, fps]).all() or end <= start or fps <= 0):
+        raise ValueError(f'Invalid segment or source sample rate: {package / "manifest.json"}')
     result = dict(schema='wfrl.blade-response.v1', method=METHOD,
                   segment_s=[start, end], phase_grid_deg=np.arange(2.5, 360, 5).tolist(),
                   turbines={})
@@ -110,20 +141,28 @@ def build(package, repo):
             raise ValueError('Raw output integrity mismatch: ' + tid)
         columns, units = read_output(path)
         if units.get('Time') != '(s)' or units.get('Azimuth') != '(deg)':
-            raise ValueError('Invalid time or azimuth units')
+            raise ValueError(f'Invalid time or azimuth units: {path}')
+        if (not np.isfinite(columns['Time']).all() or not np.isfinite(columns['Azimuth']).all()
+                or np.any(np.diff(columns['Time']) <= 0)):
+            raise ValueError(f'Expected finite, increasing source times and finite azimuth: {path}')
         use = (columns['Time'] >= start) & (columns['Time'] <= end)
         times = columns['Time'][use]
+        if (len(times) < 2 or not np.allclose([times[0], times[-1]], [start, end], atol=1e-9, rtol=0)):
+            raise ValueError(f'Statistical window endpoints are missing: {path}')
         motion = replay[tid]['motion']
         azimuth = np.degrees(np.unwrap(np.radians(columns['Azimuth'])))[use]
         if (len(times) != len(motion)
                 or not np.allclose(times, [r['time_s'] for r in motion], atol=1e-9, rtol=0)
-                or not np.allclose(np.diff(times), 1 / manifest['source_fps'], atol=1e-8, rtol=0)
+                or not np.allclose(np.diff(times), 1 / fps, atol=1e-8, rtol=0)
                 or not np.allclose(azimuth, [r['azimuth_deg'] for r in motion], atol=1e-6, rtol=0)):
-            raise ValueError('Raw output and replay clocks/azimuth differ: ' + tid)
+            raise ValueError('Raw output and replay clocks/azimuth differ: ' + str(path))
         metrics, turns, tips = {}, [], []
         for key, (suffix, expected_unit, unit) in CHANNELS.items():
-            values = beamdyn_values(columns, units, suffix, expected_unit, use)
-            cycles, grid, sampled = phase_sample(azimuth, values)
+            try:
+                values = beamdyn_values(columns, units, suffix, expected_unit, use)
+                cycles, grid, sampled = phase_sample(azimuth, values)
+            except ValueError as exc:
+                raise ValueError(f'Invalid OpenFAST output {path}: {exc}') from exc
             if key.startswith('tip_'):
                 tips.append(values)
             mean = sampled.mean(axis=0)
@@ -148,15 +187,21 @@ def build(package, repo):
 
 def export(package, repo, output):
     output = Path(output)
-    if output.exists():
+    if os.path.lexists(output):
         raise FileExistsError('Choose a new analysis directory: ' + str(output))
     result, sources = build(package, repo)
     data = (json.dumps(result, ensure_ascii=False, separators=(',', ':'), allow_nan=False) + '\n').encode()
     manifest = dict(schema='wfrl.blade-response-package.v1', source_hashes=sources,
                     files={'results.json': hashlib.sha256(data).hexdigest()})
-    output.mkdir(parents=True)
-    (output / 'results.json').write_bytes(data)
-    (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.blade-response-', dir=output.parent) as staging:
+        staged = Path(staging) / 'package'
+        staged.mkdir()
+        (staged / 'results.json').write_bytes(data)
+        (staged / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+        if os.path.lexists(output):
+            raise FileExistsError('Choose a new analysis directory: ' + str(output))
+        staged.rename(output)
     return result
 
 
