@@ -17,6 +17,14 @@ METHOD_ALGORITHM_VERSIONS = {
 STATISTICS_ROUNDOFF_TOLERANCE = 1e-12
 
 
+def _finite(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+
+def _blade_id(value):
+    return type(value) is int and value in (1, 2, 3)
+
+
 def _algorithm_identity(metadata, method_key, context, *, require_tls_version):
     """Only historical absence can mean the original two-point algorithm."""
     method = metadata.get(method_key, 'hub-axis.v1')
@@ -89,21 +97,26 @@ def resolve_package(path):
     if config.get('schema') != 'wfrl.dual-beam-calibration.v1':
         raise ValueError('Unsupported dual-beam calibration schema')
     for key in ('alarm_hold_s', 'measurement_hold_s', 'effective_length_m'):
-        if not isinstance(config.get(key), (int, float)) or not math.isfinite(config[key]) or config[key] <= 0:
+        if not _finite(config.get(key)) or config[key] <= 0:
             raise ValueError('Invalid dual-beam calibration: ' + key)
     for key, count in (('origins_m', 3), ('angles_deg', 3)):
         values = config[key]
         if not isinstance(values, list) or len(values) != count:
             raise ValueError('Invalid dual-beam mounting: ' + key)
-    if any(not isinstance(o, list) or len(o) != 3 or any(not math.isfinite(x) for x in o)
+    if any(not isinstance(o, list) or len(o) != 3 or any(not _finite(x) for x in o)
            for o in config['origins_m']):
         raise ValueError('Invalid dual-beam origins')
     angles = config['angles_deg']
-    if not all(math.isfinite(a) and 0 < a < 90 for a in angles) or not angles[0] < angles[1] < angles[2]:
+    if not all(_finite(a) and 0 < a < 90 for a in angles) or not angles[0] < angles[1] < angles[2]:
         raise ValueError('Invalid dual-beam directions')
     results = json.loads((path / 'results.json').read_text(encoding='utf-8'))
     if set(results) != set(source_manifest['turbine_ids']):
         raise ValueError('Dual-beam turbines differ from source')
+    if 'turbine_ids' in manifest:
+        ids = manifest['turbine_ids']
+        if (not isinstance(ids, list) or any(not isinstance(tid, str) for tid in ids)
+                or len(ids) != len(set(ids)) or set(ids) != set(source_manifest['turbine_ids'])):
+            raise ValueError('Dual-beam manifest turbine IDs differ from source')
     if manifest['segment'] != source_manifest['segment']:
         raise ValueError('Dual-beam segment differs from source')
     _validate_algorithm_contract(config, manifest, results)
@@ -227,12 +240,18 @@ class DualBeamReader:
             self.config, overlay['manifest'], overlay['results'])
         self.rows = overlay['results'][turbine_id]['samples']
         self._times = [r['time_s'] for r in self.rows]
+        if (not self._times or not all(_finite(t) for t in self._times)
+                or any(a >= b for a, b in zip(self._times, self._times[1:]))
+                or self._times[0] != self.start_s or self._times[-1] != self.end_s):
+            raise ValueError('Dual-beam samples require finite increasing times covering the segment')
         if self._times != [m['time_s'] for m in motion_reader.package.motion]:
             raise ValueError('Dual-beam samples must cover the full source grid')
         for row in self.rows:
             if row.get('sample_kind') != 'source' or set(row['observations']) != {'S1', 'S2', 'S3'}:
                 raise ValueError('Invalid dual-beam observation contract')
             pair = row['reconstruction']
+            if type(pair.get('valid')) is not bool or (pair['valid'] and not _blade_id(pair.get('blade_id'))):
+                raise ValueError('Invalid dual-beam reconstruction validity or blade ID')
             estimate = pair['clearance_estimate']
             if ((pair['valid'] and not (type(estimate) in (int, float) and math.isfinite(estimate)))
                     or (not pair['valid'] and estimate is not None)):
@@ -247,7 +266,12 @@ class DualBeamReader:
                     or not math.isclose(error, estimate - reference, rel_tol=0., abs_tol=1e-9)):
                 raise ValueError('Dual-beam evaluation error differs from estimate minus reference')
             for obs in row['observations'].values():
-                if obs['time_s'] != row['time_s']:
+                if type(obs.get('observed')) is not bool or type(obs.get('valid')) is not bool:
+                    raise ValueError('Invalid dual-beam observation validity')
+                if obs['valid'] and (not obs['observed'] or obs['first_object'] != 'blade'
+                                     or not _blade_id(obs.get('blade_id'))):
+                    raise ValueError('Invalid dual-beam observed blade')
+                if not _finite(obs['time_s']) or obs['time_s'] != row['time_s']:
                     raise ValueError('Dual-beam observations are not simultaneous')
             if pair['valid']:
                 a, b = (row['observations'][s] for s in ('S2', 'S3'))

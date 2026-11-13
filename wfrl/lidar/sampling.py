@@ -6,16 +6,22 @@ Each run contains run_config.json and processed.json from the same fixed window.
 from __future__ import annotations
 import argparse
 import json
+import os
 from pathlib import Path
-from .replay import _stats
+import tempfile
+from .replay import _finite, _ordered, _stats
 
 
 def summarize_grid(data, fps):
+    if not _finite(fps) or fps <= 0:
+        raise ValueError('sampling rate must be finite and positive')
     rows = data['measurements']
     passages = {}
     for row in rows:
         if not row['expected']:
             continue
+        if row['beams']['B2']['valid'] and not _finite(row['beams']['B2']['error_m']):
+            raise ValueError('valid sampling errors must be finite numbers')
         group = passages.setdefault(row['passage_id'], [])
         group.append(row)
     summary = _stats(rows)
@@ -34,10 +40,19 @@ def summarize_grid(data, fps):
 
 
 def compare_grids(base_data, refined_data, base_fps, refined_fps):
-    if base_fps <= 0 or refined_fps <= base_fps:
+    if (not all(_finite(fps) for fps in (base_fps, refined_fps))
+            or base_fps <= 0 or refined_fps <= base_fps):
         raise ValueError('refined grid must have a higher positive sampling rate')
-    base_times = [r['time_s'] for r in base_data['motion']]
-    refined_times = [r['time_s'] for r in refined_data['motion']]
+    grids = []
+    for data in (base_data, refined_data):
+        times = _ordered(data['motion'], 'sampling motion')
+        if len(times) < 2 or any(a >= b for a, b in zip(times, times[1:])):
+            raise ValueError('sampling motion must have unique increasing times')
+        samples = _ordered(data['measurements'], 'sampling measurements')
+        if any(not times[0] <= t <= times[-1] for t in samples):
+            raise ValueError('sampling measurement outside motion interval')
+        grids.append(times)
+    base_times, refined_times = grids
     if (base_times[0], base_times[-1]) != (refined_times[0], refined_times[-1]):
         raise ValueError('sampling comparison requires identical simulation interval')
     base = summarize_grid(base_data, base_fps)
@@ -69,7 +84,15 @@ def main():
     result = compare_grids(*datasets, configs[0]['fps'], configs[1]['fps'])
     result['base_run'] = str(args.base); result['refined_run'] = str(args.refined)
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps(result,indent=2,allow_nan=False),encoding='utf-8')
+    serialized = json.dumps(result, indent=2, allow_nan=False)
+    fd, name = tempfile.mkstemp(prefix='.' + args.output.name + '.', dir=args.output.parent)
+    temporary = Path(name)
+    try:
+        os.close(fd)
+        temporary.write_text(serialized, encoding='utf-8')
+        temporary.replace(args.output)
+    finally:
+        temporary.unlink(missing_ok=True)
     print(json.dumps(result['refined_minus_base'],indent=2))
 
 if __name__ == '__main__':

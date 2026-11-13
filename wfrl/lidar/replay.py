@@ -231,7 +231,7 @@ def _validate(manifest, motion, measurements, *, require_current_evidence=False)
             if beam['valid']:
                 _require(_vector(beam.get('hit_point_m')) and _vector(row.get('truth_tip_point_m')) and _vector(row.get('truth_wall_point_m')), 'missing geometry audit endpoints')
                 _require(row['expected'] and all(_finite(beam.get(k)) for k in ('slant_range_m', 'estimate_m', 'error_m')) and _finite(row.get('truth_m')), 'invalid valid measurement')
-                _require(beam['slant_range_m'] >= 0 and math.isclose(beam['error_m'], beam['estimate_m'] - row['truth_m'], abs_tol=1e-9), 'inconsistent signed error')
+                _require(beam['slant_range_m'] >= 0 and math.isclose(beam['error_m'], beam['estimate_m'] - row['truth_m'], rel_tol=0., abs_tol=1e-9), 'inconsistent signed error')
                 tip, wall = row['truth_tip_point_m'], row['truth_wall_point_m']
                 _require(math.isclose(tip[2], wall[2], abs_tol=1e-7) and math.isclose(math.dist(tip, wall), abs(row['truth_m']), abs_tol=1e-6), 'inconsistent truth endpoints')
             else:
@@ -249,6 +249,8 @@ class ReplayPackage:
         path = Path(path)
         try:
             manifest = json.loads((path / 'manifest.json').read_text(encoding='utf-8'))
+            _require(isinstance(manifest.get('files'), dict) and set(manifest['files']) == set(FILES),
+                     'invalid payload inventory')
             payload = {}
             for name in FILES:
                 raw = (path / name).read_bytes()
@@ -284,7 +286,10 @@ def publish_package(path, manifest, motion, measurements, report):
         ReplayPackage.load(temporary)
         temporary.rename(path)
     except Exception as exc:
-        (temporary / 'failure.json').write_text(json.dumps({'error': str(exc), 'status': 'FAILED'}), encoding='utf-8')
+        try:
+            (temporary / 'failure.json').write_text(json.dumps({'error': str(exc), 'status': 'FAILED'}), encoding='utf-8')
+        except OSError as failure:
+            exc.add_note(f'Could not write {temporary / "failure.json"}: {failure}')
         raise
     return path
 

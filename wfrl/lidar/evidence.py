@@ -30,6 +30,33 @@ def run_name(value):
     return PurePosixPath(value.replace('\\', '/')).name
 
 
+def _validate_passages(summary, fps, interval):
+    passages = summary.get('passages')
+    require(isinstance(passages, dict) and len(passages) == summary['passage_count'],
+            'missing passage details')
+    expected = valid = missed = 0
+    for name, passage in passages.items():
+        require(isinstance(name, str) and bool(name) and isinstance(passage, dict), 'invalid passage')
+        for field in ('expected_samples', 'valid_samples'):
+            require(type(passage.get(field)) is int and passage[field] >= 0, 'invalid passage ' + field)
+        n, hits = passage['expected_samples'], passage['valid_samples']
+        require(0 <= hits <= n and n > 0, 'invalid passage coverage')
+        require(type(passage.get('missed')) is bool and passage['missed'] == (hits == 0),
+                'inconsistent passage missed flag')
+        for field, value in (('valid_ratio', hits / n), ('expected_duration_s', n / fps),
+                             ('valid_duration_s', hits / fps)):
+            same(number(passage.get(field), 'passage ' + field), value, 'passage ' + field)
+        first, last = passage.get('first_valid_time_s'), passage.get('last_valid_time_s')
+        if hits:
+            number(first, 'passage first time'); number(last, 'passage last time')
+            require(interval[0] <= first <= last <= interval[1], 'invalid passage hit interval')
+        else:
+            require(first is None and last is None, 'empty passage hit times must be null')
+        expected += n; valid += hits; missed += passage['missed']
+    require((expected, valid, missed) == (summary['expected_samples'], summary['valid_samples'],
+                                         summary['missed_passage_count']), 'inconsistent passage totals')
+
+
 def validate_numerical_evidence(evidence, run_id):
     require(isinstance(evidence, dict) and evidence.get('run_id') == run_id, 'run mismatch')
     for key in ('analytic', 'spatial', 'temporal', 'sampling'):
@@ -98,7 +125,7 @@ def validate_numerical_evidence(evidence, run_id):
                 number(row.get(field), field)
             else:
                 require(row.get(field) is None, 'empty errors must be null')
-        require(isinstance(row.get('passages'), dict) and len(row['passages']) == row['passage_count'], 'missing passage details')
+        _validate_passages(row, fps, interval)
     changes = sampling.get('refined_minus_base')
     require(isinstance(changes, dict), 'missing sampling differences')
     for key in ('valid_ratio', 'valid_duration_s', 'expected_duration_s', *metrics, 'missed_passage_count'):
@@ -107,7 +134,23 @@ def validate_numerical_evidence(evidence, run_id):
             require(changes.get(key) is None, 'invalid null difference')
         else:
             same(number(changes.get(key), 'difference ' + key, False), b - a, 'difference ' + key)
-    require(isinstance(sampling.get('passage_comparison'), dict) and bool(sampling['passage_comparison']), 'missing passage comparison')
+    comparison = sampling.get('passage_comparison')
+    base, refined = sampling['base']['passages'], sampling['refined']['passages']
+    require(isinstance(comparison, dict) and set(comparison) == set(base) | set(refined),
+            'invalid passage comparison inventory')
+    for name, row in comparison.items():
+        a, b = base.get(name), refined.get(name)
+        require(isinstance(row, dict) and row.get('base') == a and row.get('refined') == b,
+                'inconsistent passage comparison records')
+        changed = a['missed'] != b['missed'] if a is not None and b is not None else True
+        require(type(row.get('validity_class_changed')) is bool and row['validity_class_changed'] == changed,
+                'inconsistent passage validity change')
+        difference = row.get('valid_duration_difference_s')
+        if a is None or b is None:
+            require(difference is None, 'unpaired passage duration must be null')
+        else:
+            same(number(difference, 'passage duration difference', False),
+                 b['valid_duration_s'] - a['valid_duration_s'], 'passage duration difference')
     difference = number(evidence.get('truth_numerical_error_m'), 'truth numerical difference')
     same(difference, max(space['max_truth_difference_m'], time['max_truth_difference_m'], 1e-5), 'truth numerical difference')
     return evidence

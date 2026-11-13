@@ -143,9 +143,12 @@ def reconstruct(s2, s3, hub_m, effective_length_m, clearance_at, *, time_s,
     if not isinstance(time_s, (int, float)) or not math.isfinite(time_s) or any(r.get('time_s') != time_s for r in (s2, s3)):
         return invalid('not_same_time')
     for name, row in (('s2', s2), ('s3', s3)):
+        if type(row.get('observed')) is not bool or type(row.get('valid')) is not bool:
+            return invalid('invalid_input')
         if not row.get('observed') or not row.get('valid') or row.get('first_object') != 'blade':
             return invalid(name + '_' + row.get('reason', 'invalid'))
-    if s2.get('blade_id') not in (1, 2, 3) or s2.get('blade_id') != s3.get('blade_id'):
+    if (any(type(row.get('blade_id')) is not int or row['blade_id'] not in (1, 2, 3) for row in (s2, s3))
+            or s2['blade_id'] != s3['blade_id']):
         return invalid('different_blades')
     try:
         h = vector(hub_m)
