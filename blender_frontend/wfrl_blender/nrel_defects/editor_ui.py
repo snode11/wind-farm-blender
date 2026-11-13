@@ -178,7 +178,8 @@ class NREL_PT_defects(bpy.types.Panel):
             listing.label(text='暂无缺陷，选择类型后新建')
 
         if s.draft is None:
-            selected = s.store.document['defects'][p.selected] if 0 <= p.selected < len(p.defect_items) else None
+            defects = s.store.document['defects']
+            selected = defects[p.selected] if 0 <= p.selected < len(defects) else None
             self._draw_buttons(listing, [('EDIT', '编辑选中缺陷'), ('TOGGLE', '停用' if selected and selected['enabled'] else '启用')], s, p)
             self._draw_buttons(listing, [('COPY', '复制（默认停用）'), ('DELETE', '删除')], s, p)
             self._draw_buttons(listing, [('UNDO', '撤销'), ('REDO', '重做')], s, p)
