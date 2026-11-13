@@ -419,6 +419,122 @@ def build_review_cameras(scene):
     
     
 
+def _saved_value(value):
+    if hasattr(value, 'bl_rna'):
+        return value
+    if hasattr(value, 'to_list'):
+        return value.to_list()
+    return value.copy() if hasattr(value, 'copy') else value
+
+
+class _ViewSwitchState:
+    """Restore the panel's camera, output, visibility and viewport writes on failure."""
+    def __init__(self, scene):
+        from ..cameras import demo_view_areas
+        self.scene = scene
+        self.attributes, self.camera_properties, self.created = [], [], []
+        self.remember(scene, ('camera',))
+        self.remember(scene.render, ('resolution_x', 'resolution_y', 'pixel_aspect_x', 'pixel_aspect_y'))
+        names = ['wfrl_camera', 'wfrl_clearance_turbine', 'wfrl_farm_view',
+                 'wfrl_nacelle_previous_output', 'wfrl_view_layout', 'wfrl_view_layout_error']
+        for name in ('wfrl_gimbal_kind', 'wfrl_gimbal_turbine', 'wfrl_deflection_visible'):
+            if hasattr(scene, 'is_property_set'):
+                names.append(name)
+            else:
+                self.remember(scene, (name,))
+        self.properties = {name: (name in scene, _saved_value(scene.get(name))) for name in names}
+        for area in demo_view_areas(scene):
+            space = area.spaces.active
+            self.remember(space, ('use_local_camera', 'camera', 'show_region_ui'))
+            if space.region_3d is not None:
+                self.remember(space.region_3d, ('view_perspective', 'view_camera_zoom'))
+                self.remember(space.region_3d, ('view_camera_offset',), copy=True)
+        self.preview = farm_flex.active_for(scene)
+        self.visibility = []
+        if self.preview is not None:
+            self.visible = set(self.preview.visible_turbines)
+            self.cache = self.preview.cache.copy()
+            self.reader = clearance_replay._READERS.get(scene.as_pointer())
+            self.visibility = [(obj, obj.hide_get(), obj.hide_render) for obj in scene.objects
+                               if obj.name.startswith('WFRL.Turbine.')]
+
+    def remember(self, owner, names, *, copy=False):
+        for name in names:
+            if hasattr(owner, name):
+                value = getattr(owner, name)
+                self.attributes.append((owner, name, _saved_value(value) if copy else value))
+
+    def remember_camera(self, camera):
+        if camera is None:
+            return
+        self.remember(camera, ('parent',))
+        self.remember(camera, ('location', 'rotation_euler', 'matrix_parent_inverse'), copy=True)
+        self.remember(camera.data, ('type', 'lens', 'sensor_fit', 'sensor_width', 'sensor_height',
+                                   'shift_x', 'shift_y', 'clip_start', 'clip_end', 'display_size',
+                                   'show_passepartout', 'passepartout_alpha'))
+        self.camera_properties.append((camera, {key: _saved_value(camera[key]) for key in camera.keys()}))
+
+    def restore(self):
+        errors = []
+
+        def attempt(action):
+            try:
+                action()
+            except Exception as exc:
+                errors.append(str(exc))
+
+        for name, (present, value) in self.properties.items():
+            if present:
+                attempt(lambda name=name, value=value: self.scene.__setitem__(name, value))
+            elif name in self.scene:
+                attempt(lambda name=name: self.scene.__delitem__(name))
+        for owner, name, value in self.attributes:
+            attempt(lambda owner=owner, name=name, value=value: setattr(owner, name, value))
+        for camera, properties in self.camera_properties:
+            for key in set(camera.keys()) - properties.keys():
+                attempt(lambda key=key: camera.__delitem__(key))
+            for key, value in properties.items():
+                attempt(lambda key=key, value=value: camera.__setitem__(key, value))
+        for obj, hidden, render in self.visibility:
+            attempt(lambda obj=obj, hidden=hidden: obj.hide_set(hidden))
+            attempt(lambda obj=obj, render=render: setattr(obj, 'hide_render', render))
+        if self.preview is not None:
+            self.preview.visible_turbines = self.visible
+            self.preview.cache.clear()
+            self.preview.cache.update(self.cache)
+            # A failed source frame remains invalid; view rollback cannot certify it.
+            if not getattr(self.preview, 'frame_error', ''):
+                key = self.scene.as_pointer()
+                if self.reader is None:
+                    clearance_replay._READERS.pop(key, None)
+                else:
+                    clearance_replay._READERS[key] = self.reader
+        for camera in self.created:
+            data = camera.data
+            attempt(lambda camera=camera: bpy.data.objects.remove(camera, do_unlink=True))
+            if data.users == 0:
+                attempt(lambda data=data: bpy.data.cameras.remove(data))
+        if errors:
+            raise RuntimeError('视图恢复失败：' + '; '.join(errors))
+
+
+def _view_failed(operator, state, error):
+    if state is not None:
+        try:
+            state.restore()
+        except Exception as exc:
+            error = f'{error}；{exc}'
+    operator.report({'ERROR'}, str(error))
+    return {'CANCELLED'}
+
+
+def _required_camera(scene, name):
+    camera = scene.objects.get(name)
+    if camera is None or camera.type != 'CAMERA':
+        raise ValueError('场景相机未就绪：' + name)
+    return camera
+
+
 class WFRL_OT_FarmFlexView(bpy.types.Operator):
     bl_idname='wfrl.farm_flex_view'
     bl_label='查看机组'
@@ -434,64 +550,79 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         from .. import tip_tracking
         from ..cameras import ensure_gimbal, ensure_nacelle_gimbal, down_gimbal, fill_camera_view
         from ..cameras import nacelle_side_view, restore_nacelle_view
-        front_camera=scene.objects['WFRL.Camera.T1.FrontQuarter']
-        from . import gimbal
-        if gimbal._ACTIVE:
-            gimbal._ACTIVE.finish(context)
-        if self.turbine != 'all' and self.turbine not in preview.readers:
-            self.report({'WARNING'}, '该数据包未包含此机组')
-            return {'CANCELLED'}
-        from .custom_cameras import dismiss_for_view_switch
-        dismiss_for_view_switch(scene)
-        preview.visible_turbines=set(range(len(preview.readers))) if self.turbine=='all' else {int(self.turbine[1:])-1}
-        preview.cache.clear()
-        # Hidden blade meshes need no uploads; T1 tip measurements and shared
-        # support stay current. Overview samples all nine blades before display.
-        for index,tid in enumerate(('T1','T2','T3')):
-            for obj in scene.objects:
-                if obj.name.startswith(f'WFRL.Turbine.{tid}.') and '.ClearanceRadar.' not in obj.name and '.TipTrail.' not in obj.name:
-                    obj.hide_set(index not in preview.visible_turbines)
-                    obj.hide_render=index not in preview.visible_turbines
-        if self.turbine=='all':
-            camera=scene.objects['WFRL.Camera.FarmFlexOverview']
-        else:
-            scene['wfrl_clearance_turbine']=self.turbine
-            scene.wfrl_gimbal_kind = 'NACELLE' if self.angle in {'NACELLE', 'NACELLE_SIDE'} else 'DEMO'
-            scene.wfrl_gimbal_turbine=self.turbine
-            clearance_replay._READERS[scene.as_pointer()]=preview.readers[self.turbine]
-            trail=tip_tracking.active(scene)
-            if trail is not None and trail.turbine_id != self.turbine:
-                tip_tracking.disable(scene,'turbine_change')
-            if self.turbine=='T1' and self.angle=='FRONT':
-                camera=front_camera
-            elif self.angle in {'NACELLE', 'NACELLE_SIDE'}:
-                camera=ensure_nacelle_gimbal(scene,self.turbine)
+        state = None
+        try:
+            if preview is None or not self.poll(context):
+                raise ValueError('回放数据未就绪')
+            if self.turbine != 'all' and self.turbine not in preview.readers:
+                raise ValueError('该数据包未包含此机组')
+            front_camera = scene.objects.get('WFRL.Camera.T1.FrontQuarter')
+            state = _ViewSwitchState(scene)
+            if self.turbine == 'all':
+                camera = _required_camera(scene, 'WFRL.Camera.FarmFlexOverview')
+                state.remember_camera(camera)
+            elif self.turbine == 'T1' and self.angle == 'FRONT':
+                camera = _required_camera(scene, 'WFRL.Camera.T1.FrontQuarter')
+                state.remember_camera(camera)
+            else:
+                nacelle = self.angle in {'NACELLE', 'NACELLE_SIDE'}
+                name = f'WFRL.Camera.{self.turbine}.' + ('NacelleGimbal' if nacelle else 'Gimbal')
+                existing = scene.objects.get(name)
+                state.remember_camera(existing)
+                camera = (ensure_nacelle_gimbal if nacelle else ensure_gimbal)(scene, self.turbine)
+                if existing is None:
+                    state.created.append(camera)
                 if self.angle == 'NACELLE_SIDE':
                     nacelle_side_view(camera)
-                else:
+                elif nacelle:
                     restore_nacelle_view(camera)
-            else:
-                camera=ensure_gimbal(scene,self.turbine)
-                down_gimbal(camera)
-        scene.camera=camera
-        scene['wfrl_camera']=camera.name
-        from ..nacelle_camera import select_output
-        select_output(scene, camera)
-        from ..cameras import demo_view_areas
-        for area in demo_view_areas(scene):
-            area.spaces.active.use_local_camera=False
-            area.spaces.active.camera=camera
-            area.spaces.active.region_3d.view_perspective='CAMERA'
-            fill_camera_view(area,scene)
-        preview.update(scene)
-        if self.turbine != 'all' and scene.wfrl_flex_show_tip_trails:
-            tip_tracking.enable(scene,self.turbine)
-        trail=tip_tracking.active(scene)
-        if trail is not None:
-            for obj in trail.objects.values():
-                # Wider display tubes keep the complete rotor's paths readable.
-                obj.data.bevel_depth=.24 if camera==front_camera else .08
-        scene['wfrl_farm_view']='all' if self.turbine=='all' else self.turbine+'_'+self.angle
+                else:
+                    down_gimbal(camera)
+            from . import gimbal
+            if gimbal._ACTIVE:
+                gimbal._ACTIVE.finish(context)
+                if gimbal._ACTIVE is not None:
+                    raise RuntimeError('云台资源仍在清理，请稍后重试切换视角')
+            from .custom_cameras import dismiss_for_view_switch
+            dismiss_for_view_switch(scene)
+            preview.visible_turbines=set(range(len(preview.readers))) if self.turbine=='all' else {int(self.turbine[1:])-1}
+            preview.cache.clear()
+            # Hidden blade meshes need no uploads; T1 measurements and shared support stay current.
+            for index,tid in enumerate(('T1','T2','T3')):
+                for obj in scene.objects:
+                    if obj.name.startswith(f'WFRL.Turbine.{tid}.') and '.ClearanceRadar.' not in obj.name and '.TipTrail.' not in obj.name:
+                        obj.hide_set(index not in preview.visible_turbines)
+                        obj.hide_render=index not in preview.visible_turbines
+            if self.turbine != 'all':
+                scene['wfrl_clearance_turbine']=self.turbine
+                scene.wfrl_gimbal_kind = 'NACELLE' if self.angle in {'NACELLE', 'NACELLE_SIDE'} else 'DEMO'
+                scene.wfrl_gimbal_turbine=self.turbine
+                clearance_replay._READERS[scene.as_pointer()]=preview.readers[self.turbine]
+            scene.camera=camera
+            scene['wfrl_camera']=camera.name
+            from ..nacelle_camera import select_output
+            select_output(scene, camera)
+            from ..cameras import demo_view_areas
+            for area in demo_view_areas(scene):
+                area.spaces.active.use_local_camera=False
+                area.spaces.active.camera=camera
+                area.spaces.active.region_3d.view_perspective='CAMERA'
+                fill_camera_view(area,scene)
+            preview.update(scene)
+            if self.turbine != 'all':
+                trail=tip_tracking.active(scene)
+                if trail is not None and trail.turbine_id != self.turbine:
+                    tip_tracking.disable(scene,'turbine_change')
+                if scene.wfrl_flex_show_tip_trails:
+                    tip_tracking.enable(scene,self.turbine)
+            trail=tip_tracking.active(scene)
+            if trail is not None:
+                for obj in trail.objects.values():
+                    # Wider display tubes keep the complete rotor's paths readable.
+                    obj.data.bevel_depth=.24 if camera==front_camera else .08
+            scene['wfrl_farm_view']='all' if self.turbine=='all' else self.turbine+'_'+self.angle
+        except Exception as exc:
+            return _view_failed(self, state, exc)
         return {'FINISHED'}
 
 
@@ -513,18 +644,24 @@ class WFRL_OT_FarmSplitView(bpy.types.Operator):
     def execute(self, context):
         from .. import cameras
         scene = context.scene
+        state = None
         try:
+            if not self.poll(context):
+                raise ValueError('分屏需要就绪的回放窗口，且没有正在进行的布局任务')
+            state = _ViewSwitchState(scene)
             if self.mode == 'SINGLE':
+                if scene.camera is None:
+                    raise ValueError('请先选择场景相机')
                 cameras.set_view_layout(context, 'SINGLE', camera_names=(scene.camera.name,))
             else:
+                _required_camera(scene, 'WFRL.Camera.T1.FrontQuarter')
                 result = bpy.ops.wfrl.farm_flex_view(turbine='T1', angle=self.mode)
                 if result != {'FINISHED'}:
-                    return {'CANCELLED'}
+                    raise RuntimeError('风场视角切换已取消')
                 cameras.set_view_layout(context, 'DUAL', camera_names=(
                     scene.camera.name, 'WFRL.Camera.T1.FrontQuarter'))
-        except (ValueError, RuntimeError) as exc:
-            self.report({'ERROR'}, str(exc))
-            return {'CANCELLED'}
+        except Exception as exc:
+            return _view_failed(self, state, exc)
         return {'FINISHED'}
 
 
@@ -586,18 +723,27 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
 
     def execute(self, context):
         from ..cameras import fill_camera_view
-        bpy.ops.wfrl.farm_flex_view(turbine='T1', angle='FRONT')
         scene = context.scene
-        scene.camera = scene.objects['WFRL.Camera.T1.TipComparison']
-        scene['wfrl_camera'] = scene.camera.name
-        scene.wfrl_deflection_visible = True
-        farm_flex.active_for(scene).update(scene)
-        from ..cameras import demo_view_areas
-        for area in demo_view_areas(scene):
-            area.spaces.active.use_local_camera = False
-            area.spaces.active.camera = scene.camera
-            area.spaces.active.region_3d.view_perspective = 'CAMERA'
-            fill_camera_view(area, scene)
+        state = None
+        try:
+            if not self.poll(context):
+                raise ValueError('叶尖对照数据未就绪')
+            camera = _required_camera(scene, 'WFRL.Camera.T1.TipComparison')
+            state = _ViewSwitchState(scene)
+            if bpy.ops.wfrl.farm_flex_view(turbine='T1', angle='FRONT') != {'FINISHED'}:
+                raise RuntimeError('风场视角切换已取消')
+            scene.camera = camera
+            scene['wfrl_camera'] = camera.name
+            scene.wfrl_deflection_visible = True
+            farm_flex.active_for(scene).update(scene)
+            from ..cameras import demo_view_areas
+            for area in demo_view_areas(scene):
+                area.spaces.active.use_local_camera = False
+                area.spaces.active.camera = scene.camera
+                area.spaces.active.region_3d.view_perspective = 'CAMERA'
+                fill_camera_view(area, scene)
+        except Exception as exc:
+            return _view_failed(self, state, exc)
         return {'FINISHED'}
 
 

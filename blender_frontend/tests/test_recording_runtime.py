@@ -1,5 +1,6 @@
 """Exercise production recording methods with Blender-shaped timer events."""
 import json
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -11,9 +12,17 @@ def recording(frontend_module, monkeypatch):
     def make(clock, screenshot):
         panel = frontend_module('wfrl_blender.panels.presentation')
         timers = set()
+
+        def save_screenshot(*args, **kwargs):
+            result = screenshot(*args, **kwargs)
+            path = Path(kwargs['filepath'])
+            if 'FINISHED' in result and not path.exists():
+                path.write_bytes(b'completed PNG')
+            return result
+
         monkeypatch.setattr(panel, 'time', SimpleNamespace(monotonic=lambda: clock[0], time_ns=lambda: 1))
         monkeypatch.setattr(panel, 'bpy', SimpleNamespace(
-            ops=SimpleNamespace(screen=SimpleNamespace(screenshot=screenshot)),
+            ops=SimpleNamespace(screen=SimpleNamespace(screenshot=save_screenshot)),
             app=SimpleNamespace(timers=SimpleNamespace(is_registered=lambda f: f in timers,
                 register=lambda f, **_kwargs: timers.add(f), unregister=timers.remove))))
         monkeypatch.setattr(panel, '_ACTIVE', None)
@@ -55,7 +64,8 @@ def test_short_recording_has_initial_frame_and_accepts_real_timer_shape(recordin
     assert len(manifest['frames']) == 1
     assert scene.frame_current == 7
     assert unrelated.read_bytes() == b'unrelated file'
-    assert set(recorder._directory.iterdir()) == {unrelated, recorder._directory / 'manifest.json'}
+    assert set(recorder._directory.iterdir()) == {unrelated, recorder._directory / 'manifest.json',
+                                                recorder._directory / '000000.png'}
     assert namespace._ACTIVE is None
     manager.event_timer_remove.assert_called_once()
 
@@ -142,7 +152,7 @@ def test_nonfinite_manifest_keeps_destination_and_releases_recording(recording, 
 
     assert scene['wfrl_capture_status'].startswith('Manifest write failed: ')
     assert target.read_bytes() == previous
-    assert list(recorder._directory.iterdir()) == [target]
+    assert set(recorder._directory.iterdir()) == {target, recorder._directory / '000000.png'}
     assert namespace._ACTIVE is None
     assert recorder._closed
     manager.event_timer_remove.assert_called_once()

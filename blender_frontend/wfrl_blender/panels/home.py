@@ -43,7 +43,7 @@ def snapshot(context):
     for key, title in (('wfrl_history_export_status', '历史导出'),
                        ('wfrl_capture_status', '窗口录制')):
         detail = scene.get(key, '')
-        if detail.startswith('FAILED'):
+        if detail.startswith(('FAILED', 'Manifest write failed:')):
             issues.append((title, detail))
     return status, busy, [(title, str(detail)) for title, detail in issues if detail]
 
