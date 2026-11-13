@@ -248,7 +248,7 @@ def test_png_preflight_checks_enabled_view_suffixes_and_packed_eyes():
 
 @pytest.mark.parametrize('failed', [False, True])
 def test_worker_manifest_is_not_terminal_until_owned_process_exits(tmp_path, monkeypatch, failed):
-    from wfrl_blender import animation_render as service, animation_render_worker as worker
+    from wfrl_blender import animation_render as service, animation_render_worker as worker, video_output
 
     record = dict(job_id='worker-fixture', total_frames=1, addon_root=str(tmp_path / 'addon'),
                   snapshot=str(tmp_path / 'scene.blend'), scene_name='source',
@@ -259,13 +259,16 @@ def test_worker_manifest_is_not_terminal_until_owned_process_exits(tmp_path, mon
     scene = NS(name='source', camera=NS(name='camera'), frame_current=1,
                get=lambda key: None, view_settings=NS(exposure=0.),
                render=NS(use_compositing=False, use_multiview=False, fps=24, fps_base=1.,
+                         resolution_x=32, resolution_y=32, resolution_percentage=100,
                          image_settings=NS(),
-                         frame_path=lambda **kwargs: str(tmp_path / 'frames/frame_0001.png')))
+                         frame_path=lambda **kwargs: f'{scene.render.filepath}{kwargs["frame"]:04d}.png'))
 
     def render(**kwargs):
         if failed:
             raise RuntimeError('injected render failure')
-        (tmp_path / 'frames/frame_0001.png').write_bytes(b'PNG fixture')
+        Path(scene.render.frame_path(frame=scene.frame_current)).write_bytes(bytes.fromhex(
+            '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489'
+            '0000000d49444154789c63105432fe0f000214016604e0de7f0000000049454e44ae426082'))
         for callback in tuple(handlers):
             callback(scene)
         return {'FINISHED'}
@@ -279,7 +282,8 @@ def test_worker_manifest_is_not_terminal_until_owned_process_exits(tmp_path, mon
     monkeypatch.setattr(worker.importlib.util, 'spec_from_file_location', lambda *args, **kwargs: spec)
     monkeypatch.setattr(worker.importlib.util, 'module_from_spec', lambda spec: addon)
     monkeypatch.setitem(sys.modules, spec.name, addon)
-    modules = {'animation_render': service, 'manual_control': NS(pause_all=lambda: None),
+    modules = {'animation_render': service, 'video_output': video_output,
+               'manual_control': NS(pause_all=lambda: None),
                'frontend_diagnostics': NS(build_information=lambda: {})}
     monkeypatch.setattr(importlib, 'import_module', lambda name: modules[name.rsplit('.', 1)[-1]])
     job = service.RenderJob()
