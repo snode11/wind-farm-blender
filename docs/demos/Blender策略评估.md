@@ -13,7 +13,7 @@ Blender 的后端 Replay 模式加载 checkpoint，以确定性动作 `dist.mean
 1. 按[本地配置](../setup/setup_local.md#3-fastfarm-动态后端与实时-bridge)准备完整环境，通过项目启动器或手动连接 Bridge。
 2. 在 **Item → WFRL / CONNECTION → 后端连接（高级）** 选择 **Replay**。手动连接时在环境与路径中设置 Default scene，并执行 **SCENE CONFIGURATION → Load & Validate Scene**；修改 YAML 或覆盖参数后重新校验。
 3. 在 **Item → WFRL / 后端运行** 设置 Checkpoint、Replay steps、Warmup steps 和 Seed。checkpoint 使用匹配场景的完整路径。
-4. 点击 **开始策略评估（不更新权重）**，等待后端进入 RUNNING。Pause／Resume／Step 受当前状态约束；Stop 后须等待后端确认 STOPPED。
+4. 点击 **开始策略评估（不更新权重）**，等待后端进入 RUNNING。Pause／Resume／Step 受当前状态约束；Stop 后核对 STOPPED／FAILED 结果并等待独立清理确认，不能仅凭状态名判断进程已退出，见[停止结果与清理确认](../development/BlenderBridge协议.md#停止结果与清理确认)。
 
 项目启动器入口为 `scripts/blender/wfrl_launcher.py launch`；macOS 的 `scripts/blender/run_wfrl_macos.sh` 已包含该子命令。启动器使用实际配置的后端解释器与已安装扩展，修改源码不会自动更新安装载荷。完整操作及平台边界见[用户手册](../blender/用户使用手册.md#62-已有权重推理replay)。
 

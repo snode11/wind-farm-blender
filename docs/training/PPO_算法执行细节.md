@@ -67,6 +67,8 @@ obs, reward, terminated, truncated, info = env.step({"yaw": action})
 
 **7 台风机局部风况不同**：上游风机接近来流值，下游越来越弱，这正是偏航优化的物理基础。
 
+reward 的有效要求是用同一步功率与来流归一化。本页 FLORIS 接口直接读取当前稳态功率；FAST.Farm 的 MPI 功率缓冲在 `window=1` 时取最近两条功率、来流只取最新一条，尚不满足严格同步要求。为保持与既有训练结果可比，该偏差暂不修改；[要求、实际状态及来源](MAPPO_SETUP.md#奖励归一化要求与实际状态)分别记录，不与后续 VecNormalize 缩放混同。
+
 ---
 
 ## 三、适配层：sb3_wrapper.py
@@ -312,6 +314,8 @@ model.save("results/checkpoints/ppo_ablaincourt")   # 网络权重 θ
 venv.save("results/checkpoints/vecnormalize.pkl")    # obs/reward 的 mean/var（推理必须）
 ```
 
+这是 `train_ppo.py` 当前依次写入固定路径的方式。最终保存前给模型与统计设置相同配对标识，但这两个文件不是通过同代清单原子提交；中途失败可能留下不完整或不匹配的配对。该入口也没有正式 CLI／Studio 的同目录临时文件校验流程。`wfrl/mappo_sb3.py` 的参数共享 IPPO 使用独立的同代产物与清单切换，不能将其保证套用于本页单智能体 PPO；[各入口保存合同](MAPPO_SETUP.md#检查点写入与产物选择)列出了实际范围。
+
 **推理**：raw obs → normalize_obs(用 pkl) → actor MLP → μ（deterministic，丢 σ）
 → {"yaw": μ} → FLORIS → 新尾流场 + 功率
 
@@ -347,7 +351,7 @@ tensorboard --logdir results/logs/ppo_wf
 python scripts/analysis/eval_visualize_ppo.py
 ```
 
-模型在 `results/checkpoints/ppo_ablaincourt.zip`，归一化在 `vecnormalize.pkl`；评估图在 `results/eval_outputs/`。`--eval-only` 与 `--resume` 都要求完整且兼容的权重／归一化配对，缺失或损坏时明确报错。最终保存写入相同配对标识；无标识的模型仍需另外核对来源。定期检查点同时保存同一步数的权重和归一化文件。
+模型在 `results/checkpoints/ppo_ablaincourt.zip`，归一化在同目录的 `vecnormalize.pkl`；评估图在 `results/eval_outputs/`。`--eval-only` 与 `--resume` 都要求完整且兼容的权重／归一化配对，缺失、损坏或配对标识冲突时明确报错。最终保存写入相同配对标识；无标识的模型仍需另外核对来源。定期检查点按同一步数分别保存权重和归一化文件，不提供两文件原子提交保证。
 
 `--resume` 恢复观测与奖励统计及累计步数，`--timesteps` 指追加的全场控制步数，实际按完整 rollout 向上取整。评估固定观测统计、使用原始奖励。训练前评估使用当前训练环境统计量的独立副本：新训练评估初始策略，续训评估加载的策略。该评估不构成零偏航对照，不能仅靠 before/after 日志宣称匹配零动作收益。
 

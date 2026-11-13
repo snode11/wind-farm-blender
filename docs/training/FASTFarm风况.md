@@ -49,9 +49,13 @@
 
 `verification.bts_duration` 比较文件时间轴末值减首值与驱动的 `max_steps * dt`；直接调用接口而没有驱动时长时使用 FAST.Farm `TMax`。范围内记 `within_bts_duration`，超出记 `exceeds_bts_duration` 并在启动前打印、保存警告。**当前超时长不触发拒绝**，超出部分由 InflowWind 处理，可能周期回绕或报错；该检查不保证完整计算域的时空覆盖。
 
+这一时长参数不等于 reset 后可用的控制交换数：`start_iter=S`、`max_steps=M` 的总预算为 `S+M`，reset 使用 `S+1`，后续只剩 `M−1`，调用方预热也从中扣除。最后一次真实交换即返回 `done`；[交换预算与结束](MAPPO_SETUP.md#交换预算与结束)说明驱动与训练预算的区别。
+
 MPI 统计在接口 running 状态下按接收交换累计，保留无效样本数量；风速采用总体标准差，风向采用圆周均值及合向量长度。记录保留初始化／预热／关闭排空范围的说明，首个接收样本为时间原点，绝对求解时刻没有随 MPI 传入。`control_start_sample_index` 在驱动重置返回前记录，调用方之后追加的预热不会自动重新标记。
 
-`statistics.turbine_hub` 是 DISCON 轮毂风速，不是背景纵向风速、转子面积均值或独立自由来流。`downstream_wake_affected` 选择固定坐标中 X 大于最前机组的机组，统计包含湍流、阵风、尾流和瞬态，不能单独分离尾流亏损。`statistics.farm_inflow` 与运行统计核对请求自由入流的结论仍为 **unavailable**；独立场内入流探针**待实现**。驱动用于功率归一化的 BTS 参考风速来自完整文件轮毂层均值，也不是本回合场内入流采样。
+`statistics.turbine_hub` 是 DISCON 轮毂风速，不是背景纵向风速、转子面积均值或独立自由来流。`downstream_wake_affected` 选择固定坐标中 X 大于最前机组的机组，统计包含湍流、阵风、尾流和瞬态，不能单独分离尾流亏损。`statistics.farm_inflow` 与运行统计核对请求自由入流的结论仍为 **unavailable**；独立场内入流探针**待实现**。驱动的 BTS 参考 `u_inf` 来自完整文件轮毂层均值，供正式 CLI 的 `power_norm` 诊断使用，不是本回合场内入流采样，也不是环境 reward 的分母。
+
+reward 的有效要求是同一步功率与来流归一化；实际 MPI 路径在 `PowerBuffer.get_agg(window=1)` 中对最近两条功率取均值，而来流只取最新一条，未严格同步。为保持与既有训练结果可比，暂不修改该偏差；[归一化要求与实际状态](MAPPO_SETUP.md#奖励归一化要求与实际状态)记录调用链和限制。
 
 ## 训练、场景与探针入口
 

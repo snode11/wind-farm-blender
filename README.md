@@ -29,7 +29,7 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 | 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
 | NREL 公开安装包 | **0.5.0.0.1** | [wfrl_blender-0.5.0+0.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip)；239 个文件；[交付身份](publication/blender-0.5.0.0.1.json) |
-| 开发机日常安装 | **0.5.0** | 独立载荷，按安装记录核对；239 个文件、149 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
+| 开发机日常安装 | **0.5.0.0.1** | 与公开包同一载荷；239 个文件、149 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
 <!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
@@ -43,6 +43,14 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 当前交互前端为 Blender；后端 `wfrl.studio` 提供 `Trainer` 与 `Snapshot`，通过 Bridge 运行策略与训练。checkpoint 操作见[Blender 策略评估](docs/demos/Blender策略评估.md)。
 
 FAST.Farm 实时遥测提供按求解器采样时间对齐的曲线与 JSON 导出，支持转速、叶尖变形、塔底／转轴和叶片载荷；使用匹配的扩展与配套 Bridge。通道来源与时间定义见[实现与维护](blender_frontend/README.md#55-实时连接与控制生命周期)。
+
+## 工作区训练与后端
+
+正式 CLI 与 Studio 检查点通过同目录临时文件校验后原子发布，CLI 拒绝覆盖已有文件；SB3 参数共享 IPPO 使用同代模型／归一化文件和清单原子切换，其他 SB3 入口的限制见[保存合同](docs/training/MAPPO_SETUP.md#检查点写入与产物选择)。正式 CLI 的协作式中断在完整更新边界保存，`save_interval=0` 也保存，恢复计数不一致时在启动后端前拒绝。
+
+Bridge 在 fatal 后停止向当前连接接纳新快照／训练统计，保留可发送的可靠事件供恢复补发；正式进程停止分别核对任务结果与资源清理，Windows 实机尚未验证。详见[Bridge 消息与停止合同](docs/development/BlenderBridge协议.md)。Driver 的缺测、角度单位、交换预算与算例保留见[接口说明](docs/training/MAPPO_SETUP.md#fastfarmdriver-测量与交换预算)。
+
+超速监测只记录事件，不停止训练或改变动作／奖励，正式 CLI 采样不调用该监测。reward 应使用同一步功率和来流；当前 MPI 功率窗口与来流未严格同步，为保持与既有训练结果可比暂不修改，见[安全监测](docs/training/MAPPO_SETUP.md#安全监测的范围)及[奖励要求与实际状态](docs/training/MAPPO_SETUP.md#奖励归一化要求与实际状态)。以上按工作区后端源码说明，不代替公开包或实际安装验证。
 
 ## 当前功能
 

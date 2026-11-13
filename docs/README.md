@@ -20,7 +20,9 @@
 | 叶片响应与载荷研究 | [九项响应、弹性扭转输出要求及研究用DEL](development/叶片响应与研究DEL.md) |
 | 表面与动态研究 | [表面研究入口](../research/blade-surface/README.md)、[动态研究模块](../wfrl/nrel_reconstruction/README.md) |
 | 雷达合同与计算 | [数据合同](../wfrl/lidar/REPLAY_FORMAT.md)、[雷达算法](../wfrl/lidar/README.md)、[TLS 研究](lidar/双束TLS候选实施与验证总报告.md) |
-| 训练与环境 | [训练入口](training/MAPPO_SETUP.md)、[FAST.Farm 风况请求、输入与统计](training/FASTFarm风况.md)、[参数共享 IPPO](training/IPPO_TRAINING_EXPLAINED.md)、[环境设置](setup/setup_local.md) |
+| 训练与环境 | [算法与训练入口](training/MAPPO_SETUP.md)、[检查点保存](training/MAPPO_SETUP.md#检查点写入与产物选择)、[正式 CLI 中断与恢复](training/MAPPO_SETUP.md#正式-cli-的中断与恢复)、[参数共享 IPPO](training/IPPO_TRAINING_EXPLAINED.md)、[单智能体 PPO](training/PPO_算法执行细节.md)、[环境设置](setup/setup_local.md) |
+| Bridge 与正式进程 | [消息队列、fatal、等待年龄与停止清理](development/BlenderBridge协议.md)；工作区合同，Windows 实机尚未验证 |
+| Driver 与奖励限制 | [缺测、单位、交换预算与算例保留](training/MAPPO_SETUP.md#fastfarmdriver-测量与交换预算)、[超速监测范围](training/MAPPO_SETUP.md#安全监测的范围)、[reward 同步要求与实现偏差](training/MAPPO_SETUP.md#奖励归一化要求与实际状态)、[FAST.Farm 风况请求、输入与统计](training/FASTFarm风况.md) |
 | 网页实验室 | [预览、异步计算与结果接口分工](proposal/platform/风场网页实验室_第一版方案与分工汇总.md)；待实现与目标 Ubuntu 环境验证 |
 | 研究要求 | [研究方案分类](proposal/README.md) |
 
@@ -31,7 +33,7 @@
 | NREL 公开安装包 | **0.5.0.0.1**；安装使用 [v0.5.0.0.1 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip)，包身份与适用验证见[交付身份](../publication/blender-0.5.0.0.1.json)。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷；本地工作区提交的检查范围见[工作区源码验证](blender/发布状态与验证范围.md#工作区源码验证提交-bb470611)。 |
 | 发布源码 | `v0.5.0.0.1` 源码标签及匹配归档；扩展 ZIP 可由该归档独立重建；软件合同、保存证据及适用范围见[源码软件合同与验证](blender/发布状态与验证范围.md#源码软件合同与验证)。 |
-| 本地日常安装 | **0.5.0 公开 ZIP 载荷**，实际模块 `bl_ext.user_default.wfrl_blender`；239 个文件与本地安装归档匹配。149 个新后台进程模块来源、持久启用及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | **0.5.0.0.1 公开 ZIP 载荷**，实际模块 `bl_ext.user_default.wfrl_blender`；239 个文件与本地安装归档匹配。149 个新后台进程模块来源、持久启用及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
 | X100 观测研究 | 扩展提供面积材料采样、工程检测、安装报告导入和有拒绝条件的叶片估计；配套源码提供有限候选搜索与离线评价。同源几何数值与原生画布证据见[研究验证](blender/发布状态与验证范围.md#x100-观测研究工作区验证)。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
 | 材料点研究 | Patch **2/8**、Crack **7/8**、跨相机 RGB **0/264**；真实同材料点三维误差 `null`，`FAILED_GATE / NOT_ACCEPTED`；未替换正式 601 样本资产。 |

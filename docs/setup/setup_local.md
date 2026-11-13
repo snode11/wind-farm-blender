@@ -46,7 +46,9 @@ tensorboard --logdir results/logs/ppo_wf
 python scripts/analysis/eval_visualize_ppo.py
 ```
 
-输出由 [wfrl/paths.py](../../wfrl/paths.py) 统一到 `results/checkpoints/`、`results/logs/`、`results/runs/` 和 `results/eval_outputs/`。再次训练可能覆盖同名模型。SB3 IPPO 的 `--eval-only` 与 `--resume` 必须配套加载模型和归一化文件，缺项或不兼容时明确失败；其他入口按各自规则核对文件与来源。[评估、续训和动作合同](../training/MAPPO_SETUP.md#评估续训与归一化)分别按实际训练路线使用。
+输出由 [wfrl/paths.py](../../wfrl/paths.py) 统一到 `results/checkpoints/`、`results/logs/`、`results/runs/` 和 `results/eval_outputs/`。正式 CLI 检查点拒绝覆盖已有路径，Studio 校验临时文件后原子替换指定路径。SB3 参数共享 IPPO 通过 `mappo_ablaincourt.manifest.json` 选择同代模型与归一化文件，复制产物时须保留清单及其引用的两个文件；仅无清单时使用固定名称配对。单智能体 PPO、多模态 IPPO 与 HornsRev2 仍直接写固定路径，可能覆盖同名文件，未提供清单原子提交。具体保证见[检查点写入与产物选择](../training/MAPPO_SETUP.md#检查点写入与产物选择)。
+
+SB3 的 `--eval-only` 与 `--resume` 必须加载完整兼容的模型／归一化配对，缺项或不兼容时明确失败；[评估、续训和动作合同](../training/MAPPO_SETUP.md#评估续训与归一化)按实际训练路线使用。
 
 ## 3. FAST.Farm 动态后端与实时 Bridge
 
@@ -98,10 +100,19 @@ scripts/blender/run_wfrl_macos.sh --help
 
 当前工作区启动器保留虚拟环境解释器路径，使用所选后端 Python 解析 YAML 并统一后端预检与 MPI 配置判定。监管按 PID／创建时间和继承的运行标识覆盖本机后代，父进程退出不结束监管；身份不可读时保留 UNKNOWN 与两份恢复文件。Bridge 独立声明当前会话，界面换连接不改写启动器归属；`stop-session` 使用记录的固定端点并校验活进程身份。普通重连保留原身份，认领新后端须显式确认且不停止旧任务。连接恢复的 `state_revision` 语义需要匹配的前端与 Bridge；源码合同见[维护说明](../../blender_frontend/README.md#55-实时连接与控制生命周期)，公开源码与日常工作区构建的适用范围分别见[源码验证](../blender/发布状态与验证范围.md#源码软件合同与验证)和[日常安装身份](../../publication/daily-installation.json)。
 
+### 正式训练保存与停止
+
+正式 CLI 接收 SIGINT，或平台提供的 SIGBREAK 后，在下一个完整更新边界保存检查点再退出；`save_interval=0` 也保存。恢复先核对模型、统计、实验身份及 `training_progress` 与 `recovery`／`run` 的计数，不一致时在启动后端前拒绝。恢复另起物理回合，不恢复 FAST.Farm 任意时刻的内部状态，见[中断与恢复](../training/MAPPO_SETUP.md#正式-cli-的中断与恢复)。
+
+Bridge 在 POSIX 上只向训练主进程发送协作式 SIGINT；超时后才终止所属进程树。停止后复核退出码，并分别报告 `STOPPED`、`FAILED` 和清理是否确认；强制退出不证明应用层已完成保存。未确认清理时不能启动下一任务，Driver 也不删除算例目录。Windows 的 CTRL_BREAK 失败与实机限制见[正式训练停止合同](../development/BlenderBridge协议.md#正式训练的停止与清理)。
+
+底层 `max_steps` 包含 reset 所需的初始观测交换，warmup 从剩余控制交换中扣除，详见[Driver 预算](../training/MAPPO_SETUP.md#交换预算与结束)。超速监测事件不停止训练或改变动作／奖励，正式 CLI 采样不调用该监测；reward 的同一步归一化要求也有当前保留的功率窗口偏差，分别见[安全监测](../training/MAPPO_SETUP.md#安全监测的范围)与[奖励要求及实际状态](../training/MAPPO_SETUP.md#奖励归一化要求与实际状态)。
+
 ### Windows FAST.Farm 后端
 
 Windows 路线尚未在实机上运行验证；以下为源码支持的配置要求。
 
+- 正式进程使用新进程组与共享控制台发送 CTRL_BREAK。发送失败时直接进入终止流程，状态注明“应用层收尾未确认”；即使进程清理确认，任务结果仍保留 `FAILED`。替身信号用例不构成 Windows 实机验证。
 - MPI：安装 Microsoft MPI 运行时与 SDK，用官方 `C:\Program Files\Microsoft MPI\Bin\mpiexec.exe -n 1 python ...` 启动；`FastFarmDriver` 在 Windows 上拒绝非官方 `MSMPI_BIN`。
 - 求解器：Windows 版 FAST.Farm 及其 Intel 运行时 DLL。`wfcrl` 优先使用 `WFCRL_FASTFARM_EXECUTABLE`，未配置时依次查找 Python 所在目录、相对仓库根的 `simulators/fastfarm/bin/FAST.Farm_x64_OMP_2023.exe` 和 `PATH`；该变量须在导入 `wfcrl` 前设置。
 - 控制器：仓库与资源包不提供 Windows 版 `DISCON_WT1.dll`。在 Intel oneAPI 命令行中从 `wfcrl-env\wfcrl\simulators\fastfarm` 编译：

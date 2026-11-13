@@ -167,11 +167,15 @@ for epoch in 1..10:
 - **回报归一化**：稳定 advantage 的尺度，让 `learning_rate` 好调。
 - `training=False` 时冻结统计量（评估/部署用训练期的均值方差，不再更新）。
 
-`--resume` 将 `mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl` 配套恢复，保留观测／奖励统计与累计训练步数。加载检查观测／动作空间、统计量、折扣因子和文件配对标识；缺项或不匹配时明确报错。无配对标识的兼容文件仍需核对训练来源，形状匹配不能证明其归属。
+`wfrl/mappo_sb3.py` 保存时给模型和 VecNormalize 统计设置同一 `generation`，分别通过同目录临时文件写入和加载校验，生成 `mappo_ablaincourt.<generation>.zip` 与 `vecnormalize_mappo.<generation>.pkl`；两者就绪后原子替换 `mappo_ablaincourt.manifest.json`。清单保存文件名和 SHA-256，加载固定到同一代；发布新代保留旧代，提交失败不切换原配对。
+
+`--resume` 按清单恢复模型、观测／奖励统计及累计训练步数，并校验空间、有限统计量、折扣因子和配对标识。仅在清单不存在时读取固定名称 `mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl`；清单或引用产物损坏时明确失败，不回退。无配对标识的兼容文件仍需核对训练来源，形状匹配不能证明其归属。完整规则见[检查点写入与产物选择](MAPPO_SETUP.md#检查点写入与产物选择)。
 
 > 多模态版有个关键区别：`norm_obs_keys` 只归一化标量+振动，**图像不使用 VecNormalize 的逐维运行统计**；它仍由当前图像输入和特征提取路径处理。不能一般化为“图像归一化会毁掉空间结构”。
 
 多模态入口 `scripts/train/train_mappo_mm.py` 使用独立配对 `mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。`--eval-only` 自动加载二者，冻结统计并返回原始奖励；`--resume` 恢复模型、观测／奖励统计与累计 agent transitions，`--timesteps` 为追加量，按完整 rollout 取整。图像模式须与保存模型一致；使用 `--no-image` 训练时，续训和评估也须携带该参数。缺少文件、归一化通道或模型空间不兼容时明确失败。
+
+多模态入口当前依次直接保存这两个固定路径文件，最终保存带相同配对标识，但没有上述参数共享 IPPO 的清单原子切换保证。
 
 ---
 

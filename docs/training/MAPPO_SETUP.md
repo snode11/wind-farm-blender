@@ -28,11 +28,19 @@ Interactive 的 `episode_steps` 指每回合用于训练的控制步数，默认
 
 `step` 和迭代计数贯穿训练，`episode` 从零编号。FAST.Farm 快照的仿真时间按当前物理回合的已完成 MPI 交换序号与实际步长重建，包含初始化和预热；来源字段保留这一计算方法，`control_elapsed_seconds` 单独表示相对控制时间。每个新算例重新计时，不沿用上一回合的原点。快照以顶层 `payload.episode` 传递回合；当前源码前端仅在顶层缺字段时兼容旧的 `payload.context.episode`，零值有效。实时曲线在回合变化或时间回退处断线，保留同一全局步数的跨回合边界样本与训练统计，合同见[快照与曲线说明](../../blender_frontend/README.md)。Blender 工作区的 **WFRL / 后端运行 → Episode steps** 设置仅用于 Interactive；安装版需要匹配扩展载荷，后端改动需重启 Bridge。
 
-环境原始奖励为各机组功率除以上游来流立方的均值，有载荷测量时再减去 `load_coef` 乘叶根弯矩（N·m 除以 1e7）绝对值的均值；功率与来流取自同一次仿真交换，来流裁到状态空间风速范围，见[奖励整形器](../../wfrl/rewards.py)。训练奖励缩放使用折扣累加器 `G = gamma * G + reward` 和二阶矩指数移动平均 `M = 0.99 * M + 0.01 * G**2`。`G` 在同一回合跨 rollout 保留，并在回合边界清零；`M` 跨回合保留。本轮实际采集的奖励统一除以本轮末的 `sqrt(M) + 1e-8` 后计算 GAE。该实现不等同于 SB3 `VecNormalize`。仪表板的 `mean_raw_reward` 来自本轮原始奖励均值，归一化 `mean_reward` 通道没有输出，不将两者混称。
+环境交给奖励整形器的值为 `mean(power_MW * 1e3 / u**3)`，有载荷测量时再减去 `load_coef` 乘叶根弯矩（N·m 除以 1e7）绝对值的均值；`u` 来自 `next_state.freewind_measurements` 并裁到状态空间风速范围。FAST.Farm 功率与来流的采样窗口存在下节所述偏差。训练奖励缩放使用折扣累加器 `G = gamma * G + reward` 和二阶矩指数移动平均 `M = 0.99 * M + 0.01 * G**2`。`G` 在同一回合跨 rollout 保留，并在回合边界清零；`M` 跨回合保留。本轮实际采集的奖励统一除以本轮末的 `sqrt(M) + 1e-8` 后计算 GAE。该实现不等同于 SB3 `VecNormalize`。仪表板的 `mean_raw_reward` 来自本轮原始奖励均值，归一化 `mean_reward` 通道没有输出，不将两者混称。
 
 全场功率只有在同一步的所有预期机组都具有有限标量读数且合计有限时有效。缺测在 Trainer 内部保留为 `NaN`；迭代 `mean_power` 使用本轮实际收集窗口的全部控制步，任一步全场功率无效就将整轮统计通过协议输出为 `null / invalid`，不忽略缺测样本计算部分均值。实时功率通道完全未返回时保留 `unsupported`；真实零功率仍是有效数值。有效机组自己的通道不因其他机组缺测而被抹除。
 
 以上定义属于当前后端源码，不据此宣称 Blender 安装包、日常扩展或已有 checkpoint 的运行效果已验证；训练收敛、物理控制收益和跨平台运行须另有匹配证据。
+
+### 奖励归一化要求与实际状态
+
+**有效要求：** reward 应使用同一步的功率和来流进行归一化。
+
+**实际状态：** FAST.Farm 的 MPI 路径经 `MDP.step_interface()` 调用 `avg_powers()`；[PowerBuffer.get_agg(window)](../../wfcrl-env/wfcrl/interface.py) 的切片包含当前位置及前 `window` 个位置。`window=1` 且已有两条样本时，功率取最近两条的均值；`get_measure("freewind_measurements")` 则经 `last_wind(window=0)` 只取最新一条。奖励分母虽然读取 `next_state`，分子与分母仍不严格同步，不能据此写成要求已满足。只有一条可用样本时，功率均值只含该条。
+
+**当前决定：** 为保持与既有训练结果可比，暂不修改这一实现偏差；同一步归一化的要求仍有效。该偏差属于 MPI 功率缓冲路径，不应套用到直接读取当前稳态功率的 FLORIS 接口，也不同于 Trainer 或 SB3 在奖励之后执行的统计缩放。依据为 [MDP](../../wfcrl-env/wfcrl/mdp.py)、[多智能体环境](../../wfcrl-env/wfcrl/multiagent_env.py)及[单智能体环境](../../wfcrl-env/wfcrl/simple_env.py)的实际调用链。
 
 ### 策略动作与 checkpoint
 
@@ -45,6 +53,21 @@ Replay 在后端启动、预热和控制步边界响应暂停与停止。最终�
 无版本动作合同的模型只接受可识别的保存格式：Trainer 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
 
 研究探针 `FlexPolicy` 只接受可识别的 `Dec_Turb3_Row1_Fastfarm` legacy yaw-only、非循环、无 duty 观测模型；固定动作边界为 ±5°、变换为 `clip`。它复用合同校验，并拒绝保存 `scene` 的模型及未知版本，不拓展普通 Replay 的模型适用域。
+
+### 检查点写入与产物选择
+
+[training_integrity.atomic_write()](../../wfrl/training_integrity.py) 在目标文件的同一目录创建临时文件，写完并 `fsync` 后读取校验，再以 `os.replace()` 原子发布；失败时移除临时文件。各入口的保存范围如下。
+
+| 入口 | 当前保存行为与限制 |
+| --- | --- |
+| 正式 CLI `train_fastfarm.py` | 定期和结束检查点均用 `save_checkpoint_exclusive()`，通过 Torch 重读校验；发布前若目标已存在则拒绝覆盖。保存完整软件恢复状态。 |
+| Studio / Interactive `Trainer._save()` | 用 `save_checkpoint_atomic()`，通过 Torch 重读校验后原子替换指定路径；失败保留原文件。内容为 actor、critic、观测统计、场景和动作合同，不等于正式 CLI 的完整恢复检查点。 |
+| SB3 参数共享 IPPO `wfrl/mappo_sb3.py` | 模型、归一化统计分别写入同目录临时文件并加载校验，以相同 `generation` 写为独立产物；两者就绪后原子替换清单，切换可读取的一代。 |
+| 单智能体 PPO、多模态 IPPO、HornsRev2 PPO | 当前仍依次直接保存模型和归一化文件；最终保存带相同配对标识，但没有上述临时文件校验和清单原子切换保证。不能把参数共享 IPPO 的保存合同推广到这些入口。 |
+
+参数共享 IPPO 的入口清单为 `results/checkpoints/mappo_ablaincourt.manifest.json`，引用 `mappo_ablaincourt.<generation>.zip` 与 `vecnormalize_mappo.<generation>.pkl`，并保存两者 SHA-256。加载先解析一代并校验文件名、摘要及模型／统计兼容性；加载中的配对不会因清单切换混用新旧代。发布新代后保留旧代文件；提交失败不切换已发布配对。仅在清单不存在时读取固定路径 `mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl`；清单或其引用文件损坏时明确失败，不回退到固定路径。
+
+实现与合同用例：[SB3 配对保存](../../wfrl/mappo_sb3.py)、[原子保存与恢复用例](../../tests/test_bp_checkpoint_recovery.py)。其他 SB3 入口见 [PPO](../../scripts/train/train_ppo.py)、[多模态 IPPO](../../scripts/train/train_mappo_mm.py)、[HornsRev2](../../scripts/train/train_ppo_hornsrev2.py)。
 
 ### 回合结束与时间截断
 
@@ -60,7 +83,7 @@ SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`�
 
 自定义 Scene YAML 的 `dt` 使用有限正整数秒，小数步长在创建 case 前拒绝，case、runtime 与 limiter 使用同一步长。非 Scene 的 `--backend floris` 路径保留显式 `--wind-direction`，并在风况调度与实验身份中使用它；未指定方向时，`preset:veer` 等预设可提供 FLORIS 风向。FAST.Farm 的显式 `--wind-direction` 也经配置、调度和采样器传到底层校验：270°及其等价值匹配固定坐标，其他未支持方向拒绝，不执行任意坐标旋转。Bridge Formal 仍只接受 FAST.Farm。
 
-Blender Bridge 停止时等待训练线程或隔离 worker 清理完成；资源归属未确认时保留错误状态并阻止重新启动。转矩修正同时满足单步与累计边界；当前值距 VS 包线过远时逐步接近，事件记录实际可提交的 float32 增量，不保证一步进入包线。缺失、布尔、非实数或非有限功率保留为 NaN，不补零。
+Blender Bridge 停止时等待训练线程、隔离 worker 或正式进程清理完成；资源归属未确认时保留错误状态并阻止重新启动。正式进程的信号、退出码和清理确认分别按[停止合同](../development/BlenderBridge协议.md#正式训练的停止与清理)处理。转矩修正同时满足单步与累计边界；当前值距 VS 包线过远时逐步接近，事件记录实际可提交的 float32 增量，不保证一步进入包线。缺失、布尔、非实数或非有限功率保留为 NaN，不补零。
 
 场景传感器 `NacelleLidar` 为合成示意：轮毂均值、幂律切变和确定性正弦脉动，可读取 BTS 的均值／TI 统计量，尚未实现三维 BTS 插值。输出标识 `source_kind=SYNTHETIC`、`bts_spatial_interpolation=False`；不作为实测或前馈收益证据。
 
@@ -71,6 +94,32 @@ Blender Bridge 停止时等待训练线程或隔离 worker 清理完成；资源
 `--recurrent` 只作用于集中式 critic。采样逐步维护隐藏状态，rollout 边界保留并 detach，回合起点清零；训练使用该 rollout 起点的隐藏状态及逐步回合起点标记。截断的 bootstrap 使用重置前观测和同一历史条件，但不提前消耗下一控制步的隐藏状态。数值一致性不代表 GRU 对前馈网络的控制收益已得到物理训练验证。
 
 观测统计在当前动作执行后纳入当前原始观测，再计算下一状态的 bootstrap；连续步的 bootstrap 与下一次决策估值使用同一份统计。截断处仍使用 reset 前观测，GAE 递推在回合边界停止。
+
+## FastFarmDriver 测量与交换预算
+
+### 测量有效性与单位
+
+[FastFarmDriver._read()](../../wfrl/fastfarm_driver.py) 的 `load` 与 `yaw` 缺测时保留 `NaN`，并逐机组返回 `load_valid`、`yaw_valid`、`yaw_command_valid`、`yaw_measured_valid`。`load` 只有在提供的分量非空且全部有限时才是其绝对值均值；真实零值有效，不以零代替缺测。
+
+控制 yaw 时，`yaw` 与 `yaw_command` 表示按度累计的控制指令，`yaw_measured` 单独表示求解器回读。未控制 yaw 时，FAST.Farm 原生弧度观测换算为度，`yaw_command=None` 且其有效掩码全为 false；FLORIS 的角度本来就是度，不重复换算。原生 yaw 回读缺失时 `yaw_measured` 为 `NaN`，不借控制指令补作实测。
+
+### 交换预算与结束
+
+FAST.Farm 的 `start_iter=S`、驱动 `max_steps=M` 对应总共 `S+M` 次 MPI 交换。`MDP.reset()` 消耗 `S+1` 次（含初始观测），之后只剩 `M−1` 次真实控制交换；调用方的 `warmup_steps=W` 也从这部分扣除，可供后续控制的交换为 `M−1−W`（预热须在可用预算内）。`max_steps` 不能直接解释为 reset 后还能训练的步数；CLI sampler 与 Studio 按训练预算另加预热和收尾余量。
+
+驱动在最后一次真实交换返回的测量中即报告 `done=True`，不需要再经过一次 AEC dead-agent 清理轮才结束。`M=1` 时 reset 即已用完预算；结束后再次调用 `step()` 不推进交换或增加控制步数。回合终止／截断标记也参与同一结束判断。依据为 [WFCRL 环境预算](../../wfcrl-env/wfcrl/multiagent_env.py)、[MDP reset](../../wfcrl-env/wfcrl/mdp.py)及[Driver 合同用例](../../tests/test_fastfarm_driver_bn_contract.py)。
+
+### 清理与算例保留
+
+`close()` 只有在剩余交换排空、环境关闭和 MPI 断开都确认后才设置 `cleanup_confirmed=True`；此时 `purge=True` 才可删除算例目录。排空预算耗尽、关闭或断开失败时保留目录、资源归属与 `cleanup_error`，不以清理请求代替完成确认。`strict=True` 抛出错误，非 strict 返回 false；再次关闭不重复排空，未确认时拒绝 reset。异常中断仍重新抛出。对应[失败与幂等关闭用例](../../tests/test_fastfarm_driver_bn_contract.py)。
+
+### 安全监测的范围
+
+[SafetyLimiter.monitor()](../../wfrl/safety.py) 在某机组 `rotor_speed_interval_samples > 0` 且峰值有限时，使用 `rotor_speed_interval_max` 判定超速，并在可用时记录峰值时刻；否则使用最新有限的 `rotor_speed`。超出 `RPM_ALARM` 才产生 `block` 级别事件，缺测不推断、低转矩不撤销超速事件。
+
+[SolverOutputs](../../wfrl/solver_outputs.py) 的峰值来自 `OutputReader.advance()` 本次新接纳的全部完整原生行，包括先前暂存、此刻已到时间的行；只接受不晚于当前求解时刻的行，没有按当前控制窗起点设置时间下界。因此首次读取或积压读取可能包含更早时刻，不能把该峰值解释为严格限定在最近一个控制窗内。
+
+Studio 的 Replay 与 Interactive 在执行控制步后调用 `monitor()`，事件进入快照和事件日志（limiter 的内存历史与计数），由 Bridge 转为 `safety_event`。该监测的 `block` 只是事件严重级别，不停止训练、不改动作或奖励；与执行前 `apply()` 的动作约束分开。正式 CLI `FastFarmSampler` 的采样路径不调用 `monitor()`，不能据正式训练无事件推断没有超速。依据为 [Trainer](../../wfrl/studio/trainer.py)、[正式采样器](../../scripts/train/train_fastfarm.py)、[峰值读取用例](../../tests/test_solver_outputs.py)及[监测用例](../../tests/test_safety_limiter.py)。
 
 ## FAST.Farm 风况合同
 
@@ -117,18 +166,26 @@ mpiexec -n 1 python scripts/train/train_fastfarm.py \
 
 动态入口默认每回合重新启动后端，warmup 不进入训练统计；`--episode-steps 0` 使用单长回合。`--recurrent` 仅切换 GRU critic，actor 仍是前馈共享网络。源码存在不代表 GRU 优于前馈或 MAPPO 优于 IPPO 已得到对照证据。
 
+### 正式 CLI 的中断与恢复
+
+`train_fastfarm.py` 在训练主线程注册 SIGINT，并在平台提供 SIGBREAK 时注册同一协作式中断处理器（Windows 的 CTRL_BREAK 对应 SIGBREAK）。信号只标记停止请求，采样与优化继续到下一个完整更新边界，随后保存检查点并退出；`save_interval=0` 只关闭定期保存，中断和正常结束仍保存。未完成总目标时，运行记录为 `interrupted`，中断检查点在物理后端关闭之前保存；若完整目标已完成，状态为 `completed`。这不保证求解器阻塞或进程被强制终止时仍能保存。
+
+FAST.Farm MAPPO 的 `--resume-from` 使用明确的 `new_episode_segment`：从已完成训练迭代恢复模型、优化器、归一化、随机状态、奖励整形、累计控制步／agent 步及下一回合风况序号，并开始新的物理回合。恢复段记录父运行、父实验、父检查点摘要及起始计数，不冒充未中断的物理轨迹。未结束回合的物理状态不恢复，丢弃的回合内步数保留在恢复元数据中；这不支持任意控制步的 FAST.Farm 物理状态续接。
+
+恢复前要求完整、兼容的软件检查点和有效配置／来源身份；只有总目标 `iters` 可以增加，其他有效配置须一致。`validate_resume()` 校验完整迭代数、历史及 `recovery`／`run` 中的累计控制步与 agent 步；`resume_counts()` 还将 `training_progress.step`／`agent_step` 与这两份计数交叉核对。缺少 `training_progress` 时，仅从明确的迭代数、历史配置及维度推导计数。类型非法、计数不一致或参数、模型、优化器、统计不兼容时，在创建后端前拒绝，即使本次没有启用进度输出也执行校验。
+
+缺少恢复与来源信息的既有检查点仍可按动作合同用于推理，但不能用于该续训入口。信号、保存和恢复的静态依据为 [CLI](../../scripts/train/train_fastfarm.py)、[恢复校验](../../wfrl/training_integrity.py)、[进度计数](../../wfrl/blender_bridge/training_progress.py)及[检查点恢复用例](../../tests/test_bp_checkpoint_recovery.py)。Windows 实机尚未验证；物理回合初始化及真实求解器运行需匹配环境单独验证。Bridge 的超时终止与结果判定见[正式进程停止](../development/BlenderBridge协议.md#正式训练的停止与清理)。
+
 ### 评估、续训与归一化
 
-- SB3 IPPO：`results/checkpoints/mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl`。
+下列产物均位于 `results/checkpoints/`，原子保存和覆盖范围见[检查点写入与产物选择](#检查点写入与产物选择)。
+
+- SB3 IPPO：`mappo_ablaincourt.manifest.json` 引用的同代 `.zip`／`.pkl`；无清单时才使用固定名称配对。
 - 单智能体 PPO：`ppo_ablaincourt.zip` 与 `vecnormalize.pkl`。
 - 多模态 IPPO：`mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。
 - HornsRev2 PPO：`ppo_hornsrev2.zip` 与 `vecnormalize_hr2.pkl`。
 - 集中式 FLORIS MAPPO：`mappo_central_ablaincourt.pt`；观测统计在 checkpoint 内。
 - FAST.Farm MAPPO：环境与可读标签、完整实验摘要及运行 UUID 共同命名的 `.pt`，检查其中 `obs_keys`、维度、机组顺序、控制量、观测统计及配置／来源身份；最终保存和定期检查点均包含完整软件恢复状态。
-
-FAST.Farm MAPPO 的 `--resume-from` 使用明确的 `new_episode_segment`：从已完成训练迭代恢复模型、优化器、归一化、随机状态、奖励整形、累计控制步／agent 步及下一回合风况序号，并开始新的物理回合。恢复段记录父运行、父实验、父检查点摘要及起始计数，不冒充未中断的物理轨迹。未结束回合的物理状态不恢复，丢弃的回合内步数保留在恢复元数据中；这不支持任意控制步的 FAST.Farm 物理状态续接。
-
-恢复前要求完整、兼容的软件检查点和有效配置／来源身份；只有总目标 `iters` 可以增加，其他有效配置须一致。参数、模型、优化器和统计不兼容时在创建求解器前拒绝；缺少恢复与来源信息的既有检查点仍可按动作合同用于推理，但不能用于该续训入口。物理回合初始化、跨平台及真实求解器运行仍需匹配环境单独验证。
 
 SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一文件或校验不兼容时明确失败。评估固定 `training=False`、`norm_reward=False`，冻结观测统计并报告原始奖励。`--resume` 恢复模型、观测及奖励统计和累计步数，设置 `training=True`、`norm_reward=True`；`--timesteps` 表示追加的 agent transitions，实际仍按完整 rollout 取整。
 
@@ -136,11 +193,11 @@ SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一�
 
 SB3 IPPO、多模态 IPPO、单智能体 PPO 与 HornsRev2 PPO 的最终保存均给模型和归一化文件写入相同配对标识，加载时校验标识、观测／动作空间、有限统计量和折扣因子。无配对标识的现有文件可以按兼容性校验加载，但仅凭空间和统计形状不能证明二者来自同次训练，仍须核对来源。
 
-单智能体 PPO 的 `--resume` 和 `--eval-only` 都要求完整的 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；缺失、损坏或配对不兼容时停止。续训恢复观测与奖励统计及累计步数，`--timesteps` 表示追加的全场控制步数，按完整 rollout 向上取整。评估冻结统计并报告原始奖励；训练前评估使用当前训练环境统计量的独立副本，新训练不会读取磁盘上的旧统计量。定期检查点同时保存同一步数的 `ppo_wf_<steps>_steps.zip` 和 `ppo_wf_vecnormalize_<steps>_steps.pkl`。正常结束、加载、推理、训练或保存失败时均关闭本次创建的环境。
+单智能体 PPO 的 `--resume` 和 `--eval-only` 都要求完整的 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；缺失、损坏或配对不兼容时停止。续训恢复观测与奖励统计及累计步数，`--timesteps` 表示追加的全场控制步数，按完整 rollout 向上取整。评估冻结统计并报告原始奖励；训练前评估使用当前训练环境统计量的独立副本，新训练不会读取磁盘上的旧统计量。定期检查点分别保存同一步数的 `ppo_wf_<steps>_steps.zip` 和 `ppo_wf_vecnormalize_<steps>_steps.pkl`，不做清单原子切换。正常结束、加载、推理、训练或保存失败时均关闭本次创建的环境。
 
 多模态 IPPO 的 `--eval-only` 直接加载保存模型，无需额外指定 `--resume`；评估固定统计并报告原始奖励。`--resume` 恢复观测／奖励统计和累计 agent transitions，`--timesteps` 表示追加量。归一化仅作用于 `yaw`、`wind_speed`、`wind_direction`、`vibration`；`wake_image` 不使用 VecNormalize 的逐维运行统计。训练、续训和评估的图像模式须一致：使用 `--no-image` 训练的模型，后续也需传入该参数；模式、统计通道或空间不兼容时明确报错。两种模式共用默认输出路径，开始新训练会覆盖该路径的配对文件。
 
-HornsRev2 PPO 的 `--resume` 恢复保存的统计量和累计步数，允许调整 `--n-envs`；新建 worker 的回合回报累加器清零，已学习的统计量保留。`--timesteps` 表示所有独立风场 worker 的追加环境 transition 总数，按 `n_steps * n_envs` 的完整 rollout 向上取整，每个 worker 的一步包含整个 91 机组风场。评估只使用一个风场、冻结统计并报告原始奖励。训练前评估使用当前训练统计的独立副本；定期检查点同时保存同一步数的 `ppo_hr2_<steps>_steps.zip` 和 `ppo_hr2_vecnormalize_<steps>_steps.pkl`。
+HornsRev2 PPO 的 `--resume` 恢复保存的统计量和累计步数，允许调整 `--n-envs`；新建 worker 的回合回报累加器清零，已学习的统计量保留。`--timesteps` 表示所有独立风场 worker 的追加环境 transition 总数，按 `n_steps * n_envs` 的完整 rollout 向上取整，每个 worker 的一步包含整个 91 机组风场。评估只使用一个风场、冻结统计并报告原始奖励。训练前评估使用当前训练统计的独立副本；定期检查点分别保存同一步数的 `ppo_hr2_<steps>_steps.zip` 和 `ppo_hr2_vecnormalize_<steps>_steps.pkl`，不做清单原子切换。
 
 多模态 IPPO 与 HornsRev2 PPO 的续训／评估均要求完整、兼容的模型和归一化文件；缺失、损坏或不兼容时停止，不回退随机策略或新统计量。正常结束以及加载、预测、训练或保存失败时关闭已创建的环境；HornsRev2 的归一化加载失败也会关闭其 worker。
 
