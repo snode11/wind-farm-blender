@@ -79,7 +79,7 @@ class Scene(dict):
 
 @pytest.fixture
 def trails(monkeypatch):
-    monkeypatch.setattr(tracking, '_ensure_curve', lambda *_: Curve())
+    monkeypatch.setattr(tracking, '_ensure_curve', lambda *_, **_kw: Curve())
     monkeypatch.setattr(tracking, '_simulation_time', lambda scene: scene.time)
     monkeypatch.setattr(tracking, '_tip_world', lambda obj, _depsgraph, **_kw: obj.tip)
     monkeypatch.setattr(tracking, '_is_playing', lambda scene: False)

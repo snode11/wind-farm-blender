@@ -47,13 +47,14 @@ def _simulation_time(scene):
     from . import clearance_replay
     reader = clearance_replay.reader_for(scene)
     if reader is not None:
-        timebase = scene['wfrl_clearance_timebase_fps']
-        elapsed = (scene.frame_current + scene.frame_subframe - scene.frame_start) / timebase
-        return min(reader.end_s, max(reader.start_s, reader.start_s + elapsed))
+        return clearance_replay.simulation_time(scene, reader)
     # Freeze the mapping for non-replay previews too. Render FPS may change.
     if 'wfrl_tip_trail_timebase_fps' not in scene:
         scene['wfrl_tip_trail_timebase_fps'] = scene.render.fps / scene.render.fps_base
-    return (scene.frame_current + scene.frame_subframe - scene.frame_start) / scene['wfrl_tip_trail_timebase_fps']
+    timebase = scene['wfrl_tip_trail_timebase_fps']
+    if type(timebase) not in (int, float) or not math.isfinite(timebase) or timebase <= 0:
+        raise ValueError('Invalid tip-trail timebase')
+    return (scene.frame_current + scene.frame_subframe - scene.frame_start) / timebase
 
 
 def _material(name, color):
@@ -70,7 +71,7 @@ def _material(name, color):
     return material
 
 
-def _fade_material(name, color, alpha):
+def _fade_material(name, color, alpha, *, created=None):
     import bpy
     material = bpy.data.materials.get(name)
     if material is not None:
@@ -80,6 +81,8 @@ def _fade_material(name, color, alpha):
                 node.inputs['Color'].default_value = color
         return material
     material = bpy.data.materials.new(name)
+    if created is not None:
+        created.append(('materials', material, None))
     material.diffuse_color = (*color[:3], alpha)
     material.use_nodes = True
     if hasattr(material, 'surface_render_method'):
@@ -109,29 +112,68 @@ def _collection_for(scene, turbine_id):
     return obj.users_collection[0]
 
 
-def _ensure_curve(scene, turbine_id, blade_id):
+def _release_created(created, error):
+    """Roll back owned IDs while retaining external links and data users."""
+    import bpy
+    for kind, block, collection in reversed(created):
+        try:
+            if collection is not None and collection.objects.get(block.name) == block:
+                collection.objects.unlink(block)
+            if block.users == 0 and block.library is None and not block.use_fake_user:
+                getattr(bpy.data, kind).remove(block)
+        except Exception as cleanup_error:
+            error.add_note(f'Tip-trail {kind} cleanup failed: {cleanup_error}')
+
+
+def _ensure_curve(scene, turbine_id, blade_id, *, created=None):
     import bpy
     name = f'WFRL.Turbine.{turbine_id}.TipTrail.B{blade_id}'
-    materials = [_fade_material(f'WFRL.TipTrail.B{blade_id}.Fade{i:02d}',
-                           TRAIL_COLORS[blade_id], i / (FADE_LEVELS - 1))
-                 for i in range(FADE_LEVELS)]
     obj = scene.objects.get(name)
     if obj is None:
-        data = bpy.data.curves.new(name + '.Curve', 'CURVE')
-        data.dimensions = '3D'
-        data.resolution_u = 1
-        # The camera is a long-lens Down view; a slightly thicker line remains
-        # legible against the blade and tower without obscuring the tip.
-        data.bevel_depth = .08
-        data.bevel_resolution = 2
-        obj = bpy.data.objects.new(name, data)
-        _collection_for(scene, turbine_id).objects.link(obj)
-    obj.data.materials.clear()
-    for material in materials:
-        obj.data.materials.append(material)
-    obj['provenance'] = '叶尖运动轨迹辅助线；取形变后叶片网格世界坐标；不代表测量或安全边界'
-    obj['blade_id'] = blade_id
-    obj.hide_render = True
+        obj = next((item for item in scene.objects
+                    if item.get('wfrl_tip_trail_turbine') == turbine_id
+                    and item.get('blade_id') == blade_id), None)
+    if obj is not None and (any(owner != scene for owner in getattr(obj, 'users_scene', ()))
+            or getattr(obj.data, 'users', 1) > 1):
+        raise ValueError('Tip-trail curve is shared with another object or scene')
+    owned = []
+    previous_materials = list(obj.data.materials) if obj is not None else None
+    try:
+        collection = _collection_for(scene, turbine_id)
+        materials = [_fade_material(f'WFRL.TipTrail.B{blade_id}.Fade{i:02d}',
+                               TRAIL_COLORS[blade_id], i / (FADE_LEVELS - 1), created=owned)
+                     for i in range(FADE_LEVELS)]
+        if obj is None:
+            data = bpy.data.curves.new(name + '.Curve', 'CURVE')
+            owned.append(('curves', data, None))
+            data.dimensions = '3D'
+            data.resolution_u = 1
+            # The camera is a long-lens Down view; a slightly thicker line remains
+            # legible against the blade and tower without obscuring the tip.
+            data.bevel_depth = .08
+            data.bevel_resolution = 2
+            obj = bpy.data.objects.new(name, data)
+            owned.append(('objects', obj, collection))
+            collection.objects.link(obj)
+        obj.data.materials.clear()
+        for material in materials:
+            obj.data.materials.append(material)
+        obj['provenance'] = '叶尖运动轨迹辅助线；取形变后叶片网格世界坐标；不代表测量或安全边界'
+        obj['blade_id'] = blade_id
+        obj['wfrl_tip_trail_turbine'] = turbine_id
+        obj.hide_render = True
+    except Exception as error:
+        if previous_materials is not None:
+            try:
+                obj.data.materials.clear()
+                for material in previous_materials:
+                    obj.data.materials.append(material)
+            except Exception as cleanup_error:
+                error.add_note(f'Tip-trail materials restore failed: {cleanup_error}')
+        _release_created(owned, error)
+        raise
+    if created is not None:
+        created.extend(owned)
     return obj
 
 
@@ -166,18 +208,25 @@ class TipTrail:
         self.turn_angle = 0.0
         self.compare_since = None
         self.points = {bid: deque(maxlen=max_points) for bid in (1, 2, 3)}
-        self.objects = {bid: _ensure_curve(scene, self.turbine_id, bid) for bid in (1, 2, 3)}
-        self._geometry_revision = {bid: 0 for bid in (1, 2, 3)}
-        self._drawn = {bid: None for bid in (1, 2, 3)}
-        self.enabled = True
-        self.last_frame = None
-        self.scene['wfrl_tip_trail_enabled'] = True
-        self.scene['wfrl_tip_trail_turbine'] = self.turbine_id
-        self.scene['wfrl_tip_trail_max_points'] = max_points
-        self.scene['wfrl_tip_trail_lifetime_s'] = self.lifetime_s
-        self.scene['wfrl_tip_trail_hold_s'] = HOLD_S
-        self.scene['wfrl_tip_trail_sample_interval_s'] = self.interval_s
-        self._set_visible(True)
+        self.objects = {}
+        created = []
+        try:
+            for bid in (1, 2, 3):
+                self.objects[bid] = _ensure_curve(scene, self.turbine_id, bid, created=created)
+            self._geometry_revision = {bid: 0 for bid in (1, 2, 3)}
+            self._drawn = {bid: None for bid in (1, 2, 3)}
+            self.enabled = True
+            self.last_frame = None
+            self._set_visible(True)
+            self.scene['wfrl_tip_trail_turbine'] = self.turbine_id
+            self.scene['wfrl_tip_trail_max_points'] = max_points
+            self.scene['wfrl_tip_trail_lifetime_s'] = self.lifetime_s
+            self.scene['wfrl_tip_trail_hold_s'] = HOLD_S
+            self.scene['wfrl_tip_trail_sample_interval_s'] = self.interval_s
+            self.scene['wfrl_tip_trail_enabled'] = True
+        except Exception as error:
+            _release_created(created, error)
+            raise
 
     def _set_visible(self, visible):
         try:
@@ -272,7 +321,19 @@ class TipTrail:
         if scene != self.scene or not self.enabled:
             return
         frame = int(scene.frame_current)
-        now = _simulation_time(scene)
+        try:
+            now = _simulation_time(scene)
+        except (ValueError, TypeError, ZeroDivisionError, OverflowError):
+            self.clear('time_unavailable')
+            return
+        if not math.isfinite(now):
+            self.clear('time_unavailable')
+            return
+        rotor = scene.objects.get(f'WFRL.Turbine.{self.turbine_id}.Rotor')
+        if rotor is None or not math.isfinite(float(rotor.rotation_euler.x)):
+            self.clear('rotor_unavailable')
+            return
+        angle = float(rotor.rotation_euler.x)
         if self.last_time == now:
             return  # paused redraws cannot age or brighten the trail
         if self.last_time is not None and (now < self.last_time or
@@ -280,10 +341,6 @@ class TipTrail:
             self.clear('timeline_seek')
         self.last_frame = frame
         self.last_time = now
-        rotor = scene.objects.get(f'WFRL.Turbine.{self.turbine_id}.Rotor')
-        if rotor is None:
-            return
-        angle = float(rotor.rotation_euler.x)
         if self.compare_since is not None:
             if now - self.compare_since < HOLD_S + LIFETIME_S:
                 for bid in (1, 2, 3):
@@ -346,8 +403,16 @@ class TipTrail:
 
 
 def active(scene):
-    trail = _ACTIVE.get(_scene_key(scene))
-    return trail if trail is not None and trail.scene == scene else None
+    key = None
+    try:
+        key = _scene_key(scene)
+        trail = _ACTIVE.get(key)
+        if trail is not None and trail.scene == scene:
+            _scene_key(trail.scene)
+            return trail
+    except ReferenceError:
+        _ACTIVE.pop(key, None)
+    return None
 
 
 def enable(scene, turbine_id='T1', max_points=MAX_POINTS):
@@ -402,7 +467,10 @@ def update(scene, depsgraph=None):
         if scene.get('wfrl_scene_kind') == 'clearance_replay' and clearance_replay.reader_for(scene) is None:
             trail.clear('replay_unavailable')
             return
-        trail.update(scene, depsgraph)
+        try:
+            trail.update(scene, depsgraph)
+        except ReferenceError:
+            discard(scene, 'scene_data_unavailable')
 
 
 def on_load_pre(_unused):

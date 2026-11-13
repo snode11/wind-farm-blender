@@ -112,6 +112,7 @@ def test_disxy_material_failure_keeps_mesh_and_reports_error_once(monkeypatch, c
     link = Mock(side_effect=lambda obj: scene.objects.__setitem__(obj.name, obj))
     scene.collection = NS(name='WFRL_Scene', children_recursive=[], objects=NS(link=link))
     bpy = NS(context=NS(scene=scene), data=NS(
+        materials=[],
         meshes=NS(new=Mock(side_effect=new_mesh)),
         objects=NS(get=scene.objects.get, new=Mock(side_effect=WakeObject))))
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
