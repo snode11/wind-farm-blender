@@ -16,7 +16,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-import torch
 
 from .model import BladeModel, bspline_weights
 

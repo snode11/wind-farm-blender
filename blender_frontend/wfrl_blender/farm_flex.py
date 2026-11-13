@@ -1,14 +1,6 @@
 """Portable three-turbine flexible review playback on the shared timeline."""
-import hashlib
-import json
-import math
 from collections import OrderedDict
-from copy import deepcopy
-from dataclasses import dataclass
-from pathlib import Path
-from types import SimpleNamespace
 import numpy as np
-from . import performance
 
 _ACTIVE=None
 # Each scene owns its deformation runtime; frontend code resolves it with

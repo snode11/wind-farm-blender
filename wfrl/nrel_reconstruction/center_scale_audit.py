@@ -9,7 +9,6 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
-import hashlib
 import json
 import time
 from pathlib import Path
@@ -20,7 +19,7 @@ import torch
 from .contour import _limit, _silhouette_edges, projected_contour_candidates, projected_contour_loss
 from .diagnostics import _permitted, read_mesh_ply
 from .optimize import _prepare
-from .parameter_audit import (ROOT_BAND_M, TARGET_Z_M, distance_stats, edge_attributes,
+from .parameter_audit import (ROOT_BAND_M, distance_stats, edge_attributes,
                               nearest_segments, normalization, perspective_attribute,
                               perturb_model, restore_model, robust_values, sha256)
 

@@ -1,20 +1,7 @@
 """NREL six-morphology editor bound to the native recorded flexible replay."""
-import copy
-from dataclasses import asdict
-import json
-import math
-import time
-from pathlib import Path
 import bpy
-import numpy as np
 from bpy.app.handlers import persistent
-from mathutils import Vector
-from mathutils.bvhtree import BVHTree
-from .reference_surface import ReferenceSurface
-from .defect_schema import KIND_DESCRIPTIONS, KIND_LABELS, PRESETS, new_document, new_defect, validate_document, save_document
-from .defect_shapes import lightning_crater
-from .defect_store import DefectStore
-from .defect_geometry import DefectGeometry
+from .defect_schema import new_defect
 
 _SESSIONS = {}
 _INITIALIZING = {}

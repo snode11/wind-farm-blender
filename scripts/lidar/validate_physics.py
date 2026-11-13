@@ -3,7 +3,14 @@ from pathlib import Path
 import json,sys,math
 import numpy as np
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
-from wfrl.lidar.physics import *
+from wfrl.lidar.physics import (
+    Calibration,
+    first_hit,
+    read_surface,
+    simplified_estimate,
+    tip_reference,
+    truth_clearance,
+)
 
 def analytic_evidence():
     tip=np.array([3.,4.,0.]);distance,wall=truth_clearance(tip)

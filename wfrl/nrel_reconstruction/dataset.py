@@ -194,7 +194,6 @@ def decode_inspection(directory, output, selected_ids=None):
     n = data['sampling']['frame_count_per_camera']; fps = data['sampling']['fps']
     ids = set(selected_ids if selected_ids is not None else range(0, n, max(1, fps // 2)))
     report = {'input_policy': data['input_policy'], 'videos': {}, 'saved_frame_ids': sorted(ids)}
-    strips = []
     for camera in ('C1', 'C2', 'C3'):
         path = root / f'{camera}.mp4'; info = probe_video(path)
         stream, frames = info['streams'][0], info['frames']

@@ -14,7 +14,6 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from wfrl.nrel_reconstruction.artifact_paths import relocated_path
 from wfrl.nrel_reconstruction.dataset import load_bundle, iter_rgb, probe_video, write_json
 from wfrl.nrel_reconstruction.diagnostics import read_mesh_ply
 

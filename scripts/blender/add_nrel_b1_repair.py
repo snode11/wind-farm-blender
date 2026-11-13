@@ -282,7 +282,7 @@ def main():
     scene = bpy.context.scene
     assert farm_flex.is_active(scene)
     scene.frame_set(1)
-    blade = scene.objects['WFRL.Turbine.T1.Blade1']
+    scene.objects['WFRL.Turbine.T1.Blade1']
     baseline = {obj.name: [p.material_index for p in obj.data.polygons]
         for obj in scene.objects if obj.type == 'MESH' and obj.name.endswith(('Blade1', 'Blade2', 'Blade3'))}
     # The current extension already adds this mark through the normal scene

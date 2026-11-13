@@ -80,7 +80,7 @@ def plot_wakefield(env, tag):
 def rollout(env, model, vecnorm):
     """Deterministic policy rollout; normalize obs with saved stats before predict."""
     obs, _ = env.reset(options=WIND)
-    n = env.n_turbines
+    env.n_turbines
     yaw_hist, power_hist, reward_hist = [], [], []
     done, ep_ret = False, 0.0
     while not done:

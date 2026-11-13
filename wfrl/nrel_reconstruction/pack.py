@@ -5,10 +5,6 @@ import csv
 import json
 import math
 from pathlib import Path
-import os
-import shutil
-import subprocess
-import numpy as np
 
 from wfrl.camera_video.media import encode_video, sha256
 from .dataset import write_json, load_bundle, IMAGING_KEYS, COLOR_KEYS

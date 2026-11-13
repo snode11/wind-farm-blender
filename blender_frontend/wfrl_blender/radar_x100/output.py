@@ -2,7 +2,7 @@
 import bpy
 import numpy as np
 from . import display
-from .core import analysis, schema
+from .core import analysis
 
 _WINDOWS = {}
 _HANDLE = None

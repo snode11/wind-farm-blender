@@ -7,7 +7,6 @@ It is specific to the reviewed material-rendered passage, not a general segmente
 from __future__ import annotations
 
 import hashlib
-import json
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw

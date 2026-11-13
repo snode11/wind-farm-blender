@@ -1,10 +1,8 @@
 """Scene-owned radar lifecycle and deterministic simulation/replay sampling."""
-import math
 import time
 import uuid
-import numpy as np
-from .core import schema, simulation, ply, recording, channel, acquisition
-from . import clearance, configuration, display, view
+from .core import schema, simulation, ply, recording, channel
+from . import configuration, view
 from . import observations, mount_presets, session_recording, estimation
 
 _SESSIONS = {}
