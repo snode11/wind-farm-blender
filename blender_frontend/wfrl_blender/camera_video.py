@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import tempfile
 import time
 import numpy as np
 
@@ -36,21 +37,40 @@ def frame_times(start_s, end_s, fps, exposure_s):
     count = (end_s - start_s) * fps
     if not all(math.isfinite(v) for v in (start_s, end_s, exposure_s)) or not 0 < exposure_s <= 1 / fps:
         raise ValueError('Exposure must be finite and in (0, 1/fps]')
+    if not math.isfinite(count):
+        raise ValueError('Frame count must be finite')
     if count <= 0 or abs(count - round(count)) > 1e-7:
         raise ValueError('Duration must be a positive integer number of frames')
     return start_s + (np.arange(round(count), dtype=np.float64) + .5) / fps
 
 
 def shutter_times(center_s, exposure_s, samples):
-    if samples < 1:
-        raise ValueError('Exposure samples must be positive')
+    if isinstance(samples, (bool, np.bool_)) or not isinstance(samples, (int, np.integer)) or samples < 1:
+        raise ValueError('Exposure samples must be positive integers')
+    if not all(math.isfinite(v) for v in (center_s, exposure_s)) or exposure_s <= 0:
+        raise ValueError('Shutter center must be finite and exposure finite and positive')
     return center_s + ((np.arange(samples) + .5) / samples - .5) * exposure_s
+
+
+def _save_camera_matrices(path, matrices):
+    """Publish a complete NPY without truncating an existing export on failure."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix='.' + path.name + '.',
+                                         suffix='.tmp', delete=False) as handle:
+            temporary = Path(handle.name)
+            np.save(handle, matrices, allow_pickle=False)
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def is_auxiliary(obj):
     name = obj.name
     return (obj.type == 'FONT' or name.startswith(('WFRL.Grid.', 'WFRL.Inflow.',
-            'WFRL.Fixture.', 'WFRL.Label.', 'WFRL.Wake', 'WFRL.Deflection.'))
+            'WFRL.Fixture.', 'WFRL.Label.', 'WFRL.Wake', 'WFRL.Deflection.',
+            'WFRL.Cinematic.', 'WFRL.FlexTipTrail.'))
             or any(token in name for token in ('.TipTrail.', '.ClearanceRadar.Beam',
                                                '.SensorFrustum', '.ReferenceLine')))
 
@@ -390,7 +410,7 @@ def _render_package(args):
         active.update(scene, sim_time_s=float(center), record_telemetry=False)
         bpy.context.view_layer.update()
         matrices[index] = np.asarray(camera.matrix_world)
-    np.save(output / 'camera_world.npy', matrices, allow_pickle=False)
+    _save_camera_matrices(output / 'camera_world.npy', matrices)
     rendered = 0
     for index in range(limit):
         target = frames / f'{index:06d}.png'
@@ -415,21 +435,24 @@ def _render_package(args):
             scene.render.filepath = str(temporary_exr)
             stage = time.monotonic()
             temporary_exr.unlink(missing_ok=True)
-            result = render_sample()
-            if result != {'FINISHED'}:
-                raise RuntimeError('Exposure sample render did not finish: ' + str(result))
-            if not temporary_exr.is_file() or temporary_exr.stat().st_size == 0:
-                raise RuntimeError('Exposure sample render produced no fresh EXR')
-            timings['render_write'] += time.monotonic() - stage
-            stage = time.monotonic()
-            linear = bpy.data.images.load(str(temporary_exr), check_existing=False)
             try:
-                pixels = np.empty(len(accumulation), dtype=np.float32)
-                linear.pixels.foreach_get(pixels)
-                if not np.isfinite(pixels).all(): raise ValueError('Non-finite linear radiance')
-                accumulation += pixels / args.exposure_samples
+                result = render_sample()
+                if result != {'FINISHED'}:
+                    raise RuntimeError('Exposure sample render did not finish: ' + str(result))
+                if not temporary_exr.is_file() or temporary_exr.stat().st_size == 0:
+                    raise RuntimeError('Exposure sample render produced no fresh EXR')
+                timings['render_write'] += time.monotonic() - stage
+                stage = time.monotonic()
+                linear = bpy.data.images.load(str(temporary_exr), check_existing=False)
+                try:
+                    pixels = np.empty(len(accumulation), dtype=np.float32)
+                    linear.pixels.foreach_get(pixels)
+                    if not np.isfinite(pixels).all(): raise ValueError('Non-finite linear radiance')
+                    accumulation += pixels / args.exposure_samples
+                finally:
+                    bpy.data.images.remove(linear)
             finally:
-                bpy.data.images.remove(linear)
+                temporary_exr.unlink(missing_ok=True)
             timings['read_accumulate'] += time.monotonic() - stage
         stage = time.monotonic()
         integrated = bpy.data.images.new('WFRL.IntegratedLinearExposure', width=width,

@@ -173,12 +173,34 @@ def avoid_nacelle(coords, center, radius):
     return p.ravel()
 
 
-def material():
+def _release(store, block):
+    if (block.users == 0 and not block.use_fake_user and block.library is None
+            and getattr(block, 'shape_keys', None) is None):
+        store.remove(block)
+
+
+def material(created=None):
     import bpy
-    mat = bpy.data.materials.get('WFRL.Cinematic.Silk')
-    if mat is not None and mat.get('wfrl_revision') == 4:
-        return mat
-    mat = mat or bpy.data.materials.new('WFRL.Cinematic.Silk')
+    name = PREFIX + 'Silk'
+    existing = bpy.data.materials.get(name)
+    if existing is not None and existing.get('wfrl_revision') not in (1, 2, 3, 4):
+        raise ValueError('Cinematic material name is occupied by an unmanaged material')
+    current = next((mat for mat in bpy.data.materials
+                    if mat.name.startswith(name) and mat.get('wfrl_revision') == 4), None)
+    if current is not None:
+        return current
+    mat = bpy.data.materials.new(name)
+    try:
+        _configure_material(mat)
+    except Exception:
+        _release(bpy.data.materials, mat)
+        raise
+    if created is not None:
+        created.append(mat)
+    return mat
+
+
+def _configure_material(mat):
     mat['wfrl_revision'] = 4
     mat.diffuse_color = (.025, .65, 1.0, 1.0)
     mat.use_nodes = True
@@ -192,7 +214,6 @@ def material():
     # but animated subpixel trails break apart. Use opaque emission; geometric
     # radius taper still softens the ends without randomly discarding pixels.
     links.new(emission.outputs[0], out.inputs['Surface'])
-    return mat
 
 
 def ensure(scene):
@@ -203,26 +224,51 @@ def ensure(scene):
         tid = root.name.split('.')[2]
         name = PREFIX + tid
         obj = scene.objects.get(name)
+        if obj is None and bpy.data.objects.get(name) is not None:
+            raise ValueError('Cinematic object name is occupied in another scene: ' + name)
+        if obj is not None:
+            if obj.type != 'CURVE' or obj.get('wfrl_revision') not in (1, 2, 3, 4):
+                raise ValueError('Cinematic object name is occupied by an unmanaged object')
+            if obj.data.users > 1 or len(obj.users_scene) > 1 or obj.library is not None:
+                raise ValueError('Cinematic curve or object is shared; cannot update it')
         if obj is not None and obj.get('wfrl_revision') == 4:
             continue
+        new_object = None
+        created_materials = []
         curve = obj.data if obj else bpy.data.curves.new(name + '.Data', 'CURVE')
-        curve.dimensions = '3D'
-        curve.bevel_depth = .45
-        curve.bevel_resolution = 2
-        curve.materials.clear()
-        curve.materials.append(material())
-        curve.splines.clear()
-        for index in range(STRANDS):
-            spline = curve.splines.new('POLY')
-            spline.points.add(SAMPLES - 1)
-        if obj is None:
-            obj = bpy.data.objects.new(name, curve)
-            root.users_collection[0].objects.link(obj)
+        old_materials = list(curve.materials)
+        try:
+            mat = material(created_materials)
+            curve.dimensions = '3D'
+            curve.bevel_depth = .45
+            curve.bevel_resolution = 2
+            curve.materials.clear()
+            curve.materials.append(mat)
+            curve.splines.clear()
+            for index in range(STRANDS):
+                spline = curve.splines.new('POLY')
+                spline.points.add(SAMPLES - 1)
+            if obj is None:
+                new_object = bpy.data.objects.new(name, curve)
+                root.users_collection[0].objects.link(new_object)
+        except Exception:
+            if new_object is not None:
+                bpy.data.objects.remove(new_object, do_unlink=True)
+            if obj is None:
+                _release(bpy.data.curves, curve)
+            for mat in created_materials:
+                _release(bpy.data.materials, mat)
+            raise
+        obj = obj if obj is not None else new_object
         obj['wfrl_revision'] = 4
         obj.visible_shadow = False
         obj['fidelity'] = 'SYNTH'
         obj['provenance'] = 'Procedural wind-tunnel illustration; no solved velocity field or mesh collision solver'
         obj['turbine_id'] = tid
+        for mat in old_materials:
+            if (mat is not None and mat.name.startswith(PREFIX + 'Silk')
+                    and mat.get('wfrl_revision') in (1, 2, 3)):
+                _release(bpy.data.materials, mat)
 
 
 def _hide_in_scene(scene, obj, hidden):
@@ -231,12 +277,17 @@ def _hide_in_scene(scene, obj, hidden):
             obj.hide_set(hidden, view_layer=layer)
 
 
+def _managed(obj):
+    return (obj.name.startswith(PREFIX) and obj.type == 'CURVE'
+            and obj.get('wfrl_revision') in (1, 2, 3, 4))
+
+
 def set_visibility(scene):
     enabled = getattr(scene, 'wfrl_wake_display', 'SCIENTIFIC') == 'CINEMATIC' and scene.wfrl_show_wake
     if enabled:
         ensure(scene)
     for obj in scene.objects:
-        if obj.name.startswith(PREFIX):
+        if _managed(obj):
             obj.hide_render = not enabled
             _hide_in_scene(scene, obj, not enabled)
 
@@ -262,7 +313,7 @@ def update(scene, phase):
     scene['wfrl_cinematic_direction_deg'] = (270 - math.degrees(wind_angle)) % 360
     transports = {}
     for obj in list(scene.objects):
-        if not obj.name.startswith(PREFIX):
+        if not _managed(obj):
             continue
         root = scene.objects.get('WFRL.Turbine.' + obj['turbine_id'] + '.YawRoot')
         if root is None:

@@ -346,6 +346,12 @@ def sample_span_bands(clipped: SurfaceClip, span_edges, *, samples_across=3, sam
 
 
 def evaluate_visibility(bands, first_hit_visible: Callable[[RaySample], bool]):
-    """Evaluate bounded targets with the caller's real scene first-hit test."""
-    return VisibilityReport(tuple(BandVisibility(band, tuple(bool(first_hit_visible(sample))
+    """Evaluate first-hit booleans; missing or invalid observations are errors."""
+    def checked(sample):
+        value = first_hit_visible(sample)
+        if not isinstance(value, (bool, np.bool_)):
+            raise ValueError('first_hit_visible must return a boolean for every ray sample')
+        return bool(value)
+
+    return VisibilityReport(tuple(BandVisibility(band, tuple(checked(sample)
                                   for sample in band.samples)) for band in bands))
