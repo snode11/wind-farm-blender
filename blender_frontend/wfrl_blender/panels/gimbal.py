@@ -45,20 +45,48 @@ def show(context):
     from .. import split_reconstruction
     if split_reconstruction.is_reconstruction_view(context.scene, context.space_data):
         raise ValueError('请在左侧 demo 视口控制云台')
-    camera = current(context.scene)
+    scene = context.scene
     from ..nacelle_camera import select_output
-    select_output(context.scene, camera)
     space = context.space_data
+    saved = [(scene.render, name, getattr(scene.render, name)) for name in
+             ('resolution_x', 'resolution_y', 'pixel_aspect_x', 'pixel_aspect_y')]
+    output_key = 'wfrl_nacelle_previous_output'
+    previous_output = list(scene[output_key]) if output_key in scene else None
     if space and space.type == 'VIEW_3D':
-        from .custom_cameras import dismiss_for_view_switch
-        dismiss_for_view_switch(context.scene)
-        # Local camera leaves another World view alone in dual/quad layouts.
-        space.use_local_camera = True
-        space.camera = camera
-        space.region_3d.view_perspective = 'CAMERA'
-        space.region_3d.view_camera_zoom = 0
-        space.region_3d.view_camera_offset = (0, 0)
-        fill_camera_view(context.area, context.scene)
+        saved.extend((space, name, getattr(space, name)) for name in ('use_local_camera', 'camera'))
+        saved.extend((space.region_3d, name, getattr(space.region_3d, name)) for name in
+                     ('view_perspective', 'view_camera_zoom'))
+        saved.append((space.region_3d, 'view_camera_offset', tuple(space.region_3d.view_camera_offset)))
+    try:
+        camera = current(scene)
+        select_output(scene, camera)
+        if space and space.type == 'VIEW_3D':
+            from .custom_cameras import dismiss_for_view_switch
+            dismiss_for_view_switch(scene)
+            # Local camera leaves another World view alone in dual/quad layouts.
+            space.use_local_camera = True
+            space.camera = camera
+            space.region_3d.view_perspective = 'CAMERA'
+            space.region_3d.view_camera_zoom = 0
+            space.region_3d.view_camera_offset = (0, 0)
+            fill_camera_view(context.area, scene)
+    except Exception as exc:
+        errors = []
+        for owner, name, value in saved:
+            try:
+                setattr(owner, name, value)
+            except (ReferenceError, RuntimeError, ValueError, TypeError) as error:
+                errors.append(f'{name}: {error}')
+        try:
+            if previous_output is not None:
+                scene[output_key] = previous_output
+            elif output_key in scene:
+                del scene[output_key]
+        except (ReferenceError, RuntimeError, ValueError, TypeError) as error:
+            errors.append(str(error))
+        if errors:
+            raise RuntimeError(f'{exc}；视图恢复失败：' + '；'.join(errors)) from exc
+        raise
     return camera
 
 
@@ -122,13 +150,19 @@ class WFRL_OT_GimbalPreset(GimbalAvailable, bpy.types.Operator):
     preset: EnumProperty(items=[(v, v.title(), '') for v in ('DOWN', 'NACELLE', 'FRONT', 'BACK', 'RESET')])
 
     def execute(self, context):
+        previous_kind = context.scene.wfrl_gimbal_kind
         if self.preset in {'DOWN', 'NACELLE'}:
             from .. import farm_flex
             if farm_flex.is_active(context.scene):
                 return bpy.ops.wfrl.farm_flex_view(
                     turbine=context.scene.wfrl_gimbal_turbine, angle=self.preset)
             context.scene.wfrl_gimbal_kind = 'NACELLE' if self.preset == 'NACELLE' else 'DEMO'
-        camera = show(context)
+        try:
+            camera = show(context)
+        except (ValueError, RuntimeError, ReferenceError, KeyError, TypeError) as exc:
+            context.scene.wfrl_gimbal_kind = previous_kind
+            self.report({'ERROR'}, '无法选择云台相机：' + str(exc))
+            return {'CANCELLED'}
         if self.preset == 'DOWN':
             down_gimbal(camera)
         elif self.preset == 'RESET':
@@ -152,20 +186,44 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
 
     def finish(self, context=None):
         global _ACTIVE
-        if getattr(self, '_timer', None):
-            self._wm.event_timer_remove(self._timer)
-            self._timer = None
-        if getattr(self, '_handle', None):
-            bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
-            self._handle = None
+        self._closed = True
+        errors = []
+        for name, remove in (
+                ('_timer', lambda value: self._wm.event_timer_remove(value)),
+                ('_handle', lambda value: bpy.types.SpaceView3D.draw_handler_remove(value, 'WINDOW'))):
+            value = getattr(self, name, None)
+            if value is None:
+                continue
+            try:
+                remove(value)
+            except (ReferenceError, ValueError):
+                # Blender has already invalidated this resource.
+                setattr(self, name, None)
+            except RuntimeError as exc:
+                errors.append(str(exc))
+            else:
+                setattr(self, name, None)
         try:
-            self._area.header_text_set(None)
-            self._area.tag_redraw()
+            if getattr(self, '_area', None) is not None:
+                self._area.header_text_set(None)
+                self._area.tag_redraw()
         except ReferenceError:
             pass
-        self._closed = True
-        if _ACTIVE is self:
+        except (RuntimeError, ValueError) as exc:
+            errors.append(str(exc))
+        self._scene = self._area = self._region = None
+        if getattr(self, '_timer', None) is None:
+            self._wm = None
+        pending = getattr(self, '_timer', None) is not None or getattr(self, '_handle', None) is not None
+        if pending:
+            _ACTIVE = self
+        elif _ACTIVE is self:
             _ACTIVE = None
+        if errors:
+            try:
+                self.report({'ERROR'}, '云台资源清理失败：' + '；'.join(errors))
+            except (ReferenceError, RuntimeError):
+                pass
 
     def cancel(self, context):
         self.finish(context)
@@ -174,20 +232,28 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
         global _ACTIVE
         if _ACTIVE:
             _ACTIVE.finish(context)
-            return {'FINISHED'}
-        if context.area.type != 'VIEW_3D':
+            return {'CANCELLED'} if _ACTIVE else {'FINISHED'}
+        if context.area is None or context.area.type != 'VIEW_3D':
             return {'CANCELLED'}
-        show(context)
         self._area, self._scene, self._wm = context.area, context.scene, context.window_manager
-        self._region = next(r for r in context.area.regions if r.type == 'WINDOW')
+        self._region = next((r for r in context.area.regions if r.type == 'WINDOW'), None)
+        self._timer = self._handle = None
         self._closed, self._drag, self._stick = False, None, (0, 0)
         self._last_time = time.monotonic()
-        self._timer = self._wm.event_timer_add(.025, window=context.window)
-        self._handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_overlay, (), 'WINDOW', 'POST_PIXEL')
         _ACTIVE = self
-        self._wm.modal_handler_add(self)
-        self._area.header_text_set('Gimbal: drag to look | wheel: zoom | joystick: hold to turn | Esc: exit')
-        self._area.tag_redraw()
+        try:
+            if self._region is None:
+                raise ValueError('云台控制需要可用的 3D 视图窗口区域')
+            self._timer = self._wm.event_timer_add(.025, window=context.window)
+            self._handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_overlay, (), 'WINDOW', 'POST_PIXEL')
+            self._wm.modal_handler_add(self)
+            self._area.header_text_set('Gimbal: drag to look | wheel: zoom | joystick: hold to turn | Esc: exit')
+            self._area.tag_redraw()
+            show(context)
+        except Exception as exc:
+            self.finish(context)
+            self.report({'ERROR'}, '无法启动云台控制：' + str(exc))
+            return {'CANCELLED'}
         return {'RUNNING_MODAL'}
 
     def geometry(self):
@@ -207,6 +273,8 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
 
     def modal(self, context, event):
         if self._closed:
+            if _ACTIVE is self:
+                self.finish(context)
             return {'FINISHED'}
         try:
             if context.scene != self._scene or self._area.type != 'VIEW_3D':
@@ -262,9 +330,13 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
             if event.type in {'MIDDLEMOUSE', 'TRACKPADPAN', 'TRACKPADZOOM', 'MOUSEROTATE'}:
                 return {'RUNNING_MODAL'}
             return {'PASS_THROUGH'}
-        except (ReferenceError, RuntimeError, KeyError):
+        except ReferenceError:
             self.finish(context)
             return {'FINISHED'}
+        except (RuntimeError, KeyError, ValueError, TypeError) as exc:
+            self.finish(context)
+            self.report({'ERROR'}, '云台控制失败：' + str(exc))
+            return {'CANCELLED'}
 
     def draw_overlay(self):
         if self._closed or bpy.context.area != self._area:
@@ -370,8 +442,9 @@ def cancel_on_load(_unused):
 
 
 def register_properties():
-    if cancel_on_load not in bpy.app.handlers.load_pre:
-        bpy.app.handlers.load_pre.append(cancel_on_load)
+    for handlers in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
+        if cancel_on_load not in handlers:
+            handlers.append(cancel_on_load)
     bpy.types.Scene.wfrl_gimbal_turbine = EnumProperty(name='Camera turbine', items=[(t, t, '') for t in ('T1', 'T2', 'T3')], default='T1', update=switch)
     bpy.types.Scene.wfrl_gimbal_kind = EnumProperty(name='Camera mount',
         items=[('DEMO', 'Down 视角', ''), ('NACELLE', '机舱云台', '')], default='DEMO')
@@ -379,8 +452,9 @@ def register_properties():
 
 
 def unregister_properties():
-    if cancel_on_load in bpy.app.handlers.load_pre:
-        bpy.app.handlers.load_pre.remove(cancel_on_load)
+    for handlers in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
+        if cancel_on_load in handlers:
+            handlers.remove(cancel_on_load)
     if _ACTIVE:
         _ACTIVE.finish()
     for name in ('wfrl_gimbal_turbine', 'wfrl_gimbal_kind', 'wfrl_gimbal_speed'):

@@ -21,7 +21,7 @@ class WFRL_OT_ClearanceClip(bpy.types.Operator):
             if not path.strip():
                 raise ValueError('请在“数据配置”中选择所选片段的数据包目录')
             clearance_replay.load(scene, bpy.path.abspath(path), self.demo)
-        except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
+        except (ValueError, OSError, ImportError, KeyError, TypeError, RuntimeError) as exc:
             from .. import playback
             playback.cancel(scene)
             clearance_replay.clear(scene, '回放数据未就绪：' + str(exc))
@@ -136,7 +136,7 @@ def progress_set(scene, value):
 
 
 def number(value, signed=False):
-    return '--' if value is None else format(value, '+.2f' if signed else '.2f')
+    return '--' if value is None or not math.isfinite(value) else format(value, '+.2f' if signed else '.2f')
 
 
 def selected_installation_label(config):
