@@ -3,6 +3,7 @@
 This script deliberately does not add ``blender_frontend`` to ``sys.path``.  Its
 inner mode runs inside Blender after the extension was installed and enabled by
 Blender's extension CLI.
+Success requires a PASS report, its completion marker and no subprocess errors.
 """
 
 from __future__ import annotations
@@ -16,6 +17,11 @@ import subprocess
 import sys
 import tempfile
 import time
+
+try:
+    from scripts.blender.validate_frontend_package import ERROR_PATTERN, EXIT_MEMORY_WARNING
+except ModuleNotFoundError:
+    from validate_frontend_package import ERROR_PATTERN, EXIT_MEMORY_WARNING
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -111,12 +117,15 @@ def _inside_blender(output: Path, source_root: Path) -> None:
     print("WFRL_PART7_INSTALLED_SMOKE=PASS")
 
 
-def _run(command: list[str], env: dict[str, str], log: list[str], *, cwd: Path) -> None:
+def _run(command: list[str], env: dict[str, str], log: list[str], *, cwd: Path) -> str:
     completed = subprocess.run(command, cwd=cwd, env=env, text=True,
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     log.append("$ " + " ".join(command) + "\n" + completed.stdout)
     if completed.returncode:
         raise subprocess.CalledProcessError(completed.returncode, command, completed.stdout)
+    if ERROR_PATTERN.search(EXIT_MEMORY_WARNING.sub('', completed.stdout)):
+        raise RuntimeError('Blender reported an error despite a zero exit code')
+    return completed.stdout
 
 
 def verify(blender: Path = BLENDER, *, evidence_dir: Path = EVIDENCE) -> None:
@@ -159,11 +168,15 @@ def verify(blender: Path = BLENDER, *, evidence_dir: Path = EVIDENCE) -> None:
                   "--clear-all"], env, log, cwd=scratch)
             _run([*command, "--command", "extension", "install-file", "-r", "wfrl_part7",
                   "--enable", str(result.archive)], env, log, cwd=scratch)
-            _run([*command, "--python", str(Path(__file__).resolve()), "--",
+            smoke_output = _run([*command, "--python", str(Path(__file__).resolve()), "--",
                   "--inside", "--output", str(staged_install),
                   "--source-root", str(ROOT)], env, log, cwd=scratch)
             if not staged_install.is_file():
                 raise RuntimeError(f"Blender did not produce package-install.json; inspect {log_path}")
+            evidence = json.loads(staged_install.read_text(encoding="utf-8"))
+            if (not isinstance(evidence, dict) or evidence.get('status') != 'PASS'
+                    or 'WFRL_PART7_INSTALLED_SMOKE=PASS' not in smoke_output):
+                raise RuntimeError(f'Blender smoke requires a PASS report and completion marker; inspect {log_path}')
         finally:
             staged_log = scratch / log_path.name
             staged_log.write_text("\n".join(log), encoding="utf-8")
@@ -174,7 +187,6 @@ def verify(blender: Path = BLENDER, *, evidence_dir: Path = EVIDENCE) -> None:
         checksum = evidence_dir / "package-checksum.sha256"
         installed_files = sorted(path.relative_to(repository).as_posix()
                                  for path in repository.rglob("*") if path.is_file())
-        evidence = json.loads(staged_install.read_text(encoding="utf-8"))
         evidence.update(
             archive=result.archive.name, archive_sha256=result.sha256,
             extension_version=json.loads(result.inventory.read_text(encoding="utf-8"))["version"],

@@ -41,6 +41,8 @@ def sha256(path):
 def safe_relative(name):
     relative = PurePosixPath(name)
     if (relative.is_absolute() or '..' in relative.parts or not relative.parts
+            or any(not part or part == '.' for part in name.split('/'))
+            or any(ord(character) < 32 for character in name)
             or any(character in name for character in '\\<>:"|?*')):
         raise ValueError(f'Unsafe inventory path: {name}')
     for part in name.split('/'):
@@ -52,6 +54,8 @@ def safe_relative(name):
 
 def verify_archive(archive, inventory):
     data = json.loads(Path(inventory).read_text(encoding='utf-8'))
+    if not data['files']:
+        raise ValueError('Empty package inventory')
     actual = sha256(archive)
     if actual != data['archive_sha256']:
         raise ValueError('Archive SHA-256 differs from inventory')
@@ -71,6 +75,10 @@ def verify_archive(archive, inventory):
 
 def verify_installed(package, inventory):
     package = Path(package).resolve()
+    if not package.is_dir():
+        raise ValueError(f'Installed package directory is missing: {package}')
+    if not inventory['files']:
+        raise ValueError('Empty installed package inventory')
     expected = {row['path']: row for row in inventory['files']}
     mismatches = []
     for name, row in expected.items():
