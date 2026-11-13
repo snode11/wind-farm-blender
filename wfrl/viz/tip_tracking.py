@@ -46,11 +46,17 @@ class TipTracker:
         if isinstance(dets, dict):
             data = dets
         else:
-            arr = np.asarray(dets, dtype=float)
-            data = {0: arr} if arr.shape == (2,) else dict(enumerate(dets))
+            single = ((isinstance(dets, np.ndarray) and dets.shape == (2,))
+                      or (len(dets) == 2 and all(np.isscalar(v) for v in dets)))
+            data = {0: dets} if single else dict(enumerate(dets))
         out = {}
         for bid, value in data.items():
-            if isinstance(bid, bool) or int(bid) != bid or int(bid) not in (0, 1, 2):
+            try:
+                valid = (not isinstance(bid, (bool, np.bool_))
+                         and int(bid) == bid and int(bid) in (0, 1, 2))
+            except (ValueError, TypeError, OverflowError):
+                valid = False
+            if not valid:
                 raise ValueError('Blade IDs must be integers 0,1,2')
             if value is not None:
                 out[int(bid)] = value
@@ -112,9 +118,9 @@ class TipTracker:
             self._finish_pass(bid)
 
     def update_pixels(self, dets=None, rpm=0., t=0., *, source='pixel_sphere_estimate'):
+        d = self._norm_dets(dets)
         if not self._begin(t, rpm, source):
             return self.results
-        d = self._norm_dets(dets)
         for bid in sorted(set(d) | set(self.last)):
             self._buffers(bid)
             result = None
@@ -168,10 +174,10 @@ class TipTracker:
         """
         if not isinstance(source, str) or not source.strip() or not isinstance(provenance, dict) or not provenance:
             raise ValueError('World input requires source and provenance')
-        if not self._begin(t, rpm, source):
-            return self.results
         if not isinstance(blades, dict) or any(type(b) is not int or b not in (0,1,2) for b in blades):
             raise ValueError('World blade IDs must be 0,1,2')
+        if not self._begin(t, rpm, source):
+            return self.results
         for bid in sorted(set(blades) | set(self.last)):
             self._buffers(bid)
             data = blades.get(bid)
@@ -179,14 +185,15 @@ class TipTracker:
                 if data is None:
                     raise ValueError('missing blade')
                 point = finite_vector(data['P'])
+                if np.ma.is_masked(data['sections']):
+                    raise ValueError('Sections must not contain masked coordinates')
                 sections = np.asarray(data['sections'], dtype=float)
                 if (sections.ndim != 2 or sections.shape[1] != 3 or not 2 <= len(sections) <= 1024
-                        or not np.isfinite(sections).all() or not np.allclose(sections[-1], point, atol=1e-6)):
+                        or not np.isfinite(sections).all()
+                        or not np.allclose(sections[-1], point, atol=1e-6, rtol=0)):
                     raise ValueError('Sections must be finite root-to-tip XYZ ending at P')
                 result = self.geom.decompose(point, data.get('reference'))
                 result.update(P=point, source=source, validity='valid', provenance=dict(provenance))
-                self._accept(bid, result, t)
-                self.sections[bid] = sections.copy()
             except (ValueError, TypeError, KeyError) as exc:
                 self.errors[bid] = str(exc)
                 if not self._gap[bid] and self.show_trails:
@@ -194,4 +201,7 @@ class TipTracker:
                     self.trail_px[bid].append(None)
                 self._gap[bid] = True
                 self._finish_pass(bid)
+                continue
+            self._accept(bid, result, t)
+            self.sections[bid] = sections.copy()
         return self.results
