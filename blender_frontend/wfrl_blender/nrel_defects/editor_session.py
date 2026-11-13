@@ -127,7 +127,7 @@ class EditorSession(EditorGeometry, EditorPersistence):
         from . import editor as _editor
         if not math.isfinite(t) or not self.flex.times[0] <= t <= self.flex.times[-1]:
             raise ValueError('时刻超出 NREL 源数据时间线')
-        _editor._UPDATING=True
+        updating, _editor._UPDATING = _editor._UPDATING, True
         try:
             f=1+(t-self.flex.times[0])*60
             self.scene.frame_set(math.floor(f),subframe=f-math.floor(f))
@@ -142,7 +142,7 @@ class EditorSession(EditorGeometry, EditorPersistence):
             self.scene['defect_time_s']=t
             self.records=None
             self.scene['defect_analysis_status']='NOT_EVALUATED'
-        finally: _editor._UPDATING=False
+        finally: _editor._UPDATING=updating
 
     def begin(self, index=None, kind='fine_crack'):
         from . import editor as _editor
@@ -213,15 +213,27 @@ class EditorSession(EditorGeometry, EditorPersistence):
     def discard_preview(self):
         if self.preview is not None:
             self.geometry.activate(self.payload)
-            self.store.cancel(self.preview)
-            self.preview=None
+            previous, self.preview = self.preview, None
+            self.store._cancel_after_error(previous)
             self.update_helpers(self.store.document)
 
     def preview_draft(self):
-        self.discard_preview()
-        self.preview=self.store.prepare(self.draft)
-        self.geometry.activate(self.preview.resource)
-        self.update_helpers(self.draft)
+        previous = self.preview
+        candidate = self.store.prepare(self.draft)
+        try:
+            self.geometry.activate(candidate.resource)
+            self.update_helpers(candidate.document)
+        except BaseException:
+            try:
+                self.geometry.activate(previous.resource if previous is not None else self.payload)
+                self.update_helpers(previous.document if previous is not None else self.store.document)
+            except Exception:
+                _LOG.exception('Defect preview failed; display restoration also failed')
+            self.store._cancel_after_error(candidate)
+            raise
+        self.preview = candidate
+        if previous is not None:
+            self.store._cancel_after_error(previous)
 
     def finish(self, commit=False):
         from . import editor as _editor
@@ -342,7 +354,8 @@ def detach(scene=None,*,restore=True):
         # preview or access a scene whose RNA has already been deleted.
         s.geometry.active = None
         for payload in (getattr(s, 'payload', None), s.healthy_payload,
-                        s.preview.resource if s.preview is not None else None):
+                        s.preview.resource if s.preview is not None else None,
+                        *list(getattr(s.geometry, 'pending', []))):
             if payload is not None:
                 attempt(lambda payload=payload: s.geometry.dispose(payload))
         if not failed and restore:

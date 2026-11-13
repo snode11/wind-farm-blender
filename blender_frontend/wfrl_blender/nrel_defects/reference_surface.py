@@ -113,6 +113,11 @@ class ReferenceSurface:
             raise ValueError('turbine_ids must contain unique nonempty strings')
         self._us = tuple(.5*(1+math.cos(math.tau*j/self.n)) for j in range(self.n))
         self.triangles, self.triangle_face_indices = self._triangulate()
+        for triangle, face_index in zip(self.triangles, self.triangle_face_indices):
+            a, b, c = (self.vertices[i] for i in triangle)
+            area = _norm(_cross(_sub(b, a), _sub(c, a)))
+            if not math.isfinite(area) or area <= 1e-12:
+                raise ValueError(f'DEGENERATE_SURFACE: reference face {face_index}')
         # Exclude the cylindrical root, edge seams and presentation tip taper.
         shoulder = float(source['blade_stations'][-2][0])
         self.domain = {'s_m': (10., min(shoulder-.3, self._spans[-1])), 'u': (.05, .95)}

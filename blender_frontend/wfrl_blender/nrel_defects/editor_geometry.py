@@ -133,8 +133,14 @@ class GeometrySet:
         if any(child is getattr(self.managers[tid], '_active', None)
                for tid, child in payload.get('turbines', {}).items()):
             return
+        errors = []
         for tid, child in payload.get('turbines',{}).items():
-            self.managers[tid].dispose(child)
+            try:
+                self.managers[tid].dispose(child)
+            except Exception as exc:
+                errors.append(exc)
+        if errors:
+            raise RuntimeError('缺陷资源释放失败：' + '; '.join(map(str, errors)))
         self.pending[:] = [item for item in self.pending if item is not payload]
 
 
