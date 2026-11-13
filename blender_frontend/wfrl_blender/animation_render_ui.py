@@ -1,10 +1,12 @@
 """Scene-bound controls for an independent background animation render."""
 from pathlib import Path
+import logging
 
 from . import animation_render as service
 
 _SOURCE_SCENE = None
 _LAST_DISPLAY = None
+_LOG = logging.getLogger(__name__)
 
 
 def _publish():
@@ -13,41 +15,65 @@ def _publish():
     display = (current.state, current.completed_frames, current.total_frames, current.error, current.message)
     if display == _LAST_DISPLAY:
         return
-    _LAST_DISPLAY = display
     try:
         if _SOURCE_SCENE is not None:
             _SOURCE_SCENE['wfrl_animation_render_status'] = current.message
             _SOURCE_SCENE['wfrl_animation_render_directory'] = str(current.directory or '')
             from . import viewport
             viewport.tag_redraw((_SOURCE_SCENE,))
+        _LAST_DISPLAY = display
     except ReferenceError:
         pass
 
 
+def _monitor_error(exc):
+    detail = f'后台渲染状态更新失败，将重试：{exc}'
+    if detail not in service.job.error:
+        service.job.error = '\n'.join(filter(None, (service.job.error, detail)))
+        _LOG.exception('Animation render monitoring failed')
+
+
+def _publish_safely():
+    try:
+        _publish()
+        return True
+    except Exception as exc:
+        _monitor_error(exc)
+        return False
+
+
+def _ensure_poll_timer():
+    import bpy
+    if not bpy.app.timers.is_registered(_poll):
+        bpy.app.timers.register(_poll, first_interval=.1, persistent=True)
+
+
 def _poll():
     global _SOURCE_SCENE
-    if service.job.active and _SOURCE_SCENE is not None:
-        try:
-            _SOURCE_SCENE.frame_current
-        except ReferenceError:
-            _SOURCE_SCENE = None
-            service.job.cancel()
-    service.job.poll()
-    _publish()
-    return .25 if service.job.active else None
+    try:
+        if service.job.active and _SOURCE_SCENE is not None:
+            try:
+                _SOURCE_SCENE.frame_current
+            except ReferenceError:
+                _SOURCE_SCENE = None
+                service.job.cancel()
+        service.job.poll()
+    except Exception as exc:
+        _monitor_error(exc)
+    published = _publish_safely()
+    return .25 if service.job.active or not published else None
 
 
 def _recover(scene):
     global _SOURCE_SCENE, _LAST_DISPLAY
-    import bpy
     if service.job.active or scene is _SOURCE_SCENE:
         return
     directory = scene.get('wfrl_animation_render_directory')
     if directory and service.job.recover(directory):
         _SOURCE_SCENE, _LAST_DISPLAY = scene, None
-        _publish()
-        if service.job.active and not bpy.app.timers.is_registered(_poll):
-            bpy.app.timers.register(_poll, first_interval=.1)
+        _publish_safely()
+        if service.job.active:
+            _ensure_poll_timer()
 
 
 def restore(_unused=None):
@@ -76,6 +102,8 @@ def start(context, directory):
         bpy.data.libraries.write(str(path), {scene}, path_remap='ABSOLUTE', compress=True)
 
     previous_directory = service.job.directory
+    had_timer = bpy.app.timers.is_registered(_poll)
+    _ensure_poll_timer()
     try:
         from .native_camera_views import capture_quality
         with capture_quality(scene):
@@ -83,17 +111,18 @@ def start(context, directory):
                 addon_root=Path(__file__).resolve().parent, scene_name=scene.name,
                 frame_start=scene.frame_start, frame_end=scene.frame_end, frame_step=scene.frame_step,
                 snapshot_writer=snapshot, render_settings=_render_settings(scene))
-    except Exception:
+    except Exception as exc:
         if service.job.directory != previous_directory:
             _SOURCE_SCENE, _LAST_DISPLAY = scene, None
-            if service.job.active and not bpy.app.timers.is_registered(_poll):
-                bpy.app.timers.register(_poll, first_interval=.1)
-            _publish()
+            if service.job.active:
+                service.job._start_error = service.job._start_error or str(exc)
+                service.job.cancel()
+            _publish_safely()
+        if not service.job.active and not had_timer and bpy.app.timers.is_registered(_poll):
+            bpy.app.timers.unregister(_poll)
         raise
     _SOURCE_SCENE, _LAST_DISPLAY = scene, None
-    _publish()
-    if not bpy.app.timers.is_registered(_poll):
-        bpy.app.timers.register(_poll, first_interval=.1)
+    _publish_safely()
     return result
 
 
@@ -142,11 +171,15 @@ def draw(layout, context):
 def close(_unused=None):
     global _SOURCE_SCENE
     import bpy
-    service.job.close()
-    if bpy.app.timers.is_registered(_poll):
-        bpy.app.timers.unregister(_poll)
-    _publish()
-    _SOURCE_SCENE = None
+    try:
+        service.job.close()
+    finally:
+        _publish_safely()
+        _SOURCE_SCENE = None
+        if bpy.app.timers.is_registered(_poll):
+            bpy.app.timers.unregister(_poll)
+        if service.job.active:
+            _ensure_poll_timer()
 
 
 def register():
@@ -165,11 +198,13 @@ def register():
 
 def unregister():
     import bpy
-    close()
-    if bpy.app.timers.is_registered(restore):
-        bpy.app.timers.unregister(restore)
-    if restore in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.remove(restore)
-    for handlers in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
-        if close in handlers:
-            handlers.remove(close)
+    try:
+        close()
+    finally:
+        if bpy.app.timers.is_registered(restore):
+            bpy.app.timers.unregister(restore)
+        if restore in bpy.app.handlers.load_post:
+            bpy.app.handlers.load_post.remove(restore)
+        for handlers in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
+            if close in handlers:
+                handlers.remove(close)

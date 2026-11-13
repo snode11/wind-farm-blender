@@ -129,18 +129,23 @@ class RenderJob:
     def recover(self, directory):
         """Restore a saved result or wait for an interrupted worker to exit."""
         self.poll()
-        if self.active:
+        if self.active or self.state == 'STARTING':
             return False
         directory = Path(directory).expanduser().resolve()
         try:
             record = json.loads((directory / 'manifest.json').read_text(encoding='utf-8'))
             job_record = json.loads((directory / 'job.json').read_text(encoding='utf-8'))
+            if not isinstance(record, dict) or not isinstance(job_record, dict):
+                return False
             count, total = record['completed_frames'], record['total_frames']
             state = record['state']
             if (record.get('schema') != 'wfrl.animation-render.v1'
                     or not record.get('job_id') or record['job_id'] != job_record.get('job_id')
                     or type(count) is not int or type(total) is not int or not 0 <= count <= total
                     or total < 1 or total != job_record.get('total_frames')
+                    or not isinstance(state, str)
+                    or (state == 'COMPLETE' and count != total)
+                    or not isinstance(record.get('error') or '', str)
                     or state not in {'COMPLETE', 'FAILED', 'CANCELLED', 'FAILING', 'RENDERED', 'RUNNING'}):
                 return False
             if state == 'RUNNING' and not record.get('worker_pid'):
@@ -163,11 +168,12 @@ class RenderJob:
     def start(self, directory, *, blender, addon_root, scene_name,
               frame_start, frame_end, frame_step, snapshot_writer, render_settings=None):
         self.poll()
-        if self.active:
+        if self.active or self.state == 'STARTING':
             raise ValueError('已有动画正在后台渲染，请等待完成或取消')
         frames = (frame_start, frame_end, frame_step)
         if any(type(value) is not int for value in frames) or frame_step < 1 or frame_end < frame_start:
             raise ValueError('无效的动画帧范围或步长')
+        total_frames = len(range(frame_start, frame_end + 1, frame_step))
         blender, addon_root = Path(blender).resolve(), Path(addon_root).resolve()
         if not blender.is_file() or not os.access(blender, os.X_OK):
             raise ValueError('Blender 可执行文件不存在')
@@ -177,10 +183,11 @@ class RenderJob:
         base = Path(directory).expanduser().resolve()
         base.mkdir(parents=True, exist_ok=True)
         job_id = uuid.uuid4().hex
-        self.directory = base / ('animation-' + job_id[:12])
-        self.directory.mkdir(mode=0o700)
+        directory = base / ('animation-' + job_id[:12])
+        directory.mkdir(mode=0o700)
+        self.directory = directory
         self.completed_frames = 0
-        self.total_frames = len(range(frame_start, frame_end + 1, frame_step))
+        self.total_frames = total_frames
         self._cancel_at = None
         self._start_error = ''
         self.error = ''
@@ -229,10 +236,17 @@ class RenderJob:
     def _read_progress(self):
         try:
             record = json.loads((self.directory / 'manifest.json').read_text(encoding='utf-8'))
+            if not isinstance(record, dict):
+                raise ValueError('渲染状态必须是对象')
             count = record['completed_frames']
+            state = record.get('state')
             if (record.get('job_id') != self._record['job_id']
                     or record.get('total_frames') != self.total_frames
-                    or type(count) is not int or not 0 <= count <= self.total_frames):
+                    or type(count) is not int or not 0 <= count <= self.total_frames
+                    or not isinstance(state, str)
+                    or state not in {'STARTING', 'RUNNING', 'RENDERED', 'FAILING', 'COMPLETE', 'FAILED', 'CANCELLED'}
+                    or (state == 'COMPLETE' and count != self.total_frames)
+                    or not isinstance(record.get('error') or '', str)):
                 raise ValueError('渲染状态与当前作业不匹配')
             self._record = record
             self.completed_frames = count
@@ -269,7 +283,7 @@ class RenderJob:
         if code is None:
             if self._cancel_at is not None:
                 if time.monotonic() - self._cancel_at >= 2:
-                    self.process.kill()
+                    self._signal_stop(force=True)
                 self.state, self.message = 'CANCELLING', '正在取消后台渲染…'
             else:
                 self.message = f'后台渲染 {self.completed_frames}/{self.total_frames} 帧'
@@ -309,19 +323,35 @@ class RenderJob:
         if self.process is not None and self._cancel_at is None:
             self._cancel_at = time.monotonic()
             self.state, self.message = 'CANCELLING', '正在取消后台渲染…'
-            try:
+            self._signal_stop()
+
+    def _cleanup_error(self, exc):
+        detail = f'后台渲染进程尚未回收，将重试：{exc}'
+        if detail not in self.error:
+            self.error = '\n'.join(filter(None, (self.error, detail)))
+
+    def _signal_stop(self, *, force=False):
+        try:
+            if force:
+                self.process.kill()
+            else:
                 self.process.terminate()
-            except ProcessLookupError:
-                pass
+        except ProcessLookupError:
+            pass
+        except OSError as exc:
+            self._cleanup_error(exc)
 
     def close(self):
         self.cancel()
         if self.process is not None:
             try:
-                self.process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
-                self.process.wait(timeout=2)
+                try:
+                    self.process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    self._signal_stop(force=True)
+                    self.process.wait(timeout=2)
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                self._cleanup_error(exc)
             self.poll()
 
 
