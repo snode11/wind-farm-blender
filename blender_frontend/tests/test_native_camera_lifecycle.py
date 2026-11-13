@@ -33,6 +33,15 @@ class CameraData:
         self.removed = False
 
 
+class IdentityMatrix(tuple):
+    def __new__(cls):
+        return super().__new__(cls, ((1., 0., 0., 0.), (0., 1., 0., 0.),
+                                    (0., 0., 1., 0.), (0., 0., 0., 1.)))
+
+    def determinant(self):
+        return 1.
+
+
 class Proxy:
     def __init__(self, data):
         self._data = data
@@ -88,7 +97,7 @@ def runtime(monkeypatch):
     view = NS(as_pointer=lambda: 20, scene=scene,
               screen=NS(areas=[camera_area], is_animation_playing=False), workspace=NS())
     windows, closed_windows, removed_handlers, timers = [source, view], [], [], []
-    context = NS(window=source, scene=scene, workspace=NS(), space_data=source_area.spaces.active,
+    context = NS(window=source, area=source_area, scene=scene, workspace=NS(), space_data=source_area.spaces.active,
                  window_manager=NS(windows=windows), screen=source.screen)
 
     @contextmanager
@@ -538,7 +547,7 @@ def test_history_quality_restoration_matches_scene_identity(runtime):
 ])
 def test_pose_and_capture_metadata_preserve_proxy_and_manual_view(runtime, changes):
     params = CameraParameters(location=(0., 0., 0.))
-    camera = NS(as_pointer=lambda: 51)
+    camera = NS(as_pointer=lambda: 51, matrix_world=IdentityMatrix())
     runtime.monkeypatch.setattr(runtime.native.core, 'get_camera', lambda *_: camera)
     runtime.monkeypatch.setattr(runtime.native.core, 'parameters', lambda _: replace(params, **changes))
     region = NS(type='WINDOW', width=1000, height=700)
@@ -576,7 +585,7 @@ def test_optical_replacement_restores_only_an_existing_camera_view(runtime, pers
         pass
 
     params = CameraParameters(location=(0., 0., 0.), fov=90.)
-    camera = NS(as_pointer=lambda: 51)
+    camera = NS(as_pointer=lambda: 51, matrix_world=IdentityMatrix())
     runtime.monkeypatch.setattr(runtime.native.core, 'get_camera', lambda *_: camera)
     runtime.monkeypatch.setattr(runtime.native.core, 'parameters', lambda _: params)
     data = Resource()

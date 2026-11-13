@@ -17,9 +17,11 @@ from . import native_camera_drawing as _drawing
 
 _ACTIVE = None
 _KEYMAPS = []
+_HEADERS = []
 _ERROR_PROPERTY = 'wfrl_native_camera_error'
 _PROXY_OWNER = 'wfrl_native_camera_owner'
 _HISTORY_QUALITY = None
+_PENDING_RESUMES = []
 
 
 def owns_view(window, area):
@@ -90,6 +92,7 @@ class NativeSession:
     def __init__(self, context, slots, layout='GRID'):
         self.window, self.scene, self.original = context.window, context.scene, context.workspace
         self.source_window_id = context.window.as_pointer()
+        self.source_area_id = context.area.as_pointer()
         self.window_id = self.source_window_id
         self.closing = False
         self.closed = False
@@ -118,6 +121,10 @@ class NativeSession:
         self.proxy_owner = uuid.uuid4().hex
         self.save_state = None
         self.fast = True
+        # Timer registration and cancellation require the same callable object.
+        self.prepare = self.prepare
+        self.first_paint = self.first_paint
+        self.resume_after_close = self.resume_after_close
         shader=context.space_data.shading
         self.material_settings={key:getattr(shader,key) for key in (
             'use_scene_lights','use_scene_world','studio_light','studiolight_rotate_z',
@@ -171,6 +178,19 @@ def capture_quality(scene):
 
 def shutdown(preserve_playback=True):
     global _ACTIVE
+    if not preserve_playback:
+        for callback in list(_PENDING_RESUMES):
+            pending = callback.__self__
+            pending.resume_when_closed = False
+            try:
+                if bpy.app.timers.is_registered(callback):
+                    bpy.app.timers.unregister(callback)
+            except (ReferenceError, ValueError):
+                pass
+            except Exception as exc:
+                _remember_error(pending.scene, f'取消共同播放恢复失败：{exc}', append=True)
+                continue
+            _PENDING_RESUMES.remove(callback)
     if _ACTIVE:
         session = _ACTIVE
         # Keep ownership until every retained resource is released. A failed
@@ -359,15 +379,19 @@ class WFRL_OT_NativeExit(bpy.types.Operator):
 
 
 def register():
-    bpy.types.VIEW3D_HT_header.prepend(header)
-    bpy.types.IMAGE_HT_header.prepend(header)
-    bpy.app.handlers.load_pre.append(on_load)
-    bpy.app.handlers.load_post.append(on_loaded)
-    bpy.app.handlers.save_pre.append(on_save)
-    bpy.app.handlers.save_post.append(on_saved)
-    bpy.app.handlers.save_post_fail.append(on_saved)
+    for owner in (bpy.types.VIEW3D_HT_header, bpy.types.IMAGE_HT_header):
+        if owner not in _HEADERS:
+            owner.prepend(header)
+            _HEADERS.append(owner)
+    for handlers, callback in ((bpy.app.handlers.load_pre, on_load),
+                               (bpy.app.handlers.load_post, on_loaded),
+                               (bpy.app.handlers.save_pre, on_save),
+                               (bpy.app.handlers.save_post, on_saved),
+                               (bpy.app.handlers.save_post_fail, on_saved)):
+        if callback not in handlers:
+            handlers.append(callback)
     config=bpy.context.window_manager.keyconfigs.addon
-    if config:
+    if config and not _KEYMAPS:
         keymap=config.keymaps.new(name='Frames',space_type='EMPTY')
         item=keymap.keymap_items.new('wfrl.native_camera_play','SPACE','PRESS',head=True)
         _KEYMAPS.append((keymap,item))
@@ -382,13 +406,14 @@ def on_loaded(_):
     """Discard only explicitly owned observation resources from loaded files."""
     for obj in list(bpy.data.objects):
         owner = obj.get(_PROXY_OWNER)
-        if owner and obj.type == 'CAMERA' and obj.data.get(_PROXY_OWNER) == owner:
+        if (owner and obj.type == 'CAMERA' and obj.data.get(_PROXY_OWNER) == owner
+                and not _projection.shared_proxy(obj, bpy=bpy)):
             data = obj.data
             bpy.data.objects.remove(obj, do_unlink=True)
-            if data.users == 0:
+            if data.users == 0 and not _projection.user_retained(data):
                 bpy.data.cameras.remove(data)
     for data in list(bpy.data.cameras):
-        if data.get(_PROXY_OWNER) and data.users == 0:
+        if data.get(_PROXY_OWNER) and data.users == 0 and not _projection.user_retained(data):
             bpy.data.cameras.remove(data)
 
 
@@ -444,8 +469,9 @@ def on_saved(_):
 def unregister():
     shutdown(preserve_playback=False)
     if bpy.app.timers.is_registered(watch):bpy.app.timers.unregister(watch)
-    bpy.types.VIEW3D_HT_header.remove(header)
-    bpy.types.IMAGE_HT_header.remove(header)
+    for owner in list(_HEADERS):
+        owner.remove(header)
+        _HEADERS.remove(owner)
     if on_load in bpy.app.handlers.load_pre:bpy.app.handlers.load_pre.remove(on_load)
     for handlers, callback in ((bpy.app.handlers.load_post, on_loaded),
                                (bpy.app.handlers.save_pre, on_save),

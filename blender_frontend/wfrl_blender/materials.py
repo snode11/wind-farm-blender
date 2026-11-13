@@ -39,10 +39,27 @@ SURFACES = {
 }
 
 
+def _new_material(name, configure):
+    """Release an unreferenced allocation when its shader cannot be built."""
+    import bpy
+    material = bpy.data.materials.new(name)
+    try:
+        return configure(material)
+    except Exception:
+        if not material.users and not material.use_fake_user and material.library is None:
+            bpy.data.materials.remove(material)
+        raise
+
+
 def get_material(name: str, *, namespace="WFRL"):
     import bpy
+    material = bpy.data.materials.get(f"{namespace}.{name}")
+    if material is None:
+        return _new_material(f"{namespace}.{name}", lambda value: _configure_material(value, name))
+    return _configure_material(material, name)
 
-    material = bpy.data.materials.get(f"{namespace}.{name}") or bpy.data.materials.new(f"{namespace}.{name}")
+
+def _configure_material(material, name):
     material.diffuse_color = PALETTE.get(name, PALETTE["tower"])
     material.use_nodes = True
     if name in {"wake_line", "wake_pulse", "cinematic_line"}:
@@ -127,7 +144,13 @@ def refresh_turbine_surfaces(objects, *, object_prefix='WFRL.Turbine.', material
 def wake_volume_material():
     """Soft radial and axial falloff in generated coordinates, without a shell."""
     import bpy
-    material = bpy.data.materials.get('WFRL.WakeVolume') or bpy.data.materials.new('WFRL.WakeVolume')
+    material = bpy.data.materials.get('WFRL.WakeVolume')
+    if material is None:
+        return _new_material('WFRL.WakeVolume', _configure_wake_volume)
+    return _configure_wake_volume(material)
+
+
+def _configure_wake_volume(material):
     material.use_nodes = True
     nodes, links = material.node_tree.nodes, material.node_tree.links
     nodes.clear()
@@ -207,21 +230,25 @@ def flow_material(material, *, pulse=False, cinematic=False):
 BLADE_TIP_BANDS = ((.25, 1.0), (1.7, 2.45), (3.15, 3.9))
 
 
+def _configure_tip_material(material):
+    material.use_nodes = True
+    material.diffuse_color = (.8, .006, .012, 1)
+    node = material.node_tree.nodes.get('Principled BSDF')
+    node.inputs['Base Color'].default_value = material.diffuse_color
+    node.inputs['Roughness'].default_value = .36
+    node.inputs['Emission Color'].default_value = (.8, .002, .004, 1)
+    node.inputs['Emission Strength'].default_value = .7
+    material['provenance'] = 'Illustrative night-visible tip paint; not a physical light specification'
+    return material
+
+
 def ensure_blade_tip_markings(objects, *, object_prefix="WFRL.Turbine.",
                               material_name="WFRL.BladeTipRed"):
     """Paint three tip bands on new and saved owned blade meshes, once per mesh."""
     import bpy
     material = bpy.data.materials.get(material_name)
     if material is None:
-        material = bpy.data.materials.new(material_name)
-        material.use_nodes = True
-        material.diffuse_color = (.8, .006, .012, 1)
-        node = material.node_tree.nodes.get('Principled BSDF')
-        node.inputs['Base Color'].default_value = material.diffuse_color
-        node.inputs['Roughness'].default_value = .36
-        node.inputs['Emission Color'].default_value = (.8, .002, .004, 1)
-        node.inputs['Emission Strength'].default_value = .7
-        material['provenance'] = 'Illustrative night-visible tip paint; not a physical light specification'
+        material = _new_material(material_name, _configure_tip_material)
     for obj in objects:
         if (obj.type != 'MESH' or not obj.name.startswith(object_prefix)
                 or obj.name.rsplit('.', 1)[-1] not in {'Blade1', 'Blade2', 'Blade3'}):
