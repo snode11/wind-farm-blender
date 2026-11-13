@@ -18,6 +18,65 @@ from scripts.experiments.calib_blade_flex import read_fast_out
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def measurement(m, key, n=3):
+    raw = m.get(key)
+    values = np.full(n, np.nan) if raw is None else np.asarray(raw, float).ravel()
+    if values.size != n:
+        raise ValueError(f'{key}: expected {n} turbine values, got {values.size}')
+    valid = np.isfinite(values)
+    if f'{key}_valid' in m:
+        declared = np.asarray(m[f'{key}_valid'])
+        if declared.dtype.kind != 'b' or declared.size != n:
+            raise ValueError(f'{key}_valid: expected {n} boolean turbine flags')
+        valid &= declared.ravel()
+    return values, valid
+
+
+def infer_validated(policy, m):
+    for key in policy.metadata['obs_keys']:
+        _, valid = measurement(m, key)
+        if not valid.all():
+            turbines = (np.flatnonzero(~valid) + 1).tolist()
+            raise ValueError(f'拒绝策略观测: {key} 无效，机组 {turbines}；不做插补')
+    return policy.infer(m)
+
+
+def record_measurement(m):
+    row = {}
+    for key, label in (('yaw', 'returned_yaw_deg'), ('yaw_command', 'command_yaw_deg'),
+                       ('yaw_measured', 'measured_yaw_deg'), ('power', 'power_mw'),
+                       ('load', 'load')):
+        values, valid = measurement(m, key)
+        row[label] = [float(v) if ok else None for v, ok in zip(values, valid)]
+        row[f'{key}_valid'] = valid.tolist()
+        row[f'{key}_valid_count'] = int(valid.sum())
+        row[f'{key}_status'] = '有效数据' if valid.any() else '无有效数据'
+    return row
+
+
+def physical_check(columns, selected, turbine_id):
+    def bounds(key):
+        values = np.asarray(columns[key], float)[selected]
+        values = values[np.isfinite(values)]
+        return ([float(values.min()), float(values.max())] if values.size else None,
+                int(values.size))
+
+    rpm, rpm_count = bounds('RotSpeed')
+    pitch, pitch_count = bounds('BlPitch1')
+    yaw = np.asarray(columns['YawPzn'], float)
+    final_yaw = float(yaw[-1]) if yaw.size and np.isfinite(yaw[-1]) else None
+    finite = all(np.isfinite(v).all() for v in columns.values())
+    return dict(turbine_id=turbine_id, rpm_range=rpm, rpm_valid_count=rpm_count,
+                rpm_status='有效数据' if rpm_count else '无有效数据',
+                pitch_deg_range=pitch, pitch_valid_count=pitch_count,
+                pitch_status='有效数据' if pitch_count else '无有效数据',
+                final_actual_yaw_deg=final_yaw, final_actual_yaw_valid=final_yaw is not None,
+                finite=finite, pitch_tolerance_deg=.05,
+                passed=bool(finite and rpm_count and pitch_count and
+                            rpm[0] > 0 and rpm[1] < 13.2 and
+                            pitch[0] >= -.05 and pitch[1] <= 90.05))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--checkpoint', type=Path, default=ROOT/'results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt')
@@ -132,7 +191,7 @@ def main():
         if args.turbulence:
             report['wind_sha256'] = hashlib.sha256(args.turbulence.read_bytes()).hexdigest()
         for k in range(args.steps):
-            raw, norm = policy.infer(m)
+            raw, norm = infer_validated(policy, m)
             # Execute limits in the physics driver, never scale display poses.
             cmd = np.clip(raw, -0.3*driver.dt, 0.3*driver.dt)
             cmd = np.clip(np.asarray(m['yaw'])+cmd, -10., 10.)-m['yaw']
@@ -140,13 +199,9 @@ def main():
             m = driver.step(cmd)
             if m.get('done'):
                 raise RuntimeError('Solver ended before the requested control samples')
-            actual = driver._raw_measure('yaw')
             row = dict(step=k+1, normalized_obs=norm.tolist(),
                        policy_delta_deg=raw.tolist(), bounded_delta_deg=cmd.tolist(),
-                       previous_yaw_deg=previous.tolist(),
-                       returned_yaw_deg=np.asarray(m['yaw']).tolist(),
-                       measured_yaw_deg=None if actual is None else np.degrees(actual).tolist(),
-                       power_mw=np.asarray(m['power']).tolist())
+                       previous_yaw_deg=previous.tolist(), **record_measurement(m))
             report['records'].append(row)
             (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
             print(json.dumps(row), flush=True)
@@ -155,15 +210,7 @@ def main():
         for tid in ('T1', 'T2', 'T3'):
             c = read_fast_out(farm/f'Case.{tid}.out')
             selected = c['Time'] >= 27+args.warmup_steps*driver.dt
-            rpm, pitch = c['RotSpeed'][selected], c['BlPitch1'][selected]
-            checks = dict(turbine_id=tid, rpm_range=[float(rpm.min()), float(rpm.max())],
-                          pitch_deg_range=[float(pitch.min()), float(pitch.max())],
-                          final_actual_yaw_deg=float(c['YawPzn'][-1]),
-                          finite=all(np.isfinite(v).all() for v in c.values()))
-            # Same documented one-solver-step actuator tolerance as the prior audit.
-            checks['pitch_tolerance_deg'] = .05
-            checks['passed'] = bool(checks['finite'] and rpm.min()>0 and rpm.max()<13.2
-                                    and pitch.min()>=-.05 and pitch.max()<=90.05)
+            checks = physical_check(c, selected, tid)
             report['physical_checks'].append(checks)
         if not all(c['passed'] for c in report['physical_checks']):
             raise ValueError('Native output failed rotor-speed/pitch validation')

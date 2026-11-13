@@ -40,13 +40,64 @@ EP_STEPS = 400
 WARMUP = 8
 
 
+def measurement(m, key, n):
+    """Return values and the intersection of declared validity and finiteness."""
+    values = np.asarray(m.get(key, np.full(n, np.nan)), float).ravel()
+    if values.size != n:
+        raise ValueError(f"{key}: expected {n} turbine values, got {values.size}")
+    valid = np.isfinite(values)
+    if f"{key}_valid" in m:
+        declared = np.asarray(m[f"{key}_valid"])
+        if declared.dtype.kind != "b" or declared.size != n:
+            raise ValueError(f"{key}_valid: expected {n} boolean turbine flags")
+        valid &= declared.ravel()
+    return values, valid
+
+
 def pack_obs(m, n, obs_keys, obs_duty):
-    cols = [np.asarray(m[k], np.float32).ravel() for k in obs_keys]
+    cols = []
+    for key in obs_keys:
+        values, valid = measurement(m, key, n)
+        if not valid.all():
+            turbines = (np.flatnonzero(~valid) + 1).tolist()
+            raise ValueError(f"拒绝策略观测: {key} 无效，机组 {turbines}；不做插补")
+        cols.append(values)
     if obs_duty:
-        duty = np.asarray((m.get("duty") or {}).get("yaw", np.zeros(n)),
-                          np.float32).ravel()
+        duty, valid = measurement(m.get("duty") or {}, "yaw", n)
+        if not valid.all():
+            raise ValueError("拒绝策略观测: duty.yaw 缺失或无效；不做插补")
         cols.append(np.clip((0.1 - duty) / 0.1, 0.0, 1.0).astype(np.float32))
-    return np.stack(cols, axis=1)                              # (n, obs_dim)
+    obs = np.stack(cols, axis=1).astype(np.float32)
+    if not np.isfinite(obs).all():
+        raise ValueError("拒绝策略观测: float32 转换后存在非有限值")
+    return obs                                               # (n, obs_dim)
+
+
+def describe(values, valid=None, precision=2):
+    values = np.asarray(values, float)
+    mask = np.isfinite(values)
+    if valid is not None:
+        mask &= np.asarray(valid, bool)
+    samples = values[mask]
+    if not samples.size:
+        return "无有效数据（有效样本数=0）"
+    return (f"mean={samples.mean():.{precision}f}, "
+            f"min={samples.min():.{precision}f}, max={samples.max():.{precision}f} "
+            f"（有效样本数={samples.size}）")
+
+
+def report_rollout(yaw, power, yaw_valid, power_valid):
+    print("\n==================== ROLLOUT 结论 ====================")
+    for i in range(yaw.shape[1]):
+        print(f"T{i + 1} 末50步偏航角(°): "
+              + describe(yaw[-50:, i], yaw_valid[-50:, i]))
+        print(f"T{i + 1} 末50步功率(MW): "
+              + describe(power[-50:, i], power_valid[-50:, i], 3))
+    complete = power_valid.all(axis=1) & np.isfinite(power).all(axis=1)
+    farm = np.full(power.shape[0], np.nan)
+    farm[complete] = power[complete].sum(axis=1)
+    print("末50步全场功率(MW): " + describe(farm[-50:], precision=4))
+    print("上游(T1)最终偏航(°): " + describe(yaw[-1:, 0], yaw_valid[-1:, 0]))
 
 
 def main():
@@ -77,7 +128,7 @@ def main():
 
     ep_steps = args.ep_steps
     rt = SceneRuntime(sc, max_steps=ep_steps + WARMUP + 8, warmup_steps=0)
-    yaw_hist, pow_hist = [], []
+    yaw_hist, pow_hist, yaw_flags, power_flags = [], [], [], []
     try:
         rt.reset()
         contract.validate_runtime(sc.controls, rt.driver.act_bounds)
@@ -89,36 +140,38 @@ def main():
         for t in range(ep_steps):
             obs = pack_obs(m, n, obs_keys, obs_duty)
             obs_n = ((obs - mean) / std).astype(np.float32)
+            if not np.isfinite(obs_n).all():
+                raise ValueError("拒绝策略观测: 归一化后存在非有限值，请检查 checkpoint")
             with torch.no_grad():
                 a = actor.dist(torch.as_tensor(obs_n)).mean
             cmd = contract.commands(a.cpu().numpy(), n)
             rt.step(yaw_delta=cmd.get("yaw"), pitch_delta=cmd.get("pitch"),
                     torque_delta=cmd.get("torque"))
             m = rt.last_measure
-            yaw = np.asarray(m["yaw"], float).ravel()
-            pw = np.asarray(m["power"], float).ravel()
+            yaw, yaw_valid = measurement(m, "yaw", n)
+            pw, power_valid = measurement(m, "power", n)
             yaw_hist.append(yaw.copy())
             pow_hist.append(pw.copy())
+            yaw_flags.append(yaw_valid.copy())
+            power_flags.append(power_valid.copy())
             if t % 50 == 0 or t == ep_steps - 1:
-                print(f"  step {t:3d}  yaw={np.round(yaw, 1).tolist()}  "
-                      f"P={np.round(pw, 3).tolist()}  ΣP={pw.sum():.3f}MW",
+                yaw_text = [round(v, 1) if ok else "无有效数据" for v, ok in zip(yaw, yaw_valid)]
+                power_text = [round(v, 3) if ok else "无有效数据" for v, ok in zip(pw, power_valid)]
+                total = describe([pw.sum()] if power_valid.all() else [], precision=3)
+                print(f"  step {t:3d}  yaw={yaw_text} "
+                      f"(有效样本数={yaw_valid.sum()}) P={power_text} "
+                      f"(有效样本数={power_valid.sum()}) ΣP={total} MW",
                       flush=True)
     finally:
         rt.close(purge=True)
 
-    yaw_hist = np.array(yaw_hist)                              # (T, n)
-    pow_hist = np.array(pow_hist)
-    tail = slice(-50, None)                                    # 末 50 步稳态
-    print("\n==================== ROLLOUT 结论 ====================")
-    print(f"末50步平均偏航角(°): {np.round(yaw_hist[tail].mean(0), 2).tolist()}")
-    print(f"末50步偏航角范围   : "
-          f"min={np.round(yaw_hist[tail].min(0), 1).tolist()} "
-          f"max={np.round(yaw_hist[tail].max(0), 1).tolist()}")
-    print(f"末50步分机组功率(MW): {np.round(pow_hist[tail].mean(0), 3).tolist()}")
-    print(f"末50步全场功率(MW) : {pow_hist[tail].sum(1).mean():.4f}")
-    print(f"上游(T1)最终偏航   : {yaw_hist[-1, 0]:.2f}°  "
-          f"(理论最优 ~20°；可达上限 ~36° @400步)")
-    np.savez(args.out, yaw=yaw_hist, power=pow_hist)
+    yaw_hist = np.asarray(yaw_hist).reshape(-1, n)              # (T, n)
+    pow_hist = np.asarray(pow_hist).reshape(-1, n)
+    yaw_valid = np.asarray(yaw_flags, bool).reshape(-1, n)
+    power_valid = np.asarray(power_flags, bool).reshape(-1, n)
+    report_rollout(yaw_hist, pow_hist, yaw_valid, power_valid)
+    np.savez(args.out, yaw=yaw_hist, power=pow_hist,
+             yaw_valid=yaw_valid, power_valid=power_valid)
     print(f"轨迹存 -> {args.out}")
     return 0
 
