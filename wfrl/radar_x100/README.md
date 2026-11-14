@@ -2,7 +2,7 @@
 
 本包提供独立于 Blender 和训练 Bridge 的 `x100-frame.v1` 合同、严格 PLY 读取器、显式索引记录／回放、面积材料采样、几何观测、未标定工程检测模型、同帧分析数据类型／数学基准、有限安装排序、叶片拟合／因果估计和本地采集通道。依赖 Python 标准库和 NumPy。厂家 UDP 解码、SDK、航迹字段和实机标定尚未接入。
 
-本文描述工作区源码接口；面积材料采样、安装搜索与叶片估计由 0.3.42.8 扩展及配套源码提供，日常安装为同一 0.3.42.8 公开载荷。公开附件与日常安装的行为及验证范围按[载荷身份](../../docs/blender/发布状态与验证范围.md)核对。
+本文描述 X100 核心接口。0.5.0.0.1 扩展提供面积采样、几何与工程检测仿真、净空估计、安装报告导入和叶片估计。离线搜索和评价通过配套源码运行。公开包与日常安装的身份及验证范围见[发布状态](../../docs/blender/发布状态与验证范围.md)。
 
 ## 帧与来源
 
@@ -42,11 +42,11 @@
 python scripts/radar_x100/import_ply.py /path/to/index.json /path/to/new_recording
 ```
 
-导入保留同一次读取取得的原始 PLY 字节与摘要。记录包包含 `manifest.json`、`frame_index.jsonl`、`frames/*.ply` 和实际存在时的 `*.velocity.f32`。每项保存完整帧元数据、载荷摘要和回放时间；manifest 保存索引摘要。PLY 逐项只读一次，对同一字节快照校验并解码。`Replay.at(t)` 只选已到达时刻的最后一项原始帧，不插值生成观测；起点前返回无帧。具有相同呈现时间的帧保留独立索引，逐帧操作按索引访问。
+导入保留同一次读取取得的原始 PLY 字节与摘要。`Recorder.append()` 将传入的 `original_ply` 固定为不可变字节快照，点载荷校验、摘要和落盘均使用该快照。记录包包含 `manifest.json`、`frame_index.jsonl`、`frames/*.ply` 和实际存在时的 `*.velocity.f32`。每项保存完整帧元数据、载荷摘要和回放时间；manifest 保存索引摘要。PLY 逐项只读一次，对同一字节快照校验并解码。`Replay.at(t)` 只选已到达时刻的最后一项原始帧，不插值生成观测；起点前返回无帧。具有相同呈现时间的帧保留独立索引，逐帧操作按索引访问。
 
 Blender 工作区源码使用独立的 Python 播放时钟与索引选择帧，RNA 时间属性只承担显示与显式输入；自动片尾停在最后索引，再次播放从起点开始。目录重录使用实际选中原索引行的 `replay_time_s`，相对记录首行归零，完整保留原始 `FrameTime`。源时刻相等、递减或改变时钟域不改写呈现轴；主动跳回较早索引使当前重录失败并保留 `INCOMPLETE`，包括呈现时间相等的较早索引。UI 重录只包含实际显示并提交的行，不保证覆盖原包全部索引。
 
-`Recorder` 创建 `INCOMPLETE` 标记，至少写入一帧且成功关闭后才删除。关闭期间 `state` 为 `FINALIZING`，不再接受追加；关闭索引、写入状态为 `COMPLETE` 的最终清单并删除标记后，`state` 才变为 `COMPLETE`。零帧关闭进入 `FAILED`，保留错误与不完整标记；一帧零顶点观测仍是可回放的有效空帧。索引预算为 64 MiB，写入与读取使用同一上限；追加超过预算时记录失败，不生成无法被读取器打开的完整包。写盘、校验或记录预算失败进入 `FAILED`；已写文件、最后成功索引行数量和失败原因保留。未正常关闭的包不能作为完整回放打开。 工作区以独占临时文件写入、刷新并原子替换清单；最终清单写入失败时保留 `INCOMPLETE`，失败清单按可用存储尽力写入。
+`Recorder` 创建 `INCOMPLETE` 标记，至少写入一帧且成功关闭后才删除。关闭期间 `state` 为 `FINALIZING`，不再接受追加；关闭索引、写入状态为 `COMPLETE` 的最终清单并删除标记后，`state` 才变为 `COMPLETE`。零帧关闭进入 `FAILED`，保留错误与不完整标记；一帧零顶点观测仍是可回放的有效空帧。索引预算为 64 MiB，写入与读取使用同一上限；追加超过预算时记录失败，不生成无法被读取器打开的完整包。写盘、校验或记录预算失败进入 `FAILED`；追加或关闭期间的 `KeyboardInterrupt`、`SystemExit` 也执行失败清理，关闭索引并继续向调用方传播原始异常。已写文件、最后成功索引行数量和失败原因保留；异常没有消息时以异常类型名称记录原因。未正常关闭的包不能作为完整回放打开。 工作区以独占临时文件写入、刷新并原子替换清单；最终清单写入失败时保留 `INCOMPLETE`，失败清单按可用存储尽力写入。
 
 ## 几何观测
 
@@ -72,15 +72,15 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 
 ## 工程检测模型
 
-[simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，`DetectionConfig()` 默认 `calibration_status=UNCALIBRATED`；[calibration.py](calibration.py) 的 `calibrated_config()` 给出按实测无人机 PLY 拟合的 `USER_CALIBRATED` 配置，Blender 工作区的 DETECTIONS 使用该配置与已应用视场（拟合量与未拟合项见[检测校准](../../docs/blender/X100雷达.md#检测校准)）。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式工作区源码)。两者都不是设备实测。
+[simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，`DetectionConfig()` 默认 `calibration_status=UNCALIBRATED`；[calibration.py](calibration.py) 的 `calibrated_config()` 给出按实测无人机 PLY 拟合的 `USER_CALIBRATED` 配置，Blender 工作区的 DETECTIONS 使用该配置与已应用视场（拟合量与未拟合项见[检测校准](../../docs/blender/X100雷达.md#检测校准)）。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式)。两者都不是设备实测。
 
-**交付范围：**公开 0.3.42.8 扩展按 [扩展构建清单](../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 包含 `detection.py` 与 `clearance.py`，提供 DETECTIONS 工程检测链与净空估计。本机日常安装为同一 0.3.42.8 公开载荷，已包含这两个模块；其安装记录只核对文件身份、新进程模块来源、持久启用与配置保留，未运行这两条功能路径。隔离安装验证工具在安装后的扩展上运行 DETECTIONS 与净空检查；当前发布未运行这些检查，验证范围按[发布记录](../../publication/blender-0.3.42.8/verification.json)识别。
+0.5.0.0.1 扩展按[构建清单](../../scripts/blender/build_extension.py)打包 `calibration.py`、`detection.py` 和 `clearance.py`，提供 DETECTIONS 工程检测与净空估计。隔离安装验证工具在目标扩展内运行这两条路径；实际发布和安装的验证状态见[发布状态](../../docs/blender/发布状态与验证范围.md#软件验证的适用对象)。
 
 模型假设如下：
 
 - `surface_rcs()` 将参考面积权重乘以有效 RCS 密度和双面入射因子 `abs(normal·LOS)^incidence_exponent`。面积本身不是 RCS；法向取当前几何，参考面积随材料运输，不随表面应变重算。
 - `received_power_w()` 使用单站、远场、自由空间点散射体雷达方程，期望功率按距离四次方衰减；收发使用相同形状的可分离方向图，额外传播衰减按往返距离计算。该关系描述功率，不规定点数按距离四次方衰减。
-- 分辨率聚类使用距离、`sin(方位角)`、`sin(俯仰角)`、径向速度四维连续距离；每簇各维跨度不超过一个分辨宽度，不按固定箱边界分割近邻，也不让相邻链条无限合并。正轴分辨率为 **0.2 m／1°／2°／0.1 m/s**，角轴宽度用正轴角宽的弧度值表示。离轴采用恒定方向余弦分辨率假设，各角轴局部角宽约为 `正轴角宽 / cos(离轴角)`；这不是厂家给出的离轴性能曲线。位置与速度为功率加权连续质心，不量化到箱中心。实现上每帧先按相邻哈希箱一次性列出各点在四维均不超过一个分辨宽度的近邻，再按字典序种子逐个分簇；有限输入、编码范围和近邻对数（`MAX_NEIGHBOR_PAIRS`）在预算内时使用该路径，否则回退逐种子查 81 个相邻箱的同义实现，两者标签与簇数逐项一致。
+- 分辨率聚类使用距离、`sin(方位角)`、`sin(俯仰角)`、径向速度四维连续距离；每簇各维跨度不超过一个分辨宽度，不按固定箱边界分割近邻，也不让相邻链条无限合并。正轴分辨率为 **0.2 m／1°／2°／0.1 m/s**，角轴宽度用正轴角宽的弧度值表示。离轴采用恒定方向余弦分辨率假设，各角轴局部角宽约为 `正轴角宽 / cos(离轴角)`；这不是厂家给出的离轴性能曲线。位置与速度为功率加权连续质心，先将各贡献功率除以所属簇的总功率，再对位置与速度加权，不量化到箱中心。实现上每帧先按相邻哈希箱一次性列出各点在四维均不超过一个分辨宽度的近邻，再按字典序种子逐个分簇；有限输入、编码范围和近邻对数（`MAX_NEIGHBOR_PAIRS`）在预算内时使用该路径，否则回退逐种子查 81 个相邻箱的同义实现，两者标签与簇数逐项一致。
 - 簇内先相加非相干期望功率。默认 `SWERLING_0` 用确定性合成信号幅值加复高斯噪声，检测概率为 Marcum Q1；可选 `SWERLING_1` 才用信号加噪声均值的指数总功率。门限／处理后噪声比为 `-ln(Pfa)`，门限后可另加独立漏检。
 - 虚警试验覆盖距离、两个方向余弦和多普勒四维搜索域；有正响应散射体的搜索箱不参加纯噪声试验。空箱虚警概率为单元 `Pfa`，位置和速度在各自搜索箱内均匀抽样。按抽样总功率截取最强输出，再加独立高斯测量误差；越出量程、角域或速度范围的估计丢弃，不补点。不同帧独立。
 - 不包含相干相位干涉、极化、近场电磁求解、多径、实际波形处理、chirp 时序、厂家分类或跟踪。多普勒分辨仅是上述工程聚类近似。
@@ -105,7 +105,8 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 | `processing_gain_db`、`false_alarm_probability_per_cell`、`fluctuation_model` | 43.1220604659924 dB、1e-12、`SWERLING_0`；检测器噪声为接收机噪声除以线性处理增益 |
 | `miss_probability`、`false_alarms_enabled` | 0；`True`，门限后的附加漏检与空单元虚警开关 |
 | `range_std_m`、`azimuth_std_deg`、`elevation_std_deg`、`radial_velocity_std_m_s` | 0.025 m、0.05°、0.1°、0.025 m/s；把手册±0.05 m、±0.1°／0.2°、±0.05 m/s假设为高斯±2σ。手册未说明置信度或分布；显式设0才关闭相应误差 |
-| `azimuth_limit_deg`、`elevation_limit_deg` | 60°、22°（`schema.PROFILE`）；矩形视场半角，取值 (0, 90]，同时决定视场筛选、角度输出筛选和噪声搜索网格。`simulate(..., fov_deg=)` 为几何对照提供同一视场 |
+| `azimuth_limit_deg`、`elevation_limit_deg` | 60°、22°（`schema.PROFILE`）；矩形视场半角，取值 (0, 90]，同时决定视场筛选、角度输出筛选和噪声搜索网格。`simulate(..., fov_deg=, fov_shape=)` 为几何对照提供同一视场 |
+| `field_of_view_shape` | `ANGULAR`（默认）：方位角、俯仰角分别不超过半角；`PROJECTIVE`：针孔相机矩形，`x > 0` 且 \|y/x\| ≤ tan 方位半角、\|z/x\| ≤ tan 俯仰半角，半角须 ≤ 89.9°。噪声搜索网格仍取同样半角的外包范围，落在矩形外的检测与虚警在角度输出筛选中剔除；`simulation.fov_mask()`／`in_fov(..., shape)` 提供同一判定 |
 | `ms_velocity_threshold_m_s` | 1e-6 m/s；`ms` = |合成径向速度| 大于该值 |
 | `vendor_snr_offset_db`、`vendor_mag_slope`、`vendor_mag_intercept`、`vendor_mag_std` | `None`、1、0、0；偏置为 `None` 时不填厂家字段 |
 | `calibration_status`、`calibration_reference`、`parameter_basis` | `UNCALIBRATED`、`None`、研究假设声明；`USER_CALIBRATED` 必须提供非空引用，但软件只校验声明，不验证标定质量 |
@@ -133,7 +134,7 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 
 ## 同帧侧壁分析与评价边界
 
-`analysis.Context` 以只读 NumPy 数组保存身份、`world_from_analysis`、`world_from_sensor`、侧壁顶点及三角面；不包含叶片真值和材料标签。`validate_surface()` 拒绝非法、非有限或退化塔面；`closest_reference()` 是小样本独立 NumPy 数学基准，`distance_colors()` 提供独立固定单向色标，不改变原始点属性。纯核心不导入 bpy 或 mathutils。
+`analysis.Context` 以只读 NumPy 数组保存身份、`world_from_analysis`、`world_from_sensor`、侧壁顶点及三角面；不包含叶片真值和材料标签。`validate_surface()` 拒绝非法、非有限或退化塔面；`closest_reference()` 是小样本独立 NumPy 数学基准，通过叉积重心坐标判断投影是否位于三角面内，兼顾面内投影与闭合边界距离。`distance_colors()` 提供独立固定单向色标，不改变原始点属性。纯核心不导入 bpy 或 mathutils。
 
 Blender `SceneSampler.analysis_context()` 从中心源时刻样本提取配对上下文，运行时身份包含场景会话运行代、源帧、时钟、来源／几何／标定及适用回放索引。`SideWallQuery` 负责锚点 BVH，结果逐点保留原始 indices、机舱局部 points、distance、世界最近点 nearest、侧壁局部 triangle 和 status；状态为 VALID、OUTSIDE_ROI、NONFINITE 或 QUERY_FAILED。缺失距离／最近点使用 NaN，无面身份使用 -1，不填零。finite 计全部有限坐标点，selected 计 ROI 内有限点，valid 计距离查询成功点；距离分位数只使用有效距离，不受显示缩放或像素裁剪影响。
 
@@ -145,7 +146,9 @@ Blender `SceneSampler.analysis_context()` 从中心源时刻样本提取配对�
 
 [installation.py](installation.py) 与 [optimize_mount.py](../../scripts/radar_x100/optimize_mount.py) 使用 `x100-installation-search.v2`。报告分开保存硬件、ROI、机械、几何覆盖、所评网格的模拟检测支持及 `detection_profiles[].passage_detection_support`。主指标为 `DISTAL_ROI_PASSAGE_DETECTIONS.v1`：完整叶片经过期间末段ROI的非纯噪声检测支持、最长连续漏检秒数、精确正下方时刻支持与塔距误差。排序依次比较最差经过支持率、最长漏检、正下方支持率、最差叶片支持率、塔距RMSE、平均ROI检测点数，几何覆盖只作平局辅助。各配置取最不利值，不合成设备可靠性分数。
 
-`selected_installation()` 校验v2、来源、几何、面积方法与算法身份并重算排名；机械／运动须为 `PASS_RESEARCH`，检测经过、正下方与适用塔距误差须已知，最差叶片检测支持须为正。导入还要求所评网格的模拟支持已知且为正、几何覆盖字段齐全；几何零覆盖本身不再是排名否决条件。缺证据、排名不符、来源不符或有错误帧时拒绝应用。仅筛选前若干经过的报告不提供可应用 `winner_id`。应用保留预算、观测模式和场景时刻；ROI可能包含塔架返回，支持率不是叶片识别率，详见[安装覆盖搜索](../../docs/blender/X100观测研究.md#安装覆盖搜索)。
+`--output` 指定完整报告路径。存在可应用推荐时，配套的 `<文件名主体>.summary.json` 保存同一 v2 来源信息、机械筛选策略、全部候选及用于资格检查和重算排名的汇总字段。逐帧数据留在完整报告中，摘要的 `evidence_report` 记录该文件的名称和 SHA-256。Blender 导入上限为 16 MiB，超限时选择摘要。搜索按筛选与评分字段排名，再从检查点逐候选写入完整报告。已有兼容的完整报告可用 `scripts/radar_x100/extract_mount_summary.py` 提取摘要，提取命令需要读入并解析整份输入。完整报告及摘要使用新文件名发布，摘要写出失败时保留已发布的完整报告。搜索失败或中断保留任务目录中的 `metadata.json` 和已完成候选的独立 JSON。[搜索与摘要提取](../../docs/blender/X100观测研究.md#安装覆盖搜索)
+
+`selected_installation()` 校验v2、来源、几何、面积方法与算法身份并重算排名。导入要求 `mechanical_policy` 声明当前安装包络尺寸、轴向与中心、研究参数、仅外部安装规则及 `physical_installation_approved=false`。缺失或不符时须重新运行 `scripts/radar_x100/optimize_mount.py`。机械／运动须为 `PASS_RESEARCH`，检测经过、正下方与适用塔距误差须已知，最差叶片检测支持须为正。导入还要求所评网格的模拟支持已知且为正、几何覆盖字段齐全；几何零覆盖本身不再是排名否决条件。缺证据、排名不符、来源不符或有错误帧时拒绝应用。仅筛选前若干经过的报告不提供可应用 `winner_id`。应用保留预算、观测模式和场景时刻；ROI可能包含塔架返回，支持率不是叶片识别率，详见[安装覆盖搜索](../../docs/blender/X100观测研究.md#安装覆盖搜索)。
 
 `tracking.py` 的 `fit_blades()` 只接收观测世界坐标、同帧塔面距离及三个 `BladePrior`。先验含逻辑叶片编号、`world_from_blade` 和名义叶尖径向坐标 `tip_span_m`；Blender 以轮毂为原点、根部方向为坐标轴，末端局部Z取结构参数 `TipRad`。已知塔面附近点及多叶片走廊重叠点保持未关联；原始观测和原索引不改写。分段中位数与稳健二次拟合提供候选叶片段，支持、跨度、残差和外推条件满足时给出名义径向截面的模型叶尖估计。拟合离散度不是经过标定的物理置信区间。
 

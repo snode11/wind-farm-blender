@@ -60,10 +60,8 @@ def closest_reference(points, vertices, triangles):
             distances.append(np.nan); nearest.append([np.nan]*3); ids.append(-1); continue
         q = point-n*(np.einsum('ij,ij->i',point-a,n)/nn)[:,None]
         w=q-a
-        uu,vv,uv = (np.einsum('ij,ij->i',x,y) for x,y in ((u,u),(v,v),(u,v)))
-        wu,wv = np.einsum('ij,ij->i',w,u),np.einsum('ij,ij->i',w,v)
-        beta=(wu*vv-wv*uv)/(uu*vv-uv*uv)
-        gamma=(wv*uu-wu*uv)/(uu*vv-uv*uv)
+        beta=np.einsum('ij,ij->i',np.cross(w,v),n)/nn
+        gamma=np.einsum('ij,ij->i',np.cross(u,w),n)/nn
         candidates=[np.where(((beta>=0)&(gamma>=0)&(beta+gamma<=1))[:,None],q,np.inf)]
         for x,y in ((a,b),(b,c),(c,a)):
             edge=y-x

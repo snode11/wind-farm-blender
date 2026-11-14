@@ -71,46 +71,92 @@ class DisXYFrame:
     vec: np.ndarray = None  # (ny, nx, 3) 三分量，需要画流线时用
 
 
-_KV = re.compile(rb"^\s*(\w+)\s+(.*)$")
-
-
 def read_disxy(path):
     """读一张 FAST.Farm 的 DisXY VTK（legacy STRUCTURED_POINTS，ASCII 或 BINARY）。
 
-    FAST.Farm 写的是 3 分量向量场，点序是 X 最快、然后 Y、然后 Z（Z 只有 1 层）。
-    BINARY 段是 **big-endian float32**（legacy VTK 规定），Windows 上直接
-    `np.fromfile` 会读成小端乱码 —— 必须显式 `>f4`。
+    支持单层 XY 网格和一个 VECTORS float 三分量场，点序为 X 最快、然后 Y。
+    BINARY 数据按 big-endian float32 读取。头部、点数、数据长度和有限值
+    必须一致；损坏、缺测或不支持的格式抛出带路径的 ValueError。
     """
     with open(path, "rb") as fh:
-        blob = fh.read()
-    # 头部是文本行；找到 LOOKUP_TABLE / VECTORS 之后的数据起点
-    head_end = blob.find(b"\n", blob.find(b"VECTORS"))
-    head = blob[:head_end].decode("latin-1", "replace")
+        if not re.fullmatch(rb"# vtk DataFile Version \d+\.\d+\s*", fh.readline(), re.I):
+            raise ValueError(f"{path}: 无效 VTK 文件标识")
+        fh.readline()  # The title is free text, not a source of header fields.
+        encoding = fh.readline().strip().upper()
+        if encoding not in (b"ASCII", b"BINARY"):
+            raise ValueError(f"{path}: 编码必须为 ASCII 或 BINARY")
+        head = {}
+        while True:
+            line = fh.readline()
+            if not line:
+                raise ValueError(f"{path}: 缺 VECTORS 或头部截断")
+            try:
+                fields = line.decode("ascii").split()
+            except UnicodeDecodeError as exc:
+                raise ValueError(f"{path}: VECTORS 头部必须为 ASCII") from exc
+            if not fields:
+                continue
+            key = fields[0].upper()
+            if key not in {"DATASET", "DIMENSIONS", "ORIGIN", "SPACING", "POINT_DATA", "VECTORS"}:
+                raise ValueError(f"{path}: 不支持的 VECTORS 头部字段 {key}")
+            if key in head:
+                raise ValueError(f"{path}: 重复 {key}")
+            head[key] = fields[1:]
+            if key == "VECTORS":
+                payload = fh.read()
+                break
 
     def _grab(key, cast=float, n=3):
-        m = re.search(rf"{key}\s+([-\d.eE+\s]+)", head)
-        if not m:
+        if key not in head:
             raise ValueError(f"{path}: 缺 {key}")
-        return [cast(v) for v in m.group(1).split()[:n]]
+        if len(head[key]) != n:
+            raise ValueError(f"{path}: {key} 必须有 {n} 个值")
+        try:
+            return [cast(v) for v in head[key]]
+        except ValueError as exc:
+            raise ValueError(f"{path}: 无效 {key}") from exc
 
+    if _grab("DATASET", str.upper, 1) != ["STRUCTURED_POINTS"]:
+        raise ValueError(f"{path}: DATASET 必须为 STRUCTURED_POINTS")
     nx, ny, nz = _grab("DIMENSIONS", int)
+    if nx < 1 or ny < 1 or nz != 1:
+        raise ValueError(f"{path}: DIMENSIONS 必须为正数且 XY 切面 nz=1")
     ox, oy, oz = _grab("ORIGIN")
     dx, dy, dz = _grab("SPACING")
-    binary = "BINARY" in head
+    if not np.isfinite([ox, oy, oz]).all():
+        raise ValueError(f"{path}: ORIGIN 必须为有限数值")
+    if not np.isfinite([dx, dy, dz]).all() or min(dx, dy, dz) <= 0:
+        raise ValueError(f"{path}: SPACING 必须为有限正数")
+    if _grab("POINT_DATA", int, 1)[0] != nx * ny:
+        raise ValueError(f"{path}: POINT_DATA 与 DIMENSIONS 不一致")
+    if _grab("VECTORS", str, 2)[1].lower() != "float":
+        raise ValueError(f"{path}: VECTORS 仅支持 float")
 
     want = nx * ny * nz * 3
-    if binary:
-        raw = np.frombuffer(blob, dtype=">f4", count=want,
-                            offset=head_end + 1).astype(np.float32)
+    if encoding == b"BINARY":
+        size = want * 4
+        if len(payload) < size or payload[size:].strip():
+            raise ValueError(f"{path}: VECTORS 数据长度不符，需 {size} 字节，可能还在写")
+        raw = np.frombuffer(payload, dtype=">f4", count=want).astype(np.float32)
     else:
-        raw = np.asarray(blob[head_end + 1:].split()[:want], dtype=np.float32)
-    if raw.size < want:
-        raise ValueError(f"{path}: 数据不全（{raw.size}/{want}），可能还在写")
+        tokens = payload.split()
+        if len(tokens) != want:
+            raise ValueError(f"{path}: VECTORS 数据量不符（{len(tokens)}/{want}），可能还在写")
+        try:
+            with np.errstate(over="ignore", invalid="ignore"):
+                raw = np.asarray(tokens, dtype=np.float32)
+        except ValueError as exc:
+            raise ValueError(f"{path}: VECTORS 数据必须为数值") from exc
+    if not np.isfinite(raw).all():
+        raise ValueError(f"{path}: VECTORS 数据必须为有限数值")
     vec = raw.reshape(nz, ny, nx, 3)[0]          # nz=1（XY 切面）
 
-    x = ox + dx * np.arange(nx)
-    y = oy + dy * np.arange(ny)
-    u = np.hypot(vec[:, :, 0], vec[:, :, 1])     # 水平幅值；竖向分量不进色标
+    with np.errstate(over="ignore", invalid="ignore"):
+        x = ox + dx * np.arange(nx)
+        y = oy + dy * np.arange(ny)
+        u = np.hypot(vec[:, :, 0], vec[:, :, 1])  # 水平幅值；竖向分量不进色标
+    if not (np.isfinite(x).all() and np.isfinite(y).all() and np.isfinite(u).all()):
+        raise ValueError(f"{path}: 网格坐标及水平风速必须为有限数值")
     t = _step_of(path)
     return DisXYFrame(t=t, path=path, x=x, y=y, u=u, vec=vec)
 
@@ -174,8 +220,8 @@ class DisXYReader:
     def wait_first(self, timeout=60.0, poll=0.5):
         """阻塞等第一张切面（建场景要先知道网格范围）。超时返回 None。"""
         import time
-        t0 = time.time()
-        while time.time() - t0 < timeout:
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < timeout:
             fr = self.latest()
             if fr is not None:
                 return fr

@@ -48,24 +48,53 @@ def reader_for(scene):
 def clear(scene, reason='回放数据未就绪'):
     _READERS.pop(scene.as_pointer(), None)
     scene['wfrl_flex_active'] = False
-    from .clearance_visual import reset_beams
-    reset_beams(scene)
+    scene['wfrl_clearance_status'] = reason
+    scene.wfrl_clearance_show_config = True
+    errors = []
+    try:
+        from .clearance_visual import reset_beams
+        reset_beams(scene)
+    except Exception as exc:
+        errors.append(exc)
     try:
         from . import tip_tracking
         tip_tracking.reset(scene, 'replay_clear')
     except ImportError:
         pass
-    scene['wfrl_clearance_status'] = reason
-    scene.wfrl_clearance_show_config = True
+    except Exception as exc:
+        errors.append(exc)
+    if errors:
+        for error in errors[1:]:
+            errors[0].add_note(f'Replay cleanup also failed: {error}')
+        raise errors[0]
+
+
+def simulation_time(scene, reader):
+    """Map a finite timeline position using the saved simulation timebase."""
+    if 'wfrl_clearance_timebase_fps' in scene:
+        timebase = scene['wfrl_clearance_timebase_fps']
+    else:
+        fps, base = scene.render.fps, scene.render.fps_base
+        if (type(fps) not in (int, float) or type(base) not in (int, float)
+                or not math.isfinite(fps) or not math.isfinite(base) or base <= 0):
+            raise ValueError('Invalid replay timebase')
+        timebase = fps / base
+    if type(timebase) not in (int, float) or not math.isfinite(timebase) or timebase <= 0:
+        raise ValueError('Invalid replay timebase')
+    elapsed = (scene.frame_current + scene.frame_subframe - scene.frame_start) / timebase
+    time_s = reader.start_s + elapsed
+    if not math.isfinite(time_s):
+        raise ValueError('Invalid replay time')
+    return min(reader.end_s, max(reader.start_s, time_s))
+
+
 def sample(scene):
     reader = reader_for(scene)
     if reader is None:
         return None
     # The timeline's simulation mapping is fixed when a clip is loaded. Render
     # FPS controls playback speed, not which saved observation a frame means.
-    timebase = scene.get('wfrl_clearance_timebase_fps', scene.render.fps / scene.render.fps_base)
-    elapsed = (scene.frame_current + scene.frame_subframe - scene.frame_start) / timebase
-    return reader.at(min(reader.end_s, max(reader.start_s, reader.start_s + elapsed)))
+    return reader.at(simulation_time(scene, reader))
 
 
 def load(scene, path, demo, *, restoring=False):
@@ -147,7 +176,14 @@ def update(scene, depsgraph=None):
             # Native timeline edits must obey the same bounds as the replay slider.
             scene.frame_set(frame)
             return
-    value = sample(scene)
+    try:
+        value = sample(scene)
+    except (ValueError, TypeError, ArithmeticError) as error:
+        try:
+            clear(scene, '回放数据未就绪：' + str(error))
+        except Exception as cleanup_error:
+            error.add_note(f'Replay cleanup failed: {cleanup_error}')
+        raise
     if value is None:
         return
     from .clearance_visual import update_beams
@@ -179,6 +215,9 @@ def update(scene, depsgraph=None):
 
 def on_load_pre(_):
     """File loads release parsed packages even when no replay is attached."""
+    global _END_REQUEST
+    _END_REQUEST = None
+    _READERS.clear()
     from . import farm_flex
     farm_flex.clear_package_cache()
 
@@ -243,7 +282,7 @@ def on_load(_):
                     continue
                 load(scene, bpy.path.abspath(path), demo, restoring=True)
                 scene.frame_set(frame, subframe=subframe)
-            except (ValueError, OSError, ImportError, KeyError, TypeError, ReferenceError) as exc:
+            except (ValueError, OSError, ImportError, KeyError, TypeError, ReferenceError, RuntimeError) as exc:
                 clear(scene, '回放数据未就绪：' + str(exc))
 
 

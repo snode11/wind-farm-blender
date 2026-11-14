@@ -1,6 +1,7 @@
 """X100 controls for source identity, installation, replay and recording health."""
 import bpy
 import time
+from types import SimpleNamespace
 from ..radar_x100.output import WFRL_OT_X100Output
 
 
@@ -57,6 +58,24 @@ class WFRL_OT_X100MountPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def _frame_mount(context):
+    from ..radar_x100.runtime import session_for
+    try:
+        area = getattr(context, 'area', None)
+        if area is None or area.type != 'VIEW_3D':
+            return None
+        space = area.spaces.active
+        if not any(tuple(space.region_quadviews) or (space.region_3d,)):
+            return None
+        session = session_for(context.scene)
+        mount = session.mount if session is not None else None
+        if mount is not None and context.scene.objects.get(mount.name) == mount:
+            return mount
+    except (AttributeError, ReferenceError, RuntimeError):
+        return None
+    return None
+
+
 class WFRL_OT_X100FrameUnit(bpy.types.Operator):
     bl_idname = 'wfrl.x100_frame_unit'
     bl_label = '查看雷达'
@@ -64,15 +83,42 @@ class WFRL_OT_X100FrameUnit(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        from ..radar_x100.runtime import session_for
-        session = session_for(context.scene)
-        return bool(session and session.mount and session.mount.name in context.scene.objects)
+        return _frame_mount(context) is not None
 
     def execute(self, context):
-        from ..radar_x100.runtime import session_for
-        from ..radar_x100.view import frame_unit
-        if not frame_unit(context, session_for(context.scene).mount):
-            self.report({'WARNING'}, '当前窗口没有 3D 视口')
+        from ..radar_x100.view import frame_unit, housing
+        mount = _frame_mount(context)
+        if mount is None:
+            self.report({'WARNING'}, '请在有效的 3D 视口中查看已安装的雷达')
+            return {'CANCELLED'}
+        saved = []
+        try:
+            model = housing(mount)
+            if model is not None and model.get('wfrl_x100_hidden_for_camera') is not None:
+                self.report({'INFO'}, '雷达与相机光心重合，外形已隐藏以免遮挡相机画面')
+                return {'CANCELLED'}
+            space = context.area.spaces.active
+            saved.append((space, 'clip_start', space.clip_start))
+            for region in tuple(space.region_quadviews) or (space.region_3d,):
+                if region is None:
+                    continue
+                for name in ('view_perspective', 'view_location', 'view_rotation', 'view_distance'):
+                    value = getattr(region, name)
+                    saved.append((region, name, value.copy() if hasattr(value, 'copy') else value))
+            local_context = SimpleNamespace(screen=SimpleNamespace(areas=(context.area,)))
+            if not frame_unit(local_context, mount):
+                raise ValueError('当前区域没有 3D 视口')
+        except Exception as exc:
+            errors = []
+            for owner, name, value in saved:
+                try:
+                    setattr(owner, name, value)
+                except Exception as cleanup:
+                    errors.append(str(cleanup))
+            message = str(exc)
+            if errors:
+                message += '；视口恢复失败：' + '；'.join(errors)
+            self.report({'ERROR'}, message)
             return {'CANCELLED'}
         return {'FINISHED'}
 
@@ -80,11 +126,12 @@ class WFRL_OT_X100FrameUnit(bpy.types.Operator):
 class WFRL_OT_X100SearchApply(bpy.types.Operator):
     bl_idname = 'wfrl.x100_search_apply'
     bl_label = '应用搜索推荐安装'
-    bl_description = '核对来源后应用离线搜索结果，保留当前场景时刻'
+    bl_description = '应用离线搜索生成的 .summary.json 或大小不超过 16 MiB 的完整报告，保留当前场景时刻'
 
     def execute(self, context):
         import json
         from pathlib import Path
+        from ..radar_x100.core import installation
         from ..radar_x100.runtime import apply_mount_preset
         try:
             busy = _busy(context.scene)
@@ -92,9 +139,10 @@ class WFRL_OT_X100SearchApply(bpy.types.Operator):
                 raise ValueError(busy)
             path = Path(bpy.path.abspath(context.scene.wfrl_x100_search_path))
             with path.open('rb') as stream:
-                raw = stream.read(16 * 1024 * 1024 + 1)
-            if len(raw) > 16 * 1024 * 1024:
-                raise ValueError('安装搜索报告超过大小上限')
+                raw = stream.read(installation.SEARCH_REPORT_MAX_BYTES + 1)
+            if len(raw) > installation.SEARCH_REPORT_MAX_BYTES:
+                raise ValueError('安装搜索报告超过 16 MiB，请选择同次搜索的 .summary.json。'
+                                 '也可用 scripts/radar_x100/extract_mount_summary.py 从完整报告提取摘要')
             apply_mount_preset(context.scene, 'SEARCH', search_report=json.loads(raw))
         except Exception as exc:
             self.report({'ERROR'}, str(exc))
@@ -102,32 +150,54 @@ class WFRL_OT_X100SearchApply(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def _replay_session(context):
+    from ..radar_x100.runtime import session_for
+    try:
+        session = session_for(context.scene)
+        if (session is not None and session.mode == 'REPLAY' and session.replay is not None
+                and session.replay.rows and not getattr(session, 'closing', False)):
+            return session
+    except (AttributeError, ReferenceError, RuntimeError):
+        return None
+    return None
+
+
 class WFRL_OT_X100Step(bpy.types.Operator):
     bl_idname = 'wfrl.x100_step'
     bl_label = '文件帧跳转'
     direction: bpy.props.IntProperty(default=1)
 
+    @classmethod
+    def poll(cls, context):
+        return _replay_session(context) is not None
+
     def execute(self, context):
-        from ..radar_x100.runtime import session_for
-        session = session_for(context.scene)
-        if session and session.mode == 'REPLAY' and session.replay:
+        session = _replay_session(context)
+        if session is None:
+            return {'CANCELLED'}
+
+        def step():
             session.playing = False
             index = session.selected_replay_index()
             index = max(0, min(len(session.replay.rows) - 1, index + self.direction))
-            return _replay_action(self, context, lambda: session.seek_frame(index))
-        return {'FINISHED'}
+            session.seek_frame(index)
+
+        return _replay_action(self, context, step)
 
 
 class WFRL_OT_X100Play(bpy.types.Operator):
     bl_idname = 'wfrl.x100_play'
     bl_label = '文件播放 / 暂停'
 
+    @classmethod
+    def poll(cls, context):
+        return _replay_session(context) is not None
+
     def execute(self, context):
-        from ..radar_x100.runtime import session_for
-        session = session_for(context.scene)
-        if session and session.mode == 'REPLAY' and session.replay:
-            return _replay_action(self, context, session.toggle_playback)
-        return {'FINISHED'}
+        session = _replay_session(context)
+        if session is None:
+            return {'CANCELLED'}
+        return _replay_action(self, context, session.toggle_playback)
 
 
 def _replay_action(operator, context, action):
@@ -295,6 +365,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                 vector.label(text=scene.bl_rna.properties[name].name)
                 for index, axis in enumerate('XYZ' if name != 'wfrl_x100_field_of_view' else ('方位', '俯仰')):
                     vector.prop(scene, name, index=index, text=axis)
+            _property(layout, scene, 'wfrl_x100_field_of_view_shape', narrow=narrow)
             layout.separator()
             if scene.wfrl_x100_observation_mode == 'GEOMETRY':
                 _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
@@ -474,6 +545,8 @@ class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):
         from ..radar_x100.runtime import session_for
         from ..radar_x100.display import source_label
         session = session_for(context.scene)
+        if session is None:
+            return
         layout = self.layout.column(align=True)
         if session.frame:
             frame = session.frame
@@ -538,7 +611,7 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
         layout.label(text='仅记录实际采样帧；非完整 33 Hz 导出', icon='INFO')
 
 
-PROPERTIES = ('source', 'observation_mode', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
+PROPERTIES = ('source', 'observation_mode', 'mount', 'location', 'rotation', 'field_of_view', 'field_of_view_shape', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
               'port', 'stream', 'stale_s', 'color', 'echo_classes', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit', 'search_path', 'blade_tracking')
 
 
@@ -573,9 +646,13 @@ def register_properties():
         field_of_view=p.FloatVectorProperty(name='视场半角 (°)', size=2, min=.1, max=90.,
             description='矩形视场的方位 / 俯仰半角；默认取规格书视场',
             default=(schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg'])),
+        field_of_view_shape=p.EnumProperty(name='视场形状', default='ANGULAR', items=(
+            ('ANGULAR', '方位／俯仰角', '方位角与俯仰角分别不超过半角；规格书雷达视场'),
+            ('PROJECTIVE', '相机矩形', '与针孔相机画面一致的矩形：横向与纵向正切不超过半角正切；半角须小于 90°'))),
         candidates=p.IntProperty(name='采样预算', description='下一新样本读取的材料表面候选预算；不等于输出点数', default=512, min=1, max=schema.PROFILE['max_points']),
         fov=p.BoolProperty(name='名义视场', description=f"即时显示名义视场，长度 {schema.DISPLAY_DEFAULTS['fov_length_m']:g} m，不代表探测结果或量程", default=True),
-        path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH', update=ply_path_changed),
+        path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH',
+            options={'ANIMATABLE', 'PATH_SUPPORTS_BLEND_RELATIVE'}, update=ply_path_changed),
         ply_source=p.EnumProperty(name='单帧 PLY 来源', default='UNDECLARED', items=(
             ('UNDECLARED', '请选择来源', 'PLY 本身不包含来源信息，需根据实际生成方式声明'),
             ('GEOMETRY_SIMULATION', '几何仿真', '来自几何仿真的单帧文件'),

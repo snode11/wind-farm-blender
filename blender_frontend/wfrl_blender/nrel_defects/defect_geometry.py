@@ -5,6 +5,7 @@ healthy meshes are private immutable copies.  Analysis footprints are plain
 coordinates, not hidden objects that could accidentally occlude an opening.
 """
 from copy import deepcopy
+import logging
 import math
 import time
 
@@ -13,6 +14,8 @@ import bmesh
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 from .defect_shapes import patch_depth_factor, lightning_crater
+
+_LOG = logging.getLogger(__name__)
 
 BINDING_TOLERANCE_M = 1e-5
 SIZE_TOLERANCE_M = .001
@@ -58,7 +61,7 @@ def _normal(triangle):
     u, v = [b[i]-a[i] for i in range(3)], [c[i]-a[i] for i in range(3)]
     n = (u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0])
     length = math.sqrt(sum(x*x for x in n))
-    if length <= 1e-12:
+    if not math.isfinite(length) or length <= 1e-12:
         raise ValueError('Degenerate defect support triangle')
     return tuple(x/length for x in n)
 
@@ -90,8 +93,9 @@ def _support(defect, kind, triangles, shape, *, primary, definition=None):
         anchors=deepcopy(shape.get('anchors', [])) if primary else [])
 
 
-def _new_material(name, color, roughness):
+def _new_material(name, color, roughness, owned_materials):
     mat = bpy.data.materials.new(name)
+    owned_materials.append(mat)
     mat.use_nodes = True
     mat.diffuse_color = (*color, 1)
     node = mat.node_tree.nodes.get('Principled BSDF')
@@ -231,6 +235,7 @@ class DefectGeometry:
         self._active = None
         self._healthy = {}
         self._baseline = {}
+        self._pending_preparations = []
         referenced = {index for face in surface.faces for index in face}
         if len(surface.vertices)-1 not in referenced:
             raise ValueError('NREL cosmetic apex must be the referenced terminal vertex')
@@ -292,7 +297,7 @@ class DefectGeometry:
     def active(self):
         return self._active
 
-    def _preserve_tip_vertices(self, mesh):
+    def _preserve_tip_vertices(self, mesh, owned_meshes):
         """Rebuild post-Boolean ordering while retaining loop UVs and markings.
 
         Trails read the cosmetic apex at [-1]. ComparisonView reads the loose
@@ -315,6 +320,7 @@ class DefectGeometry:
         mapping[apex] = len(coordinates)
         coordinates.append(tuple(mesh.vertices[apex].co))
         result = bpy.data.meshes.new(mesh.name+'.StableTips')
+        owned_meshes.append(result)
         result.from_pydata(coordinates, [], [tuple(mapping[index] for index in polygon.vertices)
                                             for polygon in mesh.polygons])
         for material in mesh.materials:
@@ -427,7 +433,7 @@ class DefectGeometry:
             raise ValueError('Empty healthy-surface defect support')
         return triangles
 
-    def _cut(self, blade, defect, shape, material):
+    def _cut(self, blade, defect, shape, material, owned_meshes):
         depth = defect['shape']['depth_m']
         overhang = max(.02, depth)
         vertices, faces = [], []
@@ -442,7 +448,7 @@ class DefectGeometry:
         faces.extend(((3,2,1), (3,1,0)))
         end = len(vertices)-4
         faces.extend(((end,end+1,end+2), (end,end+2,end+3)))
-        return self._apply_cutter(blade, defect, vertices, faces, material)
+        return self._apply_cutter(blade, defect, vertices, faces, material, owned_meshes)
 
     def _patch_point(self, shape, row, z):
         anchor = shape['anchors'][row]
@@ -451,7 +457,7 @@ class DefectGeometry:
             s_m=anchor['s_m']+abs(z)*(boundary['s_m']-anchor['s_m']),
             u=anchor['u']+abs(z)*(boundary['u']-anchor['u'])))
 
-    def _cut_patch(self, blade, defect, shape, material):
+    def _cut_patch(self, blade, defect, shape, material, owned_meshes):
         """Closed sampled bowl, with an independently prescribed inward floor."""
         rows, columns = len(shape['anchors']), 9
         depth = defect['shape']['depth_m']
@@ -477,49 +483,54 @@ class DefectGeometry:
                   [r*columns for r in range(rows-2,0,-1)])
         for a,b in zip(border, border[1:]+border[:1]):
             faces.extend(((a,b,b+count),(a,b+count,a+count)))
-        return self._apply_cutter(blade, defect, vertices, faces, material)
+        return self._apply_cutter(blade, defect, vertices, faces, material, owned_meshes)
 
-    def _apply_cutter(self, blade, defect, vertices, faces, material):
+    def _apply_cutter(self, blade, defect, vertices, faces, material, owned_meshes=None):
         mesh = blade.data
+        if owned_meshes is not None:
+            owned_meshes.append(mesh)
         slot = len(mesh.materials)
         mesh.materials.append(material)
-        cutmesh = bpy.data.meshes.new('NREL.Editor.Cutter')
-        cutmesh.from_pydata(vertices, [], faces)
-        bm = bmesh.new()
+        resources = dict(meshes={}, objects=[], modifiers=[])
         try:
-            bm.from_mesh(cutmesh)
-            bmesh.ops.recalc_face_normals(bm, faces=list(bm.faces))
-            bm.to_mesh(cutmesh)
-        finally:
-            bm.free()
-        cutter = bpy.data.objects.new('NREL.Editor.Cutter', cutmesh)
-        self.rig['collection'].objects.link(cutter)
-        cutter.parent = blade.parent
-        cutter.matrix_basis = blade.matrix_basis.copy()
-        cutter.matrix_parent_inverse = blade.matrix_parent_inverse.copy()
-        cutter['nrel_defect_role'] = 'cutter'
-        cutter.hide_render = True
-        for mat in mesh.materials:
-            cutmesh.materials.append(mat)
-        for polygon in cutmesh.polygons:
-            polygon.material_index = slot
-        modifier = None
-        try:
+            cutmesh = bpy.data.meshes.new('NREL.Editor.Cutter')
+            resources['meshes']['cutter'] = cutmesh
+            cutmesh.from_pydata(vertices, [], faces)
+            bm = bmesh.new()
+            try:
+                bm.from_mesh(cutmesh)
+                bmesh.ops.recalc_face_normals(bm, faces=list(bm.faces))
+                bm.to_mesh(cutmesh)
+            finally:
+                bm.free()
+            cutter = bpy.data.objects.new('NREL.Editor.Cutter', cutmesh)
+            resources['objects'].append(cutter)
+            self.rig['collection'].objects.link(cutter)
+            cutter.parent = blade.parent
+            cutter.matrix_basis = blade.matrix_basis.copy()
+            cutter.matrix_parent_inverse = blade.matrix_parent_inverse.copy()
+            cutter['nrel_defect_role'] = 'cutter'
+            cutter.hide_render = True
+            for mat in mesh.materials:
+                cutmesh.materials.append(mat)
+            for polygon in cutmesh.polygons:
+                polygon.material_index = slot
             bpy.context.view_layer.update()
             modifier = blade.modifiers.new(f"Defect {defect['id']}", 'BOOLEAN')
+            resources['modifiers'].append((blade, modifier))
             modifier.operation, modifier.solver, modifier.object = 'DIFFERENCE', 'EXACT', cutter
             self.boolean_calls += 1
             with bpy.context.temp_override(object=blade, active_object=blade):
-                bpy.ops.object.modifier_apply(modifier=modifier.name)
-            modifier = None
-        finally:
-            if modifier is not None:
-                blade.modifiers.remove(modifier)
-            bpy.data.objects.remove(cutter, do_unlink=True)
-            if cutmesh.users == 0:
-                bpy.data.meshes.remove(cutmesh)
-        if not any(poly.material_index == slot for poly in blade.data.polygons):
-            raise ValueError(f"{defect['id']}: Boolean did not produce a genuine opening/interior")
+                result = bpy.ops.object.modifier_apply(modifier=modifier.name)
+            if result != {'FINISHED'}:
+                raise RuntimeError(f"{defect['id']}: Boolean did not finish: {result}")
+            resources['modifiers'].clear()
+            if not any(poly.material_index == slot for poly in blade.data.polygons):
+                raise ValueError(f"{defect['id']}: Boolean did not produce a genuine opening/interior")
+            self.dispose(resources)
+        except BaseException:
+            self._cancel_preparation(resources)
+            raise
         return slot
 
     def _measure_depth(self, defect, shape, tree):
@@ -535,7 +546,7 @@ class DefectGeometry:
             if defect['morphology'] != 'open_crack':
                 target *= patch_depth_factor(defect['morphology'],
                     2*index/(len(shape['centerline'])-1)-1, 0., defect['shape'])
-            if measured <= BINDING_TOLERANCE_M or abs(measured-target) > SIZE_TOLERANCE_M:
+            if not math.isfinite(measured) or measured <= BINDING_TOLERANCE_M or abs(measured-target) > SIZE_TOLERANCE_M:
                 raise ValueError(f"{defect['id']}: actual inward depth {measured:.6g} m differs from {target:.6g} m")
             values.append(measured)
             expected.append(target)
@@ -586,17 +597,20 @@ class DefectGeometry:
     def prepare(self, document):
         if self._closed:
             raise ValueError('NREL defect geometry manager is closed')
+        self.retry_preparations()
         started = time.perf_counter()
         payload = dict(document=deepcopy(document), supports=[], meshes={}, materials=[], node_groups=[],
-            bvh_by_blade={}, measurements=[], owned_meshes=True)
+            bvh_by_blade={}, measurements=[], owned_meshes=True, objects=[], temporary_meshes=[])
         staging = []
         shapes, interiors, geometric_defects = {}, {}, {}
         try:
             for i, original in enumerate(self.rig['blades'], 1):
                 mesh = self._healthy[i].copy()
-                mesh.name = f'NREL.Editor.Blade{i}'
                 payload['meshes'][i] = mesh
+                payload['temporary_meshes'].append(mesh)
+                mesh.name = f'NREL.Editor.Blade{i}'
                 obj = bpy.data.objects.new(f'NREL.Editor.Staging{i}', mesh)
+                payload['objects'].append(obj)
                 self.rig['collection'].objects.link(obj)
                 obj.parent = original.parent
                 obj.matrix_basis = original.matrix_basis.copy()
@@ -659,21 +673,18 @@ class DefectGeometry:
                             cutshape, primary=False, definition=dict(virtual_region=True, event_id=defect['id'],
                                 occlusion_rule='actual geometry strictly before healthy opening',
                                 aggregation='separate component; do not add to primary event')))
-                    material = _new_material(f"NREL.Editor.Interior.{defect['id']}", color, roughness)
+                    material = _new_material(f"NREL.Editor.Interior.{defect['id']}", color, roughness,
+                                             payload['materials'])
                     material['nrel_defect_id'] = defect['id']
-                    payload['materials'].append(material)
                     cutter = self._cut if morphology == 'open_crack' else self._cut_patch
-                    interiors[defect['id']] = cutter(staging[defect['blade_id']-1], geometric, cutshape, material)
+                    interiors[defect['id']] = cutter(staging[defect['blade_id']-1], geometric, cutshape,
+                                                    material, payload['temporary_meshes'])
             for i, obj in enumerate(staging, 1):
                 # modifier_apply may replace the mesh datablock.
                 generated = obj.data
-                obj.data = self._preserve_tip_vertices(generated)
-                old = payload['meshes'][i]
+                payload['temporary_meshes'].append(generated)
+                obj.data = self._preserve_tip_vertices(generated, payload['temporary_meshes'])
                 payload['meshes'][i] = obj.data
-                if old is not obj.data and old.users == 0:
-                    bpy.data.meshes.remove(old)
-                if generated is not old and generated.users == 0:
-                    bpy.data.meshes.remove(generated)
                 fine = [s for s in payload['supports'] if s['blade_id'] == i and s['support_kind'] == 'material_mask']
                 if fine:
                     # Markings occupy additional healthy material slots. Apply
@@ -701,20 +712,61 @@ class DefectGeometry:
                     definition=dict(virtual_region=False, aggregation='separate from opening footprint',
                         occlusion_rule='actual surface', extent='surviving defect walls and floor')))
             payload['prepare_seconds'] = time.perf_counter()-started
+            self._release_objects(payload)
+            unused = {i: mesh for i, mesh in enumerate(payload['temporary_meshes'])
+                      if mesh not in payload['meshes'].values()}
+            self.dispose(dict(meshes=unused))
+            payload['temporary_meshes'].clear()
             return payload
-        except Exception:
-            for i, obj in enumerate(staging, 1):
-                old = payload['meshes'][i]
-                payload['meshes'][i] = obj.data
-                if old is not obj.data and old.users == 0:
-                    bpy.data.meshes.remove(old)
-                bpy.data.objects.remove(obj, do_unlink=True)
-            staging.clear()
-            self.dispose(payload)
+        except BaseException:
+            self._cancel_preparation(payload)
             raise
-        finally:
-            for obj in staging:
+
+    def _cancel_preparation(self, payload):
+        try:
+            self.dispose(payload)
+        except Exception:
+            if not hasattr(self, '_pending_preparations'):
+                self._pending_preparations = []
+            self._pending_preparations.append(payload)
+            _LOG.exception('Defect preparation failed; resource cleanup awaits retry')
+
+    def retry_preparations(self):
+        """Release failed candidates while preserving ownership until cleanup succeeds."""
+        errors = []
+        for payload in list(getattr(self, '_pending_preparations', [])):
+            try:
+                self.dispose(payload)
+            except Exception as exc:
+                errors.append(exc)
+        if errors:
+            raise RuntimeError('缺陷候选资源清理失败：' + '; '.join(map(str, errors)))
+
+    def _release_objects(self, payload):
+        errors, modifiers, objects = [], [], []
+        for obj, modifier in payload.get('modifiers', []):
+            try:
+                obj.modifiers.remove(modifier)
+            except ReferenceError:
+                pass
+            except Exception as exc:
+                errors.append(exc)
+                modifiers.append((obj, modifier))
+        payload['modifiers'] = modifiers
+        for obj in payload.get('objects', []):
+            try:
+                # Boolean application can replace a staging object's mesh.
+                if obj.data is not None:
+                    payload.setdefault('temporary_meshes', []).append(obj.data)
                 bpy.data.objects.remove(obj, do_unlink=True)
+            except ReferenceError:
+                pass
+            except Exception as exc:
+                errors.append(exc)
+                objects.append(obj)
+        payload['objects'] = objects
+        if errors:
+            raise RuntimeError('缺陷临时对象清理失败：' + '; '.join(map(str, errors)))
 
     def activate(self, payload, document=None, version=None):
         if self._closed:
@@ -779,6 +831,10 @@ class DefectGeometry:
             self._active = None
         self._closing_payload = previous
         try:
+            self.retry_preparations()
+        except Exception as exc:
+            errors.append(exc)
+        try:
             self.dispose(previous)
         except Exception as exc:
             errors.append(exc)
@@ -808,11 +864,15 @@ class DefectGeometry:
         if payload is None or payload is self._active or payload.get('_disposed', False):
             return
         errors = []
+        try:
+            self._release_objects(payload)
+        except Exception as exc:
+            errors.append(exc)
         groups = [(bpy.data.materials, payload.get('materials', [])),
                   (bpy.data.node_groups, payload.get('node_groups', []))]
         if payload.get('owned_meshes', True):
-            groups.insert(0, (bpy.data.meshes, [mesh for mesh in payload.get('meshes', {}).values()
-                                             if mesh not in self._healthy.values()]))
+            meshes = list(payload.get('meshes', {}).values()) + payload.get('temporary_meshes', [])
+            groups.insert(0, (bpy.data.meshes, [mesh for mesh in meshes if mesh not in self._healthy.values()]))
         for collection, resources in groups:
             for resource in resources:
                 try:
@@ -825,3 +885,5 @@ class DefectGeometry:
         if errors:
             raise RuntimeError('缺陷资源释放失败：' + '; '.join(map(str, errors)))
         payload['_disposed'] = True
+        if hasattr(self, '_pending_preparations'):
+            self._pending_preparations[:] = [item for item in self._pending_preparations if item is not payload]

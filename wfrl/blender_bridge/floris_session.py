@@ -4,6 +4,8 @@ from types import SimpleNamespace
 
 import numpy as np
 
+from wfrl.scene.power import farm_power_total
+
 
 class FlorisDemoSession:
     """Trainer lifecycle interface, reusing FastFarmDriver's FLORIS stepping.
@@ -30,6 +32,7 @@ class FlorisDemoSession:
         self.yaw_delta, self.frame_interval = float(yaw_delta), float(frame_interval)
         self._driver_factory = driver_factory
         self.runtime = None
+        self._driver = None
         self._thread = None
         self._stop = threading.Event()
         self._paused = threading.Event()
@@ -46,6 +49,8 @@ class FlorisDemoSession:
     def start(self):
         if self.running:
             return
+        if self._driver is not None:
+            raise RuntimeError('FLORIS cleanup unconfirmed; restart blocked')
         self.error = None
         self._stop.clear()
         self._paused.clear()
@@ -69,6 +74,7 @@ class FlorisDemoSession:
                 from wfrl.fastfarm_driver import FastFarmDriver
                 factory = FastFarmDriver
             driver = factory(self.env_id, max_steps=self.max_steps, controls=('yaw',))
+            self._driver = driver
             if (driver.n != self.scene.n or
                     not np.allclose(driver.xcoords, self.scene.xcoords) or
                     not np.allclose(driver.ycoords, self.scene.ycoords)):
@@ -88,7 +94,7 @@ class FlorisDemoSession:
                     step=int(m['step']), iters_done=0, frame={}, measure=measure,
                     ctx={'t': m['step'] * driver.dt, 'backend': 'floris',
                          'backend_demo': True},
-                    farm_power=float(np.sum(m['power'])), reward=float(m['reward']),
+                    farm_power=farm_power_total(m['power'], self.scene.n), reward=float(m['reward']),
                     events=[], phase='done' if driver.done else 'sampling',
                     demo_label='FLORIS steady-state backend demo (no training)')
                 self._latest = snap
@@ -105,3 +111,5 @@ class FlorisDemoSession:
                 except Exception as exc:
                     cleanup = 'FLORIS cleanup failed: ' + (str(exc) or type(exc).__name__)
                     self.error = self.error + '; ' + cleanup if self.error else cleanup
+                else:
+                    self._driver = None

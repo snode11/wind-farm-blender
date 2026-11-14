@@ -4,7 +4,6 @@ import time
 from dataclasses import replace
 
 import bpy
-from bpy.app.handlers import persistent
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, StringProperty
 from mathutils import Vector
 
@@ -45,7 +44,6 @@ from .custom_camera_properties import (
 )
 from .custom_camera_operators import (
     _timer_advanced,
-    Available,
     WFRL_OT_CustomCamera,
     WFRL_OT_CustomAction,
     WFRL_OT_CustomCoordinates,

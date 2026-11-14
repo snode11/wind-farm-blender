@@ -11,6 +11,7 @@ from .split_reconstruction_timing import spec_from_scene, step_sample_frame, tim
 
 _RUNTIME_KEY = 'wfrl_split_reconstruction_ui'
 _HUD_HANDLE = None
+_DRAW_ACTIVE = False
 
 
 def packaged_example_path(package_root=None):
@@ -224,10 +225,11 @@ class WFRL_OT_SplitReconTextureToggle(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            _core().texture_adapter(context.scene).toggle(context.scene)
-            # This reset is specific to the user's explicit display switch.
-            # Loading a saved setting never invokes this operator.
-            _core().fit(context)
+            from .split_texture_settings import rollback_on_error
+            with rollback_on_error(context.scene):
+                _core().texture_adapter(context.scene).toggle(context.scene)
+                # Only an explicit display switch requests full-turbine framing.
+                _core().fit(context)
             _redraw(context)
         except (ValueError, RuntimeError) as exc:
             self.report({'ERROR'}, str(exc))
@@ -310,6 +312,8 @@ def draw_controls(layout, context):
 
 
 def _draw_header(self, context):
+    if not _DRAW_ACTIVE:
+        return
     scene, space = context.scene, context.space_data
     if scene is None or space is None or space.type != 'VIEW_3D' or not _core().enabled(scene):
         return
@@ -360,6 +364,8 @@ def _hud_lines(scene):
 
 
 def _draw_hud():
+    if not _DRAW_ACTIVE:
+        return
     context = bpy.context
     scene, space, region = context.scene, context.space_data, context.region
     if (scene is None or space is None or space.type != 'VIEW_3D' or region is None
@@ -391,11 +397,14 @@ def _no_legacy_hud():
 
 
 def _remove_headers():
+    errors = []
     for function in tuple(getattr(bpy.types.VIEW3D_HT_header.draw, '_draw_funcs', ())):
         ours = getattr(function, '_wfrl_split_reconstruction_ui', False)
         code = getattr(function, '__code__', None)
         legacy = (getattr(function, '__name__', '') == 'split_header' and code is not None
                   and code.co_filename.endswith('restore_split_headers.py'))
+        if ours:
+            function.__globals__['_DRAW_ACTIVE'] = False
         if legacy:
             # That script discarded its draw-handler handle. Disable only its
             # identified callback; new managed handlers always retain a handle.
@@ -405,37 +414,61 @@ def _remove_headers():
         if ours or legacy:
             try:
                 bpy.types.VIEW3D_HT_header.remove(function)
-            except (ValueError, RuntimeError):
-                pass
+            except (ValueError, RuntimeError) as exc:
+                errors.append(exc)
+    if errors:
+        raise errors[0]
 
 
 _draw_header._wfrl_split_reconstruction_ui = True
 
 
 def _remove_draw_callbacks():
-    global _HUD_HANDLE
-    stored = bpy.app.driver_namespace.pop(_RUNTIME_KEY, None) or {}
-    handles = [_HUD_HANDLE]
-    old_handle = stored.get('handle')
-    if old_handle is not _HUD_HANDLE:
-        handles.append(old_handle)
+    global _HUD_HANDLE, _DRAW_ACTIVE
+    _DRAW_ACTIVE = False
+    stored = bpy.app.driver_namespace.get(_RUNTIME_KEY) or {}
+    handles = []
+    for handle in [_HUD_HANDLE, stored.get('handle'), *stored.get('pending_handles', ())]:
+        if handle is not None and all(handle is not other for other in handles):
+            handles.append(handle)
+    pending, errors = [], []
     for handle in handles:
-        if handle is not None:
-            try:
-                bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
-            except (ValueError, RuntimeError, ReferenceError):
-                pass
-    _HUD_HANDLE = None
-    _remove_headers()
+        try:
+            bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
+        except (ValueError, RuntimeError, ReferenceError) as exc:
+            removed = isinstance(exc, ReferenceError) or any(message in str(exc).lower() for message in (
+                'already removed', 'already been removed', 'handler not found', 'invalid handle'))
+            if not removed:
+                pending.append(handle)
+                errors.append(exc)
+    _HUD_HANDLE = pending[0] if pending else None
+    if pending:
+        bpy.app.driver_namespace[_RUNTIME_KEY] = {'handle': pending[0], 'pending_handles': pending[1:]}
+    else:
+        bpy.app.driver_namespace.pop(_RUNTIME_KEY, None)
+    try:
+        _remove_headers()
+    except Exception as exc:
+        errors.append(exc)
+    if errors:
+        raise errors[0]
 
 
 def _install_draw_callbacks():
-    global _HUD_HANDLE
+    global _HUD_HANDLE, _DRAW_ACTIVE
     _remove_draw_callbacks()
     bpy.types.VIEW3D_HT_header.append(_draw_header)
-    if not bpy.app.background:
-        _HUD_HANDLE = bpy.types.SpaceView3D.draw_handler_add(_draw_hud, (), 'WINDOW', 'POST_PIXEL')
-    bpy.app.driver_namespace[_RUNTIME_KEY] = {'handle': _HUD_HANDLE}
+    try:
+        if not bpy.app.background:
+            _HUD_HANDLE = bpy.types.SpaceView3D.draw_handler_add(_draw_hud, (), 'WINDOW', 'POST_PIXEL')
+        bpy.app.driver_namespace[_RUNTIME_KEY] = {'handle': _HUD_HANDLE}
+        _DRAW_ACTIVE = True
+    except Exception as exc:
+        try:
+            _remove_draw_callbacks()
+        except Exception as error:
+            exc.add_note('Draw callback cleanup requires retry: ' + str(error))
+        raise
 
 
 @persistent
@@ -456,24 +489,52 @@ def _registered_operator(cls):
 
 
 def register():
+    added, replaced, removed_handlers = [], [], []
     for handler in tuple(bpy.app.handlers.load_post):
         if getattr(handler, '_wfrl_split_reconstruction_ui', False):
             bpy.app.handlers.load_post.remove(handler)
-    for cls in _CLASSES:
-        old = _registered_operator(cls)
-        if old is not None:
-            bpy.utils.unregister_class(old)
-        bpy.utils.register_class(cls)
-    _install_draw_callbacks()
-    bpy.app.handlers.load_post.append(_on_load)
+            removed_handlers.append(handler)
+    try:
+        for cls in _CLASSES:
+            old = _registered_operator(cls)
+            if old is not None:
+                bpy.utils.unregister_class(old)
+                replaced.append(old)
+            bpy.utils.register_class(cls)
+            added.append(cls)
+        _install_draw_callbacks()
+        bpy.app.handlers.load_post.append(_on_load)
+    except Exception as exc:
+        for cls in reversed(added):
+            try:
+                bpy.utils.unregister_class(cls)
+            except Exception as error:
+                exc.add_note('Operator cleanup requires retry: ' + str(error))
+        for cls in replaced:
+            try:
+                bpy.utils.register_class(cls)
+            except Exception as error:
+                exc.add_note('Operator restoration requires retry: ' + str(error))
+        for handler in removed_handlers:
+            bpy.app.handlers.load_post.append(handler)
+        raise
 
 
 def unregister():
     for handler in tuple(bpy.app.handlers.load_post):
         if getattr(handler, '_wfrl_split_reconstruction_ui', False):
             bpy.app.handlers.load_post.remove(handler)
-    _remove_draw_callbacks()
+    errors = []
+    try:
+        _remove_draw_callbacks()
+    except Exception as exc:
+        errors.append(exc)
     for cls in reversed(_CLASSES):
         old = _registered_operator(cls)
         if old is not None:
-            bpy.utils.unregister_class(old)
+            try:
+                bpy.utils.unregister_class(old)
+            except Exception as exc:
+                errors.append(exc)
+    if errors:
+        raise errors[0]

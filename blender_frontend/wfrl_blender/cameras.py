@@ -218,6 +218,165 @@ def select_sidebar_category(area, category):
     return False
 
 
+def _layout_rect(area):
+    return (area.x, area.y, area.x + area.width, area.y + area.height)
+
+
+def _layout_same_rect(first, second):
+    # Screen borders can contribute one pixel to either adjoining area.
+    return all(abs(a - b) <= 2 for a, b in zip(first, second))
+
+
+def _layout_values(owner, names=None):
+    if owner is None:
+        return {}
+    if names is None:
+        rna = getattr(owner, 'bl_rna', None)
+        names = (prop.identifier for prop in rna.properties
+                 if not prop.is_readonly and prop.type in {'BOOLEAN', 'INT', 'FLOAT', 'STRING', 'ENUM'}) if rna else vars(owner)
+    values = {}
+    for name in names:
+        if hasattr(owner, name):
+            value = getattr(owner, name)
+            if name not in {'camera', 'lock_object'} and not hasattr(value, 'bl_rna'):
+                if hasattr(value, 'copy'):
+                    value = value.copy()
+                elif hasattr(value, '__len__') and not isinstance(value, (str, bytes)):
+                    value = tuple(value)
+            values[name] = value
+    return values
+
+
+def _layout_snapshot(area):
+    space = area.spaces.active
+    return dict(rect=_layout_rect(area), pointer=area.as_pointer(),
+        space=_layout_values(space, ('camera', 'use_local_camera', 'lock_camera', 'lens',
+            'clip_start', 'clip_end', 'show_region_ui', 'show_region_toolbar',
+            'show_region_tool_header', 'show_gizmo', 'lock_object', 'lock_bone', 'lock_cursor')),
+        region=_layout_values(space.region_3d, ('view_matrix', 'view_distance', 'view_location',
+            'view_rotation', 'view_perspective', 'view_camera_zoom', 'view_camera_offset')),
+        shading=_layout_values(getattr(space, 'shading', None)),
+        overlay=_layout_values(getattr(space, 'overlay', None)),
+        area=_layout_values(area, ('show_menus',)),
+        sidebar=next((r.active_panel_category for r in area.regions
+                      if r.type == 'UI' and hasattr(r, 'active_panel_category')), None))
+
+
+def _layout_error(job, recovery_error=None):
+    message = str(job['error'])
+    if recovery_error is not None:
+        message += f'；布局恢复未完成，将重试：{recovery_error}'
+        if str(recovery_error) != job.get('recovery_error'):
+            _LOG.error('View layout recovery failed: %s', recovery_error, exc_info=True)
+        job['recovery_error'] = str(recovery_error)
+    try:
+        job['scene']['wfrl_view_layout_error'] = message
+    except Exception:
+        _LOG.exception('View layout error could not be displayed')
+
+
+def _layout_fail(job, exc):
+    if 'error' not in job:
+        job['error'] = exc
+        _LOG.error('View layout failed: %s', exc, exc_info=True)
+    _layout_error(job)
+
+
+def _layout_restore_step(job):
+    """Undo one owned screen operation, retaining snapshots until views restore."""
+    import bpy
+    if job['window'].screen != job['screen'] or job['window'].scene != job['scene']:
+        raise RuntimeError('等待调用窗口返回原屏幕和场景')
+    areas = _layout_active_views(job['screen'])
+    if len(areas) != len(_layout_views(job['screen'])):
+        return False
+    if job.get('preserve_caller_changes'):
+        # A synchronous caller can restore its own view after catching our error.
+        for saved in job['before']:
+            area = next((a for a in areas if a.as_pointer() == saved['pointer']), None)
+            if area is not None:
+                rect = saved['rect']
+                saved.update(_layout_snapshot(area))
+                saved['rect'] = rect
+        job['preserve_caller_changes'] = False
+    while job['undo']:
+        before = job['undo'][-1]
+        missing = [rect for rect in before
+                   if not any(_layout_same_rect(rect, _layout_rect(area)) for area in areas)]
+        changed = [area for area in areas
+                   if not any(_layout_same_rect(rect, _layout_rect(area)) for rect in before)]
+        if not missing and not changed:
+            job['undo'].pop()
+            continue
+        if (len(missing), len(changed)) not in {(1, 2), (2, 1)}:
+            raise RuntimeError('分区结构已变化，无法安全撤回布局操作')
+        old_bounds = (min(r[0] for r in missing), min(r[1] for r in missing),
+                      max(r[2] for r in missing), max(r[3] for r in missing))
+        rects = [_layout_rect(area) for area in changed]
+        new_bounds = (min(r[0] for r in rects), min(r[1] for r in rects),
+                      max(r[2] for r in rects), max(r[3] for r in rects))
+        if not _layout_same_rect(old_bounds, new_bounds):
+            raise RuntimeError('分区边界已变化，无法安全撤回布局操作')
+        original_pointers = {saved['pointer'] for saved in job['before']}
+        source = next((area for area in changed if area.as_pointer() in original_pointers), changed[0])
+        with bpy.context.temp_override(window=job['window'], screen=job['screen'], area=source):
+            if len(changed) == 2:
+                target = next(area for area in changed if area is not source)
+                result = bpy.ops.screen.area_join(
+                    source_xy=(source.x + source.width // 2, source.y + source.height // 2),
+                    target_xy=(target.x + target.width // 2, target.y + target.height // 2))
+            else:
+                first, second = sorted(missing)
+                vertical = abs(first[1] - second[1]) <= 2 and abs(first[3] - second[3]) <= 2
+                axis = 0 if vertical else 1
+                cut = max(first[axis], second[axis])
+                factor = (cut - new_bounds[axis]) / (new_bounds[axis + 2] - new_bounds[axis])
+                result = bpy.ops.screen.area_split(direction='VERTICAL' if vertical else 'HORIZONTAL',
+                                                   factor=factor)
+        if 'FINISHED' not in result:
+            raise RuntimeError('Blender 未完成布局恢复操作')
+        return False
+    for saved in job['before']:
+        area = next((area for area in areas if _layout_same_rect(saved['rect'], _layout_rect(area))), None)
+        if area is None:
+            raise RuntimeError('原视图分区不可用，保留恢复快照')
+        space = area.spaces.active
+        if saved['sidebar'] is not None:
+            sidebar = next((region for region in area.regions if region.type == 'UI'), None)
+            if sidebar is None or sidebar.active_panel_category != saved['sidebar']:
+                space.show_region_ui = True
+            if not select_sidebar_category(area, saved['sidebar']):
+                raise RuntimeError('等待原视图侧栏恢复')
+        for owner, values in ((area, saved['area']), (space, saved['space']),
+                              (space.region_3d, saved['region']),
+                              (getattr(space, 'shading', None), saved['shading']),
+                              (getattr(space, 'overlay', None), saved['overlay'])):
+            for name, value in values.items():
+                setattr(owner, name, value)
+        area.tag_redraw()
+    if job.get('scene_changed'):
+        job['scene'].camera = job['scene_camera']
+        present, value = job['scene_layout']
+        if present:
+            job['scene']['wfrl_view_layout'] = value
+        else:
+            job['scene'].pop('wfrl_view_layout', None)
+    return True
+
+
+def _layout_rollback(job):
+    global _LAYOUT_JOB
+    if 'before' not in job:
+        _LAYOUT_JOB = None
+        return
+    try:
+        if _layout_restore_step(job):
+            _layout_error(job)
+            _LAYOUT_JOB = None
+    except Exception as exc:
+        _layout_error(job, exc)
+
+
 def _layout_finish(job):
     screen, scene, count, layout = job['screen'], job['scene'], job['count'], job['layout']
     names = job.get('camera_names') or ('WFRL.Camera.World', 'WFRL.Camera.T1.Sensor',
@@ -254,28 +413,28 @@ def _layout_finish(job):
                     from .turbine_geometry import geometry_data
                     fx = min(1., 2.4 * geometry_data()['scalars']['TipRad'] / space.camera.data.ortho_scale)
                 frame_gate(scene, {'area': area, 'proxy': space.camera, 'fx': fx, 'fy': 1.}, region, space)
+    job['scene_changed'] = True
     scene.camera = scene.objects.get(names[0])
     scene['wfrl_view_layout'] = layout
     return True
 
 
 def _layout_timer():
-    global _LAYOUT_JOB
     if _LAYOUT_JOB is None:
         return None
-    try:
-        _layout_step()
-    except (ValueError, RuntimeError, ReferenceError, AttributeError) as exc:
-        job = _LAYOUT_JOB
-        _LAYOUT_JOB = None
-        if job is not None:
-            job['scene']['wfrl_view_layout_error'] = str(exc)
-        print('WFRL view layout failed:', exc)
+    job = _LAYOUT_JOB
+    if 'error' not in job:
+        try:
+            _layout_step()
+        except Exception as exc:
+            _layout_fail(job, exc)
+    if 'error' in job:
+        _layout_rollback(job)
     # Keep one timer alive across the redraws required by Blender's screen
     # operators. Returning an interval is important: a timer is considered
     # registered while its callback is running, so trying to register a new
     # callback from inside `_layout_step` can otherwise stall after one split.
-    return 0.05 if _LAYOUT_JOB is not None else None
+    return (0.25 if 'error' in job else 0.05) if _LAYOUT_JOB is not None else None
 
 
 def _layout_schedule():
@@ -296,8 +455,7 @@ def _layout_step():
         raise ValueError('分屏操作超时，请重试')
     screen, count = job['screen'], job['count']
     if job['window'].screen != screen or job['window'].scene != job['scene']:
-        _LAYOUT_JOB = None
-        return
+        raise RuntimeError('分屏期间调用窗口切换了屏幕或场景')
     active = _layout_active_views(screen)
     if len(active) > count or (job.get('merge_first') and len(active) > 1):
         # Keep the largest existing view as source so shrinking does not leave
@@ -311,12 +469,12 @@ def _layout_step():
                      source.y - (area.y + area.height), 0)
             return dx + dy
         target = min(others, key=lambda area: (distance(area), -area.width * area.height))
+        job['undo'].append([_layout_rect(area) for area in active])
         with bpy.context.temp_override(window=job['window'], screen=screen, area=source):
             result = bpy.ops.screen.area_join(
                 source_xy=(source.x + source.width // 2, source.y + source.height // 2),
                 target_xy=(target.x + target.width // 2, target.y + target.height // 2))
         if 'FINISHED' not in result:
-            _LAYOUT_JOB = None
             raise ValueError('Blender could not join this view')
         _layout_schedule()
         return
@@ -336,12 +494,12 @@ def _layout_step():
             sidebar = next((r for r in area.regions if r.type == 'UI'), None)
             if sidebar:
                 factor = max(.3, .5 - sidebar.width / (2 * area.width))
+        job['undo'].append([_layout_rect(item) for item in active])
         with bpy.context.temp_override(window=job['window'], screen=screen, area=area):
             result = bpy.ops.screen.area_split(
                 direction='VERTICAL' if len(_layout_views(screen)) == 1 else 'HORIZONTAL',
                 factor=factor)
         if 'FINISHED' not in result:
-            _LAYOUT_JOB = None
             raise ValueError('Blender could not split this area')
         _layout_schedule()
         return
@@ -361,6 +519,9 @@ def set_view_layout(context, layout, *, camera_names=None, split_factor=None, re
     if bpy.app.background or context.screen is None or context.window is None:
         raise ValueError('View layouts require an interactive Blender window')
     if _LAYOUT_JOB is not None:
+        if 'error' in _LAYOUT_JOB:
+            _layout_schedule()
+            raise ValueError('视图布局正在恢复，请等待恢复完成')
         if _LAYOUT_JOB['screen'] is context.screen and _LAYOUT_JOB['layout'] == layout:
             return
         raise ValueError('A view layout change is still in progress')
@@ -375,28 +536,51 @@ def set_view_layout(context, layout, *, camera_names=None, split_factor=None, re
     active = _layout_active_views(context.screen)
     side_by_side = (len(active) == 2 and abs(active[0].y-active[1].y) <= 8
                     and abs(active[0].height-active[1].height) <= 8)
+    before = [_layout_snapshot(area) for area in active]
     context.scene['wfrl_view_layout_error'] = ''
     _LAYOUT_JOB = {'screen': context.screen, 'window': context.window,
                    'scene': context.scene, 'count': count,
                    'layout': layout, 'camera_names': camera_names,
                    'split_factor': float(split_factor) if split_factor is not None else None,
                    'merge_first': bool(camera_names and count == 2 and (rebuild or not side_by_side)),
+                   'before': before, 'undo': [], 'scene_camera': context.scene.camera,
+                   'scene_layout': ('wfrl_view_layout' in context.scene, context.scene.get('wfrl_view_layout')),
                    'deadline': time.monotonic() + 10}
+    job = _LAYOUT_JOB
     try:
         _layout_step()
-    except Exception:
-        _LAYOUT_JOB = None
+    except Exception as exc:
+        _layout_fail(job, exc)
+        structural = bool(job['undo'])
+        _layout_rollback(job)
+        if _LAYOUT_JOB is not None:
+            job['preserve_caller_changes'] = structural
+            try:
+                _layout_schedule()
+            except Exception as recovery_error:
+                _layout_error(job, recovery_error)
         raise
 
 
 def cancel_view_layout():
-    """Cancel a pending asynchronous screen-tree change during extension cleanup."""
+    """Cancel layout work, keeping an unfinished rollback available for retry."""
     global _LAYOUT_JOB
-    _LAYOUT_JOB = None
+    job = _LAYOUT_JOB
     try:
         import bpy
     except ImportError:
         return
+    if job is not None and 'before' in job:
+        if 'error' not in job:
+            _layout_fail(job, RuntimeError('分屏操作已取消'))
+        _layout_rollback(job)
+        if _LAYOUT_JOB is not None:
+            try:
+                _layout_schedule()
+            except Exception as exc:
+                _layout_error(job, exc)
+            return
+    _LAYOUT_JOB = None
     try:
         if bpy.app.timers.is_registered(_layout_timer):
             bpy.app.timers.unregister(_layout_timer)
@@ -738,6 +922,22 @@ def fill_camera_view(area, scene):
     space.region_3d.view_camera_offset = (0, 0)
 
 
+def _rollback_closeup_camera(scene, camera, data, collection):
+    """Release only this allocation's IDs without removing another user's camera."""
+    import bpy
+    try:
+        if camera is not None:
+            owned_links = int(collection is not None and collection in camera.users_collection)
+            shared = any(other != scene and (other.user_of_id(camera)
+                         or other.objects.get(camera.name) == camera) for other in bpy.data.scenes)
+            if not shared and not camera.use_fake_user and camera.users <= owned_links:
+                bpy.data.objects.remove(camera, do_unlink=True)
+        if data is not None and data.users == 0 and not data.use_fake_user:
+            bpy.data.cameras.remove(data)
+    except Exception:
+        _LOG.exception('Closeup camera initialization failed; resource cleanup also failed')
+
+
 def ensure_clearance_camera(scene, turbine_id):
     """Front-left 45-degree perspective of the lower-blade measurement zone."""
     import math
@@ -749,30 +949,39 @@ def ensure_clearance_camera(scene, turbine_id):
         raise ValueError('请先加载包含所选风机的场景')
     name = f'WFRL.Camera.{turbine_id}.Clearance'
     camera = scene.objects.get(name)
-    if camera is None:
-        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-        yaw.users_collection[0].objects.link(camera)
-    radius = geometry_data()['scalars']['TipRad']
-    # Parent only the explanatory camera, never the radar, to the yaw frame.
-    camera.parent = yaw
-    target = Vector((-5, 0, -radius * .42))
-    # Rotor front is local -X. Looking toward +X with +Z up, screen-left
-    # is +Y; keep this azimuth relative to the turbine as its yaw changes.
-    direction = Vector((-1, 1, 0)).normalized()
-    aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
-              / (scene.render.resolution_y * scene.render.pixel_aspect_y))
-    camera.data.type = 'PERSP'
-    camera.data.sensor_fit = 'HORIZONTAL'
-    camera.data.sensor_width = 36
-    camera.data.lens = 50
-    frame_width = radius * 1.65 * max(1., aspect)
-    distance = frame_width / (2 * math.tan(camera.data.angle_x / 2))
-    camera.location = target + direction * distance
-    camera.rotation_mode = 'XYZ'
-    camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
-    camera.data.clip_start, camera.data.clip_end = .1, 30000
-    camera.data.show_passepartout = False
-    camera['provenance'] = '测量区左前方45°透视；刚性模型不显示弹性变形或精确测距'
+    created = camera is None
+    data = collection = None
+    try:
+        if camera is None:
+            data = bpy.data.cameras.new(name + '.Data')
+            camera = bpy.data.objects.new(name, data)
+            collection = yaw.users_collection[0]
+            collection.objects.link(camera)
+        radius = geometry_data()['scalars']['TipRad']
+        # Parent only the explanatory camera, never the radar, to the yaw frame.
+        camera.parent = yaw
+        target = Vector((-5, 0, -radius * .42))
+        # Rotor front is local -X. Looking toward +X with +Z up, screen-left
+        # is +Y; keep this azimuth relative to the turbine as its yaw changes.
+        direction = Vector((-1, 1, 0)).normalized()
+        aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
+                  / (scene.render.resolution_y * scene.render.pixel_aspect_y))
+        camera.data.type = 'PERSP'
+        camera.data.sensor_fit = 'HORIZONTAL'
+        camera.data.sensor_width = 36
+        camera.data.lens = 50
+        frame_width = radius * 1.65 * max(1., aspect)
+        distance = frame_width / (2 * math.tan(camera.data.angle_x / 2))
+        camera.location = target + direction * distance
+        camera.rotation_mode = 'XYZ'
+        camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
+        camera.data.clip_start, camera.data.clip_end = .1, 30000
+        camera.data.show_passepartout = False
+        camera['provenance'] = '测量区左前方45°透视；刚性模型不显示弹性变形或精确测距'
+    except Exception:
+        if created:
+            _rollback_closeup_camera(scene, camera, data, collection)
+        raise
     return camera
 
 
@@ -786,29 +995,38 @@ def ensure_radar_closeup_camera(scene, turbine_id):
         raise ValueError('请先加载包含雷达的风机场景')
     name = f'WFRL.Camera.{turbine_id}.RadarCloseup'
     camera = scene.objects.get(name)
-    if camera is None:
-        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-        radar.users_collection[0].objects.link(camera)
-    camera.parent = radar.parent
-    camera.matrix_parent_inverse.identity()
-    # Stay below and beside the mount so the nacelle does not hide the sensor.
-    # Follow its installed position; do not move or scale the radar itself.
-    target = radar.location + Vector((0, 0, .095))
-    direction = Vector((-1, 1, -.45)).normalized()
-    aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
-              / (scene.render.resolution_y * scene.render.pixel_aspect_y))
-    camera.data.type = 'PERSP'
-    camera.data.sensor_fit = 'HORIZONTAL'
-    camera.data.sensor_width = 36
-    camera.data.lens = 55
-    frame_width = max(1.25, .82 * aspect)
-    distance = frame_width / (2 * math.tan(camera.data.angle_x / 2))
-    camera.location = target + direction * distance
-    camera.rotation_mode = 'XYZ'
-    camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
-    camera.data.clip_start, camera.data.clip_end = .01, 30000
-    camera.data.show_passepartout = False
-    camera['provenance'] = '雷达安装特写；外壳为示意，光束不代表命中点或测距结果'
+    created = camera is None
+    data = collection = None
+    try:
+        if camera is None:
+            data = bpy.data.cameras.new(name + '.Data')
+            camera = bpy.data.objects.new(name, data)
+            collection = radar.users_collection[0]
+            collection.objects.link(camera)
+        camera.parent = radar.parent
+        camera.matrix_parent_inverse.identity()
+        # Stay below and beside the mount so the nacelle does not hide the sensor.
+        # Follow its installed position; do not move or scale the radar itself.
+        target = radar.location + Vector((0, 0, .095))
+        direction = Vector((-1, 1, -.45)).normalized()
+        aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
+                  / (scene.render.resolution_y * scene.render.pixel_aspect_y))
+        camera.data.type = 'PERSP'
+        camera.data.sensor_fit = 'HORIZONTAL'
+        camera.data.sensor_width = 36
+        camera.data.lens = 55
+        frame_width = max(1.25, .82 * aspect)
+        distance = frame_width / (2 * math.tan(camera.data.angle_x / 2))
+        camera.location = target + direction * distance
+        camera.rotation_mode = 'XYZ'
+        camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
+        camera.data.clip_start, camera.data.clip_end = .01, 30000
+        camera.data.show_passepartout = False
+        camera['provenance'] = '雷达安装特写；外壳为示意，光束不代表命中点或测距结果'
+    except Exception:
+        if created:
+            _rollback_closeup_camera(scene, camera, data, collection)
+        raise
     return camera
 
 

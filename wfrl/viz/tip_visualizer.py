@@ -5,8 +5,11 @@ python -m wfrl.viz.tip_visualizer --video camera.mp4 --dets tips.csv
 Without a data source the preview explicitly labels its illustrative synthetic input.
 """
 import argparse
+from contextlib import contextmanager, ExitStack
 import csv
 import math
+import os
+import tempfile
 import time
 from pathlib import Path
 import numpy as np
@@ -21,6 +24,7 @@ cv2 = _LazyCV()
 # BGR: orange, blue, red. Green is reserved for the existing wind overlay.
 BLADE_COLORS = [(40, 150, 255), (255, 150, 50), (65, 70, 240)]
 DIM = .38
+PREVIEW_WINDOW = 'Tip tracking preview'
 
 def _dim(c, k=DIM):
     return tuple(int(x*k) for x in c)
@@ -177,14 +181,23 @@ class TipVisualizer(TipTracker):
         self.frame = None
 
     def feed(self, frame, dets, rpm=0., t=0., *, source='pixel_sphere_estimate'):
+        frame = self._copy_frame(frame)
         self.update_pixels(dets, rpm, t, source=source)
-        self.frame = None if frame is None else frame.copy()
+        self.frame = frame
         return self.render()
 
     def feed_world(self, frame, blades, rpm=0., t=0., *, source, provenance):
+        frame = self._copy_frame(frame)
         self.update_world(blades, rpm, t, source=source, provenance=provenance)
-        self.frame = None if frame is None else frame.copy()
+        self.frame = frame
         return self.render()
+
+    def _copy_frame(self, frame):
+        if frame is None:
+            return None
+        if frame.shape[:2] != (self.cam.H, self.cam.W):
+            raise ValueError('Frame resolution differs from calibrated camera; resize image and detections together')
+        return frame.copy()
 
     def render(self):
         left = self._draw_frame(self.frame, self.detections, self._rpm)
@@ -239,14 +252,20 @@ def load_dets(path):
     """Strict CSV frame,u,v[,blade,rpm]. Blade uses 0,1,2; bad rows name their line."""
     out = {}
     with open(path, newline='', encoding='utf-8-sig') as f:
-        for line,row in enumerate(csv.DictReader(f),2):
+        reader = csv.DictReader(f)
+        headers = [c.lower().strip() for c in (reader.fieldnames or [])]
+        if not {'frame', 'u', 'v'}.issubset(headers) or len(headers) != len(set(headers)):
+            raise ValueError(f'{path}:1: CSV requires unique frame,u,v columns')
+        for line,row in enumerate(reader,2):
             k = {c.lower().strip():v for c,v in row.items() if c}
             try:
-                frame = finite_scalar(k['frame']); bid = finite_scalar(k.get('blade') or 0)
+                if None in row:
+                    raise ValueError('too many CSV fields')
+                frame = finite_scalar(float(k['frame'])); bid = finite_scalar(float(k.get('blade') or 0))
                 if frame < 0 or frame != int(frame) or bid not in (0,1,2):
                     raise ValueError('invalid frame/blade ID')
-                u,v = finite_vector([k['u'],k['v']],2)
-                rpm = finite_scalar(k['rpm']) if k.get('rpm') else None
+                u,v = finite_vector([float(k['u']),float(k['v'])],2)
+                rpm = finite_scalar(float(k['rpm'])) if k.get('rpm') else None
                 dets,old_rpm = out.setdefault(int(frame), ({},None))
                 if int(bid) in dets:
                     raise ValueError('duplicate frame/blade')
@@ -308,7 +327,7 @@ def play_frames(vis, next_frame, *, fps, no_show=False, writer=None, key_reader=
             canvas = vis.render()
         if no_show:
             continue
-        cv2.imshow('Tip tracking preview',canvas)
+        cv2.imshow(PREVIEW_WINDOW,canvas)
         delay = max(1, round(1000*(1/fps-(time.monotonic()-start))))
         key = key_reader(0 if paused else delay) & 0xff
         if key == ord('q'):break
@@ -320,6 +339,41 @@ def play_frames(vis, next_frame, *, fps, no_show=False, writer=None, key_reader=
         if key==ord('t'):vis.set_trails(not vis.show_trails)
         advance = not paused
     vis.flush()
+
+
+@contextmanager
+def _atomic_output(path):
+    """Publish a completed file by rename; encoding failures leave the target intact.
+
+    Staging uses the system temporary directory, which must share the target's
+    filesystem for an atomic rename.
+    """
+    destination = Path(path)
+    with tempfile.TemporaryDirectory(prefix='wfrl-tip-') as directory:
+        temporary = Path(directory) / destination.name
+        yield str(temporary)
+        os.replace(temporary, destination)
+
+
+def _close_preview(cap, writer, bridge, window_open, failure):
+    errors = []
+    for resource, method, args, label in ((cap, 'release', (), 'capture'),
+                                         (writer, 'release', (), 'writer'),
+                                         (bridge, 'close', (), 'bridge'),
+                                         (cv2 if window_open else None, 'destroyWindow',
+                                          (PREVIEW_WINDOW,), 'window')):
+        if resource is None:
+            continue
+        try:
+            getattr(resource, method)(*args)
+        except Exception as exc:
+            errors.append((label, exc))
+    if errors:
+        primary = failure if failure is not None else errors[0][1]
+        for label, exc in errors:
+            primary.add_note(f'{label} cleanup failed: {exc!r}')
+        if failure is None:
+            raise primary
 
 
 def main():
@@ -343,74 +397,82 @@ def main():
     if a.video and (a.fastfarm_package or a.bridge):ap.error('Choose video or FAST.Farm source')
     if a.bridge and not a.fastfarm_package:ap.error('--bridge requires --fastfarm-package')
     opencv()  # actionable error before opening resources
-    cap, replay, bridge, writer = None,None,None,None
-    try:
-        geom = TurbineGeometry(a.hub_height,a.overhang,a.tilt,a.tip_radius,a.tower_radius,
-                               tower_top_radius_m=a.tower_top_radius)
-        W,H,n = 640,392,a.frames
-        if a.fastfarm_package:
-            from wfrl.blender_bridge.tip_replay import FastFarmTipReplay
-            replay = FastFarmTipReplay(a.fastfarm_package)
-            geom = replay.geometry
-            n = min(n,len(replay.times))
-            a.fps = replay.fps
-            if a.bridge:
-                from wfrl.blender_bridge.tip_client import TipBridgeClient
-                bridge = TipBridgeClient(a.bridge,a.fastfarm_package,a.scene)
-        if a.video:
-            cap=cv2.VideoCapture(a.video)
-            if not cap.isOpened():raise ValueError('Cannot open video: '+a.video)
-            W,H=int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps=cap.get(cv2.CAP_PROP_FPS)
-            if math.isfinite(fps) and fps>0:a.fps=fps
-            count=int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            if count>0:n=min(n,count)
-        cam=CameraModel.look_at(W,H,a.fov,a.vfov,geom.hub-a.cam_back*geom.n_axis+np.array([0,0,-a.cam_down]),
-                                geom.tip_position(180),geom.e_lat,upright=True)
-        if a.calibration:
-            import json
-            c=json.loads(a.calibration.read_text(encoding='utf-8'))
-            cam=CameraModel.from_calibration(W,H,c['K'],c['distortion'],c['position_m'],c['R_cw'])
-        local_camera_position = geom.world_rotation.T @ (cam.pos-geom.hub)
-        local_camera_rotation = geom.world_rotation.T @ cam.R_cw
-        dets=load_dets(a.dets) if a.dets else {}
-        vis=TipVisualizer(geom,cam)
-        vis.set_trails(False)
-        if a.out:
-            writer=cv2.VideoWriter(a.out,cv2.VideoWriter_fourcc(*'mp4v'),a.fps,(W+640,H))
-            if not writer.isOpened():raise ValueError('Cannot open video writer: '+a.out)
-        i=0
-        def next_frame():
-            nonlocal i
-            if i>=n:return None
-            index=i;i+=1
-            if replay:
-                sample=bridge.next_sample() if bridge else replay.at_index(index)
-                if sample is None:return None
-                geom.set_yaw(sample['yaw_deg']+180)
-                cam.set_pose(geom.hub+geom.world_rotation @ local_camera_position,
-                             geom.world_rotation @ local_camera_rotation)
-                return vis.feed_world(None,sample['blades'],sample['rpm'],sample['time_s'],
-                                      source='FAST.Farm',provenance=sample['provenance'])
-            t=index/a.fps
-            if cap is not None:
-                ok,frame=cap.read()
-                if not ok:return None
-                points,rpm=dets.get(index,({},None))
-                return vis.feed(frame,points,a.rpm if rpm is None else rpm,t)
-            return vis.feed_world(None,synthetic_blades(geom,150+6*a.rpm*t),a.rpm,t,
-                                  source='SYNTHETIC UI fixture',provenance={'formula':'illustrative cantilever curve'})
-        dump_at={int(s) for s in a.dump_at.split(',') if s.strip()}
-        def dump(canvas):
-            if a.dump and i-1 in dump_at:
-                path=f'{a.dump}_{i-1:03d}.png'
-                if not cv2.imwrite(path,canvas):raise ValueError('Cannot write '+path)
-        play_frames(vis,next_frame,fps=a.fps,no_show=a.no_show,writer=writer,on_canvas=dump)
-    finally:
-        if cap is not None:cap.release()
-        if writer is not None:writer.release()
-        if bridge is not None:bridge.close()
-        if not a.no_show:cv2.destroyAllWindows()
+    with ExitStack() as outputs:
+        cap, replay, bridge, writer = None,None,None,None
+        window_open = False
+        failure = None
+        try:
+            geom = TurbineGeometry(a.hub_height,a.overhang,a.tilt,a.tip_radius,a.tower_radius,
+                                   tower_top_radius_m=a.tower_top_radius)
+            W,H,n = 640,392,a.frames
+            if a.fastfarm_package:
+                from wfrl.blender_bridge.tip_replay import FastFarmTipReplay
+                replay = FastFarmTipReplay(a.fastfarm_package)
+                geom = replay.geometry
+                n = min(n,len(replay.times))
+                a.fps = replay.fps
+                if a.bridge:
+                    from wfrl.blender_bridge.tip_client import TipBridgeClient
+                    bridge = TipBridgeClient(a.bridge,a.fastfarm_package,a.scene)
+            if a.video:
+                cap=cv2.VideoCapture(a.video)
+                if not cap.isOpened():raise ValueError('Cannot open video: '+a.video)
+                W,H=int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                fps=cap.get(cv2.CAP_PROP_FPS)
+                if math.isfinite(fps) and fps>0:a.fps=fps
+                count=int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                if count>0:n=min(n,count)
+            cam=CameraModel.look_at(W,H,a.fov,a.vfov,geom.hub-a.cam_back*geom.n_axis+np.array([0,0,-a.cam_down]),
+                                    geom.tip_position(180),geom.e_lat,upright=True)
+            if a.calibration:
+                import json
+                c=json.loads(a.calibration.read_text(encoding='utf-8'))
+                cam=CameraModel.from_calibration(W,H,c['K'],c['distortion'],c['position_m'],c['R_cw'])
+            local_camera_position = geom.world_rotation.T @ (cam.pos-geom.hub)
+            local_camera_rotation = geom.world_rotation.T @ cam.R_cw
+            dets=load_dets(a.dets) if a.dets else {}
+            vis=TipVisualizer(geom,cam)
+            vis.set_trails(False)
+            if a.out:
+                video_path = outputs.enter_context(_atomic_output(a.out))
+                writer=cv2.VideoWriter(video_path,cv2.VideoWriter_fourcc(*'mp4v'),a.fps,(W+640,H))
+                if not writer.isOpened():raise ValueError('Cannot open video writer: '+a.out)
+            i=0
+            def next_frame():
+                nonlocal i
+                if i>=n:return None
+                index=i;i+=1
+                if replay:
+                    sample=bridge.next_sample() if bridge else replay.at_index(index)
+                    if sample is None:return None
+                    geom.set_yaw(sample['yaw_deg']+180)
+                    cam.set_pose(geom.hub+geom.world_rotation @ local_camera_position,
+                                 geom.world_rotation @ local_camera_rotation)
+                    return vis.feed_world(None,sample['blades'],sample['rpm'],sample['time_s'],
+                                          source='FAST.Farm',provenance=sample['provenance'])
+                t=index/a.fps
+                if cap is not None:
+                    ok,frame=cap.read()
+                    if not ok:return None
+                    points,rpm=dets.get(index,({},None))
+                    return vis.feed(frame,points,a.rpm if rpm is None else rpm,t)
+                return vis.feed_world(None,synthetic_blades(geom,150+6*a.rpm*t),a.rpm,t,
+                                      source='SYNTHETIC UI fixture',provenance={'formula':'illustrative cantilever curve'})
+            dump_at={int(s) for s in a.dump_at.split(',') if s.strip()}
+            def dump(canvas):
+                if a.dump and i-1 in dump_at:
+                    path=f'{a.dump}_{i-1:03d}.png'
+                    with _atomic_output(path) as temporary:
+                        if not cv2.imwrite(temporary,canvas):raise ValueError('Cannot write '+path)
+            if not a.no_show:
+                cv2.namedWindow(PREVIEW_WINDOW)
+                window_open = True
+            play_frames(vis,next_frame,fps=a.fps,no_show=a.no_show,writer=writer,on_canvas=dump)
+        except BaseException as exc:
+            failure = exc
+            raise
+        finally:
+            _close_preview(cap, writer, bridge, window_open, failure)
 
 
 if __name__=='__main__':main()

@@ -40,6 +40,7 @@ class DefectStore:
         self._prepare = prepare or (lambda document: None)
         self._activate = activate or (lambda resource, document, version: None)
         self._dispose = dispose or (lambda resource: None)
+        self._callback_active = False
         self._pending_disposals = []
         self.cleanup_errors = ()
         self._owner = uuid.uuid4().hex
@@ -47,14 +48,26 @@ class DefectStore:
         self._version = 0
         self._undo = []
         self._redo = []
-        self._resource = self._prepare(deepcopy(self._document))
-        try: self._activate(self._resource, deepcopy(self._document), self._version)
-        except Exception:
+        self._resource = self._call(self._prepare, deepcopy(self._document))
+        try: self._call(self._activate, self._resource, deepcopy(self._document), self._version)
+        except BaseException:
             try:
-                self._dispose(self._resource)
-            except Exception:
+                self._call(self._dispose, self._resource)
+            except BaseException:
                 _LOG.exception('Initial defect activation failed; resource cleanup also failed')
             raise
+
+    def _ensure_idle(self):
+        if self._callback_active:
+            raise RuntimeError('Reentrant defect store mutation from a resource callback')
+
+    def _call(self, callback, *args):
+        self._ensure_idle()
+        self._callback_active = True
+        try:
+            return callback(*args)
+        finally:
+            self._callback_active = False
 
     @property
     def document(self): return deepcopy(self._document)
@@ -72,10 +85,11 @@ class DefectStore:
 
     def retry_disposals(self, *, strict=False):
         """Release superseded resources without undoing a committed edit."""
+        self._ensure_idle()
         pending, errors = [], []
         for resource in self._pending_disposals:
             try:
-                self._dispose(resource)
+                self._call(self._dispose, resource)
             except Exception as exc:
                 pending.append(resource)
                 errors.append(str(exc))
@@ -86,6 +100,7 @@ class DefectStore:
         return not pending
 
     def prepare(self, candidate):
+        self._ensure_idle()
         document = validate_document(candidate, self.surface)
         old = {d['id']: d for d in self._document['defects']}
         for defect in document['defects']:
@@ -98,10 +113,11 @@ class DefectStore:
                     raise ValueError('Modified defect must retain id and increase revision')
                 if defect['revision'] < previous['revision']:
                     raise ValueError('Defect revision cannot decrease')
-        resource = self._prepare(deepcopy(document))
+        resource = self._call(self._prepare, deepcopy(document))
         return PreparedState(deepcopy(document), resource, self._version, self._owner)
 
     def _check(self, token):
+        self._ensure_idle()
         if not isinstance(token, PreparedState) or token.owner != self._owner or token.consumed:
             raise ValueError('Invalid or consumed transaction')
         if token.base_version != self._version: raise ValueError('STALE_STATE: transaction prepared against an older state')
@@ -114,12 +130,12 @@ class DefectStore:
             raise ValueError('Candidate changed after preparation')
         old_resource = self._resource
         try:
-            self._activate(token.resource, deepcopy(token.document), self._version+1)
-        except Exception as error:
+            self._call(self._activate, token.resource, deepcopy(token.document), self._version+1)
+        except BaseException as error:
             # Callbacks are expected to activate atomically; also explicitly
             # restore the committed resources for callbacks with partial swaps.
-            try: self._activate(old_resource, deepcopy(self._document), self._version)
-            except Exception as rollback_error:
+            try: self._call(self._activate, old_resource, deepcopy(self._document), self._version)
+            except BaseException as rollback_error:
                 if hasattr(error, 'add_note'): error.add_note(f'Activation rollback also failed: {rollback_error}')
             raise
         self._document = deepcopy(token.document)
@@ -144,19 +160,21 @@ class DefectStore:
         not exceed the live revisions.  State version still increases, derived
         resources are rebuilt, and undo returns to the entire pre-load state.
         """
+        self._ensure_idle()
         candidate = validate_document(document, self.surface)
-        resource = self._prepare(deepcopy(candidate))
+        resource = self._call(self._prepare, deepcopy(candidate))
         token = PreparedState(candidate, resource, self._version, self._owner)
         try: return self.commit(token)
-        except Exception:
+        except BaseException:
             self._cancel_after_error(token)
             raise
 
     def cancel(self, token):
         # Stale candidates still own disposable resources and may be cancelled.
+        self._ensure_idle()
         if not isinstance(token, PreparedState) or token.owner != self._owner or token.consumed:
             raise ValueError('Invalid or consumed transaction')
-        self._dispose(token.resource)
+        self._call(self._dispose, token.resource)
         token.consumed = True
 
     def _cancel_after_error(self, token):
@@ -165,20 +183,21 @@ class DefectStore:
             return
         try:
             self.cancel(token)
-        except Exception as exc:
+        except BaseException as exc:
             self._pending_disposals.append(token.resource)
             self.cleanup_errors += (str(exc),)
             token.consumed = True
             _LOG.exception('Defect transaction failed; candidate cleanup awaits retry')
 
     def _restore(self, source, target):
+        self._ensure_idle()
         if not source: return False
         document = validate_document(source[-1], self.surface)
-        resource = self._prepare(deepcopy(document))
+        resource = self._call(self._prepare, deepcopy(document))
         token = PreparedState(document, resource, self._version, self._owner)
         previous = self.document
         try: self._replace(token)
-        except Exception:
+        except BaseException:
             self._cancel_after_error(token)
             raise
         source.pop()

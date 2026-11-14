@@ -9,7 +9,6 @@ import bpy
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')), str(ROOT)]
 import wfrl_blender as addon
-from wfrl_blender import native_camera_views as native
 addon.register()
 addon.load_demo_scene()
 bpy.context.scene.frame_set(1)

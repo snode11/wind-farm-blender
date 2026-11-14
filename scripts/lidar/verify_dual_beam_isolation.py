@@ -25,6 +25,7 @@ from wfrl.camera_video.data import SourceGeometry, blade_root_frame
 from wfrl.lidar.dual_beam import reconstruct, validate_calibration
 from wfrl.lidar.dual_beam_replay import DualBeamReader, digest, error_statistics, resolve_package
 from wfrl.lidar.moving_tower import horizontal_clearance
+from scripts.lidar._atomic_output import write_text
 
 OBSERVATION_FIELDS = frozenset((
     'time_s', 'origin_m', 'direction', 'slant_range_m', 'first_object',
@@ -303,6 +304,8 @@ def audit_postprocess_boundary(path=ROOT / 'scripts/lidar/postprocess_dual_beam.
 def verify_turbine(source, data, config, *, independent_score_sink=None):
     _, _, limits = validate_calibration(config)
     rows = data['samples']
+    if not rows:
+        raise ValueError('Isolation verification requires a nonempty source grid')
     if len(rows) != len(source.times):
         raise ValueError('Result rows must cover the complete source grid')
     reads = {name: Counter() for name in ('original', 'deleted', 'polluted')}
@@ -405,14 +408,14 @@ def verify_packages(packages):
                 entry['turbines'][turbine_id] = result
                 print(turbine_id, entry['reconstruction_method'], result['rows'],
                       'PASS' if result['passed'] else 'FAIL', flush=True)
-            entry['passed'] = all(result['passed'] for result in entry['turbines'].values())
+            entry['passed'] = bool(entry['turbines']) and all(result['passed'] for result in entry['turbines'].values())
             entry['rows'] = sum(result['rows'] for result in entry['turbines'].values())
             entry['independent_tls_pooled_error_statistics'] = error_statistics(pooled_eigen_errors)
         except (AssertionError, ValueError, KeyError, TypeError, OSError) as error:
             entry['error'] = str(error)
     report['rows'] = sum(entry.get('rows', 0) for entry in report['packages'])
     report['reconstruction_calls'] = report['rows'] * 3
-    if not boundary['passed'] or any(not entry['passed'] for entry in report['packages']):
+    if not report['packages'] or not boundary['passed'] or any(not entry['passed'] for entry in report['packages']):
         report['status'] = 'FAIL'
     return report
 
@@ -425,7 +428,7 @@ def main():
     args = parser.parse_args()
     report = verify_packages(args.package)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n', encoding='utf-8')
+    write_text(args.output, json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n')
     print(report['status'], report['rows'], 'rows', args.output, flush=True)
     raise SystemExit(0 if report['status'] == 'PASS' else 1)
 

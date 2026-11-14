@@ -1,6 +1,7 @@
 """Shared scene, camera and capture operators for the MAPPO demonstration."""
 import bpy
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 class DemoLoaded:
     @classmethod
@@ -24,7 +25,7 @@ class WFRL_OT_LoadDemo(bpy.types.Operator):
         from .. import load_demo_scene
         try:
             load_demo_scene(self.package_path or None)
-        except (ValueError, OSError, KeyError, TypeError, ImportError) as exc:
+        except Exception as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         return {'FINISHED'}
@@ -37,45 +38,51 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
 
     def execute(self, context):
         from .. import farm_flex
-        if farm_flex.is_active(context.scene) and self.camera_name in {
-                'WFRL.Camera.World', 'WFRL.Camera.Top', 'WFRL.Camera.Side'}:
-            bpy.ops.wfrl.farm_flex_view(turbine='all')
-            if self.camera_name == 'WFRL.Camera.World':
-                return {'FINISHED'}
-        if self.camera_name.endswith('.Gimbal'):
-            from ..cameras import ensure_gimbal
-            turbine = self.camera_name.split('.')[-2]
-            try:
-                camera = ensure_gimbal(context.scene, turbine)
-            except ValueError as exc:
-                self.report({'WARNING'}, str(exc))
-                return {'CANCELLED'}
-            context.scene.wfrl_gimbal_turbine = turbine
-        else:
-            camera = context.scene.objects.get(self.camera_name)
-        if camera is None:
-            return {"CANCELLED"}
-        from .custom_cameras import dismiss_for_view_switch
-        dismiss_for_view_switch(context.scene)
-        context.scene.camera = camera
-        context.scene["wfrl_camera"] = self.camera_name
-        from ..nacelle_camera import select_output
-        select_output(context.scene, camera)
-        if context.screen:
-            from .. import split_reconstruction
-            for area in context.screen.areas:
-                if area.type == "VIEW_3D":
-                    if split_reconstruction.is_reconstruction_view(context.scene, area.spaces.active):
-                        continue
-                    # Sensor/dual-view uses a local camera.  Clear that
-                    # override when choosing any toolbar camera, otherwise
-                    # the viewport remains locked to T1 after selecting World.
-                    space = area.spaces.active
-                    space.use_local_camera = False
-                    space.camera = camera
-                    space.region_3d.view_perspective = "CAMERA"
-                    from ..cameras import fill_camera_view
-                    fill_camera_view(area, context.scene)
+        from .farm_replay import _ViewSwitchState, _view_failed, _required_camera
+        scene, state = context.scene, None
+        try:
+            overview = farm_flex.is_active(scene) and self.camera_name in {
+                'WFRL.Camera.World', 'WFRL.Camera.Top', 'WFRL.Camera.Side'}
+            if not self.camera_name.endswith('.Gimbal') and not (overview and self.camera_name == 'WFRL.Camera.World'):
+                camera = _required_camera(scene, self.camera_name)
+            state = _ViewSwitchState(scene)
+            if not self.camera_name.endswith('.Gimbal') and not (overview and self.camera_name == 'WFRL.Camera.World'):
+                state.remember_camera(camera)
+            if overview:
+                if bpy.ops.wfrl.farm_flex_view(turbine='all') != {'FINISHED'}:
+                    raise RuntimeError('风场视角切换已取消')
+                if self.camera_name == 'WFRL.Camera.World':
+                    return {'FINISHED'}
+            if self.camera_name.endswith('.Gimbal'):
+                from ..cameras import ensure_gimbal
+                turbine = self.camera_name.split('.')[-2]
+                existing = scene.objects.get(self.camera_name)
+                state.remember_camera(existing)
+                camera = ensure_gimbal(scene, turbine)
+                if existing is None:
+                    state.created.append(camera)
+                scene.wfrl_gimbal_turbine = turbine
+            from .custom_cameras import dismiss_for_view_switch
+            dismiss_for_view_switch(scene)
+            scene.camera = camera
+            scene['wfrl_camera'] = self.camera_name
+            from ..nacelle_camera import select_output
+            select_output(scene, camera)
+            if context.screen:
+                from .. import split_reconstruction
+                for area in context.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        if split_reconstruction.is_reconstruction_view(scene, area.spaces.active):
+                            continue
+                        # Toolbar cameras release a sensor view's local override.
+                        space = area.spaces.active
+                        space.use_local_camera = False
+                        space.camera = camera
+                        space.region_3d.view_perspective = 'CAMERA'
+                        from ..cameras import fill_camera_view
+                        fill_camera_view(area, scene)
+        except Exception as exc:
+            return _view_failed(self, state, exc)
         return {"FINISHED"}
 
 
@@ -110,8 +117,16 @@ class WFRL_OT_LoadDualBeam(bpy.types.Operator):
 
     def execute(self, context):
         from .. import load_demo_scene, farm_flex
-        path = Path(self.filepath).parent if self.filepath else self.builtin_package()
         try:
+            if self.filepath:
+                manifest = Path(bpy.path.abspath(self.filepath)).expanduser()
+                if not manifest.is_file():
+                    raise ValueError('所选数据包文件不存在或不可读：' + str(manifest))
+                if manifest.name != 'manifest.json':
+                    raise ValueError('请选择双束数据包的 manifest.json：' + str(manifest))
+                path = manifest.parent
+            else:
+                path = self.builtin_package()
             package = farm_flex.preflight(path)
             overlay = package.overlay
             if overlay is None:
@@ -122,7 +137,7 @@ class WFRL_OT_LoadDualBeam(bpy.types.Operator):
                     raise ValueError('内置双束数据包的方法与入口不一致：' + expected)
             load_demo_scene(path, _package=package)
             context.scene.wfrl_farm_panel_page = 'RADAR'
-        except (ValueError, OSError, KeyError, TypeError, ImportError) as exc:
+        except Exception as exc:
             context.scene['wfrl_home_load_error'] = '双束候选包加载失败：' + str(exc)
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
@@ -137,10 +152,27 @@ class WFRL_OT_RenderStill(bpy.types.Operator):
 
     def execute(self, context):
         scene = context.scene
-        scene.render.image_settings.file_format = "PNG"
-        scene.render.filepath = bpy.path.abspath(self.filepath)
-        scene["wfrl_last_render"] = scene.render.filepath
-        bpy.ops.render.render(write_still=True)
+        render = scene.render
+        previous_path, previous_format = render.filepath, render.image_settings.file_format
+        try:
+            destination = Path(bpy.path.abspath(self.filepath))
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with TemporaryDirectory(prefix='.wfrl-still-', dir=destination.parent) as temporary:
+                render.image_settings.file_format = 'PNG'
+                render.filepath = str(Path(temporary) / destination.name)
+                if 'FINISHED' not in bpy.ops.render.render(write_still=True):
+                    raise RuntimeError('Blender cancelled the render')
+                outputs = list(Path(temporary).iterdir())
+                if not outputs or any(not path.is_file() or path.stat().st_size == 0 for path in outputs):
+                    raise RuntimeError('Blender did not save a complete PNG')
+                for path in outputs:
+                    path.replace(destination.parent / path.name)
+            render.filepath = str(destination)
+            scene['wfrl_last_render'] = render.filepath
+        except Exception as exc:
+            render.filepath, render.image_settings.file_format = previous_path, previous_format
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {"FINISHED"}
 
 

@@ -6,11 +6,13 @@ rollout. No solver, training process, pixel inversion, or synthetic fallback.
 from collections import OrderedDict
 from pathlib import Path
 import hashlib
+import io
 import json
 import math
 import threading
 import time
 from types import SimpleNamespace
+from xml.etree.ElementTree import ParseError
 import numpy as np
 from wfrl.lidar.replay import ReplayPackage
 from wfrl.lidar.physics import read_surface
@@ -50,7 +52,11 @@ class FastFarmTipReplay:
                 raise ValueError('Result source integrity mismatch: '+str(path))
             return data
         def verified(path):
-            return json.loads(verified_bytes(path))
+            data = verified_bytes(path)
+            try:
+                return json.loads(data)
+            except (ValueError, UnicodeError) as exc:
+                raise ValueError(f'Invalid result metadata: {path}: {exc}') from exc
         cfg=verified(configs[0]);hashes=verified(self.run/'surface_hashes.json')
         if (verified(self.run/'exit_status.json').get('exit_code') != 0
                 or b'FAST.Farm terminated normally.' not in verified_bytes(self.run/'solver.log')):
@@ -79,7 +85,10 @@ class FastFarmTipReplay:
         self.times=[row['time_s'] for row in self.motion]
         if not self.times or self.times[0]!=segment['start_s'] or self.times[-1]!=segment['end_s']:
             raise ValueError('Source motion must span the complete segment')
-        if not np.allclose(np.diff(self.times),1/self.fps,atol=1e-8):
+        frames = np.rint(np.asarray(self.times) * self.fps)
+        if (not np.allclose(np.diff(self.times),1/self.fps,atol=1e-8,rtol=0.)
+                or not np.allclose(self.times,frames/self.fps,atol=1e-8,rtol=0.)
+                or not np.all(np.diff(frames) == 1)):
             raise ValueError('Motion and surface output clocks differ')
         self._cache=OrderedDict()
         self.provenance={'file':str(self.path/'manifest.json'), 'channel':'blade_geometry',
@@ -99,9 +108,15 @@ class FastFarmTipReplay:
             data=path.read_bytes()
             if hashlib.sha256(data).hexdigest()!=self.hashes.get(relative):
                 raise ValueError('Blade surface integrity mismatch: '+relative)
-            points,_=read_surface(path)
-            if len(points)%self.section_count:raise ValueError('Unexpected blade section topology')
-            sections=points.reshape(self.section_count,-1,3).mean(axis=1)
+            try:
+                points,_=read_surface(io.BytesIO(data))
+            except (ValueError, ParseError, KeyError) as exc:
+                raise ValueError(f'Invalid blade surface: {path}: {exc}') from exc
+            if len(points)%self.section_count:raise ValueError('Unexpected blade section topology: '+str(path))
+            with np.errstate(over='ignore', invalid='ignore'):
+                sections=points.reshape(self.section_count,-1,3).mean(axis=1)
+            if not np.isfinite(sections).all():
+                raise ValueError('Invalid blade section centroids: '+str(path))
             blades[bid-1]={'P':sections[-1].tolist(),'sections':sections.tolist()}
         result=dict(time_s=row['time_s'],rpm=row['rotor_speed_rpm'],yaw_deg=row['yaw_deg'],
                     azimuth_deg=row['azimuth_deg'],pitch_deg=row['pitch_deg'],blades=blades,
@@ -129,18 +144,44 @@ class FastFarmTipReplay:
                     turbines=[{'turbine_id':self.package.manifest['turbine_id'],'channels':channels}],farm={})
 
 
+def _finite_number(value):
+    try:
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    except OverflowError:
+        return False
+
+
+def _recorded_channel(channels, name, unit):
+    channel = channels.get(name)
+    if not isinstance(channel, dict):
+        raise ValueError('Missing channel: '+name)
+    if channel.get('unit') != unit:
+        raise ValueError('Unsupported unit for '+name)
+    if (channel.get('validity') != 'valid' or channel.get('value') is None
+            or channel.get('fidelity') not in ('DIRECT', 'EXPORTED')):
+        raise ValueError('Missing valid recorded '+name)
+    age, expiry = channel.get('source_age_seconds'), channel.get('stale_after_seconds')
+    if (not _finite_number(age) or not _finite_number(expiry) or age < 0 or expiry <= 0):
+        raise ValueError('Invalid source age for '+name)
+    if age >= expiry:
+        raise ValueError('Stale '+name)
+    return channel
+
+
 def sample_from_snapshot(payload,turbine_id=None):
-    """Receive the same typed geometry channel from the actual Bridge wire."""
+    """Receive finite, fresh recorded geometry (m), rotor speed (rpm) and yaw (deg).
+
+    Required measurements must be present and valid.
+    """
     timestamp=payload['timestamp']
     if timestamp['timebase']!='simulation_seconds':raise ValueError('Geometry requires simulation time')
+    if not _finite_number(timestamp.get('value')):raise ValueError('Invalid simulation time')
     candidates=[t for t in payload['turbines'] if turbine_id is None or t['turbine_id']==turbine_id]
     if len(candidates)!=1:raise ValueError('Select one turbine for tip tracking')
-    channels=candidates[0]['channels'];channel=channels['blade_geometry']
-    if channel['validity']!='valid' or channel['fidelity'] not in ('DIRECT','EXPORTED'):
-        raise ValueError('Blade geometry is missing, invalid, stale, or synthetic')
-    if channel['source_age_seconds']>=channel['stale_after_seconds']:raise ValueError('Stale blade geometry')
+    channels=candidates[0]['channels'];channel=_recorded_channel(channels,'blade_geometry','m')
     value=channel['value']
-    if value['source']!='FAST.Farm' or value['time_s']!=timestamp['value']:
+    if (not isinstance(value, dict) or value.get('source')!='FAST.Farm'
+            or not _finite_number(value.get('time_s')) or value['time_s']!=timestamp['value']):
         raise ValueError('Geometry source or timestamp mismatch')
     if value['coordinate_system']!='FAST inertial: x downwind, y lateral, z up; tower center origin':
         raise ValueError('Unsupported blade coordinate system')
@@ -148,16 +189,22 @@ def sample_from_snapshot(payload,turbine_id=None):
     for blade in value['blades']:
         bid=blade['blade_id']
         if type(bid) is not int or bid not in (1,2,3) or bid-1 in blades:raise ValueError('Invalid blade IDs')
-        points=np.asarray(blade['sections_m'],dtype=float);tip=np.asarray(blade['tip_m'],dtype=float)
+        try:
+            if (not all(_finite_number(v) for point in blade['sections_m'] for v in point)
+                    or not all(_finite_number(v) for v in blade['tip_m'])):
+                raise ValueError('Non-numeric blade coordinates')
+            points=np.asarray(blade['sections_m'],dtype=float);tip=np.asarray(blade['tip_m'],dtype=float)
+        except (KeyError, TypeError, ValueError, OverflowError) as exc:
+            raise ValueError('Invalid blade sections/tip') from exc
         if (points.ndim!=2 or points.shape[1]!=3 or not 2<=len(points)<=1024 or tip.shape!=(3,)
                 or not np.isfinite(points).all() or not np.isfinite(tip).all()
-                or not np.allclose(points[-1],tip,atol=1e-6)):
+                or not np.allclose(points[-1],tip,atol=1e-6,rtol=0.)):
             raise ValueError('Invalid blade sections/tip')
         blades[bid-1]={'P':tip,'sections':points}
     if len(blades)!=3:raise ValueError('Three blade records required')
-    for key in ('rotor_speed','yaw'):
-        c=channels[key]
-        if c['validity']!='valid' or not math.isfinite(c['value']):raise ValueError('Missing valid '+key)
+    for key, unit in (('rotor_speed', 'rpm'), ('yaw', 'deg')):
+        c=_recorded_channel(channels,key,unit)
+        if not _finite_number(c['value']):raise ValueError('Missing valid '+key)
     return dict(time_s=value['time_s'],rpm=channels['rotor_speed']['value'],yaw_deg=channels['yaw']['value'],
                 blades=blades,provenance=channel['provenance'])
 
@@ -172,9 +219,9 @@ class RecordedTipTrainer:
             raise ValueError('Recorded turbine is absent from selected scene')
         self.on_snapshot=on_snapshot;self.runtime=None;self.running=False;self.error=None
         self._stop=threading.Event();self._thread=None
+        self._state_lock=threading.Lock()
 
     def start(self):
-        self.running=True
         def work():
             try:
                 for index in range(len(self.reader.times)):
@@ -185,10 +232,21 @@ class RecordedTipTrainer:
             except Exception as exc:
                 self.error=str(exc)
             finally:self.running=False
-        self._thread=threading.Thread(target=work,name='recorded-fastfarm-tips',daemon=True)
-        self._thread.start()
+        with self._state_lock:
+            if self._thread is not None and self._thread.is_alive():
+                raise RuntimeError('Recorded tip playback is already running')
+            self.running=True
+            try:
+                self._thread=threading.Thread(target=work,name='recorded-fastfarm-tips',daemon=True)
+                self._thread.start()
+            except Exception:
+                self.running=False
+                self._thread=None
+                raise
 
     def stop(self,timeout=5):
-        self._stop.set()
-        if self._thread is not None and self._thread is not threading.current_thread():
-            self._thread.join(timeout)
+        with self._state_lock:
+            self._stop.set()
+            thread=self._thread
+        if thread is not None and thread is not threading.current_thread():
+            thread.join(timeout)

@@ -1,6 +1,6 @@
 # 叶片响应、弹性扭转与研究用 DEL
 
-本文描述保存的BeamDyn结果及本地分析入口。分析不启动求解器；响应差异、弹性扭转、应力、疲劳寿命和物理不平衡分别判断。
+本文描述保存的预弯 BeamDyn 结果及本地分析入口。分析不启动求解器；响应差异、弹性扭转、应力、疲劳寿命和物理不平衡分别判断。显式 `physics.blade_torsion` 使用官方直叶片模型及六站位旋转输出，见 [BeamDyn 叶片弹性扭转](BeamDyn叶片弹性扭转.md)；该定义不自动适用于本文的预弯结果。
 
 ## 九项响应指标
 
@@ -16,7 +16,7 @@
 
 `common-turn-phase-mean.v1` 取三叶都完整覆盖的共同转次，在5°中点网格插值，按转等权平均，提供全片段曲线、三叶均值／偏差及最近完整转统计。[imbalance.py](../../blender_frontend/wfrl_blender/imbalance.py) 兼容完整六项位移／力矩包及完整九项包；部分根部力组无效，缺根部力的六项包显示不可用。当前九项资产不意味着其他来源或既有安装载荷也含九项。数据绑定和读取规则见[离线不平衡分析](../../blender_frontend/README.md#离线不平衡分析)。
 
-## 弹性扭转：待实现
+## 保存的预弯结果：弹性扭转未提供
 
 当前 [BeamDyn输入](../../__simul__/fastfarm/FastFarm__208s__3T_1789663025.003069/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat) 的参考轴从根部到叶尖具有1 m迎风预弯，曲线为 `x=-(z/61.5)^2`，并保存 `initial_twist`。它不是直梁；局部展向切线随位置变化，受载弯曲还会改变截面方向。[prebend.py](../../blender_frontend/wfrl_blender/prebend.py) 校验该参考和独立零载静止求解身份。
 

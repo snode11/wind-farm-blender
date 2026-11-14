@@ -32,6 +32,17 @@ def record(scene, payload):
     scene['wfrl_cinematic_inflow_valid'] = True
     scene['wfrl_cinematic_backend_time'] = sample[0]
     scene['wfrl_wind_speed_mps'] = sample[1]
+    scene['wfrl_wind_direction_deg'] = float(inflow['direction'])
+    scene['wfrl_wind_coordinates'] = json.dumps(payload.get('wind_coordinates') or {})
+    objects = getattr(scene, 'objects', {})
+    for index, y in enumerate((-72., 30., 132.), 1):
+        shaft = objects.get(f'WFRL.Inflow.Arrow{index}.Shaft')
+        head = objects.get(f'WFRL.Inflow.Arrow{index}.Head')
+        if shaft is not None:
+            shaft.rotation_euler[2] = sample[2]
+        if head is not None:
+            head.rotation_euler[2] = sample[2]
+            head.location = (60.+42.*math.cos(sample[2]), y+42.*math.sin(sample[2]), 1.)
     return True
 
 

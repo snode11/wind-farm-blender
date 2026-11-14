@@ -1,8 +1,6 @@
 """Independent manual turbine state, rigid poses and main-thread motion."""
 import math
-import os
 from pathlib import Path
-import tempfile
 import time
 from dataclasses import replace
 
@@ -11,7 +9,7 @@ from bpy.app.handlers import persistent
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from .manual_motion import RotorClock, pitch_at
-from . import manual_pose
+from . import atomic_json, manual_pose
 
 
 DEFAULT_RPM = 9.0
@@ -77,6 +75,8 @@ def validate_scene(scene):
         owner = scene.get('wfrl_manual_owner')
         if not owner:
             return False, '手动控制场景缺少对象归属标识'
+        foreign_objects = {obj.as_pointer() for other in bpy.data.scenes if other != scene
+                           for obj in other.objects}
         seen_objects, seen_ids = set(), set()
         for entry in entries:
             if not entry.turbine_id or entry.turbine_id in seen_ids:
@@ -104,7 +104,7 @@ def validate_scene(scene):
                 if key in seen_objects:
                     return False, '风机控制对象不能重复使用'
                 seen_objects.add(key)
-                if any(owner != scene for owner in obj.users_scene):
+                if key in foreign_objects:
                     return False, '控制对象与其他场景共享，请使用独立副本'
         return True, ''
     except (AttributeError, ReferenceError, TypeError):
@@ -184,6 +184,13 @@ def _command_pitch(entry, pitch, *, settle=False):
         _settle_pitch(entry)
     else:
         _retarget_pitch(entry)
+
+
+def hold_pitch_clock(scene, now=None):
+    """Restart a running ramp's clock, so time spent exporting does not advance the pitch."""
+    key = _scene_key(scene)
+    if key in _PITCH_TIMES:
+        _PITCH_TIMES[key] = time.monotonic() if now is None else now
 
 
 def pitch_ramping(entry):
@@ -776,7 +783,6 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
     filter_glob: bpy.props.StringProperty(default='*.json', options={'HIDDEN'})
 
     def execute(self, context):
-        temporary = None
         try:
             valid, reason = validate_scene(context.scene)
             if not valid:
@@ -785,17 +791,10 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
             path = Path(bpy.path.abspath(self.filepath))
             if not path.name or path.is_dir():
                 raise ValueError('请选择JSON文件位置')
-            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
-                                             prefix='.' + path.name, suffix='.tmp', delete=False) as stream:
-                temporary = Path(stream.name)
-                stream.write(payload)
-            os.replace(temporary, path)
+            atomic_json.write_text(path, payload)
         except (OSError, ValueError, ReferenceError, AttributeError) as exc:
             self.report({'ERROR'}, f'无法保存姿态：{exc}')
             return {'CANCELLED'}
-        finally:
-            if temporary is not None:
-                temporary.unlink(missing_ok=True)
         self.report({'INFO'}, '三机姿态已保存')
         return {'FINISHED'}
 

@@ -37,7 +37,7 @@ def case(tmp_path, monkeypatch):
     wind_path = input_dir / "loaded.bts"
     wind_path.write_bytes(b"loaded wind fixture")
     for i in range(1, 4):
-        (input_dir / f"T{i}.fst").write_text(json.dumps({"EDFile": f'"T{i}.dat"'}), encoding="utf-8")
+        (input_dir / f"T{i}.fst").write_text(json.dumps({"EDFile": f'"T{i}.dat"', "DT": .00625}), encoding="utf-8")
         (input_dir / f"T{i}.dat").write_text(json.dumps({"NacYaw": float(i - 1)}), encoding="utf-8")
     farm_path.write_text(json.dumps({
         "InflowFile": '"InflowWind.dat"', "Mod_AmbWind": 2, "DT_Low": 3., "DT_High": .05,
@@ -388,7 +388,7 @@ def test_fixed_coordinate_conversion_and_yaw_commands(case):
     case.itf.update_command(yaw=np.array([0., 10., -10.]))
     np.testing.assert_allclose(case.itf.get_measure("wind_direction"), [270., 270., 0.])
     np.testing.assert_allclose(case.itf._current_yaw_command[1:], np.radians([0., 10., -10.]))
-    assert case.itf.wind_record["coordinates"]["rotation_supported"] is False
+    assert case.itf.wind_record["coordinates"]["rotation_supported"] is True
     assert case.itf.wind_record["coordinates"]["layout_transform"] == "identity"
 
 
@@ -443,13 +443,13 @@ def scene_runtime(case, monkeypatch, direction=280., turbulence=None):
 
 
 @pytest.mark.parametrize("direction", [270., 280.])
-def test_scene_direction_is_recorded_as_display_only(case, monkeypatch, direction):
+def test_scene_direction_is_recorded_as_case_generation(case, monkeypatch, direction):
     runtime = scene_runtime(case, monkeypatch, direction)
     runtime.reset()
     record = runtime.last_measure["wind_conditions"]
     assert record["upstream_request"]["scene"] == {
         "wind_speed": 8.123456789, "wind_direction": direction, "wind_time_series": None,
-        "wind_speed_role": "solver_request", "wind_direction_role": "display_only",
+        "wind_speed_role": "solver_request", "wind_direction_role": "case_generation",
     }
     assert record["requested"]["wind_speed"] == 8.123456789
     assert record["requested"]["wind_direction"] is None
@@ -477,7 +477,7 @@ def test_scene_explicit_solver_direction_keeps_display_separate(case, monkeypatc
     assert record["requested"]["wind_speed"] == 8.123456789
     assert record["environment_reset"]["wind_direction"] == direction
     assert record["upstream_request"]["scene"]["wind_direction"] == 250.
-    assert record["upstream_request"]["scene"]["wind_direction_role"] == "display_only"
+    assert record["upstream_request"]["scene"]["wind_direction_role"] == "case_generation"
     assert saved(record) == record
 
 
@@ -488,7 +488,7 @@ def test_scene_bts_keeps_display_and_overridden_speed_without_solver_request(cas
     record = runtime.last_measure["wind_conditions"]
     assert record["upstream_request"]["scene"] == {
         "wind_speed": 8.123456789, "wind_direction": 280., "wind_time_series": str(case.wind),
-        "wind_speed_role": "overridden_by_bts", "wind_direction_role": "display_only",
+        "wind_speed_role": "overridden_by_bts", "wind_direction_role": "case_generation",
     }
     assert record["requested"]["wind_speed"] is None
     assert record["requested"]["wind_direction"] is None
@@ -552,7 +552,7 @@ def test_training_cli_direction_is_preserved_through_config_and_sampler(
     }
     if scene_mode:
         assert record["upstream_request"]["scene"]["wind_direction"] == 280.
-        assert record["upstream_request"]["scene"]["wind_direction_role"] == "display_only"
+        assert record["upstream_request"]["scene"]["wind_direction_role"] == "case_generation"
     assert record["application"]["wind_direction"]["status"] == (
         "input_file" if direction is None else
         "MATCHES_FIXED_COORDINATES" if direction == 270. else "not_applied")

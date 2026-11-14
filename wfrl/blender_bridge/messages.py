@@ -8,12 +8,109 @@ import struct
 
 PROTOCOL_VERSION = 1
 MAX_FRAME_BYTES = 1024 * 1024
+MAX_DIAGNOSTIC_CHARS = 2048
 STALE_AFTER_SECONDS = {"telemetry": 2.0, "curve": 2.0, "wake": 5.0, "safety_event": 10.0}
 TRAINING_STATS_CAPABILITY = 'training_stats_v1'
 TRAINING_STATS_STALE_AFTER_SECONDS = 30.0
 TRAINING_STATS_CHANNELS = frozenset(('mean_power', 'mean_reward', 'value_loss', 'explained_variance', 'episode_return', 'learning_rate'))
-SCALAR_NUMERIC_CHANNELS = frozenset(('rotor_speed', 'power', 'yaw', 'pitch', 'wind_speed', 'wind_direction', 'torque', 'reward'))
-DISPLAY_CHANNEL_UNITS = {'rotor_speed': 'rpm', 'yaw': 'deg', 'pitch': 'deg', 'power': 'MW'}
+BLADE_COMPONENTS = {f'{axis}_{blade}': (axis, blade - 1)
+                    for axis in ('m_flap', 'm_edge') for blade in (1, 2, 3)}
+
+
+def _solver_output_catalog():
+    """Native ElastoDyn channels and their wire units; no inferred measurements."""
+    result = {}
+    def add(key, native, unit, label, frame, *, blade=None, gauge=None, group=None):
+        native_unit = {'N': 'kN', 'N m': 'kN-m'}.get(unit, unit)
+        result[key] = dict(native=native, unit=unit, native_unit=native_unit,
+                           scale=1000. if unit in ('N', 'N m') else 1., label=label,
+                           frame=frame, blade=blade, gauge=gauge, group=group)
+    add('rotor_speed', 'RotSpeed', 'rpm', 'Rotor speed measured', 'rotor rotation')
+    add('generator_speed', 'GenSpeed', 'rpm', 'Generator speed measured', 'generator rotation')
+    for axis, native, description, frame in (
+        ('tip_flap', 'OoPDefl', 'Tip out-of-plane deflection', 'out of rotor plane'),
+        ('tip_edge', 'IPDefl', 'Tip in-plane deflection', 'in rotor plane'),
+        ('tip_dx', 'TipDxc', 'Tip displacement x', 'ElastoDyn coned blade frame c'),
+        ('tip_dy', 'TipDyc', 'Tip displacement y', 'ElastoDyn coned blade frame c'),
+        ('tip_dz', 'TipDzc', 'Tip displacement z', 'ElastoDyn coned blade frame c')):
+        for blade in (1, 2, 3):
+            add(f'{axis}_{blade}', f'{native}{blade}', 'm', f'B{blade} {description}',
+                frame, blade=blade, group=axis)
+    for kind, unit, native_kind in (('force', 'N', 'F'), ('moment', 'N m', 'M')):
+        for axis in 'xyz':
+            add(f'tower_base_{kind}_{axis}', f'TwrBs{native_kind}{axis}t', unit,
+                f'Tower base {native_kind}{axis}', 'ElastoDyn tower-base frame t',
+                group=f'tower_base_{kind}')
+            native = f'LSShft{native_kind}{axis}a'
+            if kind == 'moment' and axis != 'x':
+                native = f'LSSTipM{axis}a'
+            add(f'shaft_{kind}_{axis}', native, unit, f'Rotor shaft {native_kind}{axis}',
+                'ElastoDyn rotating shaft frame a', group=f'shaft_{kind}')
+    for kind, axes, unit in (('F', 'xyz', 'N'), ('M', 'z', 'N m')):
+        for axis in axes:
+            group = f'root_{kind.lower()}{axis}'
+            for blade in (1, 2, 3):
+                add(f'{group}_{blade}', f'Root{kind}{axis}c{blade}', unit,
+                    f'B{blade} root {kind}{axis}', 'ElastoDyn coned blade frame c',
+                    blade=blade, group=group)
+    for gauge in (1, 2, 3):
+        for kind, unit in (('F', 'N'), ('M', 'N m')):
+            for axis in 'xyz':
+                group = f'span{gauge}_{kind.lower()}{axis}'
+                for blade in (1, 2, 3):
+                    add(f'{group}_{blade}', f'Spn{gauge}{kind}L{axis}b{blade}', unit,
+                        f'B{blade} gage {gauge} {kind}{axis}', 'ElastoDyn local blade frame',
+                        blade=blade, gauge=gauge, group=group)
+    return result
+
+
+SOLVER_OUTPUT_CHANNELS = _solver_output_catalog()
+TOWER_OUTPUT_CHANNELS = {
+    f'tower_top_{axis}': dict(native=native, unit='m', native_unit='m', scale=1.,
+                              label=f'Tower top {label} displacement',
+                              frame='ElastoDyn tower-base frame t', blade=None,
+                              gauge=None, group='tower_top_displacement')
+    for axis, native, label in (('fa', 'TTDspFA', 'fore-aft'), ('ss', 'TTDspSS', 'side-to-side'))
+}
+TORSION_OUTPUT_CHANNELS = {
+    f'tip_torsion_{blade}': dict(native=f'B{blade}N6RDzr', unit='deg', native_unit='-', scale=1.,
+                                label=f'B{blade} elastic tip torsion',
+                                frame='BeamDyn section twist about the deformed span axis',
+                                blade=blade, gauge=None, group='tip_torsion',
+                                components=[f'B{blade}N6RD{axis}r' for axis in 'xyz'])
+    for blade in (1, 2, 3)
+}
+OFFSHORE_OUTPUT_CHANNELS = {
+    key: dict(native=native, unit=unit, native_unit=native_unit, scale=1., label=label,
+              frame=frame, blade=None, gauge=None, group=group)
+    for key, native, unit, native_unit, label, frame, group in (
+        ('mudline_shear_x', '-ReactFXss', 'N', 'N', 'Mudline shear x', 'SubDyn global SS; negative base reaction', 'mudline_shear'),
+        ('mudline_shear_y', '-ReactFYss', 'N', 'N', 'Mudline shear y', 'SubDyn global SS; negative base reaction', 'mudline_shear'),
+        ('mudline_moment_x', '-ReactMXss', 'N m', 'N*m', 'Mudline moment x', 'SubDyn global SS; negative base reaction', 'mudline_moment'),
+        ('mudline_moment_y', '-ReactMYss', 'N m', 'N*m', 'Mudline moment y', 'SubDyn global SS; negative base reaction', 'mudline_moment'),
+        ('platform_surge', 'PtfmSurge', 'm', 'm', 'Transition piece surge', 'ElastoDyn platform reference at MSL +10 m', None),
+        ('platform_pitch', 'PtfmPitch', 'deg', 'deg', 'Transition piece pitch', 'ElastoDyn platform reference at MSL +10 m', None),
+        ('wave_elevation', 'Wave1Elev', 'm', 'm', 'Incident wave elevation', 'HydroDyn local wave probe (0, 0)', None),
+    )
+}
+ALL_SOLVER_OUTPUT_CHANNELS = {**SOLVER_OUTPUT_CHANNELS, **TOWER_OUTPUT_CHANNELS, **TORSION_OUTPUT_CHANNELS, **OFFSHORE_OUTPUT_CHANNELS}
+SOLVER_OUTPUT_CATALOGS = tuple(frozenset({**SOLVER_OUTPUT_CHANNELS, **tower, **torsion, **offshore})
+                              for tower in ({}, TOWER_OUTPUT_CHANNELS)
+                              for torsion in ({}, TORSION_OUTPUT_CHANNELS)
+                              for offshore in ({}, OFFSHORE_OUTPUT_CHANNELS))
+SOLVER_OUTPUT_GROUPS = {}
+for _key, _definition in SOLVER_OUTPUT_CHANNELS.items():
+    if _definition['group']:
+        SOLVER_OUTPUT_GROUPS.setdefault(_definition['group'], []).append(_key)
+
+SCALAR_NUMERIC_CHANNELS = frozenset(('rotor_speed', 'power', 'yaw', 'yaw_command', 'yaw_measured',
+                                    'pitch', 'pitch_command', 'pitch_measured', 'wind_speed',
+                                    'wind_direction', 'torque', 'reward', *BLADE_COMPONENTS, *ALL_SOLVER_OUTPUT_CHANNELS))
+DISPLAY_CHANNEL_UNITS = {'rotor_speed': 'rpm', 'yaw': 'deg', 'yaw_command': 'deg',
+                         'yaw_measured': 'deg', 'pitch': 'deg', 'pitch_command': 'deg',
+                         'pitch_measured': 'deg', 'power': 'MW', 'm_flap': 'N m', 'm_edge': 'N m',
+                         **{name: 'N m' for name in BLADE_COMPONENTS},
+                         **{name: spec['unit'] for name, spec in ALL_SOLVER_OUTPUT_CHANNELS.items()}}
 MODES = frozenset(('demo', 'interactive_training', 'formal_training', 'replay'))
 RUN_STATUSES = frozenset(('READY', 'STARTING', 'RUNNING', 'PAUSED', 'DRAINING', 'STOPPED', 'FAILED'))
 MESSAGE_TYPES = frozenset(('hello', 'hello_ack', 'command', 'lifecycle', 'snapshot', 'safety_event', 'curve', 'wake', 'error', 'training_stats'))
@@ -21,6 +118,19 @@ MESSAGE_TYPES = frozenset(('hello', 'hello_ack', 'command', 'lifecycle', 'snapsh
 
 class ProtocolError(ValueError):
     """Invalid, unsupported, oversized or out-of-order protocol input."""
+
+
+class FrameTooLarge(ProtocolError):
+    """A valid message whose frame exceeds a permanent delivery size limit."""
+
+
+def bounded_diagnostic(text):
+    """Bound server diagnostics, including JSON escaping and UTF-8 expansion."""
+    if not text.strip():
+        return 'Unspecified error'
+    if len(text) > MAX_DIAGNOSTIC_CHARS:
+        text = text[:MAX_DIAGNOSTIC_CHARS - 3] + '...'
+    return text.encode('utf-8', errors='replace').decode('utf-8')
 
 
 def _require(condition, message):
@@ -93,6 +203,8 @@ def _channel(channel, stale_after_seconds=2.0):
 
 
     _require(channel['stale_after_seconds'] == stale_after_seconds, 'Staleness threshold disagrees with v1 channel policy')
+    if 'timestamp' in channel:
+        _timestamp(channel['timestamp'])
 
 
 def data_age_seconds(channel, received_monotonic, now_monotonic):
@@ -115,6 +227,10 @@ def _channels(mapping):
         _channel(channel)
         if key in SCALAR_NUMERIC_CHANNELS and channel['value'] is not None:
             _require(_number(channel['value']), key + ' must be a finite scalar number')
+        if key in ('m_flap', 'm_edge') and channel['value'] is not None:
+            value = channel['value']
+            _require(isinstance(value, list) and len(value) == 3 and all(_number(v) for v in value),
+                     key + ' must contain three finite blade moments')
         _display_unit(key, channel)
 
 
@@ -124,13 +240,34 @@ def _display_unit(name, channel):
         _require(channel['unit'] == expected, name + ' unit must be ' + expected)
 
 
-def _data_context(payload):
-    _require(payload.get('mode') in MODES, 'Invalid business mode')
-    _require(_integer(payload.get('step')), 'Invalid step')
-    timestamp = payload.get('timestamp')
+def _channel_times(channels, frame):
+    for record in channels.values():
+        stamp = record.get('timestamp')
+        if stamp is not None:
+            _require(stamp['timebase'] == frame['timebase'], 'Channel and frame clocks disagree')
+            _require(stamp['value'] <= frame['value'] + 1e-9, 'Channel time is after its frame')
+
+
+def _timestamp(timestamp):
     _require(isinstance(timestamp, dict), 'Missing timestamp')
     _require(_number(timestamp.get('value')), 'Invalid timestamp value')
     _require(timestamp.get('timebase') in ('simulation_seconds', 'unix_seconds', 'replay_seconds'), 'Invalid timestamp timebase')
+    if timestamp.get('source') == 'mpi_exchange_index':
+        _require(timestamp['timebase'] == 'simulation_seconds', 'MPI clock requires simulation_seconds')
+        _require(_integer(timestamp.get('exchange_index')), 'Invalid MPI exchange index')
+        interval = timestamp.get('interval_seconds')
+        _require(_number(interval) and interval > 0, 'Invalid MPI interval')
+        _require(math.isclose(timestamp['value'], timestamp['exchange_index'] * interval,
+                              rel_tol=1e-12, abs_tol=1e-9), 'MPI timestamp disagrees with exchange index')
+
+
+def _data_context(payload):
+    _require(payload.get('mode') in MODES, 'Invalid business mode')
+    _require(_integer(payload.get('step')), 'Invalid step')
+    _timestamp(payload.get('timestamp'))
+    if 'control_elapsed_seconds' in payload:
+        _require(_number(payload['control_elapsed_seconds']) and payload['control_elapsed_seconds'] >= 0,
+                 'Invalid control elapsed time')
 
 
 def _training_stats(payload):
@@ -223,6 +360,7 @@ def _validate_message(message):
         _data_context(p)
         if kind == 'snapshot':
             _channels(p.get('farm'))
+            _channel_times(p['farm'], p['timestamp'])
             turbines = p.get('turbines')
             _require(isinstance(turbines, list), 'Turbines must be a list')
             ids = set()
@@ -230,6 +368,7 @@ def _validate_message(message):
                 _require(isinstance(turbine, dict) and _text(turbine.get('turbine_id')), 'Stable turbine_id required')
                 _require(turbine['turbine_id'] not in ids, 'Duplicate turbine_id')
                 ids.add(turbine['turbine_id']); _channels(turbine.get('channels'))
+                _channel_times(turbine['channels'], p['timestamp'])
         elif kind == 'curve':
             _require(_text(p.get('channel')), 'Curve channel required')
             _require(p.get('channel') != 'rotorspeed', 'Wire key must be canonical rotor_speed')
@@ -271,7 +410,9 @@ def encode_message(message):
         body = json.dumps(message, ensure_ascii=False, allow_nan=False, separators=(',', ':')).encode('utf-8')
     except (TypeError, OverflowError, RecursionError, UnicodeError) as exc:
         raise ProtocolError(str(exc)) from exc
-    _require(0 < len(body) <= MAX_FRAME_BYTES, 'Frame exceeds size limit')
+    _require(len(body) > 0, 'Empty frame')
+    if len(body) > MAX_FRAME_BYTES:
+        raise FrameTooLarge(f'Frame of {len(body)} bytes exceeds the {MAX_FRAME_BYTES}-byte limit')
     return struct.pack('!I', len(body)) + body
 
 

@@ -1,4 +1,4 @@
-"""Native visible-window acceptance of real Interactive and Formal workflows."""
+"""Accept native workflows; save reports atomically and exit nonzero on failed checks or cleanup."""
 import json
 import math
 import os
@@ -18,6 +18,7 @@ bpy.context.preferences.view.show_splash = False
 sys.path.insert(0, str(ROOT / 'blender_frontend'))
 addon_utils.enable('wfrl_blender', default_set=True)
 from wfrl_blender import runtime, charts
+from wfrl_blender.atomic_json import write_text as write_atomic_text
 from wfrl_blender.preferences import get_preferences
 prefs = get_preferences()
 assert prefs is not None
@@ -33,6 +34,7 @@ pause_step = None
 run_id = session_id = None
 export_attempt = 0
 base_build = runtime.build_live_scene
+finished = False
 
 def timed_build(scene):
     begin = time.monotonic()
@@ -47,7 +49,7 @@ def transition(name):
     stage, stage_start = name, time.monotonic()
     report['stages'].append(dict(stage=name, seconds=stage_start-started))
     print('ACCEPT_STAGE', name, round(stage_start-started, 2), flush=True)
-    (OUT / 'progress.json').write_text(json.dumps(report, indent=2, default=str), encoding='utf-8')
+    write_atomic_text(OUT / 'progress.json', json.dumps(report, indent=2, default=str))
 
 
 def control(action):
@@ -61,12 +63,31 @@ def capture(name):
 
 
 def finish():
-    report['final_status'] = runtime.get_state().run_status
+    global finished
+    if finished:
+        return
+    finished = True
+    try:
+        report['final_status'] = runtime.get_state().run_status
+    except Exception:
+        report['errors'].append(traceback.format_exc())
+    try:
+        runtime.shutdown()
+    except Exception:
+        report['errors'].append(traceback.format_exc())
     report['elapsed_seconds'] = time.monotonic() - started
     report['passed'] = not report['errors'] and stage == 'complete'
-    (OUT / 'report.json').write_text(json.dumps(report, indent=2, default=str), encoding='utf-8')
+    try:
+        write_atomic_text(OUT / 'report.json', json.dumps(report, indent=2, default=str))
+    except Exception:
+        report['passed'] = False
+        traceback.print_exc()
     print('FRONTEND_ACCEPTANCE', report['passed'], flush=True)
-    runtime.shutdown()
+    if not report['passed']:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(1)
+        return
     bpy.ops.wm.quit_blender()
 
 

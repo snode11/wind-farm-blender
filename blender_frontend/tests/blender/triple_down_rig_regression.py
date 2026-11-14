@@ -118,10 +118,13 @@ for side, cam, az in (('Left', left, 180.0 + step), ('Right', right, 180.0 - ste
 # ── View switch does not disturb the rotor ────────────────────────────────────
 t1.azimuth_deg = 137.0
 bpy.context.view_layer.update()
-assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='LEFT') == {'FINISHED'}
-assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
-assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='CENTER') == {'FINISHED'}
-assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
+view_area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+view_region = next(region for region in view_area.regions if region.type == 'WINDOW')
+with bpy.context.temp_override(area=view_area, region=view_region):
+    assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='LEFT') == {'FINISHED'}
+    assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
+    assert bpy.ops.wfrl.manual_down_view(turbine='T1', side='CENTER') == {'FINISHED'}
+    assert math.isclose(t1.azimuth_deg, 137.0), t1.azimuth_deg
 
 # Only CENTER is implied by a button that does not set ``side``.
 side_prop = bpy.ops.wfrl.manual_down_view.get_rna_type().properties['side']
@@ -179,10 +182,11 @@ for model in ('nrel5mw', 'rootkink'):
     job = dict(plan=plan)
     cams = [center, left, right]
     base = [cam.matrix_basis.copy() for cam in cams]
-    down._start_shake(job, 'T1', cams)
+    down._start_shake(job, t1, cams)
+    shakes = []
     for frame in range(plan['frames']):
         down.apply_frame(scene, plan, frame / fps, labels=False)
-        down.apply_shake(scene, job, frame)
+        shakes.append(down.apply_shake(scene, job, frame, t1.rpm))
         bpy.context.view_layer.update()
         for name, cam in rig:
             for index in (1, 2, 3):
@@ -191,8 +195,8 @@ for model in ('nrel5mw', 'rootkink'):
                 view = world_to_camera_view(scene, cam, tip)
                 if view.z > 0 and 0 <= view.x <= 1 and 0 <= 1 - view.y <= 1:
                     worst[(model, name)] = min(worst.get((model, name), 1.0), 1.0 - view.y)
-    tilts = [abs(job['shake'][f][0]) for f in job['shake']]
-    pans = [abs(job['shake'][f][1]) for f in job['shake']]
+    tilts = [abs(tilt) for tilt, _ in shakes]
+    pans = [abs(pan) for _, pan in shakes]
     assert max(pans) > .3 and max(tilts) > .2, (max(pans), max(tilts))
     down._end_shake(job)
     assert all(same_pose(cam.matrix_basis, b) for cam, b in zip(cams, base))
@@ -208,6 +212,31 @@ sidecar = json.loads(Path(video).with_suffix('.json').read_text(encoding='utf-8'
 shakes = [row['camera_shake_deg'] for row in sidecar['samples']]
 assert len(shakes) == 10 and any(any(abs(a) > 1e-3 for a in row) for row in shakes), shakes
 assert 'seed' in sidecar['camera_shake'] and same_pose(center.matrix_basis, before)
+
+# The center view and sidecar use the same shake in either export layout.
+scene.wfrl_manual_blade_model = 'nrel5mw'
+scene.wfrl_manual_pitch_rate_deg_s = 0.0
+t1.rpm, t1.azimuth_deg, t1.pitch_deg = 12.0, 0.0, 0.0
+plan = down._plan(scene, 25, 250, False)
+
+
+def export_shake(cameras):
+    job = dict(plan=plan, labels=False)
+    down._start_motion(scene, job, 'T1', cameras, dynamics=True, seed=42)
+    try:
+        samples = []
+        for frame in range(plan['frames']):
+            sample = down.apply_motion(scene, job, frame)
+            samples.append((sample['camera_shake_deg'], center.matrix_basis.copy()))
+        return samples
+    finally:
+        down._end_motion(job)
+
+
+single_shake = export_shake([center])
+triple_shake = export_shake([center, left, right])
+for frame, ((single_angles, single_pose), (triple_angles, triple_pose)) in enumerate(zip(single_shake, triple_shake)):
+    assert single_angles == triple_angles and same_pose(single_pose, triple_pose), (frame, single_angles, triple_angles)
 
 # ── Result ────────────────────────────────────────────────────────────────────
 result = dict(

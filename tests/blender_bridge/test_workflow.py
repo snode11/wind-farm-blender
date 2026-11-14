@@ -119,8 +119,9 @@ def test_rotor_fidelity_follows_actual_source_and_missing_reward_is_explicit():
     assert channels['reward']['value'] is None
     source.backend = 'fastfarm'
     channels = SnapshotAdapter(source, 's').encode(snap)['turbines'][0]['channels']
-    assert channels['rotor_speed']['fidelity'] == 'SYNTH'
-    assert 'FastFarmDriver' in channels['rotor_speed']['provenance']['formula']
+    assert channels['rotor_speed']['fidelity'] == 'DIRECT'
+    assert channels['rotor_speed']['validity'] == 'unsupported'
+    assert channels['rotor_speed']['value'] is None
     snap.ctx['channel_sources'] = {'rotor_speed': {'fidelity': 'EXPORTED',
         'provenance': {'file': 'actual-turbine.out', 'channel': 'RotSpeed'}}}
     channels = SnapshotAdapter(source, 's').encode(snap)['turbines'][0]['channels']

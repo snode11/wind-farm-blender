@@ -15,8 +15,11 @@ Usage:
 """
 
 import argparse
+import json
 import os
+import pickle
 from collections import OrderedDict
+from pathlib import Path
 from uuid import uuid4
 
 import numpy as np
@@ -29,6 +32,8 @@ from stable_baselines3.common.vec_env import VecEnv, VecNormalize
 from wfcrl import environments as envs
 
 from wfrl import paths
+from wfrl.training_integrity import (atomic_write, capture_rng, restore_rng, file_digest,
+                                     read_checkpoint_manifest, validate_checkpoint_location)
 
 ENV_ID     = "Dec_Ablaincourt_Floris"
 LOG_DIR    = os.path.join(paths.LOGS, "mappo")
@@ -148,10 +153,100 @@ class MAParallelVecEnv(VecEnv):
 
 # ---------------------------------------------------------------------------
 
+def _manifest_path():
+    return Path(str(MODEL_PATH) + ".manifest.json")
+
+
+def _generation_paths(generation):
+    normalization = Path(VECNORM_PATH)
+    return (Path(f"{MODEL_PATH}.{generation}.zip"),
+            normalization.with_name(f"{normalization.stem}.{generation}{normalization.suffix}"))
+
+
+def _checkpoint_paths():
+    """Resolve one immutable pair; legacy fixed paths apply only without a manifest."""
+    document = read_checkpoint_manifest(_manifest_path())
+    if document is None:
+        return Path(str(MODEL_PATH) + ".zip"), Path(VECNORM_PATH)
+    generation = document.get("generation") if isinstance(document, dict) else None
+    if (not isinstance(generation, str) or len(generation) != 32
+            or any(c not in "0123456789abcdef" for c in generation)
+            or document.get("schema") != 1):
+        raise ValueError("Invalid MAPPO checkpoint manifest")
+    pair = _generation_paths(generation)
+    for key, filename in zip(("model", "normalization"), pair):
+        if not filename.is_file():
+            raise FileNotFoundError(f"Required MAPPO checkpoint file is missing: {filename}")
+        validate_checkpoint_location(filename)
+        if (document.get(key) != filename.name
+                or document.get(key + "_sha256") != file_digest(filename)):
+            raise ValueError(f"MAPPO checkpoint manifest does not match {key}")
+    return pair
+
+
 def _require_checkpoint_files():
-    for filename in (MODEL_PATH + ".zip", VECNORM_PATH):
+    pair = _checkpoint_paths()
+    for filename in pair:
         if not os.path.isfile(filename):
             raise FileNotFoundError(f"Required MAPPO checkpoint file is missing: {filename}")
+    return pair
+
+
+def save_checkpoint_pair(model, venv):
+    """Commit a validated generation by replacing its manifest after both files exist."""
+    generation = uuid4().hex
+    model_path, norm_path = _generation_paths(generation)
+    manifest = _manifest_path()
+    old_ids = [obj.__dict__.get("_wfrl_checkpoint_id") for obj in (model, venv)]
+    rng = capture_rng()
+    committed = False
+    try:
+        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = generation
+        restored = {}
+
+        def validate_model(path):
+            restored["model"] = type(model).load(path, device="cpu")
+            if restored["model"].__dict__.get("_wfrl_checkpoint_id") != generation:
+                raise ValueError("MAPPO model has an invalid checkpoint identity")
+
+        def validate_norm(path):
+            with path.open("rb") as stream:
+                normalization = pickle.load(stream)
+            _validate_model_normalization(restored["model"], normalization)
+
+        atomic_write(model_path, model.save, validate_model, exclusive=True)
+        atomic_write(norm_path, venv.save, validate_norm, exclusive=True)
+        document = dict(schema=1, generation=generation,
+                        model=model_path.name, normalization=norm_path.name,
+                        model_sha256=file_digest(model_path),
+                        normalization_sha256=file_digest(norm_path))
+
+        def write_manifest(path):
+            path.write_text(json.dumps(document, allow_nan=False) + "\n", encoding="utf-8")
+
+        def validate_manifest(path):
+            if json.loads(path.read_text(encoding="utf-8")) != document:
+                raise ValueError("MAPPO checkpoint manifest failed validation")
+
+        atomic_write(manifest, write_manifest, validate_manifest)
+        committed = True
+        return model_path, norm_path
+    finally:
+        # A signal may arrive immediately after the manifest replacement.
+        if not committed and manifest.is_file():
+            try:
+                committed = json.loads(manifest.read_text(encoding="utf-8")).get("generation") == generation
+            except (OSError, ValueError, AttributeError):
+                pass
+        if not committed:
+            model_path.unlink(missing_ok=True)
+            norm_path.unlink(missing_ok=True)
+            for obj, identity in zip((model, venv), old_ids):
+                if identity is None:
+                    obj.__dict__.pop("_wfrl_checkpoint_id", None)
+                else:
+                    obj._wfrl_checkpoint_id = identity
+        restore_rng(rng)
 
 
 def _validate_normalization(venv):
@@ -183,6 +278,9 @@ def _validate_model_normalization(model, venv):
 
 def make_venv(norm_reward=True, training=True, *, norm_path=None):
     """Create a normalized environment, optionally restoring saved statistics."""
+    model_path = None
+    if norm_path is not None and os.path.abspath(norm_path) == os.path.abspath(VECNORM_PATH):
+        model_path, norm_path = _checkpoint_paths()
     if norm_path is not None and not os.path.isfile(norm_path):
         raise FileNotFoundError(f"Required MAPPO normalization file is missing: {norm_path}")
     raw  = envs.make(ENV_ID, controls=["yaw"], max_num_steps=MAX_STEPS)
@@ -197,6 +295,7 @@ def make_venv(norm_reward=True, training=True, *, norm_path=None):
             check_for_correct_spaces(base, venv.observation_space, venv.action_space)
             _validate_normalization(venv)
             venv._wfrl_normalization_path = os.path.abspath(norm_path)
+            venv._wfrl_model_path = os.path.abspath(model_path) if model_path is not None else None
         venv.training = training
         venv.norm_reward = norm_reward
         return venv
@@ -207,11 +306,13 @@ def make_venv(norm_reward=True, training=True, *, norm_path=None):
 
 def build_model(venv, resume=False):
     if resume:
-        _require_checkpoint_files()
-        if venv.__dict__.get("_wfrl_normalization_path") != os.path.abspath(VECNORM_PATH):
+        model_path = venv.__dict__.get("_wfrl_model_path")
+        if model_path is None:
             raise ValueError("Restore VecNormalize with make_venv(norm_path=VECNORM_PATH) before loading MAPPO")
-        print(f"[mappo] resuming from {MODEL_PATH}.zip")
-        model = PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        if not os.path.isfile(model_path):
+            raise FileNotFoundError(f"Required MAPPO checkpoint file is missing: {model_path}")
+        print(f"[mappo] resuming from {model_path}")
+        model = PPO.load(model_path, env=venv, tensorboard_log=LOG_DIR)
         _validate_model_normalization(model, venv)
         return model
     return PPO(
@@ -295,11 +396,8 @@ def main():
         print(f"[mappo] training {args.timesteps} steps, {venv.num_envs} agents …")
         model.learn(total_timesteps=args.timesteps, progress_bar=True,
                     reset_num_timesteps=not args.resume)
-        checkpoint_id = uuid4().hex
-        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = checkpoint_id
-        model.save(MODEL_PATH)
-        venv.save(VECNORM_PATH)
-        print(f"[mappo] saved → {MODEL_PATH}.zip")
+        model_path, _ = save_checkpoint_pair(model, venv)
+        print(f"[mappo] saved → {model_path}")
     finally:
         venv.close()
 

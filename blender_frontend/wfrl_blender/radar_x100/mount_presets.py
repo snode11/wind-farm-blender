@@ -58,7 +58,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
                 pass
     if sampler is None:
         sampler = SceneSampler(flex, mount_from_sensor=np.eye(4))
-    field_of_view = view.field_of_view()
+    field_of_view, shape = view.field_of_view(), 'ANGULAR'
     if preset == 'SEARCH':
         from .core import installation
         location, rotation = installation.selected_installation(search_report, sampler.source_id, sampler.geometry_id)
@@ -66,6 +66,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
     elif preset == 'DOWN_CAMERA':
         location, rotation, field_of_view = down_camera_installation(scene)
+        shape = 'PROJECTIVE'
     elif preset == 'REAR_HATCH':
         location, rotation = rear_hatch_installation(sampler)
     else:
@@ -74,44 +75,63 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     rotation = tuple(float(np.float32(value)) for value in rotation)
     field_of_view = tuple(float(np.float32(value)) for value in field_of_view)
     sampler = sampler.with_installation('NACELLE', installation_matrix(location, rotation))
-    sampler.field_of_view = field_of_view
+    sampler.field_of_view, sampler.field_of_view_shape = field_of_view, shape
     yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
-    if (current is not None and current.display_valid and current.frame is not None
+    settings = dict(mount='NACELLE', location=location, rotation=rotation, field_of_view=field_of_view,
+                    field_of_view_shape=shape)
+    previous = {key: getattr(scene, 'wfrl_x100_' + key) for key in settings}
+    for key in ('location', 'rotation', 'field_of_view'):
+        previous[key] = tuple(previous[key])
+
+    def write_settings(values):
+        for key, value in values.items():
+            setattr(scene, 'wfrl_x100_' + key, value)
+
+    if current is None:
+        try:
+            write_settings(settings)
+            return start(scene)
+        except Exception:
+            write_settings(previous)
+            raise
+
+    def publish_settings():
+        model = view.housing(current.mount)
+        hidden = model.hide_viewport, model.hide_render
+        camera_hide = model.get(view._CAMERA_HIDE)
+        camera_hide = tuple(camera_hide) if camera_hide is not None else None
+        try:
+            view.sync_housing_visibility(scene, current.mount)
+            write_settings(settings)
+            current.capture_configuration()
+        except Exception:
+            write_settings(previous)
+            model.hide_viewport, model.hide_render = hidden
+            if camera_hide is None:
+                model.pop(view._CAMERA_HIDE, None)
+            else:
+                model[view._CAMERA_HIDE] = camera_hide
+            raise
+
+    if (current.display_valid and current.frame is not None
             and current.sampler.calibration_id == sampler.calibration_id
             and current.sampler.geometry_id == sampler.geometry_id
             and current.mount.parent == yaw
-            and view.field_of_view(current.sampler.field_of_view) == field_of_view
+            and view.saved_field_of_view(current.fov) == (field_of_view, shape)
+            and current.sampler.field_of_view == field_of_view
+            and current.sampler.field_of_view_shape == shape
             and np.allclose(np.array(current.mount.matrix_parent_inverse) @ np.array(current.mount.matrix_basis),
                             sampler.mount_from_sensor, atol=1e-5, rtol=0)):
         current.update()
-        scene.wfrl_x100_mount = 'NACELLE'
-        scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        scene.wfrl_x100_field_of_view = field_of_view
-        current.capture_configuration()
+        publish_settings()
         return current
 
-    previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
-                tuple(scene.wfrl_x100_rotation), tuple(scene.wfrl_x100_field_of_view))
-
-    def restore_settings():
-        (scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation,
-         scene.wfrl_x100_field_of_view) = previous
-    if current is None:
-        # A new session samples its own first frame; only the scene settings need rollback.
-        try:
-            scene.wfrl_x100_mount = 'NACELLE'
-            scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-            scene.wfrl_x100_field_of_view = field_of_view
-            return start(scene)
-        except Exception:
-            restore_settings()
-            raise
     source_session = str(uuid.uuid4())
     sequence, source_t = _simulation_time(scene, sampler)
     frame = _simulation_frame(scene, sampler, source_session, sequence, source_t,
         observation_mode=current.observation_mode)
-    if frame is None:
-        raise ValueError('当前时刻没有可用的 X100 观测')
+    if frame is None or frame.completeness != 'COMPLETE':
+        raise ValueError('当前时刻没有完整的 X100 观测')
     style = display.style_key(scene, frame)
     batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if not bpy.app.background else None
     previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
@@ -119,11 +139,10 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     saved_session = dict(current.__dict__)
     previous_fov_mesh = None
     try:
-        scene.wfrl_x100_mount = 'NACELLE'
-        scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        scene.wfrl_x100_field_of_view = field_of_view
-        if view.field_of_view(current.sampler.field_of_view) != field_of_view:
-            previous_fov_mesh = view.set_field_of_view(current.fov, field_of_view)
+        if view.saved_field_of_view(current.fov) != (field_of_view, shape):
+            previous_fov_mesh = view.set_field_of_view(current.fov, field_of_view, shape)
+            current.fov_gpu_batch = (view.fov_batch(current.fov)
+                                     if current.fov_shown and not bpy.app.background else None)
         current.mount.parent = yaw
         current.mount.matrix_parent_inverse = Matrix.Identity(4)
         current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())
@@ -132,13 +151,15 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.gpu_retry_at = None
         current.render_error = ''
         current.render_color = style
-        current.capture_configuration()
+        from .core import tracking
+        current.blade_tracker = tracking.BladeTracker()
+        current.clearance_tracker = current.clearance_source = None
         current.pair_context(frame)
         current.derive_blades()
         if style[0] == 'ECHO_CLASS':
             current._display(frame, required_gpu=True, record=False)
+        publish_settings()
     except Exception:
-        restore_settings()
         if previous_fov_mesh is not None:
             discarded, current.fov.data = current.fov.data, previous_fov_mesh
             bpy.data.meshes.remove(discarded)
@@ -147,9 +168,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.__dict__.update(saved_session)
         raise
     if previous_fov_mesh is not None:
-        current.fov_gpu_batch = None
-        if previous_fov_mesh.users == 0:
-            bpy.data.meshes.remove(previous_fov_mesh)
+        view.remove_mesh(previous_fov_mesh)
     scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
     scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · ' + configuration.RATE_LABEL
     return current

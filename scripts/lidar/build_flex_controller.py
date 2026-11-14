@@ -1,7 +1,10 @@
-"""Build an isolated DISCON with working native pitch in yaw-only operation.
+"""Build an isolated DISCON for yaw-only replays with an explicit rotor target.
 
-The upstream source and installed training controller are left intact. Each
-build records the source, patch and binary hashes for the replay provenance.
+The build adds a 0.3 deg/s yaw-rate limit and an optional rotor target to a copy
+of the training controller source. When the source has no native pitch branch
+for operation without an external pitch command, the copy also receives one.
+The training source and installed controller are left intact. Each build
+records the source, patch and binary hashes for the replay provenance.
 """
 from pathlib import Path
 import hashlib
@@ -32,9 +35,12 @@ def build(output, rotor_target_rpm=12.1):
     end = original.index('      LastTimePC = Time', begin)
     block = original[begin:end]
     old = '            ENDIF'
-    if block.count(old) != 1:
+    if 'ELSE ! Native collective pitch control' in block:
+        pass  # The source already runs rate-limited native pitch without an external command.
+    elif block.count(old) != 1:
         raise ValueError('Native-pitch patch no longer matches upstream source')
-    block = block.replace(old, '''            ELSE
+    else:
+        block = block.replace(old, '''            ELSE
                 ! Native collective pitch must run when MAPPO controls yaw only.
                 DO K = 1,NumBl
                     PitRate(K) = (PitComT - PitCom(K))/ElapTime

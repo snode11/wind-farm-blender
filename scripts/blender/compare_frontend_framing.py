@@ -16,8 +16,8 @@ import math
 import os
 from pathlib import Path
 import sys
+import tempfile
 import time
-import traceback
 
 import bpy
 import numpy as np
@@ -33,6 +33,7 @@ core = importlib.import_module(MODULE + ".custom_cameras")
 rig = importlib.import_module(MODULE + ".stacked_camera_rig")
 farm = importlib.import_module(MODULE + ".farm_flex")
 preview = importlib.import_module(MODULE + ".custom_camera_preview")
+atomic_json = importlib.import_module(MODULE + ".atomic_json")
 OUT = Path(os.environ.get("WFRL_TEST_OUTPUT", str(ROOT / "outputs/frontend-update-20260927/framing/run")))
 WIDTH, HEIGHT = 320, 180
 COARSE = [0., 10., 20., 45., 90., 135., 180., 225., 270., 315., 340., 350.]
@@ -44,7 +45,7 @@ START = time.perf_counter()
 def write(name, value):
     path = OUT / name
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+    atomic_json.write_text(path, json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 def original_id(obj):
@@ -165,20 +166,30 @@ def setup_render(scene, target):
 
 def render_camera(scene, camera, path):
     scene.camera = camera
-    scene.render.filepath = str(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    bpy.ops.render.render(write_still=True)
-    image = bpy.data.images.load(str(path), check_existing=False)
+    previous_filepath = scene.render.filepath
+    published = False
     try:
-        rgba = np.empty(WIDTH * HEIGHT * 4, dtype=np.float32)
-        image.pixels.foreach_get(rgba)
-        rgb = rgba.reshape(HEIGHT, WIDTH, 4)[..., :3]
-        # Same green target and neutral non-target colors in all renders.
-        mask = ((rgb[..., 1] > 1.4 * rgb[..., 0]) & (rgb[..., 1] > 1.4 * rgb[..., 2])
-                & (rgb[..., 1] > .15))
-        return int(mask.sum()), float(mask.mean())
+        with tempfile.TemporaryDirectory(prefix='.framing-render-', dir=path.parent) as directory:
+            staged = Path(directory) / path.name
+            scene.render.filepath = str(staged)
+            bpy.ops.render.render(write_still=True)
+            image = bpy.data.images.load(str(staged), check_existing=False)
+            try:
+                rgba = np.empty(WIDTH * HEIGHT * 4, dtype=np.float32)
+                image.pixels.foreach_get(rgba)
+                rgb = rgba.reshape(HEIGHT, WIDTH, 4)[..., :3]
+                # Same green target and neutral non-target colors in all renders.
+                mask = ((rgb[..., 1] > 1.4 * rgb[..., 0]) & (rgb[..., 1] > 1.4 * rgb[..., 2])
+                        & (rgb[..., 1] > .15))
+                result = int(mask.sum()), float(mask.mean())
+            finally:
+                bpy.data.images.remove(image)
+            os.replace(staged, path)
+            published = True
+            return result
     finally:
-        bpy.data.images.remove(image)
+        scene.render.filepath = str(path) if published else previous_filepath
 
 
 def mesh_samples(target, rest):
@@ -211,6 +222,7 @@ def evaluate(scene, candidate, angle, target, triangles, face_bins, face_spans, 
     frame = int(math.ceil(frame_float) if angle >= 360. else round(frame_float))
     scene.frame_set(frame)
     bpy.context.view_layer.update()
+    actual_time = float(scene["wfrl_clearance_time_s"])
     deps = bpy.context.evaluated_depsgraph_get()
     evaluated = target.evaluated_get(deps)
     coords = np.empty(len(evaluated.data.vertices) * 3, dtype=np.float32)
@@ -224,14 +236,21 @@ def evaluate(scene, candidate, angle, target, triangles, face_bins, face_spans, 
         camera = core.get_camera(scene, slot)
         p = core.parameters(camera)
         expected = candidate["layout"]["cameras"][slot-1]["parameters"]
-        assert max(abs(a-b) for a, b in zip(p.location, expected["location"])) < 2e-5
-        assert all(abs(getattr(p, key)-expected[key]) < 2e-5 for key in ("yaw", "pitch", "roll", "fov", "vfov")), "camera changed while evaluating fixed-camera phases"
+        def check_camera():
+            current = core.parameters(camera)
+            keys = ("yaw", "pitch", "roll", "fov", "vfov", "clip_near_m", "clip_far_m",
+                    "output_long_edge_px")
+            if (not all(abs(a-b) < 2e-5 for a, b in zip(current.location, expected["location"]))
+                    or not all(abs(getattr(current, key)-expected[key]) < 2e-5 for key in keys)
+                    or current.focal_length_mm_record != expected["focal_length_mm_record"]):
+                raise RuntimeError('Camera changed while evaluating fixed-camera phases')
+        check_camera()
         inverse = np.asarray(camera.evaluated_get(deps).matrix_world.inverted())
         origin = np.asarray(camera.evaluated_get(deps).matrix_world.translation)
         local = centers @ inverse[:3, :3].T + inverse[:3, 3]
         frontal = np.einsum("ij,ij->i", normals, origin - centers) > 0
         half = np.tan(np.radians([p.fov, p.vfov]) / 2)
-        inside = ((local[:, 2] < -p.clip_near_m) &
+        inside = ((local[:, 2] < -p.clip_near_m) & (local[:, 2] >= -p.clip_far_m) &
                   (np.abs(local[:, :2]) <= -local[:, 2, None] * half).all(axis=1))
         visible, blockers = set(), {}
         root_tip = {"root_0_3m": {"sampled_front_faces": int((frontal & (face_spans <= 3)).sum()), "in_frame": 0, "visible": 0, "blockers": {}},
@@ -257,6 +276,9 @@ def evaluate(scene, candidate, angle, target, triangles, face_bins, face_spans, 
             counts["out_of_frustum"] = counts["sampled_front_faces"] - counts["in_frame"]
         image = Path("images") / candidate["id"] / f"frame-{frame:05d}-C{slot}.png"
         pixels, fraction = render_camera(scene, camera, OUT / image)
+        if scene.frame_current != frame or float(scene["wfrl_clearance_time_s"]) != actual_time:
+            raise RuntimeError('Frame or simulation time changed during camera rendering')
+        check_camera()
         observations.append({"camera": f"C{slot}", "target_blade": "Blade1", "image": str(image),
                              "sampled_front_faces": int(frontal.sum()), "out_of_frustum": int((frontal & ~inside).sum()),
                              "in_frustum": int((frontal & inside).sum()), "visible_surface_samples": len(visible),
@@ -265,7 +287,6 @@ def evaluate(scene, candidate, angle, target, triangles, face_bins, face_spans, 
                              "target_pixels": pixels, "frame_pixels": WIDTH * HEIGHT,
                              "target_pixel_fraction": fraction})
         visible_sets.append(visible)
-    actual_time = float(scene["wfrl_clearance_time_s"])
     return {"candidate": candidate["id"], "stage": stage, "requested_turn_deg": angle,
             "turn_deg": float(np.interp(actual_time, times, progress)), "frame": frame, "time_s": actual_time,
             "target_blade": "Blade1", "cameras": observations,
@@ -273,7 +294,7 @@ def evaluate(scene, candidate, angle, target, triangles, face_bins, face_spans, 
 
 
 def main():
-    if (OUT / "manifest.json").exists():
+    if OUT.exists() and any(OUT.iterdir()):
         raise RuntimeError("Use a fresh WFRL_TEST_OUTPUT directory; prior evidence will not be overwritten")
     OUT.mkdir(parents=True, exist_ok=True)
     addon.register()
@@ -377,9 +398,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception:
-        OUT.mkdir(parents=True, exist_ok=True)
-        (OUT / "error.txt").write_text(traceback.format_exc(), encoding='utf-8')
-        raise
+    main()

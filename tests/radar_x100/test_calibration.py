@@ -57,6 +57,41 @@ def test_rectangular_field_of_view_gates_detections():
     assert simulation.in_fov(xyz, (55., 30.)).all() and simulation.in_fov(xyz).tolist() == [True, False, True]
 
 
+def test_projective_field_of_view_matches_a_pinhole_camera_rectangle():
+    # Off-axis in azimuth and elevation: inside the angular box, above the camera rectangle.
+    corner = [20., 20. * math.tan(math.radians(50)), 15.]
+    xyz = np.array([[20., 0., 0.], [20., 0., 20. * math.tan(math.radians(29))], corner])
+    limits = (55., 30.)
+    assert simulation.in_fov(xyz, limits).tolist() == [True, True, True]
+    assert simulation.in_fov(xyz, limits, 'PROJECTIVE').tolist() == [True, True, False]
+    assert not simulation.in_fov(np.array([[-20., 0., 0.]]), limits, 'PROJECTIVE')[0]
+    base = dict(antenna_pattern='ISOTROPIC', false_alarms_enabled=False, processing_gain_db=90.,
+                range_std_m=0., azimuth_std_deg=0., elevation_std_deg=0., radial_velocity_std_m_s=0.,
+                azimuth_limit_deg=limits[0], elevation_limit_deg=limits[1])
+    frames = {shape: detection.generate_detections(xyz, np.zeros(3), np.ones(3), template=template(),
+                                                   config=detection.DetectionConfig(**base, field_of_view_shape=shape))
+              for shape in simulation.FOV_SHAPES}
+    assert len(frames['ANGULAR'].points) == 3 and len(frames['PROJECTIVE'].points) == 2
+    assert frames['PROJECTIVE'].provenance['field_of_view_shape'] == 'PROJECTIVE'
+    # False alarms drawn over the bounding search grid stay inside the rectangle.
+    noisy = detection.generate_detections(np.zeros((0, 3)), np.zeros(0), np.zeros(0), template=template(),
+        config=detection.DetectionConfig(**dict(base, false_alarms_enabled=True), field_of_view_shape='PROJECTIVE',
+                                         false_alarm_probability_per_cell=1e-4))
+    points = np.column_stack([noisy.points[axis] for axis in 'xyz'])
+    assert len(points) and simulation.fov_mask(points, limits, 'PROJECTIVE').all()
+
+
+@pytest.mark.parametrize('limits', [(89.95, 20.), (60., 89.95)])
+def test_projective_field_of_view_rejects_near_right_half_angles(limits):
+    with pytest.raises(ValueError):
+        simulation.field_of_view(limits, 'PROJECTIVE')
+    with pytest.raises(ValueError):
+        detection.DetectionConfig(azimuth_limit_deg=limits[0], elevation_limit_deg=limits[1],
+                                  field_of_view_shape='PROJECTIVE')
+    with pytest.raises(ValueError):
+        detection.DetectionConfig(field_of_view_shape='CONICAL')
+
+
 def test_vendor_fields_follow_configured_mapping_and_stay_unknown_by_default():
     xyz = np.array([[30., 0., 0.], [60., 1., 0.]])
     config = replace(calibration.calibrated_config(), false_alarms_enabled=False, miss_probability=0.,

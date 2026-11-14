@@ -6,6 +6,8 @@ this distinguishes cropped exterior contours from in-frame surface material.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text, save_image
+
 from .artifact_paths import relocated_path
 
 import argparse
@@ -224,7 +226,7 @@ def padded_crop_evidence(rgb, obs, vertices, faces, edges, rows, overlay):
 
 def write_csv(path, rows):
     fields = list(dict.fromkeys(key for row in rows for key in row))
-    with Path(path).open('w', newline='', encoding='utf-8') as handle:
+    with atomic_open(Path(path), 'w', newline='', encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader(); writer.writerows(rows)
 
 
@@ -267,7 +269,7 @@ def run(source, bundle, output):
             if digest != annotation['rgb_sha256'] or signatures[str(bundle/f'{camera}.mp4')] != annotation['source_video_sha256']:
                 raise ValueError('RGB or MP4 signature differs from historical annotation')
             rgb_frames[(camera, frame)] = rgb
-            path = output/f'{camera}_{frame:06d}_native_rgb.png'; Image.fromarray(rgb).save(path)
+            path = output/f'{camera}_{frame:06d}_native_rgb.png'; save_image(Image.fromarray(rgb), path)
             rgb_signatures.append({'camera': camera, 'frame': frame, 'rgb_sha256': digest, 'matches_annotation': True, 'png_path': path.name, 'png_sha256': sha256(path)})
     all_edges, all_samples, summaries, backend = [], [], [], []
     torch.set_num_threads(1)
@@ -299,8 +301,8 @@ def run(source, bundle, output):
                 root = next(r for r in result['regions'] if r['region'] == 'root_band')
                 backend.append({**context, 'width': width, 'sampling': 'extended_global_budget' if dense else 'historical_default', 'root_c2o_count': root['c2o']['count'], 'root_o2c_count': root['o2c']['count'], 'root_o2c_mean_native_px': root['o2c']['mean_native_px'], **result['counts']})
         overlay = native_overlay(rgb, obs, annotation, vertices, faces, edges, rows, observed, valid)
-        overlay.save(output/f'{key}_native_overlay.png')
-        padded_crop_evidence(rgb, obs, vertices, faces, edges, rows, overlay).save(output/f'{key}_crop_projection.jpg', quality=94)
+        save_image(overlay, output/f'{key}_native_overlay.png')
+        save_image(padded_crop_evidence(rgb, obs, vertices, faces, edges, rows, overlay), output/f'{key}_crop_projection.jpg', quality=94)
         # Identical local crop windows for RGB and overlay preserve native pixel
         # scale. Windows describe review areas; they are not new annotations.
         crops = {'upper_boundary': (300, 110, 1250, 350), 'lower_boundary': (300, 770, 1250, 1010),
@@ -312,7 +314,7 @@ def run(source, bundle, output):
             canvas.paste(Image.fromarray(rgb).crop(box), (0, 40)); canvas.paste(overlay.crop(box), (0, h+80))
             draw.text((10, 8), f'{key} {name} | original RGB | x={box[0]}:{box[2]}, y={box[1]}:{box[3]}', font=font(20), fill='white')
             draw.text((10, h+48), 'Same native pixels + saved domain / outline + model projection', font=font(20), fill='white')
-            canvas.save(output/f'{key}_{name}_crop.png')
+            save_image(canvas, output/f'{key}_{name}_crop.png')
     unchanged = all(sha256(path) == digest for path, digest in signatures.items())
     if not unchanged: raise RuntimeError('An input changed during read-only RGB audit')
     report = {'schema': 'nrel-root-native-rgb-audit.v1', 'status': 'NONBLIND_DIAGNOSTIC_ONLY',
@@ -328,7 +330,7 @@ def run(source, bundle, output):
               'source_sha256': {str(Path(__file__).resolve()): sha256(__file__)}}
     write_csv(output/'native_root_edges.csv', all_edges); write_csv(output/'native_root_samples.csv', all_samples)
     write_csv(output/'historical_backend_root.csv', backend)
-    (output/'root_rgb_audit.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+    atomic_write_text(output/'root_rgb_audit.json', json.dumps(report, indent=2, allow_nan=False)+'\n', encoding='utf-8')
     print(json.dumps({'frames': len(summaries), 'root_edges': len(all_edges), 'native_root_samples': len(all_samples), 'unchanged': unchanged}), flush=True)
     return report
 

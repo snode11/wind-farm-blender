@@ -495,7 +495,7 @@ def test_safety_and_command_rejection_survive_disconnect_during_partial_send():
         peer.command('run.step')
         wait_for(lambda: (server.poll() or server.guard.last_sequence == peer.command_sequence))
         disconnect(server, peer)
-        assert [kind for kind, _ in server.backlog] == ['safety_event', 'error']
+        assert [kind for kind, _, _ in server.backlog] == ['safety_event', 'error']
         for step in range(2, 41):
             session._trainer.submit(snapshot(step))
             server.poll()
@@ -524,10 +524,10 @@ def test_reliable_backlog_larger_than_send_budget_drains_after_resume():
         session.emit('error', dict(code='RETAINED', message='retained error', fatal=False))
         server.poll()
         assert server.client is None
-        assert [kind for kind, _ in server.backlog] == ['lifecycle', 'lifecycle', 'lifecycle', 'error']
+        assert [kind for kind, _, _ in server.backlog] == ['lifecycle', 'lifecycle', 'lifecycle', 'error']
         frame_sizes = [len(encode_message(dict(protocol_version=1, type=kind,
                          session_id=session.session_id, sequence=100, payload=payload)))
-                       for kind, payload in server.backlog]
+                       for kind, payload, _ in server.backlog]
         assert max(frame_sizes) < server.max_queue_bytes < sum(frame_sizes)
         peer.close()
         peer.connect(sync=True)
@@ -561,7 +561,7 @@ def test_command_rejection_overflow_is_retained_and_delivered_after_resume():
         assert frame_size < server.max_queue_bytes < server.pending_bytes + frame_size
         peer.command('run.step')
         wait_for(lambda: (server.poll() or server.client is None))
-        assert [kind for kind, _ in server.backlog] == ['lifecycle', 'error']
+        assert [kind for kind, _, _ in server.backlog] == ['lifecycle', 'error']
         assert server.backlog[-1][1] == rejection
         peer.close()
         peer.connect()

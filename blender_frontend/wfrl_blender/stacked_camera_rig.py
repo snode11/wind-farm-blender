@@ -5,9 +5,11 @@ Build explicitly in a fresh scene; do not silently replace user camera layouts.
 Camera coordinates remain in YawRoot metres for the existing capture pipeline.
 """
 from dataclasses import dataclass, asdict
+from functools import wraps
 import math
 
 from . import custom_cameras as core, camera_projection as projection
+from .mechanical_details import _rollback_new_resources
 
 PREFIX = 'WFRL.T1.StackedRig'
 
@@ -123,6 +125,7 @@ def blade_geometry(scene):
     return obj, points, spans, used
 
 
+@_rollback_new_resources
 def _housing(scene, cameras, config):
     import bpy
     from .scene_builder import _primitive_mesh
@@ -229,6 +232,29 @@ def _housing(scene, cameras, config):
     return assembly
 
 
+def _rig_construction(build_rig):
+    @wraps(build_rig)
+    @_rollback_new_resources
+    def guarded(scene, *args, **kwargs):
+        from copy import deepcopy
+        from . import custom_camera_history as history
+        previous_history = deepcopy(vars(history.HISTORY))
+        keys = ('wfrl_stacked_camera_rig', 'wfrl_stacked_reference_frame')
+        previous = {key: scene[key] for key in keys if key in scene}
+        try:
+            return build_rig(scene, *args, **kwargs)
+        except BaseException:
+            for key in keys:
+                if key in previous:
+                    scene[key] = previous[key]
+                elif key in scene:
+                    del scene[key]
+            vars(history.HISTORY).update(previous_history)
+            raise
+    return guarded
+
+
+@_rig_construction
 def build(scene, config=RigParameters()):
     import bpy
     if any(core.get_camera(scene, slot) for slot in core.SLOTS) or scene.objects.get(PREFIX):
@@ -261,6 +287,7 @@ def _default_layout():
     return json.loads(path.read_text(encoding='utf-8'))
 
 
+@_rig_construction
 def build_default(scene):
     """Create the reviewed preset in a fresh MAPPO scene, using bundled data."""
     from . import custom_camera_history as history
@@ -430,17 +457,26 @@ def validate_surface_contact(scene, value):
         samples += [arm_center + arm_rotation @ Vector((x,y,z))
                     for x in (-.02,0.,.02) for z in (-.02,0.,.02) for y in (-.14,0.,.14)]
     found = False
+    def nearest_checked(tree, sample):
+        near, _, face, distance = tree.find_nearest(sample)
+        if (near is None or not core._finite(near)
+                or type(distance) not in (int, float) or not math.isfinite(distance) or distance < 0):
+            raise ValueError('安装校验失败：无法取得有效的表面距离')
+        return near, face, distance
+
     for name, vertices, faces, normals, tree in core._geometry(scene):
         if name == mount['surface_name']:
-            near, _, face, distance = tree.find_nearest(point)
-            if near is None or distance > 2e-4 or normals[face].dot(normal) < .995:
+            near, face, distance = nearest_checked(tree, point)
+            if (type(face) is not int or not 0 <= face < len(normals)
+                    or not core._finite(normals[face])
+                    or distance > 2e-4 or normals[face].dot(normal) < .995):
                 raise ValueError('安装面已变化，请重新选点')
             found = True
         if not core._closed_mesh(faces):
             raise ValueError('安装表面不闭合，无法确认支架贴合')
         for sample in samples:
-            nearest, _, _, distance = tree.find_nearest(sample)
-            if nearest is not None and distance > 2e-4 and core._inside(sample, tree, normals):
+            _, _, distance = nearest_checked(tree, sample)
+            if distance > 2e-4 and core._inside(sample, tree, normals):
                 raise ValueError('此处会使盒体或支架穿入机舱，请选择更平整的位置或调整方向')
     if not found:raise ValueError('请选择有效的 T1 机舱安装面')
 

@@ -34,7 +34,8 @@ class HistoryWindow:
         self.session_id = message.get('session_id')
         now = self.clock()
         context = {key: deepcopy(p[key]) for key in
-                   ('mode', 'step', 'agent_step', 'iteration', 'phase', 'episode', 'timestamp', 'record_kind') if key in p}
+                   ('mode', 'step', 'agent_step', 'iteration', 'phase', 'episode', 'timestamp',
+                    'control_elapsed_seconds', 'record_kind') if key in p}
         context.update(run_id=run_id, session_id=self.session_id, sequence=sequence,
                        message_type=message['type'], received_monotonic=now)
         if message['type'] == 'snapshot':
@@ -64,9 +65,14 @@ class HistoryWindow:
                            data=deepcopy(record) if copy_record else record))
 
     def snapshot(self):
-        """Main thread takes only a bounded copy; JSON and disk I/O happen later."""
+        """Pin the exported record range without copying record contents.
+
+        Appended records are never mutated: ``ingest`` stores a new dict per sample and the
+        deque only appends or evicts. Pinning the record references here is therefore a
+        stable view; ``export_document`` deep-copies and serializes it off the main thread.
+        """
         return {'run_id': self.run_id, 'session_id': self.session_id, 'capacity': self.capacity,
-                'series': [{'key': list(key), 'records': deepcopy(list(records)),
+                'series': [{'key': list(key), 'records': list(records),
                             'dropped_count': self.dropped.get(key, 0)}
                            for key, records in self.series.items()]}
 

@@ -7,7 +7,7 @@
 | 功能 | 主要模块／仓库入口 | 专题 |
 | --- | --- | --- |
 | WFRL 主入口与状态 | `panels/home.py`、`home_state.py`；复用回放／相机／手动／导出／后端操作器，保留原页签 | [操作入口](../../../../前端readme.md#wfrl-主入口)、[验证入口](verification.md) |
-| 手动场景、姿态、变桨与 Down | `manual_scene.py`、`manual_scene_links.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py`、`manual_down.py`、`manual_dynamics.py`、`live_stream.py`、`live_stream_view.py`、`panels/manual_control.py`；仓库 `scripts/blender/open_manual_control.py` | [手动控制](../../../../docs/blender/风机手动控制.md) |
+| 手动场景、姿态、变桨与 Down | `manual_scene.py`、`manual_scene_links.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py`；`manual_down.py` 入口与 `manual_down_cameras.py`／`manual_down_motion.py`／`manual_down_jobs.py`／`manual_down_render.py`／`manual_down_ui.py`；`manual_dynamics.py`、`live_stream.py`、`live_stream_view.py`、`panels/manual_control.py`；仓库 `scripts/blender/open_manual_control.py` | [手动控制](../../../../docs/blender/风机手动控制.md)、[Down 实现结构](../../../../blender_frontend/README.md#手动-down-相机与导出) |
 | 柔性运动、外形与测量 | `farm_flex.py`、`farm_flex_package.py`、`farm_flex_scene.py`、`farm_flex_geometry.py`、`farm_flex_telemetry.py`、`turbine_geometry.py`、`deflection.py` | [实现说明](../../../../blender_frontend/README.md) |
 | 场景、播放归属与性能 | `runtime.py`、`scene_builder.py`、`playback.py`、`playback_benchmark.py`、`performance.py` | [验证入口](verification.md) |
 
@@ -18,9 +18,9 @@
 - 批量编辑只传播当前字段，分别变桨仅初始化模式切换的机组；对象缺失、装配层级损坏或跨场景共享时停止控制并提示重建。相关操作见[风机手动控制](../../../../docs/blender/风机手动控制.md)。
 - 普通旋转按墙钟积分、变速保留方位、零 RPM 不运行；静止默认 90°，运行命令 0°，暂停／停转命令 90°，变桨速度 `wfrl_manual_pitch_rate_deg_s` 默认 5°/s，复位、预设与载入立即到位。每机 `pitch_actual_b{i}_deg`／`pitch_start_b{i}_deg` 保存实际桨距与本次起点，场景恢复不推进未显示姿态。
 - JSON 整体校验、按编号应用，保存同刻实际姿态；载入、重开、撤销／重做后暂停。
-- Down 相机俯仰按手动叶片外形取 `manual_down.MANUAL_DOWN_PITCH_DEG`（rootkink −78°，NREL −82.5°），写入相机属性 `wfrl_down_pitch_deg` 并由 `cameras.down_gimbal()` 读取；左右侧视相机为 Down 绕主轴 ±47°。
-- 视口叶片摆动／塔架运动与相机抖动由 `manual_control.MOTION_HOOKS` 驱动，保存前恢复刚性模型与静止相机；Down 单路／三路导出暂停视口运动并按导出时钟逐帧生成。
-- 现场视频分屏只在当前会话保留流地址，不与仿真时钟同步。
+- `manual_down_cameras.py` 管理机位、标注和叶片外形；俯仰按手动叶片外形取 `MANUAL_DOWN_PITCH_DEG`（rootkink −78°，NREL −82.5°，也由 `manual_down` 导出），写入相机属性 `wfrl_down_pitch_deg` 并由 `cameras.down_gimbal()` 读取；左右侧视相机为 Down 静止位姿绕主轴 ±47°，位置与方向一起旋转。`wfrl.manual_down_view` 只切换调用的 3D 视图，无有效调用区域时取消。
+- 视口叶片摆动／塔架运动与相机抖动由 `manual_control.MOTION_HOOKS` 中的 `manual_dynamics.live_update`／`manual_down_motion.live_shake_update` 驱动，保存前恢复刚性模型与静止相机；`manual_down_jobs.py` 编排单路／三路导出，暂停视口运动并调用 `manual_down_motion.py` 按导出时钟逐帧生成。
+- 现场视频只分割调用的 3D 视图，其他视口保持；启动失败释放自有分屏和资源，并恢复调用视图的相机、取景与显示设置。流地址只在当前会话保留，不与仿真时钟同步。生命周期与恢复范围见[视频作业](video-jobs.md#现场视频分屏)。
 
 ## 回放、共享资源与缓存
 
@@ -59,7 +59,7 @@
 | --- | --- | --- |
 | WFRL 主入口与状态 | `test_home_state.py` | 后台 `home_entry_smoke.py`：真实 RNA／操作器配合布局适配器，检查页面、相机草稿取消、回放推进、手动场景往返与卸载；不代替可见窗口排版或真实鼠标操作。 |
 | 手动场景与姿态 | `test_manual_motion.py`、`test_manual_pose.py` | 后台 `manual_control_regression.py`、`manual_control_state_regression.py`、`manual_control_undo_regression.py`、`manual_pose_regression.py`、`manual_pose_undo_regression.py`、`manual_scene_recovery_regression.py`、`manual_environment_regression.py`；窗口 `manual_control_window.py`、`manual_playback_window.py`，真实鼠标 `manual_repair_mouse_window.py`（手动运行）。 |
-| 变桨速度、Down、结构运动与现场视频 | `test_manual_motion.py`、`test_live_stream.py` | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；跨场景模型与环境隔离 `model_environment_integration.py`；窗口 `manual_down_video_window.py`（手动运行）。 |
+| 变桨速度、Down、结构运动与现场视频 | `test_manual_motion.py`、`test_live_stream.py`、`test_manual_down_publish.py` | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；跨场景模型与环境隔离 `model_environment_integration.py`；窗口 `manual_down_video_window.py`（手动运行）。 |
 | 叶片外形 | `test_blade_models.py` | 后台 `blade_model_regression.py`；窗口 `blade_model_window.py`、`shared_context_switch_regression.py`。 |
 | 环境几何与贴地 | `test_landscape_geometry.py`、`test_landscape_distribution.py` | 后台 `landscape_geometry_regression.py`；同机位输出与多窗口背景另外核对。 |
 | 场景与播放归属 | `test_scene_mesh_lifecycle.py`、`test_scene_playback_lifecycle.py`、`test_native_camera_playback.py` | 后台 `scene_playback_lifecycle_regression.py`、`replay_history_regression.py`；窗口 `native_camera_reopen_regression.py`、`native_camera_playback_regression.py`。 |

@@ -1,10 +1,103 @@
 """NREL defect evidence outputs; editing and G diagnostics never render."""
 import csv
+from contextlib import contextmanager
+from copy import deepcopy
 import hashlib
+import logging
+import os
 from pathlib import Path
+import shutil
+import stat
+import sys
+import tempfile
 import bpy
+from .. import atomic_json
 from ..atomic_json import write_json as _write_json
 from .defect_timeline import FrameMapping
+
+_LOG = logging.getLogger(__name__)
+
+
+@contextmanager
+def _staged_run(run, *, require_empty=False):
+    """Stage complete files and restore originals if publication raises.
+
+    Failed rollback retains the original backup and names it in the error.
+    """
+    output = run['output']
+    existed = output.exists()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    root = Path(tempfile.mkdtemp(prefix='.nrel-output-', dir=output.parent))
+    retain_backup = False
+    try:
+        staging, backup = root/'products', root/'previous'
+        staging.mkdir()
+        backup.mkdir()
+        staged = dict(run, output=staging, manifest=deepcopy(run['manifest']))
+        yield staged
+        if require_empty:
+            mode = None
+            if output.exists():
+                mode = stat.S_IMODE(output.stat().st_mode)
+                staging.chmod(mode)
+                output.rmdir()
+            try:
+                os.rename(staging, output)
+            except BaseException:
+                if mode is not None and not output.exists():
+                    output.mkdir(mode=mode)
+                raise
+            run['manifest'] = staged['manifest']
+            return
+        files = sorted(staging.iterdir(), key=lambda path: (path.name == 'run_manifest.json', path.name))
+        for path in files:
+            target = output/path.name
+            if target.exists() or target.is_symlink():
+                mode = target.lstat().st_mode
+                if stat.S_ISREG(mode):
+                    path.chmod(stat.S_IMODE(mode))
+                shutil.copy2(target, backup/path.name, follow_symlinks=False)
+        output.mkdir(exist_ok=True)
+        published = []
+        try:
+            for path in files:
+                os.replace(path, output/path.name)
+                published.append(path.name)
+        except BaseException as error:
+            for name in reversed(published):
+                previous = backup/name
+                try:
+                    if previous.exists() or previous.is_symlink():
+                        os.replace(previous, output/name)
+                    else:
+                        (output/name).unlink()
+                except OSError as exc:
+                    retain_backup = True
+                    error.add_note(f'Output rollback failed for {output/name}: {exc}; original backup: {previous}')
+                    _LOG.exception('NREL output rollback failed')
+            if not existed and not any(output.iterdir()):
+                output.rmdir()
+            raise
+        run['manifest'] = staged['manifest']
+    finally:
+        if not retain_backup:
+            _cleanup(lambda: shutil.rmtree(root))
+
+
+def _cleanup(*callbacks):
+    """Attempt every restoration and preserve the original operation error."""
+    primary = failure = sys.exc_info()[1]
+    for callback in callbacks:
+        try:
+            callback()
+        except BaseException as exc:
+            if failure is None:
+                failure = exc
+            else:
+                failure.add_note(f'NREL capture cleanup failed: {exc}')
+                _LOG.exception('NREL capture cleanup failed')
+    if failure is not primary:
+        raise failure
 
 
 def write_json(path,value):
@@ -32,16 +125,25 @@ def create_run(editor,directory,*,mode='G',mapping=None):
     editor.verify_cameras()
     output=Path(directory).expanduser().resolve()
     if output.exists() and any(output.iterdir()): raise ValueError('旧运行不覆盖；请选择新的空目录')
-    output.mkdir(parents=True,exist_ok=True)
     start,end=map(float,(editor.flex.times[0],editor.flex.times[-1]))
     mapping=mapping or FrameMapping(start,end-start,60.,60.,start)
-    write_json(output/'defects.json',editor.store.document)
     package=Path(__file__).parents[1]
     sources=list(Path(__file__).parent.glob('*.py'))+[package/'farm_flex.py',package/'turbine_geometry.py',package/'assets/nrel5mw_geometry.json']
-    manifest=dict(schema='wfrl.nrel_blade_defects.run.v1',mode=mode,state='PREPARED',run_id=output.name,
+    run=dict(output=output,manifest={},mapping=mapping)
+    with _staged_run(run, require_empty=True) as staged:
+        write_json(staged['output']/'defects.json',editor.store.document)
+        staged['manifest'] = _run_manifest(editor, output.name, mode, mapping, start, end, package, sources,
+            digest(staged['output']/'defects.json'))
+        update_run(staged)
+        save_review(editor,staged)
+    return run
+
+
+def _run_manifest(editor, run_id, mode, mapping, start, end, package, sources, defects_sha256):
+    return dict(schema='wfrl.nrel_blade_defects.run.v1',mode=mode,state='PREPARED',run_id=run_id,
         state_version=editor.store.version,blender_version=bpy.app.version_string,
         source_hashes={str(p.relative_to(package)):digest(p) for p in sources},
-        defects_sha256=digest(output/'defects.json'),reference_surface=editor.surface.metadata(),
+        defects_sha256=defects_sha256,reference_surface=editor.surface.metadata(),
         replay_manifest_sha256=editor.scene.get('wfrl_farm_manifest_sha256'),
         source_motion=dict(start_s=start,end_s=end,source_sampling_hz=1/float(editor.flex.times[1]-editor.flex.times[0]),timeline_hz=60.),
         frame_mapping=mapping.to_dict(),cameras=[camera_metadata(editor, c) for c in editor.cameras()],
@@ -50,45 +152,57 @@ def create_run(editor,directory,*,mode='G',mapping=None):
         limitations=['Synthetic visual morphology and user dimensions, no physical damage coupling.',
             'Existing saved radar measurements describe their original simulation geometry.',
             'G visibility does not establish image discernibility or measured damage accuracy.'])
-    run=dict(output=output,manifest=manifest,mapping=mapping)
-    update_run(run)
-    save_review(editor,run)
-    return run
 
 
 def update_run(run): write_json(run['output']/'run_manifest.json',run['manifest'])
 
 
 def save_records(run,rows):
-    write_json(run['output']/'visibility.json',rows)
     fields=['turbine_id','blade_id','defect_id','revision','support_id','support_kind','primary','camera_id','time_s','frame_index','status','in_frame_fraction','visible_fraction_in_frame','visible_area_px2']
-    with (run['output']/'projection_stats.csv').open('w',newline='',encoding='utf-8') as stream:
-        writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore')
-        writer.writeheader()
-        writer.writerows(rows)
-    run['manifest']['products']['visibility']=dict(state='GENERATED',records=len(rows),sha256=digest(run['output']/'visibility.json'))
+    with _staged_run(run) as staged:
+        write_json(staged['output']/'visibility.json',rows)
+        with (staged['output']/'projection_stats.csv').open('w',newline='',encoding='utf-8') as stream:
+            writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore')
+            writer.writeheader()
+            writer.writerows(rows)
+            stream.flush()
+            os.fsync(stream.fileno())
+        staged['manifest']['products']['visibility']=dict(state='GENERATED',records=len(rows),sha256=digest(staged['output']/'visibility.json'))
 
 
 def save_analysis(editor,run):
     rows=editor.analyze(run_id=run['manifest']['run_id'])
-    save_records(run,rows)
-    run['manifest']['state']='G_CURRENT_COMPLETE'
-    update_run(run)
-    save_review(editor,run)
+    with _staged_run(run) as staged:
+        save_records(staged,rows)
+        staged['manifest']['state']='G_CURRENT_COMPLETE'
+        update_run(staged)
+        save_review(editor,staged)
     return rows
 
 
 def save_review(editor,run):
-    (run['output']/'review.md').write_text('\n'.join(['# NREL 5MW 合成缺陷检查','',
+    atomic_json.write_text(run['output']/'review.md', '\n'.join(['# NREL 5MW 合成缺陷检查','',
         '状态：'+run['manifest']['state'],'','六类合成视觉形态；使用当前 NREL 健康参考面与已有柔性回放。',
         '尺寸与深度检查为静态健康参考下的生成器校验，不代表现场损伤测量。',
         'G 是理想几何投影/遮挡诊断，不能据此认定可辨识。A 图外观尚未审核。',
-        '缺陷未进入 OpenFAST 刚度、载荷或既有雷达数据；查看时保留原数据来源。','']),encoding='utf-8')
+        '缺陷未进入 OpenFAST 刚度、载荷或既有雷达数据；查看时保留原数据来源。','']))
 
 
 def capture_images(editor,directory):
     """Explicit UI/CLI action: paired instantaneous lossless PNGs at current time."""
     run=create_run(editor,directory,mode='A')
+    try:
+        with _staged_run(run) as staged:
+            _capture_images(editor, staged)
+    except BaseException as exc:
+        run['manifest']['state']='A_FAILED'
+        run['manifest']['error']=str(exc)
+        _cleanup(lambda: update_run(run), lambda: save_review(editor,run))
+        raise
+    return run
+
+
+def _capture_images(editor, run):
     scene=editor.scene
     render=scene.render
     saved=(scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,
@@ -100,6 +214,14 @@ def capture_images(editor,directory):
     blur=hasattr(render,'use_motion_blur')
     old_blur=render.use_motion_blur if blur else None
     frame_time=float(scene['defect_time_s'])
+
+    def restore_render():
+        scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,_frame,_subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved
+        render.pixel_aspect_x, render.pixel_aspect_y = saved_pixels
+        render.use_border, render.use_crop_to_border = saved_border
+        render.use_compositing, render.use_sequencer = saved_postprocessing
+        if blur: render.use_motion_blur=old_blur
+
     try:
         render.image_settings.file_format='PNG'
         render.image_settings.color_mode='RGBA'
@@ -137,24 +259,13 @@ def capture_images(editor,directory):
                         K=descriptor['K'], P=descriptor['P'], matrix_world=descriptor['matrix_world'],
                         pixel_aspect=[render.pixel_aspect_x, render.pixel_aspect_y]))
         finally:
-            editor.geometry.activate(editor.payload)
-            editor.geometry.dispose(healthy)
+            _cleanup(lambda: editor.geometry.activate(editor.payload),
+                     lambda: editor.geometry.dispose(healthy))
         run['manifest']['state']='A_IMAGES_GENERATED; NOT_REVIEWED'
         for key in ('camera_raw','healthy'): run['manifest']['products'][key]=dict(state='GENERATED')
         update_run(run)
         save_review(editor,run)
-    except BaseException as exc:
-        run['manifest']['state']='A_FAILED'
-        run['manifest']['error']=str(exc)
-        update_run(run)
-        save_review(editor,run)
-        raise
     finally:
-        scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,frame,subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved
-        render.pixel_aspect_x, render.pixel_aspect_y = saved_pixels
-        render.use_border, render.use_crop_to_border = saved_border
-        render.use_compositing, render.use_sequencer = saved_postprocessing
-        if blur: render.use_motion_blur=old_blur
-        scene.frame_set(frame,subframe=subframe)
-        editor.set_time(frame_time)
+        _cleanup(restore_render, lambda: scene.frame_set(saved[6],subframe=saved[7]),
+                 lambda: editor.set_time(frame_time))
     return run

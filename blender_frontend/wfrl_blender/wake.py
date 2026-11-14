@@ -306,6 +306,23 @@ def update_proxy_objects(scene, *, phase: float, rotor_radius: float = 63.0) -> 
     return updated
 
 
+def _release_disxy_created(obj, mesh, collection, materials, error):
+    """Release only new, unretained IDs and their destination collection link."""
+    import bpy
+    blocks = [('objects', obj, collection), ('meshes', mesh, None)]
+    blocks.extend(('materials', material, None) for material in materials)
+    for kind, block, owner in blocks:
+        if block is None:
+            continue
+        try:
+            if owner is not None and owner.objects.get(block.name) == block:
+                owner.objects.unlink(block)
+            if block.users == 0 and block.library is None and not block.use_fake_user:
+                getattr(bpy.data, kind).remove(block)
+        except Exception as cleanup_error:
+            error.add_note(f'DisXY {kind} cleanup failed: {cleanup_error}')
+
+
 def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "WFRL_Scene"):
     """Create or update one reusable DisXY mesh object in Blender."""
     if frame.kind != "disxy":
@@ -317,20 +334,29 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
     if collection is None:
         raise WakePayloadError(f"missing Blender collection: {collection_name}")
     vertices, faces = grid_mesh(frame)
+    from .wind_coordinates import world_vertices
+    vertices = world_vertices(vertices, scene)
     shape = list(frame.shape)
     obj = scene.objects.get("WFRL.WakeDisXY")
     if obj is None and bpy.data.objects.get("WFRL.WakeDisXY") is not None:
         raise WakePayloadError('DisXY object belongs to another scene')
-    if obj is None:
+    created = obj is None
+    if created:
         mesh = bpy.data.meshes.new("WFRL.WakeDisXY.Mesh")
-        mesh.from_pydata(vertices, [], faces)
-        mesh.update()
-        obj = bpy.data.objects.new("WFRL.WakeDisXY", mesh)
-        collection.objects.link(obj)
+        try:
+            mesh.from_pydata(vertices, [], faces)
+            mesh.update()
+            obj = bpy.data.objects.new("WFRL.WakeDisXY", mesh)
+            collection.objects.link(obj)
+        except Exception as error:
+            _release_disxy_created(obj, mesh, collection, (), error)
+            raise
+        materials_before = set(bpy.data.materials)
         try:
             from .materials import get_material
             obj.data.materials.append(get_material("wake"))
         except Exception as exc:
+            _release_disxy_created(None, None, None, set(bpy.data.materials) - materials_before, exc)
             from . import runtime
             runtime.get_state().error = f'DisXY wake material failed: {exc}'
             failure = (type(exc), str(exc))
@@ -342,6 +368,9 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
                     pass
     else:
         mesh = obj.data
+        if (any(owner != scene for owner in getattr(obj, 'users_scene', ()))
+                or getattr(mesh, 'users', 1) > 1):
+            raise WakePayloadError('DisXY geometry is shared with another object or scene')
         if (list(obj.get('wfrl_disxy_shape', ())) != shape
                 or len(mesh.vertices) != len(vertices) or len(mesh.polygons) != len(faces)):
             mesh.clear_geometry()
@@ -350,13 +379,18 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
             for vertex, coordinate in zip(mesh.vertices, vertices):
                 vertex.co = coordinate
         mesh.update()
-    obj["wfrl_disxy_shape"] = shape
-    obj["fidelity"] = frame.fidelity
-    obj["provenance"] = frame.provenance
-    obj["wake_kind"] = "FAST.Farm DisXY"
-    obj["sequence"] = frame.sequence
-    obj["validity"] = frame.validity
-    set_disxy_validity(scene, frame.validity_at(time.monotonic()))
+    try:
+        obj["wfrl_disxy_shape"] = shape
+        obj["fidelity"] = frame.fidelity
+        obj["provenance"] = frame.provenance
+        obj["wake_kind"] = "FAST.Farm DisXY"
+        obj["sequence"] = frame.sequence
+        obj["validity"] = frame.validity
+        set_disxy_validity(scene, frame.validity_at(time.monotonic()))
+    except Exception as error:
+        if created:
+            _release_disxy_created(obj, mesh, collection, set(bpy.data.materials) - materials_before, error)
+        raise
     return obj
 
 

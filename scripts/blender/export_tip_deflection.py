@@ -8,6 +8,11 @@ import hashlib
 import json
 import numpy as np
 
+if __package__:
+    from .export_demo_telemetry import source_indices, validate_geometry, validate_units, write_sidecar
+else:
+    from export_demo_telemetry import source_indices, validate_geometry, validate_units, write_sidecar
+
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -21,21 +26,19 @@ def export(package, case, geometry_asset):
             raise ValueError('Package integrity mismatch: ' + name)
     with np.load(package / 'geometry.npz') as archive:
         times, poses = archive['times'], archive['poses']
+    turbine_ids = manifest.get('turbine_ids', ['T1'])
+    validate_geometry(times, poses, turbine_ids)
     farm = case / 'FarmInputs'
     output = farm / 'Case.T1.out'
     lines = output.read_text(encoding='utf-8').splitlines()
     names, units = lines[6].split(), lines[7].split()
-    raw = np.loadtxt(output, skiprows=8)
+    raw = np.loadtxt(output, skiprows=8, ndmin=2)
     columns = dict(zip(names, raw.T))
     source_times = columns['Time']
-    indices = np.searchsorted(source_times, times)
-    out_of_range = (times < source_times[0]) | (indices >= len(source_times))
-    if np.any(out_of_range):
-        raise ValueError(
-            f'Requested time {times[out_of_range][0]} s is outside available source time '
-            f'range [{source_times[0]}, {source_times[-1]}] s')
-    if not np.allclose(source_times[indices], times, atol=1e-8, rtol=0):
-        raise ValueError('Source time mismatch')
+    validate_units(names, units, {'Time': '(s)', 'YawPzn': '(deg)', 'Azimuth': '(deg)',
+                                 'RotSpeed': '(rpm)', 'BlPitch1': '(deg)',
+                                 **{key: '(deg)' for key in ('BlPitch2', 'BlPitch3') if key in columns}})
+    indices = source_indices(source_times, times, atol=1e-8, mismatch='Source time mismatch')
     telemetry = json.loads((package / 'telemetry.json').read_text(encoding='utf-8'))
     if sha(output) != telemetry['sources']['T1']['sha256']:
         raise ValueError('Output does not belong to this farm package')
@@ -73,7 +76,8 @@ def export(package, case, geometry_asset):
     precise = np.column_stack([columns['YawPzn'], azimuth, columns['RotSpeed'],
                                columns['BlPitch1'], columns.get('BlPitch2', columns['BlPitch1']),
                                columns.get('BlPitch3', columns['BlPitch1'])])[indices]
-    if not np.allclose(precise, poses[:, 0], rtol=0, atol=.002):
+    turbine_slot = turbine_ids.index('T1')
+    if not np.allclose(precise, poses[:, turbine_slot], rtol=0, atol=.002):
         raise ValueError('Pose/source mismatch')
     simulation = np.stack([np.column_stack([columns[f'OoPDefl{b}'], columns[f'IPDefl{b}']])[indices]
                            for b in (1, 2, 3)], axis=1)
@@ -98,10 +102,8 @@ def export(package, case, geometry_asset):
             tower_motion_sha256=manifest['files']['tower-motion.npz'],
             method='Rigid reference uses independent solver nacelle surface rigid transform plus azimuth/pitch; compare in transported unpitched coned axes.',
             scope='Flexible ElastoDyn tower; fixed platform; independently recorded actual blade pitch; same-run saved surface transforms. Interpolated frames are not solver samples.')
-    target = package / 'deflection-t1.json'
-    target.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':'), allow_nan=False) + '\n', encoding='utf-8')
-    manifest['files'][target.name] = sha(target)
-    (package / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+    write_sidecar(package, manifest, 'deflection-t1.json',
+                  json.dumps(payload, ensure_ascii=False, separators=(',', ':'), allow_nan=False) + '\n')
     return payload
 
 

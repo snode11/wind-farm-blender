@@ -146,8 +146,9 @@ def test_resume_restores_statistics_and_adds_timesteps(monkeypatch, isolated):
     assert probe.models[0].num_timesteps == 44
     assert probe.envs[0].obs_rms["yaw"].count > 123.0
     assert probe.envs[0].ret_rms.count > 125.0
-    restored_model = PPO.load(cli.MODEL_PATH)
-    with open(cli.VECNORM_PATH, "rb") as stream:
+    model_path, norm_path = cli._require_checkpoint_files()
+    restored_model = PPO.load(model_path)
+    with norm_path.open("rb") as stream:
         restored_norm = pickle.load(stream)
     assert restored_model.num_timesteps == 44
     assert restored_model._wfrl_checkpoint_id == restored_norm._wfrl_checkpoint_id
@@ -237,20 +238,25 @@ def test_model_failure_closes_every_owned_environment(monkeypatch, isolated, ope
 
 
 def test_periodic_checkpoints_include_matching_normalization(monkeypatch, isolated):
-    from stable_baselines3.common.callbacks import CheckpointCallback
+    callback_class = cli.AtomicCheckpointCallback
 
     def callback(**options):
         options["save_freq"] = 2
-        return CheckpointCallback(**options)
+        return callback_class(**options)
 
     save_pair()
-    monkeypatch.setattr(cli, "CheckpointCallback", callback)
+    monkeypatch.setattr(cli, "AtomicCheckpointCallback", callback)
     loader_probe(monkeypatch)
     monkeypatch.setattr(sys, "argv", ["train_ppo.py", "--resume", "--timesteps", "2"])
     cli.main()
-    saved_model = PPO.load(Path(cli.CKPT_DIR) / "ppo_wf_42_steps.zip")
-    with (Path(cli.CKPT_DIR) / "ppo_wf_vecnormalize_42_steps.pkl").open("rb") as stream:
+    model_path, norm_path = cli.CheckpointPair(
+        Path(cli.CKPT_DIR) / "ppo_wf_42_steps",
+        Path(cli.CKPT_DIR) / "ppo_wf_vecnormalize_42_steps.pkl",
+    ).require()
+    saved_model = PPO.load(model_path)
+    with norm_path.open("rb") as stream:
         saved_norm = pickle.load(stream)
     assert saved_model.num_timesteps == 42
     assert saved_norm.obs_rms["yaw"].count == 126.0
     assert saved_norm.ret_rms.count == 127.0
+    assert saved_model._wfrl_checkpoint_id == saved_norm._wfrl_checkpoint_id

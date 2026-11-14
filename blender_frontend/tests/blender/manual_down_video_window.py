@@ -16,6 +16,8 @@ if MODULE == 'wfrl_blender':
 addon = importlib.import_module(MODULE)
 control = importlib.import_module(MODULE + '.manual_control')
 down = importlib.import_module(MODULE + '.manual_down')
+jobs = importlib.import_module(MODULE + '.manual_down_jobs')
+rendering = importlib.import_module(MODULE + '.manual_down_render')
 panel = importlib.import_module(MODULE + '.panels.manual_control')
 expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
 if expected:
@@ -108,15 +110,15 @@ def observe():
             STATE['viewport_clip'] = [clip.frame_duration, list(clip.size)]
             assert clip.frame_duration == 750 and tuple(clip.size) == (1920, 1080)
             # Without FFmpeg the viewport export falls back to render.opengl.
-            found = down.ffmpeg_executable
-            down.ffmpeg_executable = lambda context=None: None
+            found = rendering.ffmpeg_executable
+            rendering.ffmpeg_executable = lambda context=None: None
             try:
                 with bpy.context.temp_override(window=window, area=area, region=region):
                     result = bpy.ops.wfrl.manual_down_video(
                         'EXEC_DEFAULT', filepath=str(OUT / 'fallback_down.mp4'), turbine='T1', length_mode='FRAMES',
                         frame_count=50, fps=25, resolution='720', engine='VIEWPORT_SOLID', from_start=True)
             finally:
-                down.ffmpeg_executable = found
+                rendering.ffmpeg_executable = found
             assert result == {'FINISHED'}, result
             fallback = json.loads((OUT / 'fallback_down.json').read_text(encoding='utf-8'))
             assert fallback['encoder'] == 'blender ffmpeg (render.opengl)' and fallback['resolution'] == [1280, 720]
@@ -132,7 +134,7 @@ def observe():
             return .5
         if STATE['step'] == 'render':
             target = OUT / 'window_down.mp4'
-            if target.exists() and target.with_suffix('.json').exists() and not down._EXPORT:
+            if target.exists() and target.with_suffix('.json').exists() and not jobs._EXPORT:
                 sidecar = json.loads(target.with_suffix('.json').read_text(encoding='utf-8'))
                 assert sidecar['samples'][0]['T1']['pitch_deg'] == [0.0, 0.0, 0.0]
                 assert sidecar['samples'][-1]['T1']['pitch_deg'][0] == 9.5

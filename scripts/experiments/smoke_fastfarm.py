@@ -3,6 +3,9 @@
 import os, time
 
 from wfrl import paths
+from wfrl.mpi_runtime import configure_local_mpi
+
+configure_local_mpi()
 
 os.chdir(paths.ROOT)                # wfcrl 按 CWD 找 simulators/ 与 __simul__/
 print("cwd:", os.getcwd(), flush=True)

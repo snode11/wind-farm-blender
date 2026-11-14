@@ -31,27 +31,47 @@ pixel 反解只适合相机观测实验；球外两解通过 ambiguous 标记，
 单位：米、度、秒。
 """
 import math
+from numbers import Real
+
 import numpy as np
 
 
 def finite_scalar(value, name='value'):
-    if isinstance(value, (bool, np.bool_)):
+    if (isinstance(value, (bool, np.bool_, np.timedelta64))
+            or not isinstance(value, (Real, str))):
         raise ValueError(name + ' must be a finite number')
-    value = float(value)
+    try:
+        value = float(value)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError(name + ' must be a finite number') from exc
     if not math.isfinite(value):
         raise ValueError(name + ' must be finite')
     return value
 
 
+def _finite_array(value):
+    """复制有限实数数组，兼容 CSV 数值文本；拒绝掩码缺测、布尔与复数。"""
+    if np.ma.is_masked(value):
+        raise ValueError('Expected finite unmasked numbers')
+    try:
+        if isinstance(value, np.ndarray) and value.dtype.kind in 'mM':
+            raise ValueError('Expected numeric geometry, not time values')
+        items = np.asarray(value, dtype=object)
+        values = [finite_scalar(item) for item in items.flat]
+    except (TypeError, OverflowError) as exc:
+        raise ValueError('Expected finite numbers') from exc
+    return np.asarray(values, dtype=float).reshape(items.shape)
+
+
 def finite_vector(value, size=3):
-    value = np.asarray(value, dtype=float)
-    if value.shape != (size,) or not np.isfinite(value).all():
+    value = _finite_array(value)
+    if value.shape != (size,):
         raise ValueError(f'Expected a finite ({size},) vector')
     return value.copy()
 
 
 def rotation_matrix(value):
-    value = np.asarray(value, dtype=float)
+    value = _finite_array(value)
     if (value.shape != (3, 3) or not np.isfinite(value).all()
             or not np.allclose(value.T @ value, np.eye(3), atol=1e-7)
             or not math.isclose(np.linalg.det(value), 1, abs_tol=1e-7)):
@@ -187,7 +207,7 @@ class CameraModel:
             self.fx, self.fy, self.cx, self.cy = finite_vector(intrinsics, 4)
             if min(self.fx, self.fy) <= 0:
                 raise ValueError('Focal lengths must be positive')
-        self.distortion = np.zeros(5) if distortion is None else np.asarray(distortion, dtype=float).reshape(-1)
+        self.distortion = np.zeros(5) if distortion is None else _finite_array(distortion).reshape(-1)
         if len(self.distortion) not in (4, 5, 8, 12, 14) or not np.isfinite(self.distortion).all():
             raise ValueError('Invalid OpenCV distortion coefficients')
         self.set_pose(pos_w, R_cw)
@@ -202,7 +222,7 @@ class CameraModel:
 
     @classmethod
     def from_calibration(cls, width, height, K, distortion, pos_w, R_cw):
-        K = np.asarray(K, dtype=float)
+        K = _finite_array(K)
         if (K.shape != (3, 3) or not np.isfinite(K).all()
                 or not np.allclose(K[2], [0, 0, 1]) or K[0, 1] != 0 or K[1, 0] != 0):
             raise ValueError('Invalid camera intrinsic matrix')
@@ -375,6 +395,7 @@ class RpmAzimuthIntegrator:
 
     def __init__(self, geom, direction=+1):
         self.geom = geom
+        direction = finite_scalar(direction, 'direction')
         self.dir = 1 if direction >= 0 else -1   # 旋转方向：+1 = 方位角递增
         self.phi = None       # 当前方位角(度)
         self.t = None         # 当前时刻(秒)
@@ -386,7 +407,7 @@ class RpmAzimuthIntegrator:
     def step(self, t, rpm):
         """
         推进到时刻 t(秒)，rpm 为该段的转速。返回三维坐标与派生量。
-        未 seed 过 → 返回 None。
+        未 seed 过 → 返回 None；计算失败保留相位与时间。
         """
         if self.phi is None:
             return None
@@ -395,11 +416,11 @@ class RpmAzimuthIntegrator:
         if dt < 0:
             raise ValueError('Rewind requires reseeding the integrator')
         omega_deg = 360.0 * rpm / 60.0        # 度/秒
-        self.phi = (self.phi + self.dir * omega_deg * dt) % 360.0
-        self.t = float(t)
-        P = self.geom.tip_position(self.phi)         # 面外角恒为 0
-        out = {'P': P, 'azimuth_deg_integrated': self.phi}
+        phi = finite_scalar((self.phi + self.dir * omega_deg * dt) % 360.0, 'azimuth')
+        P = self.geom.tip_position(phi)         # 面外角恒为 0
+        out = {'P': P, 'azimuth_deg_integrated': phi}
         out.update(self.geom.decompose(P))
+        self.phi, self.t = phi, t
         return out
 
 

@@ -27,10 +27,15 @@ from numbers import Real
 
 import numpy as np
 
+from wfrl.mpi_runtime import configure_local_mpi
+
+configure_local_mpi()
+
 from wfcrl import environments as envs
 from wfcrl.rewards import StepPercentage
 
 from wfrl import paths
+from wfrl.safety import DUTY_LIMIT
 
 _LOG = logging.getLogger(__name__)
 
@@ -39,13 +44,6 @@ _LOG = logging.getLogger(__name__)
 # "__simul__/{fastfarm,floris}/"），两者都在仓库根。切过去，否则换个 cwd 起进程就找不到。
 os.chdir(paths.ROOT)
 
-
-# NREL 5MW 传动链常数，用来把「功率 + 发电机转矩」反解成转速（见 _read）。
-# 出处：inputs/template/FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat:100
-#       inputs/template/FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT1.dat:21
-GB_RATIO = 97.0        # 齿轮箱速比 (-)
-GEN_EFF = 0.944        # 发电机效率 (-)：avrSWAP(15) 是**电功率**，反解转速要先除掉
-RPM_MAX = 20.0         # 转子转速显示上限 (rpm)；NREL 5MW 额定 12.1，超出即非物理
 
 # NREL 5MW 轮毂高度 (m)：ElastoDyn 的 TowerHt=87.6 加上轴倾后的悬伸抬升，取 90。
 # 用途是从 .bts 的竖向剖面上插出**自由来流**（剪切很强，取错一层差 0.35 m/s）。
@@ -60,14 +58,11 @@ HUB_HEIGHT = 90.0
 LOAD_SCALE = 1e7
 
 # --- 偏航执行机构占空比：滑动窗口版（贴合真实散热恢复）-----------------------
-# WFCRL 原版占空比是"回合累计、永不衰减"：早期偏得多，配额被历史永久占用，
-# 剩下整个回合的偏航全被清零 —— 偏航到不了 wake steering 需要的 20~30°。这不符合
-# 真实风机（偏航电机偏完散热恢复后可再偏）。这里改成滑动窗口：只看最近 W 步的
-# 动作占比，偏完停几步配额就还回来。同时把上限从 10% 放宽到 30%（wake steering
-# 风场对风动作更频繁，30% 可辩护）⇒ 可持续量 0.3·rate·dt = 0.27°/步，170 步可
-# 偏到 ~45°，真正解锁 30°。偏航速率 0.3°/s 不动（贴合 NREL 5MW，Jonkman 2009）。
+# yaw 默认只累计最近 W 步的动作占比；零动作随窗口滚动释放预算。
+# pitch 及关闭滑动窗口的 yaw 使用 env 的回合累计判据，上限为 DUTY_LIMIT。
+# 测量 duty_limit 与各控制量实际使用的配置一致。
 YAW_DUTY_WINDOW = 20        # 滑动窗口步数（dt=3 s ⇒ 60 s，贴合散热时间尺度）
-YAW_DUTY_LIMIT = 0.30       # 占空比上限（放宽自 WFCRL 原版的 0.10）
+YAW_DUTY_LIMIT = 0.30       # yaw 滑动窗口默认占空比上限
 YAW_RATE = 0.3             # 偏航电机速率 (°/s)，与 mdp.ACTUATORS_RATE["yaw"] 同源
 
 # 一次训练里删不掉的算例目录（Windows 句柄没释放）。下一次 purge 时一并重试。
@@ -129,7 +124,12 @@ class FastFarmDriver:
                  controls=("yaw",), load_coef=1.0, reward_shaper=None,
                  wake_vtk=False, wake_vtk_z=90.0, wind_time_series=None,
                  yaw_duty_sliding=True, yaw_duty_window=YAW_DUTY_WINDOW,
-                 yaw_duty_limit=YAW_DUTY_LIMIT):
+                 yaw_duty_limit=YAW_DUTY_LIMIT, physics=None, substructure=None):
+        from wfrl.physics_options import validate_physics, validate_substructure
+        self.physics = validate_physics({} if physics is None else physics)
+        self.substructure = validate_substructure(substructure, self.physics)
+        if 'floris' in env_id.lower() and (any(self.physics.values()) or self.substructure is not None):
+            raise ValueError('physics options require the FAST.Farm backend')
         # 只有 FAST.Farm 后端需要 MPI_Comm_spawn；FLORIS 是纯 Python 稳态解，
         # 不经 MPI，直接 python 就能跑（D5 的奖励/观测设计正靠它秒级迭代）。
         if "floris" not in env_id.lower():
@@ -200,7 +200,11 @@ class FastFarmDriver:
         self.obs_keys = list(self.env.observation_space(self.agents[0]).keys())
         self.done = False
         self._steps = 0
+        self._solver_owned = False
         self._started = False
+        self.cleanup_confirmed = False
+        self.cleanup_error = None
+        self._prepare_solver_outputs()
 
         # 偏航占空比：滑动窗口接管。把 yaw 从 mdp.ACTUATORS_RATE 移除 ⇒ env 的
         # `if not (control in ACTUATORS_RATE): continue`（multiagent_env.py:200）
@@ -215,6 +219,20 @@ class FastFarmDriver:
             rate.pop("yaw", None)
             # 实例属性覆盖类属性，只影响这个 env，不动上游默认
             self._uenv.mdp.ACTUATORS_RATE = rate
+
+    def _prepare_solver_outputs(self):
+        self._solver_outputs = None
+        self.physics_record = None
+        from wfcrl.interface import FastFarmInterface
+        if isinstance(self.env.mdp.interface, FastFarmInterface):
+            from wfrl.solver_outputs import SolverOutputs
+            from wfcrl.fastfarm_physics import configure_physics
+            farm_path = self.env.mdp.interface._simul_file
+            physics = getattr(self, 'physics', {})
+            case = getattr(self.env.mdp, 'farm_case', None)
+            substructure = getattr(self, 'substructure', getattr(case, 'substructure', None))
+            self._solver_outputs = SolverOutputs(farm_path, physics=physics, substructure=substructure)
+            self.physics_record = configure_physics(farm_path, physics, substructure=substructure)
 
     # ------------------------------------------------------------------
     def reset(self, wind_speed=None, wind_direction=None, *, background_bts=None,
@@ -235,7 +253,16 @@ class FastFarmDriver:
         仍由 wind_speed、wind_direction 和 wind_parameters 逐项验证。
         """
         from wfcrl.interface import FastFarmInterface, WindRequestError, _wind_json
+        from wfcrl.fastfarm_direction import normalize_direction
+        if ((getattr(self, 'physics_record', None) or {}).get('substructure') is not None
+                and wind_direction is not None
+                and normalize_direction(wind_direction) != 270.):
+            raise ValueError('OC3 monopile currently requires wind_direction=270')
         itf = getattr(self.env.mdp, "interface", None)
+        if getattr(self, "cleanup_error", None) is not None:
+            raise RuntimeError("FAST.Farm cleanup is unconfirmed") from self.cleanup_error
+        self._started = False
+        self.cleanup_confirmed = False
         upstream_request = _wind_json(upstream_request)
         options = {}
         if isinstance(itf, FastFarmInterface):
@@ -283,21 +310,31 @@ class FastFarmDriver:
             reset_error = exc
             raise
         finally:
+            # Spawn can succeed before env.reset or its metadata writes fail.
+            self._solver_owned = self._has_solver()
             record = getattr(itf, "wind_record", None)
-            if (isinstance(itf, FastFarmInterface) and upstream_request is not None
+            if (isinstance(itf, FastFarmInterface)
                     and record is not None and record is not previous_record):
-                record["upstream_request"] = upstream_request
-                itf._save_wind_record()
+                if upstream_request is not None:
+                    record["upstream_request"] = upstream_request
+                if getattr(self, 'physics_record', None) is not None:
+                    record['physics'] = copy.deepcopy(self.physics_record)
+                if upstream_request is not None or getattr(self, 'physics_record', None) is not None:
+                    itf._save_wind_record()
                 if reset_error is not None:
                     reset_error.record = copy.deepcopy(record)
         if isinstance(itf, FastFarmInterface):
             itf.mark_wind_control_start()
-        self.done = False
+        self._telemetry_servo_steps = None
+        if getattr(self, '_solver_outputs', None) is not None:
+            self._solver_outputs.start(itf.wind_record['loaded_inputs'])
         self._steps = 0
-        self._started = True
+        self.done = self._episode_ended()
         self._yaw_win.clear()          # 新回合：偏航占空比窗口清空
         self.u_inf = self._freestream(fallback=wind_speed)
-        return self._read(reward=0.0)
+        measurement = self._read(reward=0.0)
+        self._started = True
+        return measurement
 
     def _freestream(self, fallback=None):
         """用于归一化的输入参考风速 (m/s)。
@@ -353,33 +390,26 @@ class FastFarmDriver:
             return None
         return v if v.size == self.n else None
 
-    def _rotor_speed(self, power_mw):
-        """转子转速 (rpm)，由电功率与发电机转矩反解：ω_gen = P /(η·T)。
-
-        FAST.Farm 经 MPI 传回来的只有 12 个通道（DISCON.F90:356-368），里面**没有**
-        转速；但 to_SC(2)=avrSWAP(15) 是电功率、to_SC(6)=avrSWAP(23) 是发电机转矩，
-        两者相除就得高速轴角速度，再除齿轮箱速比即转子转速。这比可视化里原来
-        「每帧固定 +18°」的假自转真实：转速会随风速与转矩指令变。
-
-        转矩接近 0（启动瞬态 / 空转）时商会发散，这里裁到 RPM_MAX 并置 nan 保护。
-        """
-        tq = self._raw_measure("torque")
-        if tq is None:
-            return np.full(self.n, np.nan)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            omega_gen = (power_mw * 1e6) / (GEN_EFF * tq)      # rad/s，高速轴
-            rpm = omega_gen * 60.0 / (2.0 * np.pi) / GB_RATIO
-        rpm[~np.isfinite(rpm)] = np.nan
-        rpm[np.abs(tq) < 1.0] = np.nan                          # 转矩≈0，商无意义
-        return np.clip(rpm, 0.0, RPM_MAX)
+    def _raw_blade_moments(self):
+        """Keep the six MPI moments in N m, including a squeezed single-turbine row."""
+        interface = getattr(self.env.mdp, 'interface', None)
+        if 'load' not in getattr(interface, 'measure_map', {}):
+            return None
+        try:
+            values = np.asarray(interface.get_measure('load'), dtype=float)
+        except (KeyError, IndexError, TypeError, ValueError, OverflowError):
+            _LOG.warning('原始叶根弯矩不可用', exc_info=True)
+            return None
+        if self.n == 1 and values.shape == (6,):
+            values = values.reshape(1, 6)
+        return values.copy() if values.shape == (self.n, 6) else None
 
     def _duty(self):
         """各机组各控制量的**执行机构占空比**，≥上限时动作被清零。
 
-        yaw 走本 driver 的**滑动窗口**（见 YAW_DUTY_* 常量）：只看最近 W 步的动作
-        占比，偏完停几步配额恢复；上限 0.30。其余控制量（pitch）仍走 env 的累计版
-        （`multiagent_env.py:196-207`，acc/rate/(k·dt)，上限 0.10）。
-        yaw 关掉滑动窗口时回退到 env 累计版，与旧行为一致。
+        yaw 滑动窗口只看最近 yaw_duty_window 步，使用 yaw_duty_limit。
+        其余受约束控制量及关闭滑动窗口的 yaw 使用 env 累计版，
+        acc/rate/(k·dt)，上限 DUTY_LIMIT。对应上限由 _duty_limits 提供。
         """
         rate = self._uenv.mdp.ACTUATORS_RATE
         dt = float(self._uenv.farm_case.dt)
@@ -402,29 +432,49 @@ class FastFarmDriver:
             out[ag] = d
         return out
 
+    def _duty_limits(self):
+        """各受约束控制量的生效上限；env 累计版固定使用 DUTY_LIMIT。"""
+        limits = {c: DUTY_LIMIT for c in self.controls
+                  if c in self.env.mdp.ACTUATORS_RATE}
+        if self.yaw_duty_sliding and "yaw" in self.controls:
+            limits["yaw"] = self.yaw_duty_limit
+        return limits
+
     def _read(self, reward):
-        """一轮结束后回读全场真实测量。"""
+        """Read a physical round; *_valid masks describe each turbine's sample.
+
+        load_valid requires all supplied load components to be finite. yaw is
+        the command in degrees when controlled, otherwise the observation in
+        degrees; yaw_command and yaw_measured keep these roles separate.
+        Missing samples stay NaN, including the reset infos before any action.
+        """
         n = self.n
-        yaw = np.zeros(n); power = np.zeros(n); load = np.zeros(n)
+        yaw = np.full(n, np.nan); power = np.full(n, np.nan); load = np.full(n, np.nan)
         ws = np.zeros(n); wd = np.zeros(n); pitch = np.zeros(n)
         mflap = np.full((n, 3), np.nan); medge = np.full((n, 3), np.nan)
         for ag in self.agents:
             i = self._idx[ag]
             obs = self.env.observe(ag)
             info = self.env.infos.get(ag, {})
-            yaw[i] = float(np.ravel(obs.get("yaw", [0.0]))[0])
+            yaw[i] = _power_scalar(obs.get("yaw"))
             ws[i] = float(np.ravel(obs.get("wind_speed", [np.nan]))[0])
             wd[i] = float(np.ravel(obs.get("wind_direction", [np.nan]))[0])
             pitch[i] = float(np.ravel(obs.get("pitch", [np.nan]))[0])
             power[i] = _power_scalar(info.get("power"))
-            # load 是**六元组**（见下方 root_moments），reward 用的是它的 mean|·|，
-            # 这里保留标量以兼容既有调用方，逐叶片值另开两个键。
+            # 保留 info 载荷的 mean|·| 标量；逐叶片弯矩优先使用下方 MPI 六分量原值。
             if "load" in info:
-                lv = np.ravel(info["load"]).astype(float)
-                load[i] = float(np.abs(lv).mean())
+                try:
+                    lv = np.ma.asarray(info["load"], dtype=float).filled(np.nan).ravel()
+                except (TypeError, ValueError, OverflowError):
+                    lv = np.array([np.nan])
+                if lv.size and np.isfinite(lv).all():
+                    load[i] = float(np.abs(lv).mean())
                 if lv.size == 6:
                     mflap[i] = lv[:3] * LOAD_SCALE
                     medge[i] = lv[3:] * LOAD_SCALE
+        root_moments = self._raw_blade_moments()
+        if root_moments is not None:
+            mflap, medge = root_moments[:, :3], root_moments[:, 3:]
         # pitch 单位：作为**测量**时来自 avrSWAP(4)，是弧度；作为**被控量**时 MDP
         # 自己按度累加（DEFAULT_BOUNDS pitch=[0,360]）。统一成度再往外给。
         if "pitch" not in self.controls:
@@ -435,31 +485,87 @@ class FastFarmDriver:
         # 逐步打印一模一样）。真实桨距要绕开 MDP 直接问 interface 要第 4 通道。
         pm = self._raw_measure("pitch")
         pitch_meas = np.degrees(pm) if pm is not None else np.full(n, np.nan)
+        ym = self._raw_measure("yaw")
+        from wfcrl.interface import FastFarmInterface
+        native_yaw_radians = isinstance(getattr(self.env.mdp, "interface", None), FastFarmInterface)
+        if "yaw" not in self.controls and native_yaw_radians:
+            yaw = np.degrees(yaw)
+        yaw_measured = np.full(n, np.nan) if ym is None else (
+            np.degrees(ym) if native_yaw_radians else ym)
+        yaw_command = yaw.copy() if "yaw" in self.controls else None
         tq = self._raw_measure("torque")
         torque = tq if tq is not None else np.full(n, np.nan)
         duty = self._duty()
-        # yaw 已从 env 的 ACTUATORS_RATE 移除（滑动窗口接管），但它的占空比仍要
-        # 上报给 obs-duty/D5 ⇒ 显式把 yaw 并进来。
-        duty_ctrls = [c for c in self.controls
-                      if c in self.env.mdp.ACTUATORS_RATE]
-        if self.yaw_duty_sliding and "yaw" in self.controls \
-                and "yaw" not in duty_ctrls:
-            duty_ctrls.append("yaw")
+        duty_limits = self._duty_limits()
         duty_arr = {c: np.array([duty[ag].get(c, 0.0) for ag in self.agents])
-                    for c in duty_ctrls}
-        return {
+                    for c in duty_limits}
+        clock = self._solver_clock()
+        measurement = {
             "yaw": yaw, "power": power, "load": load,
+            "load_valid": np.isfinite(load), "yaw_valid": np.isfinite(yaw),
+            "yaw_command": yaw_command,
+            "yaw_command_valid": np.isfinite(yaw) if yaw_command is not None else np.zeros(n, dtype=bool),
+            "yaw_measured": yaw_measured,
+            "yaw_measured_valid": np.isfinite(yaw_measured),
             "m_flap": mflap, "m_edge": medge,
             "wind_speed": ws, "wind_direction": wd, "pitch": pitch,
             "pitch_meas": pitch_meas,
-            "torque": torque, "rotor_speed": self._rotor_speed(power),
+            "torque": torque, "rotor_speed": np.full(n, np.nan),
             "duty": duty_arr,
+            "duty_limit": duty_limits,
             "reward": float(reward), "done": self.done, "step": self._steps,
+            "solver_clock": clock,
             "wind_conditions": copy.deepcopy(getattr(
                 getattr(self.env.mdp, "interface", None), "wind_record", None)),
         }
+        if getattr(self, '_solver_outputs', None) is not None:
+            values, records = self._solver_outputs.sample(clock['value'], clock['interval_seconds'])
+            measurement.update(values)
+            measurement['output_channels'] = records
+        if getattr(self, 'physics_record', None) is not None:
+            measurement['physics'] = copy.deepcopy(self.physics_record)
+            for turbine in measurement.get('output_channels', ()):
+                for record in turbine.values():
+                    record['provenance']['physics_identity'] = self.physics_record['identity']
+        return measurement
+
+    def _solver_clock(self):
+        """Use the completed MPI count, including initialization and warmup."""
+        from wfcrl.interface import FastFarmInterface
+        from wfrl.fastfarm_clock import coupling_timestamp, servo_time_steps
+        interface = getattr(self.env.mdp, 'interface', None)
+        if not isinstance(interface, FastFarmInterface):
+            return None
+        loaded = interface.wind_record['loaded_inputs']
+        stamp = coupling_timestamp(interface._num_iter, loaded['farm_settings']['DT_Low'])
+        if getattr(self, '_telemetry_servo_steps', None) is None:
+            self._telemetry_servo_steps = servo_time_steps(loaded)
+        stamp['servo_time_steps'] = list(self._telemetry_servo_steps)
+        stamp['power_window_steps'] = int(interface._default_avg_window)
+        return stamp
 
     # ------------------------------------------------------------------
+    def _has_solver(self):
+        """A live child communicator owns solver resources independently of reset."""
+        from wfcrl.interface import MPI
+        env = getattr(self, "_uenv", getattr(self, "env", None))
+        interface = getattr(getattr(env, "mdp", None), "interface", None)
+        comm = getattr(interface, "_comm", None)
+        return MPI is not None and isinstance(comm, MPI.Intercomm) and bool(comm)
+
+    def _episode_ended(self):
+        """AEC flags and the exchange budget both end physical transitions.
+
+        WFCRL reset uses start_iter + 1 exchanges out of start_iter + max_steps,
+        leaving max_steps - 1 control rounds. Dead-agent cleanup is not a round.
+        """
+        for name in ("terminations", "truncations"):
+            if any(getattr(self.env, name, {}).values()):
+                return True
+        interface = getattr(getattr(self.env, "mdp", None), "interface", None)
+        count, budget = getattr(interface, "_num_iter", None), getattr(interface, "max_iter", None)
+        return count is not None and budget is not None and count >= budget
+
     def _clip(self, name, delta):
         """把某个控制量的增量补齐成 (n,) 并裁到它自己的动作边界。"""
         try:
@@ -497,7 +603,8 @@ class FastFarmDriver:
         FLORIS 后端只实现了 yaw（interface.py:576-581），给 pitch/torque 会在
         构造 env 时就报错，不会静默吞掉。
         """
-        if self.done:
+        if self.done or self._episode_ended():
+            self.done = True
             return self._read(reward=0.0)
         deltas = {"yaw": yaw_delta, "pitch": pitch_delta,
                   "torque": torque_delta}
@@ -519,18 +626,14 @@ class FastFarmDriver:
             _, _, term, trunc, _ = self.env.last()
             if term or trunc:
                 self.done = True
-                self.env.step(None)
-                continue
+                return self._read(reward=0.0)
             i = self._idx[ag]
             self.env.step({c: np.array([v[i]], dtype=np.float32)
                            for c, v in cmd.items()})
         self._steps += 1
-        # 截断轮里 AEC 会清空 rewards 字典 → 用 .get 防御
+        self.done = self._episode_ended() or self._steps >= self.max_steps
         rw = self.env.rewards.get(self.agents[0], 0.0)
         reward = float(np.ravel(rw)[0]) if np.size(rw) else 0.0
-        # 回合预算耗尽 → 截断
-        if self._steps >= self.max_steps:
-            self.done = True
         return self._read(reward=reward)
 
     # ------------------------------------------------------------------
@@ -540,44 +643,77 @@ class FastFarmDriver:
         早退时调用；用零增量把回合走完（有上限，防止极长回合把关闭卡死）。
         `purge=True` 额外删掉本次 `envs.make()` 建的算例目录 —— 按回合重启训练时
         每回合一个 ~37 MB 的目录，不清会把 `__simul__/` 撑爆（README §8 第 5 条）。
-        `strict=True` 要求排空完成、环境关闭成功且 MPI 子通信器已断开；失败后
-        禁止重复排空不确定的 AEC 状态，由拥有工作进程的调用方处理取消。
+        返回值和 cleanup_confirmed 表示排空、环境关闭和 MPI 断开均已确认。
+        失败时 cleanup_error 保留原因，任何 strict 值都禁止 purge 和重复排空；
+        strict=True 重新抛出异常，非 strict 返回 False，中断始终重新抛出。
         """
-        prior_error = getattr(self, "_strict_close_error", None)
-        if strict and prior_error is not None:
-            raise RuntimeError("FAST.Farm close previously failed; cleanup is unconfirmed") from prior_error
+        prior_error = getattr(self, "cleanup_error", None)
+        if prior_error is not None:
+            if strict:
+                raise RuntimeError("FAST.Farm close previously failed; cleanup is unconfirmed") from prior_error
+            return False
+        if getattr(self, "cleanup_confirmed", False):
+            if purge:
+                self._purge_case()
+            return True
+        self.cleanup_confirmed = False
         cap = drain_cap if drain_cap is not None else getattr(self, "max_steps", 0)
         drained = 0
         close_error = None
+        interruption = None
         try:
-            while getattr(self, "_started", False) and not self.done and drained < cap:
-                for _ in range(self.n):
-                    _, _, term, trunc, _ = self.env.last()
-                    if term or trunc:
+            self._solver_owned = getattr(self, "_solver_owned", False) or self._has_solver()
+            interface = getattr(getattr(getattr(self, "env", None), "mdp", None), "interface", None)
+            if self._solver_owned and callable(getattr(interface, "update_command", None)):
+                # A partial reset need not have an AEC selector or observations.
+                # Hold the interface's last commands until its fixed MPI budget ends.
+                while interface._num_iter < interface.max_iter and drained < cap:
+                    interface.update_command()
+                    drained += 1
+                if interface._num_iter < interface.max_iter:
+                    raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
+                self.done = True
+            elif getattr(self, "_started", False):
+                while not self.done and drained < cap:
+                    if self._episode_ended():
                         self.done = True
-                        self.env.step(None)
-                        continue
-                    self.env.step({c: np.array([0.0], dtype=np.float32)
-                                   for c in self.controls})
-                drained += 1
-                if self._steps + drained >= self.max_steps:
-                    self.done = True
-            if strict and getattr(self, "_started", False) and not self.done:
-                raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
-        except Exception as e:                       # noqa: BLE001
+                        break
+                    for _ in range(self.n):
+                        _, _, term, trunc, _ = self.env.last()
+                        if term or trunc:
+                            self.done = True
+                            break
+                        self.env.step({c: np.array([0.0], dtype=np.float32)
+                                       for c in self.controls})
+                    drained += 1
+                    self.done = (self.done or self._episode_ended()
+                                 or self._steps + drained >= self.max_steps)
+                if not self.done:
+                    raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
+        except BaseException as e:
             _LOG.exception("FAST.Farm 排空失败（strict=%s）", strict)
-            if strict:
-                close_error = e
+            close_error = e
+            if not isinstance(e, Exception):
+                interruption = e
         try:
-            self._safe_close(strict=strict)
-        except Exception as e:                       # noqa: BLE001
+            self._safe_close(strict=True)
+        except BaseException as e:
             _LOG.exception("FAST.Farm 环境关闭未完成")
             close_error = close_error or e
+            if interruption is None and not isinstance(e, Exception):
+                interruption = e
         if close_error is not None:
-            self._strict_close_error = close_error
-            raise close_error
+            self.cleanup_error = close_error
+            if interruption is not None:
+                raise interruption
+            if strict:
+                raise close_error
+            return False
+        self._solver_owned = self._started = False
+        self.cleanup_confirmed = True
         if purge:
             self._purge_case()
+        return True
 
     def _purge_case(self):
         """删掉本次算例目录，连同之前删不掉的那些一起重试。
@@ -621,10 +757,7 @@ class FastFarmDriver:
             if strict:
                 # WFCRL 的 env.close 可以是空操作；FAST.Farm 的最后一次通信负责
                 # Disconnect。仍有效的子通信器表示不能确认旧求解器已释放。
-                from wfcrl.interface import MPI
-                mdp = getattr(getattr(self, "_uenv", env), "mdp", None)
-                comm = getattr(getattr(mdp, "interface", None), "_comm", None)
-                if MPI is not None and isinstance(comm, MPI.Intercomm) and bool(comm):
+                if self._has_solver():
                     raise RuntimeError("FAST.Farm MPI communicator is still connected")
         except Exception:                            # noqa: BLE001
             if strict:

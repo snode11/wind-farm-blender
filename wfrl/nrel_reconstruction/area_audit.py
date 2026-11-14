@@ -5,6 +5,8 @@ This module must not be imported by reconstruction/parameter-selection code.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_open, atomic_write_text
+
 from .artifact_paths import relocated_path
 
 import argparse
@@ -309,12 +311,12 @@ def run_audit(comparison_path: Path, output_dir: Path) -> dict:
         "runtime": {"python": sys.version, "numpy": np.__version__},
     }
     output_dir.mkdir(parents=True, exist_ok=True)
-    with (output_dir / "per_triangle_area_accounting.csv").open("w", encoding="utf-8", newline="") as handle:
+    with atomic_open(output_dir / "per_triangle_area_accounting.csv", "w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]) if rows else ["source_triangle_id"])
         writer.writeheader()
         writer.writerows(rows)
-    (output_dir / "outside_span_pieces.json").write_text(json.dumps({"evaluation_only": True, "pieces": outside}, indent=2) + "\n", encoding='utf-8')
-    (output_dir / "area_audit.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
+    atomic_write_text(output_dir / "outside_span_pieces.json", json.dumps({"evaluation_only": True, "pieces": outside}, indent=2) + "\n", encoding='utf-8')
+    atomic_write_text(output_dir / "area_audit.json", json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
     p = partition
     text = ["# 独立评分域面积对账（仅评估诊断）", "", "只复用已保存真值网格；未优化、未采集、未重评分、未改变历史门槛。", "",
             "| 域 | 原三角形严格裁剪面积（m²） | 有正面积贡献的原三角形数 |", "|---|---:|---:|"]
@@ -329,7 +331,7 @@ def run_audit(comparison_path: Path, output_dir: Path) -> dict:
              "PLY 不提供压力面/吸力面或前后缘材料语义；这些语义域面积保持 null。报告中的 x/y/z 法向主分量类别只是原局部坐标几何代理。拓扑闭合不证明观测覆盖。", "",
              f"历史全部域面积重新计算一致：{historical_match}；原始输入哈希保持不变：{unchanged}。同态元数据仅核对保存记录的一致性，未重新验证历史场景。", "",
              f"历史联合结论保留：**{report['historical_final_joint_geometry_criterion']}**。"]
-    (output_dir / "README.md").write_text("\n".join(text) + "\n", encoding="utf-8")
+    atomic_write_text(output_dir / "README.md", "\n".join(text) + "\n", encoding="utf-8")
     if not area_closed or not unchanged or not historical_match:
         raise ValueError("Area closure, historical consistency or immutable-input audit failed; inspect saved diagnostic report")
     return report

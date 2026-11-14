@@ -2,6 +2,7 @@
 from collections import deque
 import errno
 import ipaddress
+import math
 import select
 import socket
 import time
@@ -30,8 +31,13 @@ class TransportClient:
             raise ValueError('host must be a loopback IP literal')
         if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
             raise ValueError('port must be between 1 and 65535')
-        if timeout_seconds <= 0 or min(max_queue_bytes, max_bytes_per_poll, max_messages_per_poll, max_io_calls_per_poll, max_pending_messages) < 1:
-            raise ValueError('timeout and queue/poll limits must be positive')
+        if (isinstance(timeout_seconds, bool) or not isinstance(timeout_seconds, (int, float))
+                or not math.isfinite(timeout_seconds) or timeout_seconds <= 0):
+            raise ValueError('timeout must be finite and positive')
+        limits = (max_queue_bytes, max_bytes_per_poll, max_messages_per_poll,
+                  max_io_calls_per_poll, max_pending_messages)
+        if any(isinstance(value, bool) or not isinstance(value, int) or value < 1 for value in limits):
+            raise ValueError('queue/poll limits must be positive integers')
         if not isinstance(capabilities, (list, tuple, set, frozenset)) or any(not isinstance(cap, str) or not cap.strip() or 'binary' in cap for cap in capabilities):
             raise ValueError('invalid client capabilities')
         self.capabilities = frozenset(capabilities)
@@ -152,6 +158,9 @@ class TransportClient:
             session = message['session_id']
             if payload['selected_version'] != 1:
                 raise ProtocolError('unsupported negotiated protocol version')
+            extensions = set(payload['capabilities']) & {TRAINING_STATS_CAPABILITY}
+            if not extensions <= self.capabilities:
+                raise ProtocolError('unrequested training_stats_v1 capability')
             if payload['resumed']:
                 if session != self.session_id or message['sequence'] <= self._last_inbound:
                     raise ProtocolError('invalid resumed session or sequence')
@@ -163,9 +172,6 @@ class TransportClient:
                 self._last_inbound = -1
                 self._last_outbound = 0
             self._last_outbound = max(self._last_outbound, payload.get('last_command_sequence', -1))
-            extensions = set(payload['capabilities']) & {TRAINING_STATS_CAPABILITY}
-            if not extensions <= self.capabilities:
-                raise ProtocolError('unrequested training_stats_v1 capability')
             self.negotiated_capabilities = frozenset(extensions)
             self.session_id = session
             self._phase = 'connected'

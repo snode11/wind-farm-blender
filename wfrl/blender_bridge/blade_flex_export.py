@@ -7,7 +7,9 @@ twice. This archive complements the matching clearance package, not its truth.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import tempfile
 
 import numpy as np
 
@@ -71,15 +73,28 @@ def export_reader(reader, package, output, start, duration, wind=None):
         if not isinstance(wind, dict) or any(k not in wind for k in required):
             raise ValueError('wind must provide mean_mps, ti_percent, gust_increment_mps, gust_peak_mps, gust_duration_s')
         vals = {k: float(wind[k]) for k in required}
-        if vals['mean_mps'] <= 0 or not 0 <= vals['ti_percent'] <= 100 or vals['gust_increment_mps'] < 0 \
+        if not all(np.isfinite(value) for value in vals.values()) \
+                or vals['mean_mps'] <= 0 or not 0 <= vals['ti_percent'] <= 100 or vals['gust_increment_mps'] < 0 \
                 or vals['gust_peak_mps'] < vals['mean_mps'] or vals['gust_duration_s'] <= 0:
             raise ValueError('Invalid wind envelope')
         metadata['wind_conditions'] = vals
-    Path(output).parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(output, times=np.array([t for _, t in rows]),
-                        transforms=np.asarray(transforms, dtype=np.float32), metadata=json.dumps(metadata))
-    Path(output).with_suffix('.json').write_text(json.dumps(metadata, indent=2), encoding='utf-8')
-    print(json.dumps(metadata), flush=True)
+    output = Path(output)
+    archive = output if str(output).endswith('.npz') else Path(str(output) + '.npz')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(metadata, allow_nan=False)
+    # Each published file is complete; the archive carries its own metadata.
+    with tempfile.TemporaryDirectory(prefix='.' + output.name + '-', dir=output.parent) as directory:
+        staged_archive = Path(directory) / 'archive.npz'
+        staged_metadata = Path(directory) / 'metadata.json'
+        np.savez_compressed(staged_archive, times=np.array([t for _, t in rows]),
+                            transforms=np.asarray(transforms, dtype=np.float32), metadata=encoded)
+        staged_metadata.write_text(json.dumps(metadata, indent=2, allow_nan=False), encoding='utf-8')
+        for path in (staged_archive, staged_metadata):
+            with path.open('rb') as handle:
+                os.fsync(handle.fileno())
+        os.replace(staged_archive, archive)
+        os.replace(staged_metadata, output.with_suffix('.json'))
+    print(encoded, flush=True)
 
 
 if __name__ == '__main__':

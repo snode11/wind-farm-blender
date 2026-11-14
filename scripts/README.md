@@ -7,10 +7,12 @@
 | `blender/` | Blender 启动、扩展构建、相机与缺陷工具、视频作业及原生回归运行器 |
 | `train/`、`analysis/` | 训练、匹配评估及保存数据分析；[算法与输入合同](../docs/training/MAPPO_SETUP.md) |
 | `analysis/export_blade_response.py`、`analysis/blade_del.py` | 从已有BeamDyn输出生成九项响应统计或研究用根部弯矩DEL；[通道、扭转限制与DEL方法](../docs/development/叶片响应与研究DEL.md)，不启动求解器 |
-| `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及双预设覆盖；`optimize_mount.py` 搜索有限安装集合，`evaluate_blades.py` 评价几何因果估计，`--detections` 分别报告单帧支持与离线经过跟踪。见[数据合同](../wfrl/radar_x100/README.md)、[双预设覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
+| `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及安装覆盖；`optimize_mount.py` 搜索有限安装集合，`extract_mount_summary.py` 由完整报告提取导入摘要，`evaluate_blades.py` 评价几何因果估计，`--detections` 分别报告单帧支持与离线经过跟踪。见[数据合同](../wfrl/radar_x100/README.md)、[离线安装覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
 | `lidar/` | 雷达结果包、数值诊断与来源检查；[计算入口](lidar/README.md) |
 | `reconstruction/`、`nrel_*.py` | 叶片重建与独立动态研究；[研究对象与状态](../research/README.md) |
 | `experiments/` | 明确对象的物理实验、数值检查与约束探针；MPI 和输入由各脚本声明 |
+| `experiments/` 物理选项检查 | `compare_fastfarm_physics.py`、`audit_fastfarm_physics.py`、`check_openfast_reference.py`、`check_tower_decay.py`、`compare_dynamic_stall.py`、`run_dynamic_stall_reference.py`、`derive_polar_consistent_ua.py`、`smoke_physics_telemetry.py` 对照塔架柔性、动态失速与塔影；[物理选项与精度检查](../docs/development/FASTFarm物理选项.md)。`benchmark_beamdyn.py` 测量叶片弹性扭转耗时，见[BeamDyn 叶片弹性扭转](../docs/development/BeamDyn叶片弹性扭转.md)；`compare_fastfarm_offshore.py` 对照 OC3 单桩，见[海上单桩与波浪](../docs/development/OC3海上单桩与波浪.md)；`compare_fastfarm_directions.py` 对照风向算例，见[FAST.Farm 风况](../docs/training/FASTFarm风况.md) |
+| `inflow/` | `generate_turbsim.py` 按风速、湍流强度和随机种子生成 TurbSim 湍流盒，`smoke_turbulence.py` 用真实求解器读取检查；[TurbSim 湍流盒](../docs/training/TurbSim湍流盒.md) |
 | `camera_video.py` | 已有相机视频包的检查、播放与服务入口；[视频包合同实现](../wfrl/camera_video/package.py) |
 | `ci/` | 发布身份摘要检查；[自动检查](../docs/development/自动检查.md) |
 | `figures/` | 研究图表生成，使用各脚本指定的数据源 |
@@ -23,7 +25,7 @@
 scripts/blender/run_wfrl_macos.sh --help
 python3 scripts/blender/run_regressions.py --list
 python3 scripts/blender/run_installed_windows.py --list
-python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.8.json
+python3 scripts/ci/check_release_identity.py --release publication/blender-0.5.0.0.1.json
 ```
 
 后端 checkpoint 评估通过 Blender Replay 操作，配置与模型合同见[Blender 策略评估](../docs/demos/Blender策略评估.md)。宿主测试与原生检查按[自动检查](../docs/development/自动检查.md)选择。

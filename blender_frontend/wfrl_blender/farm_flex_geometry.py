@@ -192,11 +192,13 @@ class _Geometry:
         # Analytic support slivers need double precision at z~50 m so their
         # sub-millimetre triangles do not collapse during geometry analysis.
         points = np.asarray(coordinates, dtype=np.float64 if high_precision else np.float32).reshape(-1,3)
-        if not len(points):
-            return points.copy()
+        if not np.isfinite(points).all():
+            raise ValueError('Blade reference points must contain finite coordinates')
         t = float(time_s)
         if not math.isfinite(t) or not self.times[0] <= t <= self.times[-1]:
             raise ValueError('Simulation time outside source geometry range')
+        if not len(points):
+            return points.copy()
         _, _, _, _, _, k, b, offset = next(row for row in self.blades if row[0] == obj)
         matrix = self.reference_matrices[obj.name]
         original = points@matrix[:3,:3].T+matrix[:3,3]-offset
@@ -386,9 +388,12 @@ class _Geometry:
             if getattr(obj.data, 'is_editmode', False):
                 raise ValueError('Replay mesh is in edit mode: ' + obj.name)
         for obj, rest, _index, _weight, k in self.towers:
-            if k in support_turbines and (scene.objects.get(obj.name) != obj
-                    or len(obj.data.vertices) != len(rest)):
+            if k not in support_turbines:
+                continue
+            if scene.objects.get(obj.name) != obj or len(obj.data.vertices) != len(rest):
                 raise ValueError('Replay mesh topology no longer matches its binding: ' + obj.name)
+            if getattr(obj.data, 'is_editmode', False):
+                raise ValueError('Replay mesh is in edit mode: ' + obj.name)
         for k, tid in enumerate(self.readers):
             if self.export_turbines is not None and k not in self.export_turbines:
                 continue

@@ -69,8 +69,46 @@ def _read(scene, key):
     return raw
 
 
+def _runtime_signature(scene):
+    """Identify saved inputs and live meshes without retaining additional RNA."""
+    import bpy
+    blades = objects(scene)
+    cam = scene.objects.get(scene.get('split_texture_camera_name', CAMERA))
+    if cam is None or len(blades) != 3 or any(obj is None or obj.type != 'MESH' for obj in blades):
+        raise ValueError('保存的表面纹理网格或相机缺失')
+    texts = []
+    for key in ('recon', 'texture'):
+        name = scene.get('split_texture_' + key + '_text')
+        block = bpy.data.texts.get(name or '')
+        texts.append((name, block.as_pointer() if block is not None else None,
+                      scene.get('split_texture_' + key + '_sha256')))
+    return (getattr(scene, 'session_uid', scene.as_pointer()),
+            scene.get('split_texture_model_sha256'),
+            tuple(scene.get('split_texture_blade_names', ())), cam.as_pointer(),
+            tuple((obj.as_pointer(), obj.data.as_pointer(), len(obj.data.vertices),
+                   obj.get('split_texture_blade')) for obj in blades), tuple(texts))
+
+
+def _runtime(scene):
+    """Revalidate replaced or deleted bindings before committing another sample."""
+    key = scene.as_pointer()
+    value = _SESSIONS.get(key)
+    if value is not None:
+        try:
+            if _runtime_signature(scene) == value.get('binding'):
+                return value
+        except ReferenceError:
+            pass
+        except ValueError:
+            _SESSIONS.pop(key, None)
+            raise
+        _SESSIONS.pop(key, None)
+    return _restore(scene)
+
+
 def _restore(scene):
     from .blade_recon_data import ReconSequence
+    from .split_mappo_texture import _validate_saved_texture_blades, _validate_atlas_pixels
     raw = _read(scene, 'recon')
     sequence = ReconSequence.from_data(json.loads(raw),
         source_label=scene.get('split_texture_source_label', ''),
@@ -82,12 +120,7 @@ def _restore(scene):
     if saved_camera is None or len(blades) != 3 or any(obj is None or obj.type != 'MESH' for obj in blades):
         raise ValueError('保存的表面纹理网格或相机缺失')
     manifest = json.loads(_read(scene, 'texture'))
-    if (not isinstance(manifest, dict) or not isinstance(manifest.get('atlas'), dict) or
-            not isinstance(manifest.get('files'), list) or len(manifest['files']) != 3 or
-            not all(isinstance(record, dict) and record.get('sha256') for record in manifest['files']) or
-            not all(isinstance(manifest['atlas'].get(key), int) and manifest['atlas'][key] > 0
-                    for key in ('W', 'H'))):
-        raise ValueError('保存的表面纹理元数据不完整')
+    _validate_saved_texture_blades(blades, manifest, 'split_texture_blade')
     for blade, record in zip(blades, manifest['files']):
         if len(blade.data.vertices) != sequence.rotor.cfg.n_sections * sequence.rotor.cfg.n_ring:
             raise ValueError('保存的表面纹理网格采样不匹配')
@@ -103,11 +136,10 @@ def _restore(scene):
         image = tex.image if tex else None
         if image is None or image.packed_file is None:
             raise ValueError('保存的表面纹理没有打包')
-        if tuple(image.size) != (manifest['atlas']['W'], manifest['atlas']['H']):
-            raise ValueError('保存的表面纹理尺寸不匹配')
         if hashlib.sha256(image.packed_file.data).hexdigest() != record['sha256']:
             raise ValueError('保存的表面纹理图像校验失败')
-    value = dict(sequence=sequence, blades=blades, index=None)
+        _validate_atlas_pixels(image, manifest['atlas'])
+    value = dict(sequence=sequence, blades=blades, index=None, binding=_runtime_signature(scene))
     _SESSIONS[scene.as_pointer()] = value
     return value
 
@@ -136,7 +168,7 @@ def ensure(scene):
             raise RuntimeError('合成纹理资源回收未确认，请重试') from errors[0]
         _PENDING_IMPORTS.pop(scene.as_pointer(), None)
     if scene.get(MARKER):
-        value = _SESSIONS.get(scene.as_pointer()) or _restore(scene)
+        value = _runtime(scene)
         return _activate(scene, value)
     sequence = ReconSequence(detail_recon_path())
     textures = TexturePackage(detail_texture_path(), sequence.rotor)
@@ -196,7 +228,7 @@ def ensure(scene):
         scene[INDEX] = min(16, len(sequence.states)-1)
         scene[DETAIL] = True
         scene[MARKER] = True
-        value = dict(sequence=sequence, blades=allocated[:3], index=None)
+        value = dict(sequence=sequence, blades=allocated[:3], index=None, binding=_runtime_signature(scene))
         _SESSIONS[scene.as_pointer()] = value
         return _activate(scene, value, new=True, register=resources.register)
     except Exception as error:
@@ -216,7 +248,7 @@ def ensure(scene):
 def apply(scene, *, value=None, register=None):
     import numpy as np
     from . import blade_recon_review as review, blade_recon_inspection as inspection
-    value = value or _SESSIONS.get(scene.as_pointer()) or _restore(scene)
+    value = value or _runtime(scene)
     sequence = value['sequence']
     index = min(max(int(scene.get(INDEX, 16)), 0), len(sequence.states)-1)
     if scene.get(INDEX) != index:

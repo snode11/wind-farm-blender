@@ -1,0 +1,87 @@
+{
+  "schema": "wfrl.experiment-delivery.v1",
+  "version": "0.5.1",
+  "snapshot_date": "2026-11-14",
+  "experiment": {
+    "name": "wind-farm-experiments-0.5.1.zip",
+    "bytes": 1030209587,
+    "sha256": "af21b9295df65464b919fd3f0e70e4c0500761b54c97f8de4e7d61a1e82dd7ab",
+    "file_count": 1394,
+    "source_bytes": 1266704270,
+    "scope": "Full original experiment archive is not published or retained as a compressed file. Original evidence directories remain local. Public material consists of the summary and four CSV files.",
+    "status": "NOT_PUBLISHED_ARCHIVE_NOT_RETAINED",
+    "archive_retained": false,
+    "raw_sources_retained": true
+  },
+  "inflow": {
+    "name": "wind-farm-inflow-0.5.1.zip",
+    "bytes": 185211251,
+    "sha256": "ba159376d0f8440ae507f7be616be8c4bdd4368d40f89e08431d7b4c23c21168",
+    "file_count": 14,
+    "source_bytes": 190485308,
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.zip.sha256",
+    "scope": "Four TurbSim boxes at 8/12 m/s and TI 8/16%, seed 42, with inputs and manifest; preserved random-gust.bts used by the high-wind data.",
+    "status": "UPLOADED"
+  },
+  "dependency": {
+    "name": "wfcrl-dependency-0.5.1.tar.gz",
+    "commit": "eec42a7e1fab8464088fcb375338d451d75ae3f2",
+    "bytes": 29978162,
+    "sha256": "26490ae4af9abaa65d594eb51a99a6101f9a909b9c984540a23936adbf07b156",
+    "file_count": 111,
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz.sha256",
+    "archive_prefix": "wfcrl-env/",
+    "excluded_suffixes": [
+      ".dll",
+      ".so",
+      ".dylib",
+      ".exe",
+      ".pyc",
+      ".pyo"
+    ],
+    "scope": "Tracked dependency sources and inputs; compile controllers on the target platform.",
+    "status": "UPLOADED"
+  },
+  "csv_rows": {
+    "yaw_timeseries": 1280,
+    "high_wind_timeseries": 300
+  },
+  "latest_physics_full_raw_outputs": "NOT_RETAINED; see retained tables and identities in the topic documents",
+  "csv_assets": [
+    {
+      "name": "yaw-timeseries.csv",
+      "rows": 1280,
+      "bytes": 138899,
+      "sha256": "1f9c4184ed7fbae97b7e4a14e71fe34365a5d69cbe2fe8f7c4e036f35bf79d0a",
+      "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/yaw-timeseries.csv",
+      "status": "UPLOADED"
+    },
+    {
+      "name": "yaw-summary.csv",
+      "rows": 8,
+      "bytes": 1111,
+      "sha256": "798a86cf77aabc638d2320262663d4f32747709b43dfeaa6b0f42087231026bc",
+      "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/yaw-summary.csv",
+      "status": "UPLOADED"
+    },
+    {
+      "name": "high-wind-timeseries.csv",
+      "rows": 300,
+      "bytes": 26542,
+      "sha256": "fb1dfcd97a620fd2f71b3e1005bf0edcd8c39e020c3f5be4cae17bc0b98a046b",
+      "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/high-wind-timeseries.csv",
+      "status": "UPLOADED"
+    },
+    {
+      "name": "high-wind-summary.csv",
+      "rows": 3,
+      "bytes": 509,
+      "sha256": "e850a8396abdb2fb15b89ddc8b697033cab6cb0d3f7126641768cb38aa2427b7",
+      "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/high-wind-summary.csv",
+      "status": "UPLOADED"
+    }
+  ]
+}

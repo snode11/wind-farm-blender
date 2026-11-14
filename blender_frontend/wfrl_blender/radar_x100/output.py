@@ -2,7 +2,7 @@
 import bpy
 import numpy as np
 from . import display
-from .core import analysis, schema
+from .core import analysis
 
 _WINDOWS = {}
 _HANDLE = None
@@ -281,14 +281,10 @@ class OutputWindow:
         sensor = analysis.local(analysis.transform(np.array([[0,0,0],[15,0,0]]),context.world_from_sensor),context.world_from_analysis)
         shapes.append(shape(sensor[:,(0,2)]*factor+(tx,ty),(1.,.7,.15,1)))
         rays=[]
-        azimuth_limit,elevation_limit=display.frame_field_of_view(session.frame)
-        for az in (-azimuth_limit,azimuth_limit):
-            for el in (-elevation_limit,elevation_limit):
-                a,e=np.radians([az,el])
-                length=schema.DISPLAY_DEFAULTS['fov_length_m']
-                end=[length*np.cos(e)*np.cos(a),length*np.cos(e)*np.sin(a),length*np.sin(e)]
-                pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
-                rays.extend(pair[:,(0,2)]*factor+(tx,ty))
+        for end in display.fov_corners(display.frame_field_of_view(session.frame),
+                                       display.frame_field_of_view_shape(session.frame)):
+            pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
+            rays.extend(pair[:,(0,2)]*factor+(tx,ty))
         shapes.append(shape(rays,(.15,.65,1,.5)))
         if self.show_reference:
             for curve in session.reference_curves:
@@ -413,25 +409,43 @@ def _draw():
 def close(item, *, close_window=True):
     global _HANDLE
     _WINDOWS.pop(item.window_id, None)
-    if not _WINDOWS and _HANDLE is not None:
-        bpy.types.SpaceImageEditor.draw_handler_remove(_HANDLE, 'WINDOW')
-        _HANDLE = None
-    item.release_gpu()
-    item.frame = None
-    item.xy, item.colors = np.empty((0, 2)), np.empty((0, 4))
-    item.data_key = item.source_key = None
-    window, _ = item.alive()
-    if window is not None and close_window:
-        with bpy.context.temp_override(window=window):
-            bpy.ops.wm.window_close()
+    try:
+        if not _WINDOWS and _HANDLE is not None:
+            bpy.types.SpaceImageEditor.draw_handler_remove(_HANDLE, 'WINDOW')
+            _HANDLE = None
+    finally:
+        item.release_gpu()
+        item.frame = None
+        item.xy, item.colors = np.empty((0, 2)), np.empty((0, 4))
+        item.data_key = item.source_key = None
+        window, _ = item.alive()
+        if window is not None and close_window:
+            with bpy.context.temp_override(window=window):
+                bpy.ops.wm.window_close()
 
 
 def close_all():
+    global _HANDLE
+    errors = []
+    if not _WINDOWS and _HANDLE is not None:
+        try:
+            bpy.types.SpaceImageEditor.draw_handler_remove(_HANDLE, 'WINDOW')
+            _HANDLE = None
+        except Exception as exc:
+            errors.append(exc)
     for item in list(_WINDOWS.values()):
-        close(item)
+        try:
+            close(item)
+        except Exception as exc:
+            errors.append(exc)
     for callback in (tick, discard_saved_windows):
-        if bpy.app.timers.is_registered(callback):
-            bpy.app.timers.unregister(callback)
+        try:
+            if bpy.app.timers.is_registered(callback):
+                bpy.app.timers.unregister(callback)
+        except Exception as exc:
+            errors.append(exc)
+    if errors:
+        raise RuntimeError('X100 output cleanup failed: ' + '; '.join(map(str, errors)))
 
 
 def discard_saved_windows():

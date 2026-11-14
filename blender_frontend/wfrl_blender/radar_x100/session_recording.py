@@ -6,6 +6,10 @@ from . import clearance, display
 
 def _record_current(self, frame):
     if self.fanout and not self.recording_stopping and frame is not None:
+        pending = getattr(self, '_pending_seek_records', None)
+        if pending is not None:
+            pending.append(frame)
+            return
         try:
             self._record_frame(frame)
         except Exception as exc:
@@ -79,9 +83,49 @@ def toggle_playback(self):
 
 
 def seek_frame(self, index):
-    self.playing = False
-    self._set_replay_position(self.replay.times[index], index=index)
-    self.update()
+    """Publish a requested index only when its display update succeeds."""
+    before = dict(self.__dict__)
+    scene_time = self.scene.wfrl_x100_replay_s
+    missing = object()
+    scene_status = {name: self.scene.get(name, missing)
+                    for name in ('wfrl_x100_status', 'wfrl_x100_error')}
+    pending = []
+    try:
+        # Accepted recorder submissions cannot be withdrawn by display rollback.
+        self._pending_seek_records = pending
+        self.playing = False
+        self._set_replay_position(self.replay.times[index], index=index)
+        self.update()
+    except Exception as exc:
+        # Keep the original frame and GPU batch; rollback must not resample.
+        self.__dict__.clear()
+        self.__dict__.update(before)
+        self._advancing_replay = True
+        try:
+            try:
+                self.scene.wfrl_x100_replay_s = scene_time
+            except Exception as error:
+                exc.add_note('Replay clock restoration failed: ' + str(error))
+            for name, value in scene_status.items():
+                try:
+                    if value is missing:
+                        self.scene.pop(name, None)
+                    else:
+                        self.scene[name] = value
+                except Exception as error:
+                    exc.add_note(f'Replay status restoration failed ({name}): {error}')
+        finally:
+            if '_advancing_replay' in before:
+                self._advancing_replay = before['_advancing_replay']
+            else:
+                del self._advancing_replay
+        raise
+    if '_pending_seek_records' in before:
+        self._pending_seek_records = before['_pending_seek_records']
+    else:
+        del self._pending_seek_records
+    for frame in pending:
+        self._record_current(frame)
 
 
 def start_recording(self, path):

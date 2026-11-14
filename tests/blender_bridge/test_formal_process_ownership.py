@@ -176,3 +176,44 @@ def test_detached_child_blocks_cleanup_after_formal_launcher_exits(tmp_path, mon
             session._process.wait(2)
         unrelated.terminate()
         unrelated.wait(2)
+
+
+def _windows_modules(monkeypatch, popen=None):
+    monkeypatch.setattr(formal_process, 'sys', SimpleNamespace(platform='win32'))
+    monkeypatch.setattr(formal_process, 'signals', SimpleNamespace(SIGINT=2, SIGTERM=15, CTRL_BREAK_EVENT=1))
+    monkeypatch.setattr(formal_process, 'subprocess', SimpleNamespace(Popen=popen, CREATE_NEW_PROCESS_GROUP=0x200))
+
+
+def test_windows_start_creates_process_group_for_ctrl_break(monkeypatch):
+    calls = []
+    def popen(argv, **options):
+        calls.append(options)
+        return SimpleNamespace(pid=-1)
+    _windows_modules(monkeypatch, popen)
+    monkeypatch.setattr(psutil, 'Process', Mock(side_effect=psutil.NoSuchProcess(-1)))
+    OwnedProcesses().start(['mpiexec'], cwd='.', env={}, creationflags=0x8)
+    assert calls[0]['creationflags'] == 0x208
+
+
+def test_windows_graceful_stop_sends_ctrl_break_to_root_only(monkeypatch):
+    _windows_modules(monkeypatch)
+    owned = OwnedProcesses()
+    owned._remember = lambda force=False: None
+    owned.process = Mock(poll=Mock(return_value=None))
+    child = Mock()
+    owned._owned = {child}
+    owned.signal(2)
+    owned.process.send_signal.assert_called_once_with(1)
+    child.send_signal.assert_not_called()
+
+
+def test_windows_forced_stop_terminates_every_owned_process(monkeypatch):
+    _windows_modules(monkeypatch)
+    owned = OwnedProcesses()
+    owned._remember = lambda force=False: None
+    gone, alive = Mock(), Mock()
+    gone.send_signal.side_effect = psutil.NoSuchProcess(1)
+    owned._owned = {gone, alive}
+    owned.signal(9)
+    alive.send_signal.assert_called_once_with(15)
+    gone.send_signal.assert_called_once_with(15)

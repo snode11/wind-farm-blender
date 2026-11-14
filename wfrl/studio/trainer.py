@@ -15,6 +15,7 @@
 """
 from __future__ import annotations
 
+import logging
 import os
 import threading
 import time
@@ -26,16 +27,28 @@ import numpy as np
 import torch
 
 from wfrl.mappo_central import Actor, Critic, RunningMeanStd
-from wfrl.policy_actions import PolicyActionContract, load_action_contract
+from wfrl.policy_actions import (
+    LEGACY_OBS_DUTY_LIMIT, PolicyActionContract, duty_headroom,
+    load_action_contract, load_obs_duty_limit,
+)
 from wfrl.safety import SafetyLimiter
+from wfrl.training_integrity import save_checkpoint_atomic
 
 DEVICE = torch.device("cpu")
+logger = logging.getLogger(__name__)
 
 
 def _frame_farm_power(frame):
     """读取 runtime 校验后的全场功率，缺测在内部保留为 NaN。"""
     value = frame.get("_meta", {}).get("farm_power")
     return float(value) if value is not None else float("nan")
+
+
+def _finite_mean(values):
+    """回放统计仅计有限样本；空窗口或全缺测窗口保持 NaN。"""
+    values = np.asarray(values, dtype=float)
+    valid = values[np.isfinite(values)]
+    return float(valid.mean()) if valid.size else float("nan")
 
 
 @dataclass
@@ -53,6 +66,7 @@ class Snapshot:
     phase: str = "idle"          # idle | warmup | sampling | updating | done
     demo_label: str = ""         # demo 模式：当前阶段中文提示（"变桨: 90°→0° 启动"等）
     episode: Optional[int] = None  # Interactive 回合编号，从 0 开始
+    diagnostics: Dict[str, Any] = field(default_factory=dict)
 
 
 class Trainer:
@@ -60,6 +74,8 @@ class Trainer:
 
     `episode_steps > 0` 时按训练控制步切分回合，每回合关闭并重建 runtime；
     `episode_steps == 0` 使用单长回合。每回合的 warmup 不计入训练样本。
+    训练与回放均严格确认 runtime 关闭；关闭失败时保留资源并阻止重新启动。
+    检查点仅在当前训练运行完成至少一次优化后保存。
     """
 
     def __init__(self, scene, iters: int = 8, n_steps: int = 64,
@@ -108,6 +124,12 @@ class Trainer:
         self._thread: Optional[threading.Thread] = None
         self._stop = threading.Event()
         self._paused = threading.Event()
+        self._snapshot_callback_error_types = set()
+        self._diagnostics = {
+            "snapshot_callback_failed": False,
+            "snapshot_callback_failure_count": 0,
+            "snapshot_callback_last_error": None,
+        }
         self.error: Optional[str] = None
         self.history: List[Dict[str, float]] = []      # 每轮一条，画曲线用
 
@@ -121,9 +143,17 @@ class Trainer:
         with self._lock:
             return self._latest
 
+    @property
+    def diagnostics(self) -> Dict[str, Any]:
+        """非致命回调诊断；失败次数和最近错误在此 Trainer 生命周期内保留。"""
+        with self._lock:
+            return dict(self._diagnostics)
+
     def start(self):
         if self.running:
             return
+        if self.runtime is not None:
+            raise RuntimeError('Trainer cleanup unconfirmed; restart blocked')
         self._stop.clear()
         self._thread = threading.Thread(target=self._run, name="wfrl-train",
                                         daemon=True)
@@ -137,6 +167,7 @@ class Trainer:
     def stop(self, timeout: float = 120.0):
         """请求停止并等它排空。幂等。
 
+        工作线程中的回调调用此方法只请求停止，不等待自身退出。
         超时值给得大：`close(purge=True)` 要把 FAST.Farm 在 t=0 领到的迭代预算
         走完，剩几十步就是几十秒。中途 kill 掉换来的是一个卡在 MPI_RECV 的孤儿
         进程，下次起算例时端口还被占着。
@@ -144,7 +175,7 @@ class Trainer:
         self._stop.set()
         self._paused.clear()
         t = self._thread
-        if t is not None and t.is_alive():
+        if t is not None and t.is_alive() and t is not threading.current_thread():
             t.join(timeout)
         if t is None or not t.is_alive():
             self._thread = None
@@ -154,12 +185,25 @@ class Trainer:
         kw.setdefault("episode", self.episode)
         snap = Snapshot(**kw)
         with self._lock:
+            snap.diagnostics = {**snap.diagnostics, **self._diagnostics}
             self._latest = snap
         if self.on_snapshot is not None:
             try:
                 self.on_snapshot(snap)
-            except Exception:                            # noqa: BLE001
-                pass                                     # 回调炸了不该停训练
+            except Exception as exc:                     # noqa: BLE001
+                error_type = type(exc)
+                with self._lock:
+                    count = self._diagnostics["snapshot_callback_failure_count"] + 1
+                    self._diagnostics.update(
+                        snapshot_callback_failed=True,
+                        snapshot_callback_failure_count=count,
+                        snapshot_callback_last_error=f"{error_type.__name__}: {exc}",
+                    )
+                    snap.diagnostics = {**snap.diagnostics, **self._diagnostics}
+                    first_error = error_type not in self._snapshot_callback_error_types
+                    self._snapshot_callback_error_types.add(error_type)
+                if first_error:
+                    logger.exception("快照回调失败（累计 %d 次）", count)
         return snap
 
     def _run(self):
@@ -176,8 +220,7 @@ class Trainer:
         finally:
             if self.runtime is not None:
                 try:
-                    self.runtime.close(purge=True, **({"strict": True}
-                                                     if not (self.demo or self.replay) else {}))
+                    self.runtime.close(purge=True, strict=True)
                 except Exception as e:                   # noqa: BLE001
                     cleanup_error = traceback.format_exc()
                     self.error = (self.error + "\n" + cleanup_error
@@ -210,6 +253,7 @@ class Trainer:
             ck, controls=self.controls, n_agents=n, scene=self.scene.to_dict())
         obs_keys = ck["obs_keys"]
         obs_duty = bool(ck.get("obs_duty", False))
+        obs_duty_limit = load_obs_duty_limit(ck)
         mean = np.asarray(ck["obs_mean"], np.float32)
         std = np.sqrt(np.asarray(ck["obs_var"], np.float32) + 1e-8)
         controls = self.action_contract.controls
@@ -219,7 +263,7 @@ class Trainer:
         log_std = ck["actor"]["log_std"].cpu().numpy()
         print(f"[trainer] 回放 {self.ckpt_path}\n"
               f"  obs_dim={ck['obs_dim']} act_dim={ck['act_dim']} "
-              f"obs_duty={obs_duty} controls={controls} "
+              f"obs_duty={obs_duty} obs_duty_limit={obs_duty_limit:g} controls={controls} "
               f"std={np.round(np.exp(log_std), 3).tolist()}", flush=True)
 
         ep = self.replay_steps
@@ -255,7 +299,7 @@ class Trainer:
         for k in range(ep):
             if not self._wait_for_control_step():
                 break
-            obs = self._pack_keys(m, obs_keys, obs_duty, n)
+            obs = self._pack_keys(m, obs_keys, obs_duty, n, obs_duty_limit)
             on = ((obs - mean) / std).astype(np.float32)
             with torch.no_grad():
                 a = self.actor.dist(torch.as_tensor(on, device=DEVICE)).mean
@@ -267,12 +311,14 @@ class Trainer:
                 torque_delta=cmd.get("torque"))
             m = self.runtime.last_measure
             evs = evs + self.limiter.monitor(m)
-            r = float(frame["_meta"].get("reward") or 0.0)
+            reward = frame["_meta"].get("reward")
+            r = float(reward) if reward is not None else float("nan")
 
             # 回放专用：记录每步数据
-            yaw_vals = np.asarray(m.get("yaw", np.zeros(n)), float).ravel()
+            yaw_vals = np.asarray(m.get("yaw", np.full(n, np.nan)), float).ravel()
+            yaw = float(yaw_vals[0]) if yaw_vals.size else float("nan")
             replay_history["step"].append(k + 1)
-            replay_history["yaw"].append(yaw_vals[0] if len(yaw_vals) > 0 else 0.0)
+            replay_history["yaw"].append(yaw if np.isfinite(yaw) else float("nan"))
             replay_history["power"].append(_frame_farm_power(frame))
             replay_history["reward"].append(r)
 
@@ -285,15 +331,16 @@ class Trainer:
 
         # 回放结束：把记录的数据转成 history 格式，让训练面板能画曲线
         if len(replay_history["step"]) > 0:
-            # 每 10 步聚合一条，避免曲线过密
+            # 按回放长度聚合有限样本，缺测窗口保留 NaN。
             step_interval = max(1, ep // 40)  # 最多 40 个点
             for i in range(0, len(replay_history["step"]), step_interval):
                 end_idx = min(i + step_interval, len(replay_history["step"]))
                 self.history.append({
                     "iter": i // step_interval,
                     "step": replay_history["step"][end_idx - 1],
-                    "mean_power": float(np.mean(replay_history["power"][i:end_idx])),
-                    "mean_reward": float(np.mean(replay_history["reward"][i:end_idx])),
+                    "yaw": _finite_mean(replay_history["yaw"][i:end_idx]),
+                    "mean_power": _finite_mean(replay_history["power"][i:end_idx]),
+                    "mean_reward": _finite_mean(replay_history["reward"][i:end_idx]),
                     "vloss": 0.0,  # 回放没有训练，填 0
                     "explained_var": 0.0,
                 })
@@ -305,18 +352,17 @@ class Trainer:
                       farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="done")
 
-    def _pack_keys(self, m, obs_keys, obs_duty, n):
+    def _pack_keys(self, m, obs_keys, obs_duty, n, obs_duty_limit=LEGACY_OBS_DUTY_LIMIT):
         """回放专用打包：列顺序严格按 checkpoint 存的 obs_keys，可选拼 duty 余量。
 
-        与 rollout_ckpt.py:pack_obs 逐位一致 —— duty headroom =
-        clip((0.1 - duty_yaw)/0.1, 0, 1)。训练面板自采的 _pack 用 self.obs_keys，
-        回放必须改用 ckpt 里的 obs_keys（网络输入维度由它定死）。
+        duty 余量使用 checkpoint 的 obs_duty_limit，缺字段时固定为 0.1。
+        训练面板自采的 _pack 用 self.obs_keys；回放使用 checkpoint 的列顺序。
         """
         cols = [np.asarray(m[k], np.float32).ravel() for k in obs_keys]
         if obs_duty:
             duty = np.asarray((m.get("duty") or {}).get("yaw", np.zeros(n)),
                               np.float32).ravel()
-            cols.append(np.clip((0.1 - duty) / 0.1, 0.0, 1.0).astype(np.float32))
+            cols.append(duty_headroom(duty, obs_duty_limit))
         return np.stack(cols, axis=1).astype(np.float32)
 
     def _demo_sequence(self):
@@ -627,6 +673,7 @@ class Trainer:
         ret_rms_var, ret_acc = 1.0, 0.0
 
         gstep = 0
+        updated = False
         for it in range(self.iters):
             if self._stop.is_set():
                 break
@@ -713,6 +760,7 @@ class Trainer:
                                  next_val_buf[:filled], episode_end[:filled])
             stats = self._update(obs_buf[:filled], act_buf[:filled],
                                  logp_buf[:filled], adv, ret, opt)
+            updated = True
             # 全场功率取本轮全部采样步的均值；任何一步缺测使整轮统计无效。
             stats.update(iter=it, step=gstep,
                          mean_power=float(np.mean(pow_buf[:filled])),
@@ -724,7 +772,7 @@ class Trainer:
                           reward=float(rew_buf[:filled].mean()), events=[],
                           phase="updating", stats=dict(stats))
 
-        if self.ckpt_path and self.history:
+        if self.ckpt_path and updated:
             self._save(rms)
 
     # ---- 观测打包、GAE 与 PPO 更新 --------------------------------------
@@ -804,7 +852,7 @@ class Trainer:
             raise ValueError("saving a policy requires its training action_contract")
         os.makedirs(os.path.dirname(self.ckpt_path) or ".", exist_ok=True)
         obs_dim = len(self.obs_keys)
-        torch.save({"actor": self.actor.state_dict(),
+        save_checkpoint_atomic({"actor": self.actor.state_dict(),
                     "critic": self.critic.state_dict(),
                     "obs_mean": rms.mean, "obs_var": rms.var,
                     "obs_keys": list(self.obs_keys),

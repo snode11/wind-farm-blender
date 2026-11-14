@@ -11,12 +11,15 @@ import numpy as np
 
 from wfrl.lidar.physics import read_surface, tip_reference
 from wfrl.lidar.moving_tower import horizontal_clearance
+from scripts.lidar._atomic_output import updated_files
 
 
 def metrics(rows):
     expected = [r for r in rows if r['expected']]
     valid = [r for r in expected if r['beams']['B2']['valid']]
     e = np.array([r['beams']['B2']['estimate_m'] - r['truth_m'] for r in valid])
+    if not np.isfinite(e).all():
+        raise ValueError('Nonfinite valid baseline error')
     passages = {r['passage_id'] for r in expected}
     hit = {r['passage_id'] for r in valid}
     return dict(expected=len(expected), valid=len(valid),
@@ -32,7 +35,6 @@ def metrics(rows):
 
 def audit(package, output):
     package, output = Path(package), Path(output)
-    output.mkdir(parents=True, exist_ok=True)
     manifest = json.loads((package/'manifest.json').read_text(encoding='utf-8'))
     for name, digest in manifest['files'].items():
         if hashlib.sha256((package/name).read_bytes()).hexdigest() != digest:
@@ -83,8 +85,9 @@ def audit(package, output):
         window='Existing +/-3 degree samples only; extended diagnostic window still required',
         scope='Discrete contour vertices at minimum recorded truth in each passage; edge-interior and cosmetic apex not yet included',
         acceptance='Diagnostic only; no automatic equivalence or compensation decision')
-    (output/'baseline-diagnostics.json').write_text(json.dumps(summary,indent=2), encoding='utf-8')
-    (output/'tip-point-samples.json').write_text(json.dumps(samples,indent=2), encoding='utf-8')
+    with updated_files(output) as staged:
+        (staged/'baseline-diagnostics.json').write_text(json.dumps(summary,indent=2), encoding='utf-8')
+        (staged/'tip-point-samples.json').write_text(json.dumps(samples,indent=2), encoding='utf-8')
     return summary
 
 

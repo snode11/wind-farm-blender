@@ -90,10 +90,19 @@ class FrontendState:
             raise ValueError("Invalid session synchronization")
         if state_revision is not None and (type(state_revision) is not int or state_revision < 0):
             raise ValueError("Invalid state revision")
+        if isinstance(capabilities, (str, bytes)):
+            raise ValueError("Invalid synchronization capabilities")
+        try:
+            capabilities = set(capabilities)
+        except TypeError as exc:
+            raise ValueError("Invalid synchronization capabilities") from exc
+        if any(not isinstance(capability, str) or not capability.strip()
+               for capability in capabilities):
+            raise ValueError("Invalid synchronization capabilities")
         self._set_cleanup(status, cleanup_confirmed, worker_alive)
         self.session_id, self.run_status, self.mode = session_id, status, mode
         self.state_revision = self._synchronized_revision = state_revision
-        self.capabilities = set(capabilities)
+        self.capabilities = capabilities
         self.connection, self.confirmed, self.error = "CONNECTED", True, ""
 
     def lifecycle(self, session_id: str, status: str, mode: str, capabilities, *, state_revision=None,

@@ -107,22 +107,27 @@ remain limitations. Segments are retained only across contiguous valid samples,
 so a segment never bridges an explicit U/occlusion-mask gap.
 """
     width,height=map(int,image_size)
-    if width<=1 or height<=1 or max_candidates<1 or sample_spacing_px<=0:
-        raise ValueError('Positive contour sampling budget and image dimensions required')
+    if (width<=1 or height<=1 or max_candidates<1 or sample_spacing_px<=0 or near_m<=0
+            or not math.isfinite(sample_spacing_px) or not math.isfinite(near_m)):
+        raise ValueError('Positive finite contour sampling budget and image dimensions required')
     if vertices.ndim!=2 or vertices.shape[1]!=3 or not vertices.is_floating_point():
         raise ValueError('vertices must be floating Nx3')
     faces=torch.as_tensor(faces,device=vertices.device,dtype=torch.long)
     K=torch.as_tensor(K,device=vertices.device,dtype=vertices.dtype)
     camera_transform=torch.as_tensor(T_camera_cv_from_world,device=vertices.device,dtype=vertices.dtype)
     root_transform=torch.as_tensor(T_world_from_blade_root,device=vertices.device,dtype=vertices.dtype)
+    if not all(bool(torch.isfinite(value).all()) for value in (vertices,K,camera_transform,root_transform)):
+        raise ValueError('Projection geometry and calibration must be finite')
     labels=torch.as_tensor(labels,device=vertices.device)
-    if labels.shape!=(height,width) or not bool(((labels>=0)&(labels<=2)).all()):
+    if labels.shape!=(height,width) or not bool(((labels==0)|(labels==1)|(labels==2)).all()):
         raise ValueError('labels must be HxW B=0/F=1/U=2')
     if candidate_valid_mask is None:
         validity=labels!=2
     else:
-        validity=torch.as_tensor(candidate_valid_mask,device=vertices.device,dtype=torch.bool)
-        if validity.shape!=(height,width):raise ValueError('candidate_valid_mask must match image')
+        validity=torch.as_tensor(candidate_valid_mask,device=vertices.device)
+        if validity.shape!=(height,width) or not bool(((validity==0)|(validity==1)).all()):
+            raise ValueError('candidate_valid_mask must be a finite binary mask matching the image')
+        validity=validity.to(torch.bool)
     transform=camera_transform@root_transform
     camera=vertices@transform[:3,:3].T+transform[:3,3]
     edges=_silhouette_edges(camera,faces)
@@ -210,13 +215,15 @@ the caller must treat these as missing image terms, not successful fitting.
 All returned terms are scalar tensors, compatible with the existing optimizer's
 JSON conversion. This does not read files, calibrated truth or replay geometry.
 """
-    if uncertainty_px<0 or robust_delta_px<=0 or distance_scale_px<=0 or max_observed<1:
-        raise ValueError('Nonnegative uncertainty and positive contour loss scales required')
+    if (uncertainty_px<0 or robust_delta_px<=0 or distance_scale_px<=0 or max_observed<1
+            or not all(math.isfinite(value) for value in (uncertainty_px,robust_delta_px,distance_scale_px))):
+        raise ValueError('Contour loss requires finite nonnegative uncertainty and positive scales')
     candidates,segments,counts=projected_contour_candidates(
         vertices,faces,K,T_camera_cv_from_world,T_world_from_blade_root,image_size,labels,
         candidate_valid_mask,max_candidates,sample_spacing_px,near_m)
     observed=torch.as_tensor(observed_points,device=vertices.device,dtype=vertices.dtype)
-    if observed.ndim!=2 or observed.shape[1]!=2:raise ValueError('observed_points must be Nx2 trusted RGB coordinates')
+    if observed.ndim!=2 or observed.shape[1]!=2 or not bool(torch.isfinite(observed).all()):
+        raise ValueError('observed_points must be finite Nx2 trusted RGB coordinates')
     width,height=map(int,image_size)
     inside=(torch.isfinite(observed).all(dim=-1)&(observed[:,0]>=0)&(observed[:,0]<=width-1)
             &(observed[:,1]>=0)&(observed[:,1]<=height-1))

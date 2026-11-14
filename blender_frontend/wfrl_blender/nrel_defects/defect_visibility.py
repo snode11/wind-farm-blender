@@ -145,6 +145,13 @@ def _bbox(points):
             max(p[0] for p in points), max(p[1] for p in points)]
 
 
+def _finite_vector(value):
+    try:
+        return len(value) == 3 and all(not isinstance(x, bool) and math.isfinite(x) for x in value)
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
 def _project(point, camera):
     delta = _sub(point, camera['origin'])
     x, y, depth = [_dot(axis, delta) for axis in camera['axes']]
@@ -188,7 +195,14 @@ def analyze_support(support, camera, ray_distance, *, sampling_step_px=0.75,
         row['status'] = 'NOT_EVALUATED'
         row['reasons'] = ['DEFECT_DISABLED']
         return row
-    if not triangles or len(normals) != len(triangles):
+    try:
+        valid_support = (bool(triangles) and len(normals) == len(triangles)
+            and all(len(triangle) == 3 and all(_finite_vector(point) for point in triangle)
+                    for triangle in triangles)
+            and all(_finite_vector(normal) for normal in normals))
+    except (TypeError, ValueError):
+        valid_support = False
+    if not valid_support:
         row['reasons'] = ['MISSING_OR_INCONSISTENT_SUPPORT']
         return row
     projected, depths, angles = [], [], []
@@ -228,13 +242,15 @@ def analyze_support(support, camera, ray_distance, *, sampling_step_px=0.75,
     row['in_frame_fraction'] = min(1.0, max(0.0, framed_area / full_area))
 
     centerline = support.get('centreline_world', support.get('centerline', []))
-    if centerline:
+    if centerline and len(centerline) >= 2 and all(_finite_vector(point) for point in centerline):
         line = [_project(point, camera)[0] for point in centerline]
         if all(p is not None for p in line):
             row['length_px'] = sum(math.dist(a, b) for a, b in zip(line, line[1:]))
     widths = support.get('width_sections_world', support.get('width_sections', []))
     measured = []
     for left, right in widths:
+        if not _finite_vector(left) or not _finite_vector(right):
+            continue
         a, b = _project(left, camera)[0], _project(right, camera)[0]
         if a is not None and b is not None:
             measured.append(math.dist(a, b))
@@ -337,7 +353,12 @@ def _renderable_objects(scene):
 def scene_tree(rig):
     import bpy
     from mathutils.bvhtree import BVHTree
-    deps = bpy.context.evaluated_depsgraph_get()
+    scene = rig['scene']
+    if bpy.context.scene == scene:
+        deps = bpy.context.evaluated_depsgraph_get()
+    else:
+        with bpy.context.temp_override(scene=scene, view_layer=scene.view_layers[0]):
+            deps = bpy.context.evaluated_depsgraph_get()
     vertices, faces = [], []
     for obj in _renderable_objects(rig['scene']):
         evaluated = obj.evaluated_get(deps)

@@ -32,6 +32,37 @@ from wfrl.studio.trainer import Snapshot, Trainer               # noqa: E402
 FAILS = []
 
 
+def channel_summary(measurements, key, turbine=0):
+    samples = []
+    for m in measurements:
+        raw = m.get(key)
+        values = (np.full(np.size(m.get(f"{key}_valid", [False])), np.nan)
+                  if raw is None else np.asarray(raw, float).ravel())
+        valid = np.isfinite(values)
+        if f"{key}_valid" in m:
+            declared = np.asarray(m[f"{key}_valid"])
+            if declared.dtype.kind != "b" or declared.size != values.size:
+                raise ValueError(f"{key}_valid must contain one boolean per turbine")
+            valid &= declared.ravel()
+        if turbine < values.size and valid[turbine]:
+            samples.append(values[turbine])
+    values = np.asarray(samples)
+    count = values.size
+    return dict(values=values, count=count,
+                mean=float(values.mean()) if count else None,
+                std=float(values.std()) if count else None,
+                minimum=float(values.min()) if count else None,
+                maximum=float(values.max()) if count else None)
+
+
+def describe(summary):
+    if not summary['count']:
+        return "无有效数据（有效样本数=0）"
+    return (f"mean={summary['mean']:.3f}, std={summary['std']:.3f}, "
+            f"range=[{summary['minimum']:.3f}, {summary['maximum']:.3f}] "
+            f"（有效样本数={summary['count']}）")
+
+
 def check(name, cond, detail=""):
     ok = bool(cond)
     print(f"  [{'OK ' if ok else 'FAIL'}] {name}"
@@ -89,33 +120,32 @@ def main():
 
     print("\n== 2-3. 三通道命令下发后仿真有回读响应 ==", flush=True)
     # 收集若干步的回读，看 pitch_meas / torque / rotor_speed 是否在变
-    pit, tq, rpm, yaw = [], [], [], []
+    measurements = []
     seen = set()
     deadline = time.time() + 180
     while tr.running and len(seen) < 8 and time.time() < deadline:
         s = tr.latest()
         if s and s.step not in seen and s.measure:
             seen.add(s.step)
-            m = s.measure
-            pit.append(np.ravel(m.get("pitch_meas", [np.nan]))[0])
-            tq.append(np.ravel(m.get("torque", [np.nan]))[0])
-            rpm.append(np.ravel(m.get("rotor_speed", [np.nan]))[0])
-            yaw.append(np.ravel(m.get("yaw", [np.nan]))[0])
+            measurements.append({key: None if value is None else np.asarray(value).copy()
+                                 for key, value in s.measure.items()
+                                 if key in ("pitch_meas", "torque", "rotor_speed", "yaw", "load",
+                                            "yaw_command", "yaw_measured") or key.endswith("_valid")})
         time.sleep(0.1)
 
-    tq = np.array(tq, float)
-    rpm = np.array(rpm, float)
-    pit = np.array(pit, float)
+    summaries = {key: channel_summary(measurements, key)
+                 for key in ("pitch_meas", "torque", "rotor_speed", "yaw", "load",
+                             "yaw_command", "yaw_measured")}
+    tq, rpm, pit = (summaries[key] for key in ("torque", "rotor_speed", "pitch_meas"))
+    for key, summary in summaries.items():
+        print(f"    T1 {key}: {describe(summary)}", flush=True)
     check("采到多步回读", len(seen) >= 4, f"{len(seen)} 步: {sorted(seen)}")
-    check("torque 回读有限且非零", np.any(np.isfinite(tq) & (np.abs(tq) > 1)),
-          f"样本 {np.round(tq[np.isfinite(tq)][:5], 0)}")
+    check("torque 回读有限且非零", np.any(np.abs(tq['values']) > 1), describe(tq))
     check("torque 回读随控制步变化（不是钉死常数）",
-          np.nanstd(tq) > 1.0, f"std={np.nanstd(tq):.1f} N·m")
-    check("rotor_speed 有限", np.any(np.isfinite(rpm)),
-          f"样本 {np.round(rpm[np.isfinite(rpm)][:5], 2)} rpm")
+          tq['std'] is not None and tq['std'] > 1.0, describe(tq))
+    check("rotor_speed 有限", rpm['count'] > 0, describe(rpm))
     check("pitch_meas 有限（基线顶替时应为基线桨距，仍是有限数）",
-          np.any(np.isfinite(pit)),
-          f"样本 {np.round(pit[np.isfinite(pit)][:5], 3)}°")
+          pit['count'] > 0, describe(pit))
 
     print("\n== 4. 三通道约束都进了回路 ==", flush=True)
     # 再等一会让占空比 / torque 下限触发

@@ -345,6 +345,30 @@ def retry_clock(monkeypatch):
     return clock
 
 
+@pytest.mark.parametrize('interface', [None, 'en0'])
+def test_launch_passes_local_mpi_defaults_without_parent_job_identity(
+        tmp_path, monkeypatch, owned_launch, interface):
+    from wfrl import mpi_runtime
+    monkeypatch.setattr(mpi_runtime, 'sys', SimpleNamespace(platform='darwin'))
+    for key in ('OMPI_MCA_btl', 'OMPI_MCA_btl_tcp_if_include', 'OMPI_MCA_btl_tcp_if_exclude'):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv('OMPI_COMM_WORLD_SIZE', '4')
+    monkeypatch.setenv('PMIX_NAMESPACE', 'parent-job')
+    if interface:
+        monkeypatch.setenv('OMPI_MCA_btl_tcp_if_include', interface)
+    bridge, _ = owned_launch()
+    monkeypatch.setattr(launcher, 'request_protocol_stop', lambda *args: True)
+
+    assert launcher.main(['launch', *base_args(tmp_path), '--fake']) == 0
+
+    env = launcher.subprocess.Popen.call_args.kwargs['env']
+    assert env['OMPI_MCA_btl'] == 'self,tcp'
+    assert env['OMPI_MCA_btl_tcp_if_include'] == (interface or 'lo0')
+    assert 'OMPI_COMM_WORLD_SIZE' not in env
+    assert 'PMIX_NAMESPACE' not in env
+    assert bridge.poll() is not None
+
+
 def test_launch_delivers_shutdown_signal_to_owned_child(tmp_path, monkeypatch, owned_launch, shared_console):
     ready, stopped = tmp_path / 'ready', tmp_path / 'stopped'
     bridge, files = owned_launch(

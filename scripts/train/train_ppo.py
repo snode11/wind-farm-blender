@@ -23,18 +23,24 @@ Monitoring:
 
 import argparse
 from copy import deepcopy
+import json
 import os
+from pathlib import Path
+import pickle
 from uuid import uuid4
 
 import numpy as np
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import check_for_correct_spaces
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 from wfcrl import environments as envs
 from wfrl.sb3_wrapper import WFCRLSB3Wrapper
+from wfrl.sb3_checkpoint import validate_model_normalization
+from wfrl.training_integrity import (atomic_write, capture_rng, restore_rng, file_digest,
+                                     read_checkpoint_manifest, validate_checkpoint_location)
 
 from wfrl import paths
 
@@ -44,6 +50,132 @@ CKPT_DIR = paths.CKPT
 MODEL_PATH = os.path.join(CKPT_DIR, "ppo_ablaincourt")
 VECNORM_PATH = os.path.join(CKPT_DIR, "vecnormalize.pkl")
 MAX_STEPS = 200  # steps per episode (FLORIS is fast, so we can afford long episodes)
+
+
+class CheckpointPair:
+    """Path-specific SB3 generations using the mappo_sb3 manifest contract."""
+
+    def __init__(self, model_path, normalization_path, *, norm_keys=None):
+        self.model_path = Path(model_path)
+        self.normalization_path = Path(normalization_path)
+        self.manifest = Path(str(model_path) + ".manifest.json")
+        self.norm_keys = norm_keys
+
+    def _generation_paths(self, generation):
+        norm = self.normalization_path
+        return (Path(f"{self.model_path}.{generation}.zip"),
+                norm.with_name(f"{norm.stem}.{generation}{norm.suffix}"))
+
+    def resolve(self):
+        """Pin one validated generation; use legacy paths only without a manifest."""
+        document = read_checkpoint_manifest(self.manifest)
+        if document is None:
+            return Path(str(self.model_path) + ".zip"), self.normalization_path
+        generation = document.get("generation") if isinstance(document, dict) else None
+        if (not isinstance(generation, str) or len(generation) != 32
+                or any(c not in "0123456789abcdef" for c in generation)
+                or document.get("schema") != 1):
+            raise ValueError("Invalid checkpoint manifest")
+        pair = self._generation_paths(generation)
+        for key, filename in zip(("model", "normalization"), pair):
+            if not filename.is_file():
+                raise FileNotFoundError(f"Required checkpoint file is missing: {filename}")
+            validate_checkpoint_location(filename)
+            if (document.get(key) != filename.name
+                    or document.get(key + "_sha256") != file_digest(filename)):
+                raise ValueError(f"Checkpoint manifest does not match {key}")
+        return pair
+
+    def require(self):
+        pair = self.resolve()
+        for filename in pair:
+            if not filename.is_file():
+                raise FileNotFoundError(f"Required checkpoint file is missing: {filename}")
+        return pair
+
+    def save(self, model, venv):
+        """Publish the manifest only after both immutable artifacts pass validation."""
+        generation = uuid4().hex
+        model_path, norm_path = self._generation_paths(generation)
+        old_ids = [obj.__dict__.get("_wfrl_checkpoint_id") for obj in (model, venv)]
+        rng = capture_rng()
+        committed = False
+        try:
+            model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = generation
+            restored = {}
+
+            def validate_model(path):
+                restored["model"] = type(model).load(path, device="cpu")
+                if restored["model"].__dict__.get("_wfrl_checkpoint_id") != generation:
+                    raise ValueError("Model has an invalid checkpoint identity")
+
+            def validate_norm(path):
+                with path.open("rb") as stream:
+                    normalization = pickle.load(stream)
+                validate_model_normalization(restored["model"], normalization,
+                                             norm_keys=self.norm_keys)
+
+            atomic_write(model_path, model.save, validate_model, exclusive=True)
+            atomic_write(norm_path, venv.save, validate_norm, exclusive=True)
+            document = dict(schema=1, generation=generation,
+                            model=model_path.name, normalization=norm_path.name,
+                            model_sha256=file_digest(model_path),
+                            normalization_sha256=file_digest(norm_path))
+
+            def write_manifest(path):
+                path.write_text(json.dumps(document, allow_nan=False) + "\n", encoding="utf-8")
+
+            def validate_manifest(path):
+                if json.loads(path.read_text(encoding="utf-8")) != document:
+                    raise ValueError("Checkpoint manifest failed validation")
+
+            atomic_write(self.manifest, write_manifest, validate_manifest)
+            committed = True
+            return model_path, norm_path
+        finally:
+            # An interruption immediately after replacement must retain the published pair.
+            if not committed and self.manifest.is_file():
+                try:
+                    committed = json.loads(self.manifest.read_text(encoding="utf-8")).get("generation") == generation
+                except (OSError, ValueError, AttributeError):
+                    pass
+            if not committed:
+                model_path.unlink(missing_ok=True)
+                norm_path.unlink(missing_ok=True)
+                for obj, identity in zip((model, venv), old_ids):
+                    if identity is None:
+                        obj.__dict__.pop("_wfrl_checkpoint_id", None)
+                    else:
+                        obj._wfrl_checkpoint_id = identity
+            restore_rng(rng)
+
+
+class AtomicCheckpointCallback(BaseCallback):
+    """Commit a model/statistics generation at each configured callback interval."""
+
+    def __init__(self, save_freq, save_path, name_prefix):
+        super().__init__()
+        self.save_freq = save_freq
+        self.save_path = Path(save_path)
+        self.name_prefix = name_prefix
+
+    def _on_step(self):
+        if self.n_calls % self.save_freq == 0:
+            venv = self.model.get_vec_normalize_env()
+            if venv is None:
+                raise ValueError("Atomic checkpoints require VecNormalize statistics")
+            stem = self.save_path / f"{self.name_prefix}_{self.num_timesteps}_steps"
+            norm = self.save_path / f"{self.name_prefix}_vecnormalize_{self.num_timesteps}_steps.pkl"
+            CheckpointPair(stem, norm).save(self.model, venv)
+        return True
+
+
+def _checkpoint_pair():
+    return CheckpointPair(MODEL_PATH, VECNORM_PATH)
+
+
+def save_checkpoint_pair(model, venv):
+    return _checkpoint_pair().save(model, venv)
 
 
 def make_single_env(max_steps: int = MAX_STEPS) -> Monitor:
@@ -57,9 +189,7 @@ def make_single_env(max_steps: int = MAX_STEPS) -> Monitor:
 
 
 def _require_checkpoint_files():
-    for filename in (MODEL_PATH + ".zip", VECNORM_PATH):
-        if not os.path.isfile(filename):
-            raise FileNotFoundError(f"Required PPO checkpoint file is missing: {filename}")
+    return _checkpoint_pair().require()
 
 
 def _validate_normalization(venv):
@@ -89,6 +219,9 @@ def _validate_pair(model, venv):
 
 
 def _make_venv(max_steps, *, training, norm_path=None, normalization=None):
+    model_path = None
+    if norm_path is not None and os.path.abspath(norm_path) == os.path.abspath(VECNORM_PATH):
+        model_path, norm_path = _checkpoint_pair().resolve()
     if norm_path is not None and not os.path.isfile(norm_path):
         raise FileNotFoundError(f"Required PPO normalization file is missing: {norm_path}")
     base = DummyVecEnv([lambda: make_single_env(max_steps)])
@@ -100,6 +233,7 @@ def _make_venv(max_steps, *, training, norm_path=None, normalization=None):
         elif norm_path is not None:
             venv = VecNormalize.load(norm_path, base)
             venv._wfrl_normalization_path = os.path.abspath(norm_path)
+            venv._wfrl_model_path = os.path.abspath(model_path) if model_path is not None else None
         else:
             venv = VecNormalize(base, norm_obs=True, clip_obs=10.0, gamma=0.99)
         check_for_correct_spaces(base, venv.observation_space, venv.action_space)
@@ -126,11 +260,13 @@ def make_eval_venv(max_steps: int = MAX_STEPS, *, normalization=None) -> VecNorm
 
 def build_model(venv, resume: bool) -> PPO:
     if resume:
-        _require_checkpoint_files()
-        if venv.__dict__.get("_wfrl_normalization_path") != os.path.abspath(VECNORM_PATH):
+        model_path = venv.__dict__.get("_wfrl_model_path")
+        if model_path is None:
             raise ValueError("Restore VecNormalize before loading a PPO checkpoint")
-        print(f"[train] resuming from {MODEL_PATH}.zip")
-        model = PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        if not os.path.isfile(model_path):
+            raise FileNotFoundError(f"Required PPO checkpoint file is missing: {model_path}")
+        print(f"[train] resuming from {model_path}")
+        model = PPO.load(model_path, env=venv, tensorboard_log=LOG_DIR)
         _validate_pair(model, venv)
         return model
 
@@ -212,9 +348,8 @@ def main():
         print("\n[train] --- policy evaluation (before training) ---")
         evaluate(model, n_episodes=2, normalization=venv)
 
-        ckpt_cb = CheckpointCallback(
+        ckpt_cb = AtomicCheckpointCallback(
             save_freq=20_000, save_path=CKPT_DIR, name_prefix="ppo_wf",
-            save_vecnormalize=True,
         )
 
         print(f"\n[train] --- training for {args.timesteps} timesteps ---")
@@ -222,11 +357,8 @@ def main():
                     progress_bar=args.progress_bar,
                     reset_num_timesteps=not args.resume)
 
-        checkpoint_id = uuid4().hex
-        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = checkpoint_id
-        model.save(MODEL_PATH)
-        venv.save(VECNORM_PATH)
-        print(f"[train] saved model to {MODEL_PATH}.zip and stats to {VECNORM_PATH}")
+        model_path, norm_path = save_checkpoint_pair(model, venv)
+        print(f"[train] saved model to {model_path} and stats to {norm_path}")
     finally:
         venv.close()
 

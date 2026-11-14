@@ -35,6 +35,7 @@ _last_tick = None
 _last_async_display_state = None
 _last_display_state = None
 _backend_scene = None
+_DETACHED_BACKEND_SCENE = object()
 _tick_failures = set()
 health_results = globals().get('health_results', {})
 wake_buffer = globals().get('wake_buffer', WakeFrameBuffer())
@@ -370,19 +371,41 @@ def _scene_key(scene):
     return scene.as_pointer() if hasattr(scene, 'as_pointer') else id(scene)
 
 
+class _BackendSceneUnavailable(ValueError):
+    """The claimed backend requires an explicit scene binding before polling."""
+
+
+def _detach_backend_scene(reason):
+    global _backend_scene, _live_scene, _last_tick
+    _backend_scene = _DETACHED_BACKEND_SCENE
+    _live_scene = None
+    _last_tick = None
+    _state.disconnect(reason)
+    _clear_backend_wake('stale')
+    if _client is not None:
+        try:
+            _client.close()
+        except Exception:
+            _LOG.exception('Backend scene detached: transport cleanup failed')
+
+
 def backend_scene():
     """Return the bound live scene; a deleted owner is never replaced implicitly."""
     import bpy
     scene = _backend_scene
     if scene is None:
         return None
+    if scene is _DETACHED_BACKEND_SCENE:
+        raise _BackendSceneUnavailable('Backend scene is detached; reconnect with an explicitly selected scene')
     try:
         key = _scene_key(scene)
         scenes = getattr(getattr(bpy, 'data', None), 'scenes', None)
         if not key or (scenes is not None and not any(_scene_key(item) == key for item in scenes)):
             raise ValueError('Backend scene is unavailable; reconnect with an explicitly selected scene')
-    except ReferenceError as exc:
-        raise ValueError('Backend scene was removed or reloaded; data application is stopped') from exc
+    except (ReferenceError, ValueError) as exc:
+        reason = 'Backend scene was removed or reloaded; reconnect with an explicitly selected scene'
+        _detach_backend_scene(reason)
+        raise _BackendSceneUnavailable(reason) from exc
     return scene
 
 
@@ -680,7 +703,7 @@ def _tick():
         _last_tick = None
         return 0.05
     now = time.monotonic()
-    display_before = _last_display_state if _last_display_state is not None else _display_state()
+    display_before = _last_display_state
     first_backend_display = (_last_display_state is None
                              and (_client is not None or kinematics.snapshot is not None))
     dt = 0.0 if _last_tick is None else max(0.0, now - _last_tick)
@@ -689,7 +712,7 @@ def _tick():
         kinematics.advance(dt, running=_state.run_status == 'RUNNING',
                            connected=_state.connection == 'CONNECTED' and _state.confirmed)
     messages = []
-    if _client:
+    if _client and _backend_scene is not _DETACHED_BACKEND_SCENE:
         try:
             backend_scene()
             messages = _client.poll()
@@ -703,6 +726,8 @@ def _tick():
                     _state.confirmed = True
             elif _client.status == 'DISCONNECTED' and _state.connection == 'CONNECTED':
                 _state.disconnect('Connection lost; backend state is unconfirmed')
+        except _BackendSceneUnavailable:
+            pass
         except (ValueError, KeyError, TypeError, RuntimeError) as exc:
             _state.disconnect(f'Invalid backend data or scene: {exc}')
             try:
@@ -711,19 +736,21 @@ def _tick():
                 _LOG.exception('Invalid backend data: transport cleanup failed')
     display_scene = None
     if _state.connection != 'LOCAL DEMO':
-        connected = _state.connection == 'CONNECTED' and _state.confirmed
         try:
-            scene = backend_scene()
+            display_scene = backend_scene()
         except ValueError:
-            scene = None
-            connected = False
-        display_scene = scene
+            pass
+    display_state = _display_state()
+    display_changed = first_backend_display or (display_before is not None and display_state != display_before)
+    if _state.connection != 'LOCAL DEMO':
+        scene = display_scene
+        connected = _state.connection == 'CONNECTED' and _state.confirmed
         if scene is not None and latest_wake is not None:
             validity = latest_wake.validity_at(now, connected=connected)
             if scene.get('wfrl_wake_validity') != validity:
                 scene['wfrl_wake_validity'] = validity
             set_disxy_validity(scene, validity if latest_wake.kind == 'disxy' or validity != 'valid' else 'waiting')
-        if first_backend_display or display_before != _display_state():
+        if display_changed:
             kinematics.apply_objects(scene.objects if scene is not None else {}, connected=connected)
         from .live_scene import animate_illustrative_wake
         animate_illustrative_wake(scene, dt,
@@ -739,8 +766,7 @@ def _tick():
         for result in _health.poll():
             health_results[result.component] = result
             health_changed = True
-    display_state = _display_state()
-    backend_changed = first_backend_display or display_state != display_before or bool(messages)
+    backend_changed = display_changed or bool(messages)
     _last_display_state = display_state
     targets = []
     current_scene = bpy.context.scene

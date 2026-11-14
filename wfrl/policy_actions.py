@@ -11,6 +11,8 @@ import numpy as np
 _LEGACY_BOUNDS = {"yaw": (-5.0, 5.0), "pitch": (-1.0, 1.0),
                   "torque": (-1000.0, 1000.0)}
 _CLI_FIELDS = {"env_id", "obs_duty", "recurrent", "duty_penalty"}
+# Checkpoints without an observation limit retain their training-time encoding.
+LEGACY_OBS_DUTY_LIMIT = 0.1
 
 
 def _controls(value, label="controls"):
@@ -41,6 +43,25 @@ def _vector(value, size, label):
     except (TypeError, ValueError, OverflowError) as exc:
         raise ValueError(f"{label} must contain {size} finite numbers") from exc
     return array
+
+
+def _obs_duty_limit(value):
+    limit = float(_vector([value], 1, "obs_duty_limit")[0])
+    if limit <= 0:
+        raise ValueError("obs_duty_limit must be positive")
+    return limit
+
+
+def load_obs_duty_limit(checkpoint):
+    """Read the saved observation scale; absent fields always mean 0.1."""
+    return _obs_duty_limit(checkpoint.get("obs_duty_limit", LEGACY_OBS_DUTY_LIMIT))
+
+
+def duty_headroom(duty, limit):
+    """Encode duty headroom as float32, preserving the caller's input precision."""
+    limit = _obs_duty_limit(limit)
+    duty = np.asarray(duty)
+    return np.clip((limit - duty) / limit, 0.0, 1.0).astype(np.float32)
 
 
 @dataclass(frozen=True)
@@ -180,6 +201,7 @@ def load_action_contract(checkpoint, *, controls, n_agents=None, scene=None, env
     obs_duty = ck.get("obs_duty", False)
     if type(obs_duty) is not bool or (obs_duty and "yaw" not in contract.controls):
         raise ValueError("checkpoint obs_duty must be boolean and requires yaw")
+    load_obs_duty_limit(ck)
     obs_dim = _integer(ck.get("obs_dim"), "checkpoint obs_dim")
     if obs_dim != len(obs_keys) + int(obs_duty):
         raise ValueError("checkpoint obs_dim conflicts with obs_keys/obs_duty")

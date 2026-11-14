@@ -1,4 +1,5 @@
 """Only source-bound settings require applying; display and next-sample settings stay independent."""
+import json
 from types import SimpleNamespace
 import numpy as np
 import pytest
@@ -6,7 +7,7 @@ from wfrl_blender.radar_x100 import configuration
 
 
 def scene(mode):
-    values = dict(source=mode, observation_mode='GEOMETRY', mount='NACELLE', location=(1.,2.,3.), rotation=(0.,90.,0.), field_of_view=(60.,22.),
+    values = dict(source=mode, observation_mode='GEOMETRY', mount='NACELLE', location=(1.,2.,3.), rotation=(0.,90.,0.), field_of_view=(60.,22.), field_of_view_shape='ANGULAR',
         path='//radar.ply', ply_source='TEST', port=9877, stale_s=.5, stream='NEAR',
         candidates=512, color='RANGE', color_scale='FIXED', velocity_limit=10., fov=True,
         replay_s=0., record_path='/tmp/record')
@@ -32,6 +33,7 @@ def test_immediate_and_next_sample_settings_do_not_report_pending_configuration(
     ('SIMULATION','observation_mode','DETECTIONS','观测模式'),
     ('SIMULATION','mount','WORLD','挂载'), ('SIMULATION','location',(1.,2.,4.),'安装位置'),
     ('SIMULATION','rotation',(0.,91.,0.),'安装旋转'), ('SIMULATION','field_of_view',(45.75,30.),'视场'),
+    ('SIMULATION','field_of_view_shape','PROJECTIVE','视场形状'),
     ('REPLAY','path','//other.ply','回放路径'),
     ('REPLAY','ply_source','MEASURED_REPLAY','单帧 PLY 来源'), ('LIVE','port',9878,'本地端口'),
     ('LIVE','stale_s',1.,'过期阈值')])
@@ -55,10 +57,44 @@ def test_recording_directories_ignore_single_ply_declarations_and_other_source_f
     s.wfrl_x100_location = (9.,8.,7.)
     s.wfrl_x100_port = 12345
     assert configuration.pending(s, applied, abspath=abspath) == ()
-    s.wfrl_x100_path = '/scene/radar.ply'
+    s.wfrl_x100_path = '//./radar.ply'
     assert configuration.pending(s, applied, abspath=abspath) == ()
     s.wfrl_x100_source = 'LIVE'
     assert configuration.pending(s, applied, abspath=abspath) == ('数据源',)
+
+
+def test_applied_relative_replay_path_follows_blend_directory():
+    draft = scene('REPLAY')
+    applied = configuration.capture(draft, abspath=abspath, single_ply=True)
+    saved = configuration.saved({configuration.SAVED_KEY: configuration.encode(applied)})
+    assert saved['path'] == '//radar.ply'
+    draft.wfrl_x100_path = '//./radar.ply'
+    relocated = lambda value: value.replace('//', '/relocated/')
+    assert configuration.pending(draft, saved, abspath=relocated) == ()
+    draft.wfrl_x100_path = '//different.ply'
+    assert configuration.pending(draft, saved, abspath=relocated) == ('回放路径',)
+
+
+@pytest.mark.parametrize('applied_path,draft_path', [
+    ('/scene/radar.ply', '//radar.ply'),
+    ('//radar.ply', '/scene/radar.ply'),
+])
+def test_changing_replay_path_kind_is_pending_for_the_same_resolved_file(applied_path, draft_path):
+    s = scene('REPLAY')
+    s.wfrl_x100_path = applied_path
+    applied = configuration.capture(s, abspath=abspath, single_ply=True)
+    s.wfrl_x100_path = draft_path
+    assert configuration.resolve_path(applied_path, abspath=abspath) == configuration.resolve_path(draft_path, abspath=abspath)
+    assert configuration.pending(s, applied, abspath=abspath) == ('回放路径',)
+
+
+def test_legacy_v1_applied_absolute_path_keeps_its_original_target():
+    draft = scene('REPLAY')
+    payload = json.dumps(dict(schema='x100-applied-config.v1', source='REPLAY',
+        path='/original/radar.ply', ply_source='TEST'))
+    saved = configuration.saved({configuration.SAVED_KEY: payload})
+    assert saved['path'] == '/original/radar.ply'
+    assert configuration.pending(draft, saved, abspath=abspath) == ('回放路径',)
 
 
 def test_installation_catalog_audits_original_before_rear_candidate_without_moving_source(monkeypatch):

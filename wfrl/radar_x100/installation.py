@@ -6,8 +6,13 @@ from .schema import digest, PROFILE, UNIT_ENVELOPE
 from .sampling import AREA_ALGORITHM
 
 SCHEMA = 'x100-installation-search.v2'
+SEARCH_REPORT_MAX_BYTES = 16 * 1024 * 1024
+SEARCH_SUMMARY_SUFFIX = '.summary.json'
 PASSAGE_METRIC = 'DISTAL_ROI_PASSAGE_DETECTIONS.v1'
 DEFAULT_ROI = (-15., -15., -70., -2.5, 15., -40.)
+_PASSAGE_RANK_BOUNDS = dict(worst_passage_fraction=1., longest_known_miss_duration_s=np.inf,
+                            nadir_support_fraction=1., worst_blade_fraction=1., tower_error_rmse_m=np.inf,
+                            points_per_frame_mean=np.inf)
 
 
 def _finite_number(value, lower=-np.inf, upper=np.inf):
@@ -522,10 +527,7 @@ def _candidate_problems(candidate):
     elif passage_supports and any(p.get('status') != 'KNOWN' for p in passage_supports):
         problems.append('叶片经过检测证据不完整或含未知帧')
     elif passage_supports:
-        bounds = dict(worst_passage_fraction=1., longest_known_miss_duration_s=np.inf,
-                      nadir_support_fraction=1., worst_blade_fraction=1., tower_error_rmse_m=np.inf,
-                      points_per_frame_mean=np.inf)
-        invalid = [key for key, upper in bounds.items()
+        invalid = [key for key, upper in _PASSAGE_RANK_BOUNDS.items()
                    if any(not _finite_number(p.get(key), 0, upper) for p in passage_supports)]
         if invalid:
             problems.append('叶片经过检测指标缺失或无效（' + '、'.join(invalid) + '）')
@@ -587,6 +589,15 @@ def selected_installation(report, source_id, geometry_id):
     winner = report.get('winner_id')
     if report.get('errors'):
         raise ValueError('安装搜索含未知帧，不能应用推荐安装')
+    policy = _mapping(report.get('mechanical_policy'))
+    expected_policy = profile_metadata()['mechanical_policy']
+    dimensions = _mapping(policy.get('unit_envelope')).get('dimensions_whd_m')
+    if not isinstance(dimensions, list) or dimensions != expected_policy['unit_envelope']['dimensions_whd_m']:
+        raise ValueError('安装搜索报告的 mechanical_policy.unit_envelope.dimensions_whd_m 缺失或与当前安装包络不符' + regenerate)
+    for field in ('parameters', 'housing_axes', 'opening_policy', 'physical_installation_approved'):
+        actual, expected = policy.get(field), expected_policy[field]
+        if not isinstance(actual, type(expected)) or actual != expected:
+            raise ValueError('安装搜索报告的 mechanical_policy.' + field + ' 缺失或与当前研究筛选要求不符' + regenerate)
     candidates = report.get('candidates', [])
     if not isinstance(candidates, (list, tuple)) or any(not isinstance(row, dict) for row in candidates):
         raise ValueError('安装搜索报告的 candidates 格式无效' + regenerate)
@@ -610,3 +621,49 @@ def selected_installation(report, source_id, geometry_id):
         raise ValueError('推荐安装未通过叶片经过检测校验：需要完整、已知的检测、正下方时刻和塔距误差证据' + regenerate)
     location, rotation = rows[0]['location_m'], rows[0]['rotation_deg']
     return location, rotation
+
+
+def _fields(row, *names):
+    return {name: row[name] for name in names if name in row}
+
+
+def candidate_summary(row):
+    """Keep the installation identity, eligibility checks, and ranking inputs."""
+    compact = _fields(row, 'id', 'location_name', 'location_m', 'rotation_deg', 'detection_evaluation')
+    mechanics = _mapping(row.get('mechanical'))
+    compact['mechanical'] = _fields(mechanics, 'status', 'geometry_id', 'checks', 'physical_installation_approved')
+    compact['mechanical']['motion_clearance'] = _fields(_mapping(mechanics.get('motion_clearance')), 'status',
+        'expected_frames', 'known_frames', 'unknown_frames', 'failed_frames', 'minimum_clearance_m', 'required_clearance_m')
+    compact['profiles'] = []
+    for profile in _profiles(row, 'profiles'):
+        projected = _fields(profile, 'seed', 'budget')
+        coverage = profile.get('geometric_coverage')
+        if isinstance(coverage, dict):
+            projected['geometric_coverage'] = _fields(coverage, 'status', 'worst_blade_fraction')
+        compact['profiles'].append(projected)
+    compact['detection_profiles'] = []
+    for profile in _profiles(row, 'detection_profiles'):
+        projected = _fields(profile, 'sampling_seed', 'noise_seed', 'integration_budget', 'output_point_limit', 'sampling_plan_id')
+        projected['simulated_detection_support'] = _fields(_mapping(profile.get('simulated_detection_support')),
+            'status', 'support_fraction', 'expected_frames', 'known_frames', 'unknown_frames', 'supported_frames')
+        projected['passage_detection_support'] = _fields(_mapping(profile.get('passage_detection_support')),
+            'metric', 'status', 'expected_frames', 'unknown_frames', 'continuous_support', *_PASSAGE_RANK_BOUNDS)
+        if errors := profile.get('errors'):
+            projected['errors'] = errors[:1] if isinstance(errors, (list, tuple)) else [{}]
+        compact['detection_profiles'].append(projected)
+    return compact
+
+
+def import_summary(report):
+    """Project an applicable v2 report to provenance and candidate ranking inputs."""
+    report = _mapping(report)
+    source_id, geometry_id = report.get('source_id'), report.get('geometry_id')
+    selected_installation(report, source_id, geometry_id)
+    summary = _fields(report, 'schema', 'source_id', 'geometry_id', 'shell_geometry', 'mechanical_policy',
+        'hardware_profile', 'analysis_roi', 'sampling_method', 'sampling_algorithm', 'sampling_plans',
+        'source_interval_s', 'source_grid_hz', 'source_frames', 'evaluation_scope', 'passages_per_blade',
+        'minimum_points', 'distal_span', 'half_window_deg', 'code_identity', 'ranking',
+        'errors', 'winner_id', 'best_evaluated_id', 'recommended_observation_mode', 'default_mode_basis')
+    summary['candidates'] = rank(candidate_summary(row) for row in report['candidates'])
+    selected_installation(summary, source_id, geometry_id)
+    return summary

@@ -27,10 +27,12 @@ class GeneratedReviewTests(unittest.TestCase):
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);out=root/'output';out.mkdir();(out/'texture').mkdir()
+            frames=[{'frame':k,'t':k/10,'cameras':[{'name':name} for name in module.CAMERA_NAMES]} for k in range(601)]
             texture={'atlas':{'H':4,'W':8,'dr':1,'r0':0},'params':{},'input_contract':{
-                'frames':[{'saved_calibration_checked':True}]*601,'reconstruction_input_provenance_checked':True}}
-            for name,data in [('texture/texture.json',texture),('recon.json',{}),('model_compatibility.json',{}),
-                              ('input/input_bundle.json',{}),('source_integrity.json',{'source_files':{},'model_compatibility':{
+                'frames':[{'frame':k,'t':k/10,'cameras':module.CAMERA_NAMES,'saved_calibration_checked':True} for k in range(601)],
+                'reconstruction_input_provenance_checked':True}}
+            for name,data in [('texture/texture.json',texture),('recon.json',{'frames':frames}),('model_compatibility.json',{}),
+                              ('input/input_bundle.json',{'frames':frames}),('source_integrity.json',{'source_files':{},'model_compatibility':{
                                   'vendor_model':{'sha256':'a'*64},'source_model':{},'texture_model':{}},
                                   'source_capture':{'source_hashes':{'assets/mappo/manifest.json':'b'*64}}})]:
                 module.write_json(out/name,data)

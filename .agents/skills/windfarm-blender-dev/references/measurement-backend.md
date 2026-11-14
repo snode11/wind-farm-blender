@@ -17,11 +17,12 @@
 
 - X100 独立于理想激光、双束净空及训练 Bridge。`x100-frame.v1` 保留传感器／会话／流／序号、`source_kind` 和时钟域；文件回放不改变原始来源，几何仿真不作为实测。仓库 `simulation.simulate_detections()` 与 `detection` 提供 `ENGINEERING_SIMULATION / DETECTIONS`，默认 UNCALIBRATED；工作区 `wfrl_x100_observation_mode` 默认GEOMETRY调用 `simulation.simulate()`，显式应用DETECTIONS调用 `simulate_detections()`；工程帧无material_ids，界面显示模式、标定、检测数、虚警数及可选模型SNR。参考面积积分预算与最多4096输出点独立，模型v2使用77 GHz、效率各0.7的归一化方向图增益、kT0·B·NF噪声和假设锚点反推的43.1 dB处理增益；0.2 m／1°／2°／0.1 m/s四维聚类及高斯误差均保留来源／假设。手册未给参考RCS与Pd标定指标；厂家mag／rcs／snr仍未知，模型量只作独立诊断和显示。当前构建清单包含 `detection.py` 与 `clearance.py`，安装验证入口覆盖检测模式与净空，实际载荷结论独立核对；假设与参数按[工程模型](../../../../wfrl/radar_x100/README.md#工程检测模型)核对。
 - 工作区入口为独立侧栏 **N → X100**，通过 `panels/home.py` 的 `busy_reason` 共用相机与录制占用判断；公开包和日常安装的入口按各自载荷识别，不由源码推定。
-- 几何仿真要求所属场景已加载同源 FarmFlex；`SceneSampler.sample(t)` 只读保存运动，不推进场景或播放器。30 Hz 是声明的源采样网格，不保证 UI 记录覆盖完整网格或持续 30 Hz 绘制；完整网格导出按[几何观测入口](../../../../wfrl/radar_x100/README.md#几何观测)使用独立进程和新输出。安装或来源不匹配时撤回点云并保留用户修改，不运行求解或训练。
+- 几何仿真要求所属场景已加载同源 FarmFlex；`SceneSampler.sample(t)` 只读保存运动，不推进场景或播放器。扩展仿真按 33 Hz 源网格取样，离线覆盖研究显式枚举 30 Hz 网格。UI 记录与绘制按实际消费帧核对；完整网格导出按[几何观测入口](../../../../wfrl/radar_x100/README.md#几何观测)使用独立进程和新输出。安装或来源不匹配时撤回点云并保留用户修改，不运行求解或训练。
 
-- 同一台几何雷达的原安装位／机舱侧面／T1 Down 相机位（`DOWN_CAMERA`，取相机位姿与矩形视场）／尾部吊物口（`REAR_HATCH`，`scene.rear_hatch_installation()`，视轴对准 6 点钟叶尖）通过 `runtime.apply_mount_preset()` 切换，保留场景时刻；已应用视场 `wfrl_x100_field_of_view` 属于待应用配置；记录、相机采集与共享安装按其互斥约束拒绝切换。安装对象及父级不支持约束、动画或非对象父级关系，失效时撤回观测，不覆盖原生编辑。
+- 同一台几何雷达的原安装位／机舱侧面／T1 Down 相机位（`DOWN_CAMERA`，取相机位姿、半角与 `PROJECTIVE` 视场形状）／尾部吊物口（`REAR_HATCH`，`scene.rear_hatch_installation()`，视轴对准 6 点钟叶尖）通过 `runtime.apply_mount_preset()` 切换，保留场景时刻；已应用视场 `wfrl_x100_field_of_view` 与视场形状 `wfrl_x100_field_of_view_shape` 属于待应用配置；记录、相机采集与共享安装按其互斥约束拒绝切换。安装对象及父级不支持约束、动画或非对象父级关系，失效时撤回观测，不覆盖原生编辑。
 - `SceneSampler.material_sample(t, triangle_ids, barycentric=...)` 为面积材料差分只采样输出点，当前完整几何用于遮挡；静态拓扑与同刻遮挡树按绑定复用，来源和材料校验保持。性能结论须保留相同输入、点数组、材料身份与速度的对照；CPU 更新耗时不能换算成未经测量的播放 FPS。
 - PLY 单帧不含连续时间、速度或航迹身份；序列按[显式索引合同](../../../../wfrl/radar_x100/README.md#ply-与显式索引)导入，不按文件名补时间或补帧。`FPS_DERIVED` 不代表硬件同步；未确认的实测坐标保留 `VENDOR_RAW / UNALIGNED`，不绑定不相关的 MAPPO 动画。
+- 已应用回放路径与草稿独立保存。单帧 PLY 和记录目录的 `//` 读取以当前 `.blend` 所在目录为基准，已保存的绝对路径仍指向原位置。
 - 工作区的单帧 PLY 要求显式 `source_kind`，`source_declaration=EXPLICIT` 仅表示调用方声明；路径改变会清除界面声明，路径或声明变更后须重新应用配置。完整记录保留文件内来源。几何采样同时校验机舱静态网格、变换及归属，编辑或驱动导致绑定失效时撤回观测；使用修改后的静态外壳须重新绑定，不自动烘焙驱动。
 - 新记录目录必须不存在，至少写入一帧且成功关闭才完整；零帧失败，合法零点帧仍是有效观测。关闭期间记录器为 `FINALIZING`，最终清单写入并删除 `INCOMPLETE` 后才为 `COMPLETE`；场景与面板在写盘线程退出前显示 `FINALIZING`。记录追加或关闭异常、预算或队列失败均使记录进入 `FAILED`，保留错误及 `INCOMPLETE`，不能作为完整回放。正常关闭排空已接受的记录；失败后释放待处理项，不补认成功。显示提交保存帧快照，写盘前重新校验元数据；显示最新槽与记录队列分开，迟到前帧可进入记录但不替换较新显示，Blender 最新帧不作为完整采集记录。
 - 分片在达到超时边界时即失效；组帧时间须有限，队列容量须为范围内整数。帧必须声明支持的 schema；本地通道拒绝重复 JSON 键、非有限元数据及错误的身份／字段类型，断连残包报截断。PLY 头含 `end_header` 行在内不得超过16384字节，点布局与载荷长度须匹配。发布重试重发完整帧并保留原到达年龄，关闭须中断阻塞发送并确认线程退出。
@@ -45,9 +46,11 @@
 
 ### 安装搜索与叶片观测研究
 
-- 工作区 `sampling.py` 以参考表面积和随机平移 Halton 序列固定材料坐标，算法身份为 `shifted-halton.v1`；计划身份、算法、三角面及点索引进入来源信息，面积模式小预算保持大预算前缀。面积采样、安装搜索与叶片估计由 0.3.42.8 扩展及配套源码提供，日常安装按归档摘要独立核对，验证范围见[安装记录](../../../../publication/daily-installation.json)。
+- 安装搜索将每个完成的候选原子写入任务目录的独立 JSON，在内存中保留排序字段，按排名逐候选读取检查点并写出完整证据。失败或中断保留候选与元数据。Blender 接受 16 MiB 以内的完整报告或摘要，已有兼容完整报告可用 `scripts/radar_x100/extract_mount_summary.py` 提取。[搜索与摘要提取](../../../../docs/blender/X100观测研究.md#安装覆盖搜索)
+
+- 工作区 `sampling.py` 以参考表面积和随机平移 Halton 序列固定材料坐标，算法身份为 `shifted-halton.v1`；计划身份、算法、三角面及点索引进入来源信息，面积模式小预算保持大预算前缀。扩展包含面积采样、报告导入与叶片估计。离线安装搜索使用配套源码，载荷及验证范围见[发布状态](../../../../docs/blender/发布状态与验证范围.md)。
 - 面积计划包含 `area_weights_m2`，`sampling_plan_id` 同时绑定参考面积度量与权重摘要；坐标前缀相同不表示权重和计划身份相同。工程检测不携带一一材料点身份。
-- `scripts/radar_x100/optimize_mount.py` 输出v2报告，机械／运动研究通过后，以完整叶片经过的末段ROI检测、最长连续漏检、精确正下方支持和塔距误差为主排序，几何覆盖仅作辅助。排序和导入共用指标校验：缺失、非有限、越界或未知检测指标不计分；候选ID须唯一，来源、几何、位姿及筛选范围不符时拒绝并指明字段。闭合网格包含判定包含边界点，开放或绕序不一致的网格拒绝；未知运动净空不算通过。仅筛选前若干经过不提供可应用winner。ROI可能包含塔架返回，支持率不是叶片识别率。默认GEOMETRY，连续检测支持未建立时不推荐DETECTIONS；当前有限候选指标与未纳入Git的v2本地证据见[安装研究](../../../../docs/blender/X100观测研究.md#当前最佳候选与本地证据)。v1几何报告不支持检测排名，PASS_RESEARCH不等于实体安装批准。
+- `scripts/radar_x100/optimize_mount.py` 输出v2报告，机械／运动研究通过后，以完整叶片经过的末段ROI检测、最长连续漏检、精确正下方支持和塔距误差为主排序，几何覆盖仅作辅助。排序和导入共用指标校验：缺失、非有限、越界或未知检测指标不计分；候选ID须唯一，来源、几何、位姿及筛选范围不符时拒绝并指明字段。导入还要求当前安装包络和机械筛选策略，缺失或不符时须重跑搜索。闭合网格包含判定包含边界点，开放或绕序不一致的网格拒绝；未知运动净空不算通过。仅筛选前若干经过不提供可应用winner。ROI可能包含塔架返回，支持率不是叶片识别率。默认GEOMETRY，连续检测支持未建立时不推荐DETECTIONS。v1几何报告不支持检测排名，PASS_RESEARCH不等于实体安装批准。[有限候选比较与本地证据](../../../../docs/blender/X100观测研究.md#有限候选比较与本地证据)
 - `tracking.py` 只消费观测、同帧塔面和声明的根部姿态／名义叶尖径向坐标；Blender 先验以轮毂为原点、末端局部Z取 `TipRad`。目标走廊关联、背景排除、分段中位数和稳健二次拟合只影响派生结果，不修改原点云或侧壁诊断；禁止消费材料标签或变形叶尖。局部因果平滑不引入旋转滞后，缺测、换源、后退和长间隔不输出旧估计。 连续有效估计次数按配置的最大间隔计算，源网格的覆盖率由离线研究独立计算。工作区对合法暂停帧的 GPU 叠加重建和同帧临时估计异常限频重试。
 - DETECTIONS 使用 `clearance.ClearanceTracker.update()` 的因果净空估计，另需径向速度、位置误差模型和未加载叶片形状先验；有诊断时仅消费观测总功率／噪声比，不消费纯信号功率、虚警真值或材料标签。退化拟合、无效塔面查询及过大不确定度不出数；DETECTIONS 的派生显示可另存逐帧 sidecar，回放核对摘要后显示，不用当前场景重新推理。
 - 离线 `clearance.track_clearance_passage()` 在每片叶片的同一经过内运行局部 Kalman／RTS 平滑；保留受支持的单帧值，缺测结果统一标“跟踪外推”／`TRACKING_EXTRAPOLATED`，包括使用未来锚点的插值。默认局部窗0.20 s、至少3个锚点，距最近锚点超过0.20 s或净空标准差超过0.45 m时不出数；时间后退／重复或间隔超过0.12 s时分段。该离线入口不改变前端因果更新，也不构成新观测或实机置信度。
@@ -65,7 +68,9 @@
 
 ## 单位、时间与有效性
 
-- 快照与曲线按规范协议校验 `rotor_speed=rpm`、`yaw=deg`、`pitch=deg`、`power=MW`，无效记录也须带正确单位；不静默改标签。
+- 快照与曲线按规范协议校验 `rotor_speed=rpm`、`yaw/yaw_command/yaw_measured=deg`、`pitch=deg`、`power=MW`、逐叶片 `m_flap_1..3/m_edge_1..3=N m`，无效记录也须带正确单位；不静默改标签。物理姿态使用偏航反馈，指令独立显示，缺测不互相填补。
+- FAST.Farm 帧时间按实际 MPI 交换序号与 `DT_Low` 重建并保留来源；控制相对时间单列，回合原点独立。通道时间保留 ServoDyn 上一步输出的偏移，曲线与导出使用对应采样时间；最新状态流与高频完整记录分开验收。
+- 工作区原生转速、叶尖与额外载荷由 `wfrl/solver_outputs.py` 读取当前求解文件，保留独立采样时刻、原通道／单位／坐标与节点号。单位为 rpm／m／N／N m，缺测不反算或补零；塔底载荷不证明塔架柔性、叶根扭矩不证明弹性扭转。LIVE TELEMETRY 搜索选择组图和单通道；验证按原始输出→Driver→协议→曲线／导出逐值对齐，同时检查文件延迟、无效值、重启归属与可见搜索。
 - DisXY 按源年龄加本地单调时钟判定过期，非有效、断开、换 run／身份／模式时撤回旧图；显式不匹配当前 `run_id` 的尾流被忽略，无 run 标识的兼容消息不能据此区分旧运行。
 - 失效隐藏保留渲染及各 View Layer 的用户隐藏状态；过期期间显式 DisXY 开关决定恢复后的显示选择，其他图层开关不得覆盖它。
 - DisXY `shape` 各维须为正整数（接受整数值浮点数），小数、字符串与布尔值拒绝而不截断，由 `test_wake_payload.py` 覆盖。
@@ -96,7 +101,7 @@
 
 ## FAST.Farm 风况
 
-仓库 `wfrl/fastfarm_driver.py` 与 `wfcrl-env/wfcrl/interface.py` 保存请求、实际输入和采样统计三层 `wind_conditions`。270°为固定坐标匹配，不作旋转；BTS拒绝标量风速，其他未支持请求到达接口时抛 `WindRequestError`。BTS时长不足只记录警告，场内独立入流统计为 unavailable。`upstream_request.scene` 保留显示方向（display_only）及BTS覆盖的场景风速，与实际求解 `requested` 分开；训练 `--wind-direction` 经配置、调度、采样器及场景入口完整传到底层，成功与拒绝都保存上层上下文。具体见[风况合同](../../../../docs/training/FASTFarm风况.md)；不能把文件统计或受尾流影响的轮毂统计写成自由入流验证。
+仓库 `wfrl/fastfarm_driver.py` 与 `wfcrl-env/wfcrl/interface.py` 保存请求、实际输入和采样统计三层 `wind_conditions`。270°为固定坐标匹配，不作旋转；BTS拒绝标量风速，其他未支持请求到达接口时抛 `WindRequestError`。BTS时长不足只记录警告，场内独立入流统计为 unavailable。`upstream_request.scene` 保留场景方向（`wind_direction_role=case_generation`，生成算例时按布局旋转应用）及BTS覆盖的场景风速，与实际求解 `requested` 分开；训练 `--wind-direction` 经配置、调度、采样器及场景入口完整传到底层，成功与拒绝都保存上层上下文。具体见[风况合同](../../../../docs/training/FASTFarm风况.md)；不能把文件统计或受尾流影响的轮毂统计写成自由入流验证。
 
 Replay、Interactive 与 Formal Training 的环境、动作及验收分别按[训练合同](../../../../docs/training/MAPPO_SETUP.md)选择；Bridge 模拟或 socketpair 检查不证明真实训练、停止监管或控制收益。
 
@@ -111,9 +116,9 @@ Replay、Interactive 与 Formal Training 的环境、动作及验收分别按[�
 | 连接恢复与身份 | `test_connection_recovery.py`、`test_transport.py`、`test_ui_state.py`；仓库 `tests/blender_bridge/test_disconnect_progress.py`、`tests/blender_bridge/test_reconnect.py`、`tests/blender_bridge/test_main_signals.py` | 宿主覆盖等待接管、共享时限、序号和信号关闭；后台 `connection_recovery_regression.py` 核对真实 RNA／操作器确认及 socketpair 握手，不连接 TCP 服务、不运行后端，也不验证模态窗口布局。 |
 | 快照与曲线回合、单位合同 | `test_chart_snapshot_contract.py`、`test_charts.py`、`test_history_export.py`；仓库 `tests/blender_bridge/test_messages.py` | 使用实际 `SnapshotAdapter` 到 `ChartHistory` 的生产与消费合同，校验 rpm／deg／MW 且拒绝单位不符的有效或无效记录；不启动训练或验证控制效果。 |
 | 启动器与 MPI | `test_launcher.py`；仓库 `tests/blender_bridge/test_isolated_trainer.py` | MPI／FAST.Farm 须目标环境验证。 |
-| X100 数据、采集与场景生命周期 | 仓库 `tests/radar_x100/`：PLY、来源／时钟、组帧、记录完整性及本地通道 | 后台 `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py` 覆盖只读采样、材料子集／完整几何差分一致性、安装驱动、记录失败终态、场景删除、采集互斥、保存重开、撤销／重做及资源归属；双安装位另选 `radar_x100_mount_presets.py`，不证明 GPU 或设备通过。 |
+| X100 数据、采集与场景生命周期 | 仓库 `tests/radar_x100/`：PLY、来源／时钟、组帧、记录完整性及本地通道 | 后台 `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py` 覆盖只读采样、材料子集／完整几何差分一致性、安装驱动、记录失败终态、场景删除、采集互斥、保存重开、撤销／重做及资源归属；安装预设另选 `radar_x100_mount_presets.py`，不证明 GPU 或设备通过。 |
 | X100 原始 RGB 与相机隔离 | 按上文 X100 合同及相机专题选择受影响检查 | 窗口 `radar_x100_window.py` 核对辅助物更新前后真实 RGB 字节、状态、可见性、时钟、相机参数及实际采集作业；不证明持续 30 Hz、完整片段 FPS 或实机同步。模块、输出和完成条件见[验证入口](verification.md#执行环境与来源)。 |
 | X100 独立观察与窗口生命周期 | `test_radar_x100_display.py`、`test_radar_x100_recording_ownership.py`，检查投影、色标、布局约束与关闭归属 | 窗口 `radar_x100_output_window.py` 核对实际绘制、消费帧身份、导航隔离、换源／空帧／停止、原始 RGB 与场景归属；`radar_x100_output_lifecycle.py` 仅源码，核对保存重开、其他编辑器及卸载释放。宿主检查不代替 GPU 绘制。 |
-| X100工程检测与净空 | 仓库 `tests/radar_x100/test_detection_physics.py`、`test_detection.py`、`test_simulation_detection.py`、`test_clearance.py`、`test_clearance_edges.py`；宿主 `test_radar_x100_detections.py` | 后台 `radar_x100_detection_mode.py`、`radar_x100_clearance.py` 支持源码和指定安装模块，核对模式、记录回放及净空；安装模式须校验包内模块和数据来源，不证明GPU或设备精度。 |
+| X100工程检测与净空 | 仓库 `tests/radar_x100/test_calibration.py`（实测校准、视场半角与视场形状）、`test_detection_physics.py`、`test_detection.py`、`test_simulation_detection.py`、`test_clearance.py`、`test_clearance_edges.py`；宿主 `test_radar_x100_detections.py` | 后台 `radar_x100_detection_mode.py`、`radar_x100_clearance.py` 支持源码和指定安装模块，核对模式、记录回放及净空；安装模式须校验包内模块和数据来源，不证明GPU或设备精度。 |
 | X100 面积采样、安装搜索与叶片估计 | 仓库 `tests/radar_x100/` 的 `test_sampling.py`、`test_installation.py`、`test_tracking.py` | 后台 `radar_x100_observations.py` 核对来源绑定、未知报告拒绝、材料标签隔离及状态撤回；窗口 `radar_x100_estimation_window.py` 读回拟合线／模型叶尖像素，核对开关撤回、恢复和原始帧保留。脚本控制不代替外部输入或实机精度验证。 |
 | 理想激光／双束与便携包 | `test_dual_beam_builtin.py`；仓库 `tests/lidar/` 的 `test_replay.py`、`test_dual_beam_replay.py`、`test_dual_beam_portable.py` | 后台 `dual_beam_regression.py`、`clearance_replay_smoke.py`；窗口 `dual_beam_window.py`、`clearance_gui_acceptance.py`。 |

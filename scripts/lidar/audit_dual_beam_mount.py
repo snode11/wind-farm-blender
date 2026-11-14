@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 from wfrl.camera_video.data import SourceGeometry
 from wfrl.lidar.dual_beam import validate_calibration
 from wfrl.lidar.dual_beam_replay import digest
+from scripts.lidar._atomic_output import write_text
 
 
 def closest_points_on_triangles(point, triangles):
@@ -245,7 +246,7 @@ def _audit_locations(source, locations, progress):
     for summary in summaries:
         summary['saved_pose_envelope_separation'] = (
             'intersects_or_inside' if summary['nonpositive_gap_checks'] else
-            'unresolved' if summary['containment_unresolved_checks'] else 'separated')
+            'unresolved' if not summary['blade_pose_checks'] or summary['containment_unresolved_checks'] else 'separated')
     return dict(turbine_id=source.turbine_id, source_samples=len(source.times),
                 source_triangle_count=len(source.blade_triangles), exterior_triangle_count=len(ext),
                 mounts=summaries)
@@ -300,10 +301,8 @@ def main():
                                'Mount selection and clearance do not establish laser hit coverage or reconstruction accuracy.'],
                   implementation_sha256=digest(Path(__file__)))
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    # Exclusive creation also protects against another process writing this path.
-    with args.output.open('x', encoding='utf-8') as stream:
-        json.dump(result, stream, ensure_ascii=False, allow_nan=False, indent=2)
-        stream.write('\n')
+    write_text(args.output, json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2)+'\n',
+               exclusive=True)
     print(args.output.resolve(), flush=True)
 
 

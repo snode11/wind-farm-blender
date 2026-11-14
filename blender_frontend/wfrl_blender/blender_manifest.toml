@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "wfrl_blender"
-version = "0.3.42+8"
+version = "0.5.1"
 name = "WFRL Blender"
 tagline = "Wind farm reinforcement-learning visualization workspace"
 maintainer = "WFRL"
@@ -12,4 +12,4 @@ tags = ["3D View", "Animation", "Scene"]
 
 [permissions]
 network = "Connect to WFRL Bridge, local radar acquisition and camera RTSP"
-files = "Read simulation, radar PLY/recordings and video; write radar recordings and MP4"
+files = "Read simulation, radar and video; save data and media exports"

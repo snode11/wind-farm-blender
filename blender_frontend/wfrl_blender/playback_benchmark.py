@@ -8,6 +8,15 @@ from itertools import combinations
 from math import isfinite
 
 
+def _frame(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError('frame must be an integer')
+    frame = int(value)
+    if frame != value:
+        raise ValueError('frame must be an integer')
+    return frame
+
+
 @dataclass(frozen=True)
 class PlaybackTarget:
     start_frame: int
@@ -18,11 +27,14 @@ class PlaybackTarget:
     stall_threshold_s: float = 0.5
 
     def __post_init__(self):
-        if self.end_frame <= self.start_frame or self.simulation_fps <= 0:
+        for value in (self.start_frame, self.end_frame, self.terminal_tolerance_frames):
+            _frame(value)
+        if (not isfinite(self.simulation_fps) or self.end_frame <= self.start_frame
+                or self.simulation_fps <= 0):
             raise ValueError('target must have a positive interval and simulation FPS')
         if not 0 <= self.terminal_tolerance_frames < self.end_frame - self.start_frame:
             raise ValueError('terminal tolerance must be smaller than the target interval')
-        if self.stall_threshold_s <= 0:
+        if not isfinite(self.stall_threshold_s) or self.stall_threshold_s <= 0:
             raise ValueError('stall threshold must be positive')
 
     def transition(self, previous, current):
@@ -60,13 +72,13 @@ def _rows(rows, label, started, ended, failures):
     result = []
     for row in rows:
         try:
-            timestamp, frame = float(row[0]), int(row[1])
+            timestamp, frame = float(row[0]), _frame(row[1])
             if not isfinite(timestamp) or timestamp < started or timestamp > ended:
                 raise ValueError('timestamp outside observation interval')
             if result and timestamp < result[-1][0]:
                 raise ValueError('timestamps are not ordered')
             result.append((timestamp, frame))
-        except (ValueError, TypeError, IndexError, OverflowError) as exc:
+        except (ValueError, TypeError, IndexError, KeyError, OverflowError) as exc:
             failures.append(f'{label}: invalid observation ({exc})')
     return result
 
@@ -124,9 +136,13 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
     if completed:
         if termination.get('playback_running') is not True or termination.get('driver_seek') is not False:
             failures.append('termination: not a verified playback transition (seek/stop state)')
-        previous = termination.get('previous_frame')
-        frame = termination.get('frame')
-        if previous is None or frame is None or target.transition(previous, frame) != reason:
+        try:
+            previous = _frame(termination.get('previous_frame'))
+            frame = _frame(termination.get('frame'))
+            boundary_valid = target.transition(previous, frame) == reason
+        except (ValueError, TypeError, OverflowError):
+            boundary_valid = False
+        if not boundary_valid:
             failures.append('termination: boundary evidence is invalid')
         elif not any(a[1] == previous and b[1] == frame for a, b in zip(rows, rows[1:])):
             failures.append('termination: boundary transition not observed in scene sequence')
@@ -149,7 +165,7 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
                 activation = starts[slot]
                 route_start = float(activation['wall_s'])
                 raw_frame = activation['frame']
-                start_frame = int(raw_frame)
+                start_frame = _frame(raw_frame)
                 if (not isfinite(route_start) or not started <= route_start < ended
                         or start_frame != raw_frame
                         or not target.start_frame <= start_frame < target.end_frame):
@@ -185,7 +201,7 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
             failures.append(f'C{slot}: no drawing progression')
         if not terminal:
             failures.append(f'C{slot}: missing terminal drawing evidence')
-        if slot not in states or states[slot].get('valid') is not True:
+        if not isinstance(states.get(slot), dict) or states[slot].get('valid') is not True:
             failures.append(f'C{slot}: invalid or unverified final route state')
         # Include the trailing silent interval even if the last frame was early.
         heartbeat_age = ended-values[-1][0] if values else total

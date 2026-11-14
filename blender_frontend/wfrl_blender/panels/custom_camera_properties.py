@@ -10,6 +10,7 @@ def _parameters(wm):
 
 
 def sync_fields(wm, camera):
+    syncing = _panel._SYNCING
     _panel._SYNCING = True
     try:
         p = _panel.core.parameters(camera)
@@ -28,7 +29,18 @@ def sync_fields(wm, camera):
         if anchor:
             wm.wfrl_custom_distance = anchor.distance
     finally:
-        _panel._SYNCING = False
+        _panel._SYNCING = syncing
+
+
+def _redraw_fields(op):
+    try:
+        _panel._redraw_if_changed(op)
+    except ReferenceError as exc:
+        op.ready, op.error = False, str(exc)
+        try:
+            op.area.tag_redraw()
+        except (ReferenceError, RuntimeError) as redraw:
+            op.error += '；视口刷新失败：' + str(redraw)
 
 
 def fields_changed(wm, context):
@@ -42,9 +54,9 @@ def fields_changed(wm, context):
             op.ready = False
             op.error = ''
             return
-        op.camera['custom_label'] = wm.wfrl_custom_label
         if wm.wfrl_custom_mount_mode == 'RESEARCH':
             _panel.core.apply_research(op.scene, op.camera, params, wm.wfrl_custom_research_confirmed)
+            op.camera['custom_label'] = wm.wfrl_custom_label
             op.ready, op.error = True, ''
             return
         old = _panel.core.parameters(op.camera)
@@ -62,10 +74,11 @@ def fields_changed(wm, context):
             _panel.core.apply_parameters(op.camera, params)
         op.ready = _panel.core.anchor(op.camera) is not None
         op.error = '' if op.ready else '请先点击机舱外壳选择有效安装位置'
-    except (ValueError, RuntimeError) as exc:
+        op.camera['custom_label'] = wm.wfrl_custom_label
+    except (ValueError, RuntimeError, ReferenceError) as exc:
         op.ready, op.error = False, str(exc)
     finally:
-        _panel._redraw_if_changed(op)
+        _redraw_fields(op)
 
 
 def distance_changed(wm, context):
@@ -75,10 +88,10 @@ def distance_changed(wm, context):
         _panel.core.set_distance(_panel._ACTIVE.camera, wm.wfrl_custom_distance)
         _panel.sync_fields(wm, _panel._ACTIVE.camera)
         _panel._ACTIVE.ready, _panel._ACTIVE.error = True, ''
-    except (ValueError, RuntimeError) as exc:
+    except (ValueError, RuntimeError, ReferenceError) as exc:
         _panel._ACTIVE.ready, _panel._ACTIVE.error = False, str(exc)
     finally:
-        _panel._redraw_if_changed(_panel._ACTIVE)
+        _redraw_fields(_panel._ACTIVE)
 
 
 def register_properties():
@@ -118,27 +131,38 @@ def register_properties():
 
 def unregister_properties():
     from . import stacked_camera_rig as box_panel
-    box_panel.unregister_settings()
     from .. import native_camera_views
-    native_camera_views.unregister()
-    if _panel.bpy.app.timers.is_registered(_panel.migrate_loaded):
-        _panel.bpy.app.timers.unregister(_panel.migrate_loaded)
-    if _panel.bpy.app.timers.is_registered(_panel.lifecycle_watchdog):
-        _panel.bpy.app.timers.unregister(_panel.lifecycle_watchdog)
-    if _panel._ACTIVE:
-        _panel._ACTIVE.finish(restore=True,resume=True)
-    if _panel.cancel_on_load in _panel.bpy.app.handlers.load_pre:
-        _panel.bpy.app.handlers.load_pre.remove(_panel.cancel_on_load)
-    if _panel.migrate_loaded in _panel.bpy.app.handlers.load_post:
-        _panel.bpy.app.handlers.load_post.remove(_panel.migrate_loaded)
     from .. import custom_camera_capture
-    custom_camera_capture.shutdown()
-    _panel.preview.shutdown()
-    _panel.preview.unregister_change_handler()
     from .custom_camera_output import unregister_settings
-    unregister_settings()
-    _panel.history.HISTORY.clear()
-    _panel.core.cleanup_retired()
+
+    def remove_timer(callback):
+        if _panel.bpy.app.timers.is_registered(callback):
+            _panel.bpy.app.timers.unregister(callback)
+
+    def remove_handler(handlers, callback):
+        if callback in handlers:
+            handlers.remove(callback)
+
+    actions = [box_panel.unregister_settings, native_camera_views.unregister,
+               lambda: remove_timer(_panel.migrate_loaded),
+               lambda: remove_timer(_panel.lifecycle_watchdog)]
+    if _panel._ACTIVE:
+        controller = _panel._ACTIVE
+        actions.append(lambda: controller.finish(restore=True, resume=True))
+    actions.extend((
+        lambda: remove_handler(_panel.bpy.app.handlers.load_pre, _panel.cancel_on_load),
+        lambda: remove_handler(_panel.bpy.app.handlers.load_post, _panel.migrate_loaded),
+        custom_camera_capture.shutdown, _panel.preview.shutdown,
+        _panel.preview.unregister_change_handler, unregister_settings,
+        _panel.history.HISTORY.clear, _panel.core.cleanup_retired))
+    errors = []
+    for action in actions:
+        try:
+            action()
+        except Exception as exc:
+            errors.append(str(exc))
+    if errors:
+        raise RuntimeError('相机资源清理失败：' + '；'.join(errors))
     for key in (*_panel._FIELDS,'engineering','slot','linked_zoom','has_focal','show_axis','show_frustum','research_confirmed','label','mount_mode','long_edge'):
         name='wfrl_custom_'+key
         if hasattr(_panel.bpy.types.WindowManager,name):delattr(_panel.bpy.types.WindowManager,name)

@@ -92,6 +92,24 @@ def height(x, y):
 
 
 def terrain_shader(material, *, image_loader=None):
+    """Load both texture images before replacing the material's node graph."""
+    import bpy
+    from pathlib import Path
+    from .scene_builder import _build_transaction
+
+    asset = Path(__file__).parent / 'assets' / 'landscape'
+    images = {}
+    with _build_transaction():
+        for suffix in ('diff', 'rough'):
+            path = asset / ('rocky_terrain_02_' + suffix + '_2k.jpg')
+            try:
+                image = (image_loader(path) if image_loader else
+                         bpy.data.images.load(str(path), check_existing=True))
+                if image is None or len(image.size) != 2 or min(image.size) <= 0:
+                    raise ValueError('Image has no decoded pixels')
+            except Exception as error:
+                raise RuntimeError(f'Cannot load landscape texture {path}: {error}') from error
+            images[suffix] = image
     nodes, links = material.node_tree.nodes, material.node_tree.links
     nodes.clear()
     out = nodes.new('ShaderNodeOutputMaterial')
@@ -130,18 +148,13 @@ def terrain_shader(material, *, image_loader=None):
     links.new(ramp.outputs['Color'], mix.inputs[1])
     links.new(fine.outputs['Fac'], mix.inputs[2])
     # Photographic color and roughness, tiled in meters with macro variation.
-    import bpy
-    from pathlib import Path
-    asset = Path(__file__).parent / 'assets' / 'landscape'
     mapping = nodes.new('ShaderNodeVectorMath')
     mapping.operation = 'SCALE'
     mapping.inputs[3].default_value = 1 / 38
     links.new(coord.outputs['Object'],mapping.inputs[0])
     def image_node(suffix, noncolor=False):
         tex = nodes.new('ShaderNodeTexImage')
-        path = asset / ('rocky_terrain_02_' + suffix + '_2k.jpg')
-        tex.image = (image_loader(path) if image_loader else
-                     bpy.data.images.load(str(path), check_existing=True))
+        tex.image = images[suffix]
         if noncolor:
             tex.image.colorspace_settings.name = 'Non-Color'
         tex.projection = 'BOX'
@@ -315,13 +328,14 @@ def _instance_collection(obj):
 def _remove_landscape_mesh(data, ownership):
     import bpy
     if (data.get(ownership) and data.users == 0 and not data.use_fake_user
-            and data.shape_keys is None):
+            and data.shape_keys is None and getattr(data, 'library', None) is None):
         bpy.data.meshes.remove(data)
 
 
 def _remove_landscape_prototype(obj):
     import bpy
-    if obj.get('wfrl_landscape_prototype') and obj.users == 0 and not obj.use_fake_user:
+    if (obj.get('wfrl_landscape_prototype') and obj.users == 0 and not obj.use_fake_user
+            and getattr(obj, 'library', None) is None):
         data = obj.data
         bpy.data.objects.remove(obj)
         _remove_landscape_mesh(data, 'wfrl_landscape_prototype')
@@ -341,11 +355,12 @@ def remove_landscape_instancer(obj):
     bpy.data.objects.remove(obj, do_unlink=True)
     _remove_landscape_mesh(data, 'wfrl_landscape_points')
     for group, prototypes in resources.values():
-        if group.users or group.use_fake_user:
+        if group.users or group.use_fake_user or getattr(group, 'library', None) is not None:
             continue
         bpy.data.node_groups.remove(group)
         if (prototypes is None or not prototypes.get('wfrl_landscape_prototypes')
-                or prototypes.users or prototypes.use_fake_user):
+                or prototypes.users or prototypes.use_fake_user
+                or getattr(prototypes, 'library', None) is not None):
             continue
         objects = list(prototypes.objects)
         bpy.data.collections.remove(prototypes)
@@ -802,25 +817,28 @@ def build_landscape(collection, *, detail='balanced'):
     """
     if detail not in ('balanced', 'full'):
         raise ValueError("Landscape detail must be 'balanced' or 'full'")
-    rng = random.Random(4207)
-    terrain = _build_terrain(collection, detail)
-    surface = _build_roads_and_pads(collection, terrain)
-    lush_centers = _cluster_centers(rng, surface, 24, prefer_low=True, min_separation=82)
-    dry_centers = _cluster_centers(rng, surface, 15, prefer_low=False, min_separation=105)
-    grass_materials = _build_ground_cover(collection, rng, surface, lush_centers, dry_centers)
-    _build_shrubs_and_rocks(collection, rng, surface, lush_centers, dry_centers)
-    _build_grass_tufts(collection, rng, surface, lush_centers, dry_centers, grass_materials, detail)
-    _build_distant_ground(collection, terrain, detail)
-    optimize_shrubs(collection)
-    return terrain
+    from .scene_builder import _build_transaction
+    with _build_transaction(collection):
+        rng = random.Random(4207)
+        terrain = _build_terrain(collection, detail)
+        surface = _build_roads_and_pads(collection, terrain)
+        lush_centers = _cluster_centers(rng, surface, 24, prefer_low=True, min_separation=82)
+        dry_centers = _cluster_centers(rng, surface, 15, prefer_low=False, min_separation=105)
+        grass_materials = _build_ground_cover(collection, rng, surface, lush_centers, dry_centers)
+        _build_shrubs_and_rocks(collection, rng, surface, lush_centers, dry_centers)
+        _build_grass_tufts(collection, rng, surface, lush_centers, dry_centers, grass_materials, detail)
+        _build_distant_ground(collection, terrain, detail)
+        optimize_shrubs(collection)
+        return terrain
 
 
 def _distant_shrub_mesh(collection, data):
     import bpy
     original = data.copy()
-    temp = bpy.data.objects.new('WFRL.ShrubReduction', original)
-    collection.objects.link(temp)
+    temp = None
     try:
+        temp = bpy.data.objects.new('WFRL.ShrubReduction', original)
+        collection.objects.link(temp)
         modifier = temp.modifiers.new('Distant leaf reduction', 'DECIMATE')
         modifier.ratio = .18
         graph = bpy.context.evaluated_depsgraph_get()
@@ -828,7 +846,8 @@ def _distant_shrub_mesh(collection, data):
         reduced.name = data.name + '.Distant'
         return reduced
     finally:
-        bpy.data.objects.remove(temp, do_unlink=True)
+        if temp is not None:
+            bpy.data.objects.remove(temp, do_unlink=True)
         if original.users == 0:
             bpy.data.meshes.remove(original)
 

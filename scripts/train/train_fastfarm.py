@@ -9,13 +9,18 @@ import os
 import copy
 import inspect
 import random
+import signal
+import threading
 
 import numpy as np
 import torch
 import torch.nn as nn
 
 from wfrl.mappo_central import Actor, Critic, RunningMeanStd
-from wfrl.policy_actions import PolicyActionContract, load_action_contract
+from wfrl.policy_actions import (
+    PolicyActionContract, duty_headroom, load_action_contract, load_obs_duty_limit,
+)
+from wfrl.safety import control_duty_limit
 from wfrl.rewards import CHOICES as REWARD_CHOICES, make_shaper
 
 from wfrl import paths, windcond
@@ -88,7 +93,9 @@ class FastFarmSampler:
                  obs_keys=OBS_KEYS, load_coef=1.0, reward_shaper=None,
                  wind_schedule=None, wind_time_series=None, purge=True,
                  obs_duty=False, duty_penalty=0.0, scene_path=None, progress=None,
-                 start_episode=0, upstream_request=None):
+                 start_episode=0, upstream_request=None, physics=None):
+        from wfrl.physics_options import validate_physics
+        self.physics = validate_physics({} if physics is None else physics)
         if scene_path is None and wind_time_series is not None and wind_schedule is not None:
             raise ValueError("BTS 来流由 wind_time_series 文件决定；请移除 wind_schedule，"
                              "BTS 模式不接受标量风速调度")
@@ -104,6 +111,7 @@ class FastFarmSampler:
         #  obs_duty     —— obs 追加"占空比余量"列，策略从此看得见自己还能发多大；
         #  duty_penalty —— 动作被占空比清零时按被吃掉的幅度给负奖励（λ 权重）。
         self.obs_duty = bool(obs_duty)
+        self.obs_duty_limit = None
         self.duty_penalty = float(duty_penalty)
         self.load_coef = float(load_coef)
         # 整形器**一个实例贯穿整个训练**：Centered 的 EMA 基线要跨回合保留，
@@ -140,15 +148,14 @@ class FastFarmSampler:
     def _pack(self, m):
         """driver 测量 dict -> (n, obs_dim) 本地观测矩阵。
 
-        obs_duty 开启时追加一列"占空比余量"：(0.1 − duty)/0.1 裁到 [0,1]，
-        1 = 还能自由发、0 = 再发就被清零。策略可从此列判断执行约束。
+        obs_duty 开启时按训练固定的 obs_duty_limit 追加占空比余量。
+        1 表示尚未占用，0 表示达到清零上限；不表示本步增量的限幅值。
         """
         cols = [np.asarray(m[k], dtype=np.float32) for k in self.obs_keys]
         if self.obs_duty:
             duty = np.asarray((m.get("duty") or {}).get(
                 "yaw", np.zeros(self.n)), np.float32).ravel()
-            headroom = np.clip((0.1 - duty) / 0.1, 0.0, 1.0).astype(np.float32)
-            cols.append(headroom)
+            cols.append(duty_headroom(duty, self.obs_duty_limit))
         return np.stack(cols, axis=1)                # (n, obs_dim)
 
     def _spawn(self):
@@ -158,6 +165,8 @@ class FastFarmSampler:
         reset_options = ({"upstream_request": self.upstream_request}
                          if self.upstream_request is not None else {})
         kw = {}
+        if self.physics:
+            kw['physics'] = self.physics
         if self.wind_time_series is not None:
             kw["wind_time_series"] = self.wind_time_series
         if self.scene_path is not None:
@@ -167,6 +176,8 @@ class FastFarmSampler:
             from wfrl.scene.schema import load_scene
             from wfrl.scene.runtime import SceneRuntime
             sc = load_scene(self.scene_path)
+            from wfrl.physics_options import apply_scene_physics
+            apply_scene_physics(sc, self.physics)
             self._rt = SceneRuntime(sc, max_steps=self.budget,
                                     warmup_steps=self.warmup,
                                     load_coef=self.load_coef,
@@ -186,6 +197,11 @@ class FastFarmSampler:
                  else self.drv.reset(wind_speed=ws, wind_direction=wd, **reset_options))
             for _ in range(self.warmup):             # 建立瞬态：空转、丢弃
                 m = self.drv.step(np.zeros(self.n))
+        if self.obs_duty:
+            limit = control_duty_limit(m, "yaw")
+            if self.obs_duty_limit is not None and self.obs_duty_limit != limit:
+                raise ValueError("obs_duty_limit must remain fixed across training episodes")
+            self.obs_duty_limit = limit
         self._m = m
         self._t = 0
         self.u_inf = self.drv.u_inf
@@ -271,6 +287,9 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
     bound = inspect.signature(train).bind(env_id, iters, n_steps, **kwargs)
     bound.apply_defaults()
     config = dict(bound.arguments)
+    from wfrl.physics_options import (validate_physics, PHYSICS_KEYS,
+                                    BLADE_TORSION_FIDELITY_KEY, BLADE_TORSION_DEFAULT_FIDELITY)
+    overrides = validate_physics({} if config['physics'] is None else config['physics'])
     for key in ("purge", "tag_extra", "save_interval", "resume_from", "training_progress", "run_id"):
         config.pop(key)
     speed = config.pop("wind_speed")
@@ -289,11 +308,50 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
         config["wind_sched"] = head + (":" + argument if argument else "")
     if config["scene"] is not None:
         from wfrl.scene.schema import load_scene
-        config["scene"] = load_scene(config["scene"]).to_dict()
+        from wfrl.physics_options import apply_scene_physics
+        config["scene"] = apply_scene_physics(load_scene(config["scene"]), overrides).to_dict()
         config["wind_sched"] = "scene"
     elif head == "preset" and windcond.PRESETS.get(argument, {}).get("turb") is not None:
         raise ValueError("BTS 预设不能通过 --wind-sched 加载；"
                          "请使用 --scene 并在场景的 inflow.turbulence 中指定 BTS 文件")
+    # The official UA parameter set is implicit in training identities.
+    if overrides.get('dynamic_stall_parameters') == 'official':
+        overrides.pop('dynamic_stall_parameters')
+    if config['scene'] is not None:
+        scene_physics = config['scene'].get('physics', {})
+        if scene_physics.get('dynamic_stall_parameters') == 'official':
+            scene_physics.pop('dynamic_stall_parameters')
+        if not any(scene_physics.values()):
+            config['scene'].pop('physics', None)
+    # The default BeamDyn profile is implicit in both direct and scene identities.
+    if overrides.get(BLADE_TORSION_FIDELITY_KEY) == BLADE_TORSION_DEFAULT_FIDELITY:
+        overrides.pop(BLADE_TORSION_FIDELITY_KEY)
+    if config['scene'] is not None:
+        scene_physics = config['scene'].get('physics', {})
+        if scene_physics.get(BLADE_TORSION_FIDELITY_KEY) == BLADE_TORSION_DEFAULT_FIDELITY:
+            scene_physics.pop(BLADE_TORSION_FIDELITY_KEY)
+        if not any(scene_physics.values()):
+            config['scene'].pop('physics', None)
+    config.pop('physics')
+    physics = overrides
+    if config['scene'] is not None:
+        physics = config['scene'].get('physics', {})
+    elif 'floris' in env_id.lower() and any(physics.values()):
+        raise ValueError('physics options require the FAST.Farm backend')
+    if any(physics.values()):
+        # The first three keys are always serialized, as in existing checkpoints;
+        # options added later appear only when enabled so old identities still match.
+        baseline = ('tower_flex', 'dynamic_stall', 'tower_shadow')
+        config['physics'] = {key: physics.get(key, False) for key in PHYSICS_KEYS
+                             if key in baseline or physics.get(key, False)}
+    if physics.get('dynamic_stall_parameters') == 'polar_consistent':
+        if not physics.get('dynamic_stall', False):
+            raise ValueError('polar_consistent requires dynamic_stall=True')
+        config['physics']['dynamic_stall_parameters'] = 'polar_consistent'
+    if BLADE_TORSION_FIDELITY_KEY in physics:
+        if not physics.get('blade_torsion', False):
+            raise ValueError('reference fidelity requires blade_torsion=True')
+        config['physics'][BLADE_TORSION_FIDELITY_KEY] = physics[BLADE_TORSION_FIDELITY_KEY]
     for key in ("iters", "n_steps", "n_epochs", "mb_steps"):
         if config[key] <= 0:
             raise ValueError(f"{key} must be positive")
@@ -359,6 +417,29 @@ def _training_components(obs_dim, act_dim, state_dim, recurrent, lr, checkpoint=
             restore_rng(saved_rng)
 
 
+class _TrainingCancellation:
+    """Signals request a stop at a complete update; cleanup restores prior handlers."""
+
+    def __init__(self):
+        self.requested = False
+        self.handlers = {}
+
+    def _request(self, signum, frame):
+        self.requested = True
+
+    def install(self):
+        if threading.current_thread() is threading.main_thread():
+            for name in ("SIGINT", "SIGBREAK"):
+                signum = getattr(signal, name, None)
+                if signum is not None:
+                    self.handlers[signum] = signal.getsignal(signum)
+                    signal.signal(signum, self._request)
+
+    def restore(self):
+        for signum, handler in self.handlers.items():
+            signal.signal(signum, handler)
+
+
 def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
           gamma=0.99, lam=0.95, clip=0.2, lr=3e-4, ent_coef=0.005,
           vf_coef=0.5, max_grad=0.5, recurrent=False, seed=0,
@@ -367,7 +448,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
           reward="level", reward_ref=None, reward_alpha=0.01,
           load_coef=1.0, policy="learn", purge=True, tag_extra="",
           obs_duty=False, duty_penalty=0.0, scene=None,
-          save_interval=0, resume_from=None, training_progress=None, run_id=None):
+          save_interval=0, resume_from=None, training_progress=None, run_id=None, physics=None):
     config = experiment_config(**{key: value for key, value in locals().items()})
     upstream_request = {"training": {
         "wind_speed": wind_speed, "wind_direction": wind_direction, "wind_sched": wind_sched,
@@ -381,6 +462,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
     if scene is not None:
         from wfrl.scene.schema import load_scene
         policy_scene = load_scene(scene)
+        from wfrl.physics_options import apply_scene_physics
+        apply_scene_physics(policy_scene, physics or {})
         if list(policy_scene.controls) != ["yaw"]:
             raise ValueError("train_fastfarm requires scene controls ['yaw']; use Studio for other controls")
     source_identity = source_input_identity(scene)
@@ -400,8 +483,11 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
         if not {"actor", "critic", "optimizer"} <= ckpt.keys():
             raise ValueError("resume requires a full training checkpoint with actor/critic/optimizer")
     components = None
+    counts = (0, 0)
     if ckpt is not None:
         recovery = validate_resume(ckpt, config, source_identity)
+        from wfrl.blender_bridge.training_progress import resume_counts
+        counts = resume_counts(ckpt)
         expected_obs_dim = len(OBS_KEYS) + int(obs_duty)
         if (ckpt["obs_dim"] != expected_obs_dim or ckpt.get("act_dim") != 1 or
                 ckpt.get("obs_keys") != OBS_KEYS or
@@ -419,19 +505,10 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
     tag = artifact_tag(run)
     progress = None
     if training_progress:
-        from wfrl.blender_bridge.training_progress import TrainingProgressWriter, resume_counts
+        from wfrl.blender_bridge.training_progress import TrainingProgressWriter
         import uuid
-        counts = (0, 0)
-        if resume_from:
-            checkpoint = ckpt
-            counts = resume_counts(checkpoint)
-            required = {'actor', 'critic', 'optimizer', 'obs_mean', 'obs_var'}
-            if not required <= checkpoint.keys():
-                raise ValueError('Observability resume requires a full training checkpoint')
-            if checkpoint['iteration'] >= iters:
-                raise ValueError('Observability resume requires remaining training iterations')
         progress = TrainingProgressWriter(training_progress, run_id or uuid.uuid4().hex, *counts)
-        progress.iteration = checkpoint['iteration'] + 1 if resume_from else 1
+        progress.iteration = ckpt['iteration'] + 1 if ckpt is not None else 1
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -446,8 +523,11 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
 
     smp = None
     sampler_closed = False
+    cancellation = _TrainingCancellation()
     try:
+        cancellation.install()
         smp = FastFarmSampler(env_id, episode_steps=episode_steps,
+                              physics=physics,
                               warmup_steps=warmup_steps,
                               total_steps=(iters - ckpt["iteration"]) * n_steps if ckpt else total_steps,
                               load_coef=load_coef, reward_shaper=shaper,
@@ -468,6 +548,12 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
             action_contract.validate_runtime(["yaw"], bounds)
         policy_metadata = {"controls": ["yaw"], "policy_source": "train_fastfarm",
                            "action_contract": action_contract.to_dict()}
+        if smp.obs_duty:
+            if ckpt is not None and load_obs_duty_limit(ckpt) != smp.obs_duty_limit:
+                raise ValueError(
+                    "resume obs_duty_limit must match the checkpoint: "
+                    f"checkpoint={load_obs_duty_limit(ckpt):g}, runtime={smp.obs_duty_limit:g}")
+            policy_metadata["obs_duty_limit"] = smp.obs_duty_limit
         if policy_scene is not None:
             policy_metadata["scene"] = policy_scene.to_dict()
 
@@ -537,7 +623,10 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                     **({"training_progress": {"step": progress.step, "agent_step": progress.agent_step}}
                        if progress is not None else {})}
 
+        completed_iteration = start_iter - 1
         for it in range(start_iter, iters + 1):
+            if cancellation.requested and completed_iteration >= start_iter:
+                break
             if progress is not None: progress.progress("sampling", it)
             B_obs = np.zeros((n_steps, n, smp.obs_dim), np.float32)
             B_act = np.zeros((n_steps, n, smp.act_dim), np.float32)
@@ -684,6 +773,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
             hist["pg"].append(mpg)
             hist["vloss"].append(mvl)
             hist["episodes"].append(int(np.count_nonzero(B_done)))
+            completed_iteration = it
             print(f"[{tag}] it {it}/{iters}  steps {global_step}  "
                   f"rew(1step) {B_rew.mean():+.4f}  raw {raw_mean:.3f}  "
                   f"farm_power {B_power.mean():.2f}MW  "
@@ -699,32 +789,42 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                 save_checkpoint_exclusive(checkpoint_payload(it), ckpt_path)
                 print(f"[{tag}] 定期保存 iter {it} -> {ckpt_path}", flush=True)
 
+            if cancellation.requested:
+                break
+
         hist["shaper_stats"] = smp.shaper.stats() if hasattr(smp.shaper, "stats") else {}
         hist["n_spawns"] = smp.n_spawns
         os.makedirs(CKPT_DIR, exist_ok=True)
         safe = env_id.replace("/", "_")
         model_path = os.path.abspath(os.path.join(CKPT_DIR, f"mappo_fastfarm_{safe}_{tag}.pt"))
-        run["status"] = "completed"
+        interrupted = cancellation.requested and completed_iteration < iters
+        run["status"] = "interrupted" if interrupted else "completed"
         run["checkpoint"] = model_path
-        payload = checkpoint_payload(iters)
+        payload = checkpoint_payload(completed_iteration)
         # Closing drains physics; recovery state belongs to the last training update.
+        if interrupted:
+            save_checkpoint_exclusive(payload, model_path)
         sampler_closed = True
         smp.close()
-        save_checkpoint_exclusive(payload, model_path)
+        if not interrupted:
+            save_checkpoint_exclusive(payload, model_path)
         print(f"[{tag}] saved -> {model_path}", flush=True)
 
         _dump_hist(hist, env_id, tag)
         _plot_curves(hist, env_id, tag)
         if progress is not None:
-            progress.progress("done", iters)
+            progress.progress("done", completed_iteration)
         return hist
     finally:
         try:
             if smp is not None and not sampler_closed:
                 smp.close()
         finally:
-            if progress is not None:
-                progress.close()
+            try:
+                if progress is not None:
+                    progress.close()
+            finally:
+                cancellation.restore()
 
 
 def _dump_hist(hist, env_id, tag):
@@ -774,6 +874,8 @@ DEFAULT_ENV = {"fastfarm": "Dec_Turb3_Row1_Fastfarm",
 
 def main():
     ap = argparse.ArgumentParser()
+    from wfrl.physics_options import add_physics_arguments, physics_arguments
+    add_physics_arguments(ap)
     ap.add_argument("--backend", default="fastfarm",
                     choices=["fastfarm", "floris"],
                     help="fastfarm=动态气弹(需 mpiexec)；floris=静态稳态(无需 MPI)")
@@ -789,8 +891,8 @@ def main():
                          "做后端/网络对照时**必须**给，否则比的是两次风况抽签"
                          "(功率 ~ u^3，实测单后端内部即可有 2.4x 跨度)")
     ap.add_argument("--wind-direction", type=float, default=None,
-                    help="请求求解器来流方向(°)，独立于场景显示方向。FAST.Farm 仅接受"
-                         "与固定坐标一致的 270°（模 360），不旋转；其他方向记录为未应用并拒绝")
+                    help="请求求解器来流方向(°，气象风向，270°=西风)。FAST.Farm 以平地布局绕场中心旋转实现，"
+                         "每个回合固定；运行中途改变风向会被拒绝。湍流盒须覆盖旋转后的布局")
 
     # ---- 回合结构 ----
     ap.add_argument("--episode-steps", type=int, default=128,
@@ -830,7 +932,7 @@ def main():
 
     # ---- 定期保存与恢复 ----
     ap.add_argument("--save-interval", type=int, default=0,
-                    help="每 N 轮保存一次 checkpoint（0=关闭，只在最后保存）")
+                    help="每 N 轮保存一次 checkpoint（0=关闭定期保存；结束或协作式中断仍保存）")
     ap.add_argument("--resume-from", type=str, default=None,
                     help="从完整 checkpoint 恢复软件状态，另起物理回合与 run；仅允许增加 iters")
 
@@ -847,6 +949,7 @@ def main():
     args = ap.parse_args()
     env_id = args.env or DEFAULT_ENV[args.backend]
     train(env_id, args.iters, args.n_steps,
+          physics=physics_arguments(args),
           scene=args.scene,
           recurrent=args.recurrent, seed=args.seed,
           wind_speed=args.wind_speed, wind_direction=args.wind_direction,

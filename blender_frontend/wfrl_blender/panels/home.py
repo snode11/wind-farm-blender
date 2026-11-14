@@ -23,7 +23,7 @@ def snapshot(context):
     if not ready and kind != 'manual' and saved_status not in {'', 'READY', 'REVIEW_ONLY'}:
         load_error = load_error or saved_status
     busy = busy_reason(scene)
-    manual_error = getattr(scene, 'wfrl_manual_error', '') if kind == 'manual' else ''
+    manual_error = scene.get('wfrl_manual_error', '') if kind == 'manual' else ''
     running = kind == 'manual' and any(
         (entry.running and entry.rpm > 0)
         or manual_control.pitch_ramping(entry)
@@ -43,7 +43,7 @@ def snapshot(context):
     for key, title in (('wfrl_history_export_status', '历史导出'),
                        ('wfrl_capture_status', '窗口录制')):
         detail = scene.get(key, '')
-        if detail.startswith('FAILED'):
+        if detail.startswith(('FAILED', 'Manifest write failed:')):
             issues.append((title, detail))
     return status, busy, [(title, str(detail)) for title, detail in issues if detail]
 

@@ -28,11 +28,9 @@ Monitoring:
 import argparse
 from copy import deepcopy
 import os
-from uuid import uuid4
 
 import numpy as np
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import check_for_correct_spaces
 from stable_baselines3.common.vec_env import (
@@ -44,10 +42,15 @@ from stable_baselines3.common.vec_env import (
 from wfcrl import environments as envs
 from wfrl.sb3_wrapper import WFCRLSB3Wrapper
 from wfrl.sb3_checkpoint import (
-    require_checkpoint_files, validate_model_normalization, validate_normalization,
+    validate_model_normalization, validate_normalization,
 )
 
 from wfrl import paths
+
+if __package__:
+    from .train_ppo import AtomicCheckpointCallback, CheckpointPair
+else:
+    from train_ppo import AtomicCheckpointCallback, CheckpointPair
 
 ENV_ID = "HornsRev2_Floris"
 LOG_DIR = os.path.join(paths.LOGS, "ppo_hr2")
@@ -55,6 +58,18 @@ CKPT_DIR = paths.CKPT
 MODEL_PATH = os.path.join(CKPT_DIR, "ppo_hornsrev2")
 VECNORM_PATH = os.path.join(CKPT_DIR, "vecnormalize_hr2.pkl")
 MAX_STEPS = 200  # steps per episode
+
+
+def _checkpoint_pair():
+    return CheckpointPair(MODEL_PATH, VECNORM_PATH)
+
+
+def _require_checkpoint_files():
+    return _checkpoint_pair().require()
+
+
+def save_checkpoint_pair(model, venv):
+    return _checkpoint_pair().save(model, venv)
 
 
 def make_single_env(max_steps: int = MAX_STEPS) -> Monitor:
@@ -75,6 +90,9 @@ def _env_factory(max_steps: int = MAX_STEPS):
 def _make_venv(n_envs, max_steps, *, training, norm_path=None, normalization=None):
     if n_envs < 1:
         raise ValueError("n_envs must be positive")
+    model_path = None
+    if norm_path is not None and os.path.abspath(norm_path) == os.path.abspath(VECNORM_PATH):
+        model_path, norm_path = _checkpoint_pair().resolve()
     if norm_path is not None and not os.path.isfile(norm_path):
         raise FileNotFoundError(f"Required normalization file is missing: {norm_path}")
     if n_envs > 1:
@@ -88,6 +106,7 @@ def _make_venv(n_envs, max_steps, *, training, norm_path=None, normalization=Non
         elif norm_path is not None:
             venv = VecNormalize.load(norm_path, base)
             venv._wfrl_normalization_path = os.path.abspath(norm_path)
+            venv._wfrl_model_path = os.path.abspath(model_path) if model_path is not None else None
         else:
             venv = VecNormalize(base, norm_obs=True, clip_obs=10.0, gamma=0.99)
         check_for_correct_spaces(base, venv.observation_space, venv.action_space)
@@ -114,11 +133,13 @@ def make_eval_venv(max_steps: int = MAX_STEPS, *, normalization=None) -> VecNorm
 
 def build_model(venv, resume: bool) -> PPO:
     if resume:
-        require_checkpoint_files(MODEL_PATH, VECNORM_PATH)
-        if venv.__dict__.get("_wfrl_normalization_path") != os.path.abspath(VECNORM_PATH):
+        model_path = venv.__dict__.get("_wfrl_model_path")
+        if model_path is None:
             raise ValueError("Restore VecNormalize before loading a HornsRev2 PPO checkpoint")
-        print(f"[train] resuming from {MODEL_PATH}.zip")
-        model = PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        if not os.path.isfile(model_path):
+            raise FileNotFoundError(f"Required checkpoint file is missing: {model_path}")
+        print(f"[train] resuming from {model_path}")
+        model = PPO.load(model_path, env=venv, tensorboard_log=LOG_DIR)
         validate_model_normalization(model, venv)
         return model
 
@@ -183,7 +204,7 @@ def main():
     args = parser.parse_args()
 
     if args.resume or args.eval_only:
-        require_checkpoint_files(MODEL_PATH, VECNORM_PATH)
+        _require_checkpoint_files()
     if args.eval_only:
         venv = make_eval_venv()
         try:
@@ -203,11 +224,10 @@ def main():
         evaluate(model, n_episodes=2, normalization=venv)
 
         # Each callback invocation advances every independent farm worker once.
-        ckpt_cb = CheckpointCallback(
+        ckpt_cb = AtomicCheckpointCallback(
             save_freq=max(50_000 // args.n_envs, 1),
             save_path=CKPT_DIR,
             name_prefix="ppo_hr2",
-            save_vecnormalize=True,
         )
 
         print(f"\n[train] --- training for {args.timesteps} timesteps "
@@ -215,11 +235,8 @@ def main():
         model.learn(total_timesteps=args.timesteps, callback=ckpt_cb,
                     progress_bar=args.progress_bar, reset_num_timesteps=not args.resume)
 
-        checkpoint_id = uuid4().hex
-        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = checkpoint_id
-        model.save(MODEL_PATH)
-        venv.save(VECNORM_PATH)
-        print(f"[train] saved model to {MODEL_PATH}.zip and stats to {VECNORM_PATH}")
+        model_path, norm_path = save_checkpoint_pair(model, venv)
+        print(f"[train] saved model to {model_path} and stats to {norm_path}")
     finally:
         venv.close()
 

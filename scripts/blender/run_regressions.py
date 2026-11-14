@@ -17,6 +17,10 @@ Examples::
 Saved scenes and reports stay under --output. Isolated profiles and temporary
 files stay under a unique --scratch-root child, listed in result.json for the
 caller to retain or clean. This runner does not build or install an extension.
+Unconfirmed process cleanup fails the invocation and stops further launches.
+Its cleanup.json records PID/create-time identities and the inherited run token
+for scripts.blender.run_regressions.retry_cleanup(path). Without recorded
+identities, retry is available only while this runner retains the handles.
 """
 from __future__ import annotations
 
@@ -25,9 +29,11 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
+import runpy
 import shutil
 import signal
 import subprocess
@@ -46,6 +52,8 @@ from wfrl.blender_bridge.formal_process import OwnedProcesses
 
 TEST_ROOT = ROOT / 'blender_frontend/tests/blender'
 ADDON_ROOT = ROOT / 'blender_frontend/wfrl_blender'
+write_json = runpy.run_path(str(ADDON_ROOT / 'atomic_json.py'))['write_json']
+_PENDING_CLEANUP = {}
 
 
 @dataclass(frozen=True)
@@ -85,7 +93,7 @@ REGRESSIONS = (
     Regression('nrel_editor_resource_regression.py', 'NREL_EDITOR_RESOURCE_PASS', 'checks.json',
                scope='Native helper deletion, normal editor detach and retryable resource cleanup.'),
     Regression('camera_export_contract_regression.py', 'CAMERA_EXPORT_CONTRACT_PASS', 'result.json',
-               scope='Down marker isolation, actual-camera publication gates, decoded video and excluded annotations.'),
+               scope='Down export ignores camera-bound markers and restores them; decoded frames; excluded annotations.'),
     Regression('model_environment_integration.py', 'MODEL_ENVIRONMENT_INTEGRATION_PASS', 'checks.json', timeout_s=300,
                scope='Model and World isolation across manual scenes, replay, export copies and native saved files.'),
     Regression('camera_failure_recovery_regression.py', 'CAMERA_FAILURE_RECOVERY_PASS', 'result.json',
@@ -390,17 +398,18 @@ REGRESSIONS = (
 )
 
 
-BOOTSTRAP = '''import json, os, runpy, sys, traceback
+BOOTSTRAP = '''import os, runpy, sys, traceback
 from pathlib import Path
 import bpy
 script, mode, destination, root = sys.argv[sys.argv.index('--') + 1:]
 sys.dont_write_bytecode = True
 sys.path[:0] = [str(Path(root) / 'blender_frontend'), root]
+write_json = runpy.run_path(str(Path(root) / 'blender_frontend/wfrl_blender/atomic_json.py'))['write_json']
 record = dict(status='RUNNING', final=False, script=script,
               background=bpy.app.background, blender=bpy.app.version_string,
               startup_dirty=bpy.data.is_dirty)
 def save():
-    Path(destination).write_text(json.dumps(record, indent=2) + '\\n', encoding='utf-8')
+    write_json(Path(destination), record)
 save()
 try:
     assert bpy.app.background == (mode == 'background'), 'Unexpected execution mode'
@@ -423,13 +432,21 @@ except BaseException:
 '''
 
 
-def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+def reject_json_constant(value):
+    raise ValueError(f'Invalid JSON constant: {value}')
+
+
+def finite_json_float(value):
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError(f'Non-finite JSON number: {value}')
+    return number
 
 
 def read_json(path):
     try:
-        value = json.loads(path.read_text(encoding='utf-8'))
+        value = json.loads(path.read_text(encoding='utf-8'), parse_constant=reject_json_constant,
+                           parse_float=finite_json_float)
         return value if isinstance(value, dict) else {'status': 'INVALID_JSON', 'error': 'Expected an object'}
     except (OSError, ValueError) as exc:
         return {'status': 'MISSING_OR_INVALID_JSON', 'error': str(exc)}
@@ -540,7 +557,7 @@ def evaluate(spec, phase, returncode, timed_out, execution, report, log, source_
     if source_changed:
         failures.append('Source changed during execution; rerun against a stable checkout')
     expected_execution = 'PASS' if spec.mode == 'background' else 'WAITING_FOR_CALLBACKS'
-    if (execution.get('status') != expected_execution or not execution.get('returned_normally')
+    if (execution.get('status') != expected_execution or execution.get('returned_normally') is not True
             or execution.get('background') is not (spec.mode == 'background')
             or (spec.mode == 'background' and execution.get('final') is not True)):
         failures.append('Bootstrap did not confirm the expected script execution')
@@ -580,19 +597,93 @@ def evaluate(spec, phase, returncode, timed_out, execution, report, log, source_
 
 
 def stop_process(process, owner, *, grace=8.):
-    """Reap the launcher only after all identified descendants have stopped."""
+    """Stop owned descendants and wait for the launcher; reject unconfirmed cleanup."""
+    errors = []
     for signum in (signal.SIGTERM, getattr(signal, 'SIGKILL', None)):
-        if signum is None:
-            process.kill()
+        try:
+            # Windows termination must rescan descendants on the force attempt too.
+            owner.signal(signal.SIGTERM if signum is None else signum)
+        except Exception as exc:
+            errors.append(str(exc) or type(exc).__name__)
+            try:
+                if process is not None and process.poll() is None:
+                    if signum == signal.SIGTERM:
+                        process.terminate()
+                    else:
+                        process.kill()
+            except Exception as fallback:
+                errors.append(str(fallback) or type(fallback).__name__)
+        if signum is None and process is not None:
+            try:
+                process.kill()
+            except ProcessLookupError:
+                pass
+            except Exception as exc:
+                errors.append(str(exc) or type(exc).__name__)
+        try:
+            deadline = time.monotonic() + grace
+            while owner.alive() and time.monotonic() < deadline:
+                time.sleep(.02)
+            if not owner.alive():
+                if process is not None:
+                    process.wait(timeout=grace)
+                return
+        except Exception as exc:
+            errors.append(str(exc) or type(exc).__name__)
+    try:
+        state = owner.status()
+    except Exception as exc:
+        state = 'UNKNOWN'
+        errors.append(str(exc) or type(exc).__name__)
+    detail = '; '.join(errors)
+    raise RuntimeError(f'Regression process cleanup unconfirmed: {state}' + (f'; {detail}' if detail else ''))
+
+
+class ProcessCleanupError(RuntimeError):
+    """The owned process tree remains live or could not be inspected."""
+
+
+def cleanup_process(process, owner, recovery_path):
+    """Retry with retained handles; persist PID/create-time ownership if still uncertain."""
+    recovery_path = Path(recovery_path).resolve()
+    _PENDING_CLEANUP[recovery_path] = (process, owner)
+    errors = []
+    for _ in range(2):
+        try:
+            stop_process(process, owner)
+        except Exception as exc:
+            errors.append(str(exc) or type(exc).__name__)
         else:
-            owner.signal(signum)
-        deadline = time.monotonic() + grace
-        while owner.alive() and time.monotonic() < deadline:
-            time.sleep(.02)
-        if not owner.alive():
-            process.wait(timeout=grace)
+            recovery_path.unlink(missing_ok=True)
+            _PENDING_CLEANUP.pop(recovery_path, None)
             return
-    raise RuntimeError('Regression process cleanup unconfirmed')
+    message = '; '.join(dict.fromkeys(errors))
+    try:
+        identities = owner.identities()
+        write_json(recovery_path, dict(status='UNCONFIRMED', error=message,
+                   identities=identities, token=owner.token, env_key=owner.ENV_KEY))
+    except Exception as exc:
+        raise ProcessCleanupError(f'{message}; cleanup handles retained, recovery record failed: {exc}') from exc
+    retry = 'retry with retry_cleanup(path)'
+    if not identities:
+        retry += ' in this runner only; no recorded identities for recovery after runner exit'
+    raise ProcessCleanupError(f'{message}; cleanup ownership: {recovery_path}; {retry}')
+
+
+def retry_cleanup(recovery_path):
+    """Retry a cleanup.json record using live handles or verified recorded identities."""
+    recovery_path = Path(recovery_path).resolve()
+    pending = _PENDING_CLEANUP.get(recovery_path)
+    if pending is None:
+        record = read_json(recovery_path)
+        owner = OwnedProcesses.recover(record.get('identities'), token=record.get('token'),
+                                       env_key=record.get('env_key'))
+        pending = (None, owner)
+    cleanup_process(*pending, recovery_path)
+
+
+def cleanup_pending(directory):
+    return any(path.is_relative_to(directory) for path in _PENDING_CLEANUP)
 
 
 def run_invocation(spec, phase, args, case, scratch, bootstrap):
@@ -616,35 +707,43 @@ def run_invocation(spec, phase, args, case, scratch, bootstrap):
     started = time.monotonic()
     timed_out, interrupted, launch_error = False, False, None
     returncode = None
+    cleanup_error = None
+    owner = OwnedProcesses(env_key='WFRL_REGRESSION_RUN_TOKEN')
+    process = None
     with (run / 'blender.log').open('w', encoding='utf-8') as log:
         try:
-            owner = OwnedProcesses(env_key='WFRL_REGRESSION_RUN_TOKEN')
             process = owner.start(command, cwd=ROOT, env=environment, stdout=log,
                                   stderr=subprocess.STDOUT)
             try:
                 returncode = process.wait(timeout=args.timeout or spec.timeout_s)
             except subprocess.TimeoutExpired:
                 timed_out = True
-                stop_process(process, owner)
-                returncode = process.returncode
             except KeyboardInterrupt:
                 interrupted = True
-                stop_process(process, owner)
-                returncode = process.returncode
-            if owner.alive():
-                stop_process(process, owner)
+            if not (timed_out or interrupted) and owner.alive():
                 launch_error = 'Regression left live descendants after its launcher exited'
-        except (OSError, RuntimeError) as exc:
-            launch_error = str(exc)
+        except Exception as exc:
+            launch_error = f'{type(exc).__name__}: {exc}'
+        except KeyboardInterrupt:
+            interrupted = True
+        finally:
+            process = process if process is not None else owner.process
+            if process is not None:
+                try:
+                    cleanup_process(process, owner, run / 'cleanup.json')
+                except ProcessCleanupError as exc:
+                    cleanup_error = str(exc)
+                returncode = process.returncode
     after = source_hashes(script)
     write_json(run / 'source-after.json', after)
     execution = read_json(execution_path)
     report = read_json(report_path) if report_path else None
     status, reasons = evaluate(spec, phase, returncode, timed_out, execution, report,
                                (run / 'blender.log').read_text(errors='replace', encoding='utf-8'), before != after)
-    if interrupted or launch_error:
+    if interrupted or launch_error or cleanup_error:
         status = 'FAIL'
-        reasons.append('Interrupted by caller' if interrupted else launch_error)
+        reasons.extend(message for message in ('Interrupted by caller' if interrupted else None,
+                                               launch_error, cleanup_error) if message)
     result = dict(status=status, phase=phase, reasons=reasons, returncode=returncode,
                   timed_out=timed_out, interrupted=interrupted, duration_s=time.monotonic() - started,
                   source_changed=before != after, execution=execution, script_result=report,
@@ -681,8 +780,10 @@ def main(argv=None):
     if args.list:
         print(json.dumps(dict(tests=[asdict(spec) for spec in selected], package_inputs=packages), indent=2))
         return 0
-    if args.output is None or (args.timeout is not None and args.timeout <= 0):
-        parser.error('--output is required and --timeout must be positive')
+    if args.output is None or (args.timeout is not None and (not math.isfinite(args.timeout) or args.timeout <= 0)):
+        parser.error('--output is required and --timeout must be finite and positive')
+    if args.output.expanduser().is_symlink():
+        parser.error('Output must be a new directory: ' + str(args.output))
     args.output = args.output.expanduser().resolve()
     args.blender = args.blender.expanduser().resolve()
     if not args.blender.is_file():
@@ -703,7 +804,7 @@ def main(argv=None):
         case = args.output / Path(spec.script).stem
         record = dict(script=spec.script, mode=spec.mode, scope=spec.scope, invocations=[])
         if stopped:
-            record.update(status='NOT_RUN', reason='Batch interrupted')
+            record.update(status='NOT_RUN', reason=stopped)
         elif args.mode != 'all' and args.mode != spec.mode:
             record.update(status='SKIP', reason='Excluded by explicit --mode ' + args.mode)
         elif spec.mode == 'visible' and sys.platform.startswith('linux') and not any(
@@ -718,7 +819,10 @@ def main(argv=None):
                 print(f'RUN {spec.script} [{spec.mode}/{phase}]', flush=True)
                 result = run_invocation(spec, phase, args, case, scratch / case.name / phase, bootstrap)
                 record['invocations'].append(result)
-                stopped = stopped or result['interrupted']
+                if cleanup_pending(args.output):
+                    stopped = 'Batch stopped after unconfirmed process cleanup'
+                elif result['interrupted']:
+                    stopped = 'Batch interrupted'
             record['status'] = aggregate([item['status'] for item in record['invocations']])
         summary['tests'].append(record)
         print(record['status'] + ' ' + spec.script, flush=True)

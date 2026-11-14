@@ -50,7 +50,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | `farm_flex_workload_regression.py`、`custom_camera_edit_binding_regression.py`、`nrel_defect_ui_state_regression.py` | 仅源码；安装模块变量不能改变验证层。 |
 | `live_contracts_regression.py` | 仅源码，直接导入工作区扩展；使用独立工厂启动后台进程，安装模块变量不能改变验证层。未纳入 `run_regressions.py`，按上文 `--python` 入口直接运行。 |
 | `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py`、`radar_x100_binding_replay.py`、`radar_x100_window.py` | `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；安装时另核对实际加载的 `radar_x100.core` 及规范数据模块路径。`radar_x100_regression.py` 的安装模式断言未导入工作区 `wfrl.radar_x100`，并核对 `radar_core_sha256`。 |
-| `radar_x100_mount_presets.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；后台核对单台雷达的双安装位、相同源时刻、重复选择、采样失败、记录／相机互斥及保存重开。 |
+| `radar_x100_mount_presets.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；后台核对单台雷达的四个安装预设、相同源时刻、重复选择、采样失败、记录／相机互斥及保存重开。 |
 | `radar_x100_output_window.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；核对独立点云窗口的实际绘制、消费帧与原始 RGB 隔离。 |
 | `radar_x100_output_lifecycle.py` | 仅源码，直接导入工作区扩展；必须指定 `WFRL_EXPECTED_ADDON_ROOT`，安装模块变量不能改变验证层。 |
 | `radar_x100_configuration.py` | 仅源码后台，必须指定 `WFRL_EXPECTED_ADDON_ROOT`；核对名义外壳／视场、真实 RNA、已应用配置与编辑差异、显示即时生效和下一新样本预算。 |

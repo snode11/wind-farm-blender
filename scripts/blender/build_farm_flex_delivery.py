@@ -1,12 +1,18 @@
-"""Build an isolated, movable Blender review bundle with matching runtime/data."""
+"""Verify matching runtime/data in staging and publish a complete, movable review directory."""
 from pathlib import Path
 import argparse
 import hashlib
 import json
 import shutil
+import tempfile
 from zipfile import ZipFile
 
-from scripts.blender.build_extension import build
+try:
+    from scripts.blender.build_extension import build
+    from scripts.blender.validate_frontend_package import verify_archive
+except ModuleNotFoundError:
+    from build_extension import build
+    from validate_frontend_package import verify_archive
 
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -14,13 +20,34 @@ ROOT=Path(__file__).resolve().parents[2]
 def bundle(package,destination):
     package,destination=Path(package),Path(destination)
     manifest=json.loads((package/'manifest.json').read_text(encoding='utf-8'))
-    if manifest.get('diagnostic_only') or not all(c['passed'] for c in manifest['controller_validation']):
+    validation = manifest.get('controller_validation')
+    if (manifest.get('diagnostic_only') or not isinstance(validation, list) or not validation
+            or not all(isinstance(c, dict) and c.get('passed') is True for c in validation)):
         raise ValueError('Cannot deliver a diagnostic or unaccepted controller package')
+    if destination.exists() or destination.is_symlink():
+        raise FileExistsError(f'Delivery destination already exists: {destination}')
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=f'.{destination.name}-', dir=destination.parent) as directory:
+        staged = Path(directory) / destination.name
+        _populate_bundle(package, staged, manifest)
+        if destination.exists() or destination.is_symlink():
+            raise FileExistsError(f'Delivery destination already exists: {destination}')
+        staged.rename(destination)
+    print(destination.resolve(),flush=True)
+
+
+def _populate_bundle(package, destination, manifest):
     destination.mkdir(parents=True,exist_ok=False)
     built=build(destination/'runtime-archive',farm_package=package)
+    verify_archive(built.archive, built.inventory)
     with ZipFile(built.archive) as archive:
         archive.extractall(destination/'blender_frontend/wfrl_blender')
-    shutil.copytree(package,destination/'data')
+        shutil.copytree(package,destination/'data')
+        if json.loads(archive.read('assets/mappo/manifest.json')) != manifest:
+            raise ValueError('Delivery data manifest changed during packaging')
+        for name in {'manifest.json', *manifest['files']}:
+            if (destination/'data'/name).read_bytes() != archive.read('assets/mappo/' + name):
+                raise ValueError('Delivery data differs from runtime: ' + name)
     launcher=destination/'scripts/blender/open_farm_flex.py'
     launcher.parent.mkdir(parents=True)
     shutil.copyfile(ROOT/'scripts/blender/open_farm_flex.py',launcher)
@@ -95,7 +122,6 @@ B2 估计沿用固定标定公式，未加入塔架弯曲补偿；7 m 是演示�
                for p in destination.rglob('*') if p.is_file()}
     (destination/'inventory.json').write_text(json.dumps(dict(status='REVIEW_ONLY',
         runtime_sha256=built.sha256,files=inventory),indent=2), encoding='utf-8')
-    print(destination.resolve(),flush=True)
 
 
 if __name__=='__main__':

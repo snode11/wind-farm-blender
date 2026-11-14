@@ -13,7 +13,7 @@
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -65,33 +65,55 @@ class SceneRuntime:
 
     # ---- 生命周期 --------------------------------------------------------
     def reset(self, *, wind_direction=None, upstream_request=None) -> Dict[str, Any]:
-        """场景风向仅用于显示；wind_direction 是独立的显式求解请求。"""
+        """确认旧 driver 关闭后重建传感器；失败时清理新 driver 并撤回读数。
+
+        场景风向在生成算例时以布局旋转应用（case_generation）；wind_direction 是回合重置时独立的显式求解请求。
+        """
         from wfrl.fastfarm_driver import FastFarmDriver
         if self.scene.backend != "fastfarm":
             raise NotImplementedError(
                 "SceneRuntime 目前只驱动 fastfarm 后端；floris 场景请走 viz.field")
-        self.close()
+        self.close(strict=True)
+        self.done = True
+        self._t = 0
+        self.u_inf = float("nan")
+        self.last_measure, self.last_ctx, self._last_frame = {}, {}, {}
+        self.sensors = registry.build(self.scene)
+        self.enabled = {topic: self.enabled.get(topic, True)
+                        for sensor in self.sensors for topic in sensor.topics}
         # driver 走 env_id 那条老路会绕回预注册布局表，所以把场景生成的 case
         # 直接注入 —— 场景层的意义正在于此。
         self.driver = FastFarmDriver.__new__(FastFarmDriver)
-        self._build_driver()
-        upstream_request = dict(upstream_request or {})
-        upstream_request["scene"] = {
-            "wind_speed": self.scene.wind_speed,
-            "wind_direction": self.scene.wind_direction,
-            "wind_time_series": self.scene.turbulence,
-            "wind_speed_role": "overridden_by_bts" if self.scene.turbulence else "solver_request",
-            "wind_direction_role": "display_only",
-        }
-        m = self.driver.reset(
-            wind_speed=None if self.scene.turbulence else self.scene.wind_speed,
-            wind_direction=wind_direction, upstream_request=upstream_request)
-        self.u_inf = float(getattr(self.driver, "u_inf", np.nan))
-        self.done = False
-        self._t = 0
-        for _ in range(self.warmup_steps):        # 丢弃启动瞬态
-            m = self.driver.step(np.zeros(self.scene.n))
-        return self._emit(m)
+        try:
+            self._build_driver()
+            upstream_request = dict(upstream_request or {})
+            upstream_request["scene"] = {
+                "wind_speed": self.scene.wind_speed,
+                "wind_direction": self.scene.wind_direction,
+                "wind_time_series": self.scene.turbulence,
+                "wind_speed_role": "overridden_by_bts" if self.scene.turbulence else "solver_request",
+                "wind_direction_role": "case_generation",
+            }
+            m = self.driver.reset(
+                wind_speed=None if self.scene.turbulence else self.scene.wind_speed,
+                wind_direction=wind_direction, upstream_request=upstream_request)
+            self.u_inf = float(getattr(self.driver, "u_inf", np.nan))
+            self.done = bool(m.get("done"))
+            for _ in range(self.warmup_steps):        # 丢弃启动瞬态
+                if self.done:
+                    break
+                m = self.driver.step(np.zeros(self.scene.n))
+                self.done = bool(m.get("done"))
+            return self._emit(m)
+        except BaseException as exc:
+            self.done = True
+            self.u_inf = float("nan")
+            self.last_measure, self.last_ctx, self._last_frame = {}, {}, {}
+            try:
+                self.close(strict=True)
+            except BaseException as cleanup_error:
+                raise cleanup_error from exc
+            raise
 
     def _build_driver(self):
         """按场景构造 driver，绕开 env_id → 预注册布局的那条路。"""
@@ -103,6 +125,7 @@ class SceneRuntime:
         d.max_steps = self.max_steps
         d.controls = list(self.scene.controls)
         d.wind_time_series = self.scene.turbulence
+        d.physics = dict(self.scene.physics)
         d.env = self.scene.make_env(
             max_iter=self.max_steps, load_coef=self.load_coef,
             reward_shaper=self.reward_shaper or DoNothingReward())
@@ -133,6 +156,7 @@ class SceneRuntime:
         d.done = False
         d._steps = 0
         d._started = False
+        d._prepare_solver_outputs()
         # 偏航占空比滑动窗口（driver.__init__ 被 __new__ 绕过，这里手动补齐）
         import collections as _c
         from wfrl.fastfarm_driver import (YAW_DUTY_WINDOW, YAW_DUTY_LIMIT)
@@ -160,7 +184,14 @@ class SceneRuntime:
         ctx["_source"] = self.driver
         ctx["_grab"] = grab
         ctx["u_inf"] = self.u_inf
-        ctx["t"] = self._t * self.scene.dt
+        ctx["control_elapsed_seconds"] = self._t * self.scene.dt
+        clock = m.get('solver_clock')
+        ctx["t"] = clock['value'] if clock else ctx["control_elapsed_seconds"]
+        if clock:
+            ctx['timestamp'] = {key: value for key, value in clock.items()
+                                if key not in ('servo_time_steps', 'power_window_steps')}
+        if 'yaw_measured' in m:
+            ctx['yaw'] = m['yaw_measured']
         self.last_measure = dict(m)
         self.last_ctx = ctx
         frame: Dict[str, Any] = {}
@@ -174,6 +205,8 @@ class SceneRuntime:
         frame["_meta"] = {"t": self._t, "u_inf": self.u_inf,
                           "reward": m.get("reward"), "done": self.done,
                           "farm_power": farm_power_total(m.get("power"), self.scene.n)}
+        if m.get('physics') is not None:
+            frame['_meta']['physics'] = m['physics']
         self._last_frame = frame
         return frame
 

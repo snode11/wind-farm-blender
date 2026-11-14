@@ -20,7 +20,9 @@ from .blade_recon_data import ReconSequence, TexturePackage, default_recon_path
 GREEN = (0.15, 0.75, 0.25, 1.0)
 ORANGE = (1.0, 0.55, 0.10, 1.0)
 SESSIONS = {}
+_PENDING_IMPORTS = {}
 HUD_HANDLE = None
+_RUNNING = False
 INSPECTION_PROPERTIES = (
     'wfrl_recon_texture_mode', 'wfrl_recon_texture_gain', 'wfrl_recon_texture_threshold',
     'wfrl_recon_inspect_blade', 'wfrl_recon_inspect_radius', 'wfrl_recon_inspect_tau',
@@ -38,7 +40,13 @@ def active(scene):
 
 
 def session(scene):
-    return SESSIONS.get(scene.as_pointer())
+    key = scene.as_pointer()
+    value = SESSIONS.get(key)
+    uid = getattr(scene, 'session_uid', key)
+    if value is not None and value.get('scene_uid', uid) != uid:
+        SESSIONS.pop(key, None)
+        return None
+    return value
 
 
 def _inspection_changed(scene, context):
@@ -46,7 +54,9 @@ def _inspection_changed(scene, context):
     if value is None:
         return
     from . import blade_recon_inspection
-    blade_recon_inspection.update(scene, value['blades'], value['sequence'].rotor)
+    resources = value.get('resources')
+    blade_recon_inspection.update(scene, value['blades'], value['sequence'].rotor,
+                                 register=resources.register if resources is not None else None)
     if context and context.screen:
         for area in context.screen.areas:
             area.tag_redraw()
@@ -335,7 +345,7 @@ def _mesh(scene, name, vertices, faces, material, *, register=None):
     return obj
 
 
-def _cylinder(scene, name, lower, upper, radius0, radius1, material):
+def _cylinder(scene, name, lower, upper, radius0, radius1, material, *, register=None):
     lower, upper = np.array(lower), np.array(upper)
     axis = upper - lower
     axis /= np.linalg.norm(axis)
@@ -349,24 +359,24 @@ def _cylinder(scene, name, lower, upper, radius0, radius1, material):
              for a in np.linspace(0, 2 * math.pi, n, endpoint=False)]
     faces = [(i, (i+1) % n, (i+1) % n+n, i+n) for i in range(n)]
     faces += [tuple(reversed(range(n))), tuple(range(n, n*2))]
-    return _mesh(scene, name, rings, faces, material)
+    return _mesh(scene, name, rings, faces, material, register=register)
 
 
-def _box(scene, name, center, size, material):
+def _box(scene, name, center, size, material, *, register=None):
     vertices = [np.array(center) + np.array(size)*np.array([x, y, z])*.5
                 for x, y, z in ((-1,-1,-1),(-1,-1,1),(-1,1,-1),(-1,1,1),
                                 (1,-1,-1),(1,-1,1),(1,1,-1),(1,1,1))]
     return _mesh(scene, name, vertices,
-                 [(0,4,6,2),(1,3,7,5),(0,1,5,4),(2,6,7,3),(0,2,3,1),(4,5,7,6)], material)
+                 [(0,4,6,2),(1,3,7,5),(0,1,5,4),(2,6,7,3),(0,2,3,1),(4,5,7,6)], material, register=register)
 
 
-def _context_geometry(scene, rotor, prefix):
-    mat = _material(prefix+'.Context', (.28,.33,.40,1))
+def _context_geometry(scene, rotor, prefix, *, register=None):
+    mat = _material(prefix+'.Context', (.28,.33,.40,1), register=register)
     hub = rotor.hub
-    _cylinder(scene, prefix+'.Tower', (0,0,0), (0,0,hub[2]-2.4), 3., 1.8, mat)
-    _box(scene, prefix+'.Nacelle', (0,0,hub[2]), (8,4,4), mat)
+    _cylinder(scene, prefix+'.Tower', (0,0,0), (0,0,hub[2]-2.4), 3., 1.8, mat, register=register)
+    _box(scene, prefix+'.Nacelle', (0,0,hub[2]), (8,4,4), mat, register=register)
     _cylinder(scene, prefix+'.Hub', hub-rotor.n*1.5, hub+rotor.n*1.5,
-              rotor.cfg.hub_radius_m, rotor.cfg.hub_radius_m, mat)
+              rotor.cfg.hub_radius_m, rotor.cfg.hub_radius_m, mat, register=register)
 
 
 def _camera(scene, name, position, target, *, register=None):
@@ -389,12 +399,16 @@ def _camera(scene, name, position, target, *, register=None):
     return obj
 
 
-def _import_cameras(scene, sequence, prefix):
+def _import_cameras(scene, sequence, prefix, *, register=None):
     imported = []
     for d in sequence.cameras:
         data = bpy.data.cameras.new(prefix+'.'+d['name'])
+        if register is not None:
+            register('cameras', data)
         data.clip_start, data.clip_end, data.display_size = .05, 3000, 1.5
         obj = bpy.data.objects.new(data.name, data)
+        if register is not None:
+            register('objects', obj)
         from .cameras import clear_camera_mask
         clear_camera_mask(obj)
         _apply_camera(obj, d)
@@ -434,8 +448,10 @@ def _hide_stale(obj):
     driver.expression = 'frame != applied'
 
 
-def _embed(scene, name, payload):
+def _embed(scene, name, payload, *, register=None):
     text = bpy.data.texts.new(name)
+    if register is not None:
+        register('texts', text, owned_fake_user=True)
     text.write(payload)
     text.use_fake_user = True
     text['blade_recon_owned'] = True
@@ -471,7 +487,9 @@ def _restore(scene):
                      key=lambda o:o['blade_recon_blade'])
     ghosts = sorted((o for o in scene.objects if o.get('blade_recon_role') == 'truth'),
                     key=lambda o:o['blade_recon_blade'])
-    if len(objects) != 3 or any(len(o.data.vertices) != sequence.rotor.cfg.n_sections*sequence.rotor.cfg.n_ring for o in objects):
+    if ([o.get('blade_recon_blade') for o in objects] != [0, 1, 2]
+            or any(type(o.get('blade_recon_blade')) is not int for o in objects)
+            or any(len(o.data.vertices) != sequence.rotor.cfg.n_sections*sequence.rotor.cfg.n_ring for o in objects)):
         raise ValueError('保存的叶片网格不匹配')
     texture_raw = _read_embedded(scene, 'texture')
     if texture_raw is not None:
@@ -491,12 +509,15 @@ def _restore(scene):
             if hashlib.sha256(image.packed_file.data).hexdigest() != expected['sha256']:
                 raise ValueError('保存的纹理图像校验失败')
     SESSIONS[scene.as_pointer()] = dict(sequence=sequence, blades=objects, ghosts=ghosts,
+        scene_uid=getattr(scene, 'session_uid', scene.as_pointer()),
         cameras=[o for o in scene.objects if 'blade_recon_camera_name' in o], pending=True, index=None)
     scene['blade_recon_error'] = ''
 
 
 def load(context, path=None, truth_path=None, cameras_path=None, texture_path=None):
     """Validate before allocating anything; preserve the previous scene on failure."""
+    from .split_mappo_texture import _ImportResources
+    _retry_pending()
     path = Path(path or default_recon_path()).expanduser().resolve()
     sequence = ReconSequence(path, truth_path=truth_path, cameras_path=cameras_path)
     textures = TexturePackage(texture_path, sequence.rotor) if texture_path else None
@@ -510,6 +531,7 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
     previous_views = snapshot_viewports(context)
     prefix = 'WFRL.BladeRecon.'+uuid.uuid4().hex[:8]
     scene = bpy.data.scenes.new('叶片三维重建')
+    resources = _ImportResources(scene)
     try:
         scene['wfrl_scene_kind'] = 'blade_recon'
         scene['blade_recon_return_scene'] = previous_scene.name
@@ -519,13 +541,13 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
         scene['blade_recon_sha256'] = hashlib.sha256(raw.encode()).hexdigest()
         scene['blade_recon_model_sha256'] = sequence.model_sha256
         scene['blade_recon_error'] = ''
-        _embed(scene, prefix+'.recon', raw)
+        _embed(scene, prefix+'.recon', raw, register=resources.register)
         for key, payload in companions.items():
-            _embed(scene, prefix+'.'+key, payload)
+            _embed(scene, prefix+'.'+key, payload, register=resources.register)
             scene['blade_recon_'+key+'_sha256'] = hashlib.sha256(payload.encode()).hexdigest()
         if textures:
             texture_raw = json.dumps(textures.manifest, ensure_ascii=False, sort_keys=True)
-            _embed(scene, prefix+'.texture', texture_raw)
+            _embed(scene, prefix+'.texture', texture_raw, register=resources.register)
             scene['blade_recon_texture_sha256'] = hashlib.sha256(texture_raw.encode()).hexdigest()
             scene['blade_recon_texture_source_path'] = str(textures.path)
         scene.frame_start, scene.frame_end = 1, len(sequence.states)
@@ -534,16 +556,17 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
         scene.render.resolution_x, scene.render.resolution_y = 1600, 1000
         scene.render.resolution_percentage = 100
         scene.unit_settings.system = 'METRIC'
-        _context_geometry(scene, sequence.rotor, prefix)
-        mat = _material(prefix+'.Evidence', GREEN, evidence=True)
-        ghost_mat = _material(prefix+'.Truth', (.60,.67,.75,1))
+        _context_geometry(scene, sequence.rotor, prefix, register=resources.register)
+        mat = _material(prefix+'.Evidence', GREEN, evidence=True, register=resources.register)
+        ghost_mat = _material(prefix+'.Truth', (.60,.67,.75,1), register=resources.register)
         vertices, _ = sequence.geometry(0)
         faces = sequence.rotor.tpl.faces()
         blades, ghosts = [], []
         for b in range(3):
             blade_mat = _texture_material(prefix+'.Texture.B'+str(b+1), textures.images[b],
-                                          textures.data['atlas']) if textures else mat
-            ob = _mesh(scene, prefix+'.Recon.B'+str(b+1), vertices[b].reshape(-1,3), faces, blade_mat)
+                                          textures.data['atlas'], register=resources.register) if textures else mat
+            ob = _mesh(scene, prefix+'.Recon.B'+str(b+1), vertices[b].reshape(-1,3), faces, blade_mat,
+                       register=resources.register)
             ob.data.color_attributes.new(name='evidence', type='FLOAT_COLOR', domain='POINT')
             if textures:
                 _add_uv(ob, sequence.rotor, faces)
@@ -551,21 +574,23 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
             _hide_stale(ob)
             blades.append(ob)
             if sequence.truth_states is not None:
-                ghost = _mesh(scene, prefix+'.Truth.B'+str(b+1), vertices[b].reshape(-1,3), faces, ghost_mat)
+                ghost = _mesh(scene, prefix+'.Truth.B'+str(b+1), vertices[b].reshape(-1,3), faces, ghost_mat,
+                              register=resources.register)
                 ghost.display_type, ghost.show_in_front, ghost.hide_render = 'WIRE', True, True
                 ghost['blade_recon_role'], ghost['blade_recon_blade'] = 'truth', b
                 _hide_stale(ghost)
                 ghosts.append(ghost)
-        cameras = _import_cameras(scene, sequence, prefix)
+        cameras = _import_cameras(scene, sequence, prefix, register=resources.register)
         radius, height = sequence.rotor.cfg.tip_radius_m, sequence.rotor.hub[2]
         target = (sequence.rotor.hub[0], 0, height*.80)
         for name, position in (('FRONT',(radius*4.8,0,height*.85)),
                                ('SIDE',(0,-radius*4.8,height)),
                                ('OVERVIEW',(radius*4.8,-radius*3.0,height*1.4))):
-            cam = _camera(scene, prefix+'.View.'+name, position, target)
+            cam = _camera(scene, prefix+'.View.'+name, position, target, register=resources.register)
             cam['blade_recon_view'] = name
         SESSIONS[scene.as_pointer()] = dict(sequence=sequence, blades=blades, ghosts=ghosts,
-                                          cameras=cameras, pending=True, index=None)
+                                          scene_uid=getattr(scene, 'session_uid', scene.as_pointer()),
+                                          cameras=cameras, pending=True, index=None, resources=resources)
         from . import playback
         playback.cancel(previous_scene)
         if context.window:
@@ -576,11 +601,17 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
         apply(scene)
         set_view(context, 'FRONT')
         return scene
-    except Exception:
-        if context.window and context.window.scene == scene:
-            context.window.scene = previous_scene
-            restore_viewports(context, previous_views)
-        remove(scene)
+    except Exception as exc:
+        try:
+            if context.window and context.window.scene == scene:
+                context.window.scene = previous_scene
+                restore_viewports(context, previous_views)
+        except Exception as error:
+            exc.add_note('Viewport restoration failed: ' + str(error))
+        try:
+            remove(scene, resources=resources)
+        except Exception as error:
+            exc.add_note('Import cleanup requires retry: ' + str(error))
         raise
 
 
@@ -642,6 +673,11 @@ def _frame(scene, *_):
 
 
 @persistent
+def _invalidate(_):
+    SESSIONS.clear()
+
+
+@persistent
 def _loaded(_):
     SESSIONS.clear()
     # Restoring data and meshes is deferred out of file-load callbacks.
@@ -652,7 +688,13 @@ def _loaded(_):
 
 
 def _tick():
-    for scene in tuple(bpy.data.scenes):
+    scenes = tuple(bpy.data.scenes)
+    live = {scene.as_pointer() for scene in scenes if active(scene)}
+    for key in set(SESSIONS) - live:
+        SESSIONS.pop(key, None)
+    if not _RUNNING:
+        return None
+    for scene in scenes:
         if not active(scene):
             continue
         try:
@@ -710,35 +752,75 @@ def set_view(context, name, areas=None, scene=None):
         area.tag_redraw()
 
 
-def remove(scene):
-    SESSIONS.pop(scene.as_pointer(), None)
+def _scene_resources(scene, resources):
+    """Collect this scene's owned graph, preserving shared ID and text users."""
     for obj in list(scene.objects):
         if not obj.get('blade_recon_owned'):
             continue
+        resources.register('objects', obj)
         data = obj.data
-        bpy.data.objects.remove(obj, do_unlink=True)
-        if data and data.users == 0:
-            if isinstance(data,bpy.types.Mesh):
-                bpy.data.meshes.remove(data)
-            elif isinstance(data,bpy.types.Camera):
-                bpy.data.cameras.remove(data)
+        if data is None:
+            continue
+        if isinstance(data, bpy.types.Mesh):
+            resources.register('meshes', data)
+            resources.shape_resources(obj)
+        elif isinstance(data, bpy.types.Camera):
+            resources.register('cameras', data)
+        for mat in getattr(data, 'materials', ()):
+            if mat is None or not mat.get('blade_recon_owned'):
+                continue
+            resources.register('materials', mat)
+            if mat.node_tree is None:
+                continue
+            for node in mat.node_tree.nodes:
+                for kind, block in (('images', getattr(node, 'image', None)),
+                                    ('node_groups', getattr(node, 'node_tree', None))):
+                    if block is not None and block.get('blade_recon_owned'):
+                        resources.register(kind, block)
     for key in ('recon','truth','cameras','texture'):
         name = scene.get(key+'_text')
         block = bpy.data.texts.get(name) if name else None
-        if block and block.get('blade_recon_owned'):
-            bpy.data.texts.remove(block)
-    bpy.data.scenes.remove(scene)
-    # Only unused resources allocated by this feature are reclaimed. Objects in
-    # another scene and unrelated materials/images are never touched.
-    for mat in tuple(bpy.data.materials):
-        if mat.get('blade_recon_owned') and mat.users == 0:
-            bpy.data.materials.remove(mat)
-    for image in tuple(bpy.data.images):
-        if image.get('blade_recon_owned') and image.users == 0:
-            bpy.data.images.remove(image)
+        if block is not None and block.get('blade_recon_owned'):
+            shared = any(other != scene and any(other.get(field+'_text') == name
+                         for field in ('recon', 'truth', 'cameras', 'texture')) for other in bpy.data.scenes)
+            if shared:
+                resources.records.pop(block.as_pointer(), None)
+            else:
+                resources.register('texts', block, owned_fake_user=True)
+
+
+def _finish_removal(key, resources):
+    errors = resources.rollback()
+    if errors:
+        raise RuntimeError('Reconstruction resource cleanup requires retry') from errors[0]
+    try:
+        bpy.data.scenes.remove(resources.scene)
+    except ReferenceError:
+        pass
+    _PENDING_IMPORTS.pop(key, None)
+
+
+def _retry_pending():
+    for key, resources in tuple(_PENDING_IMPORTS.items()):
+        _finish_removal(key, resources)
+
+
+def remove(scene, *, resources=None):
+    """Release this review's allocations without deleting external users."""
+    from .split_mappo_texture import _ImportResources
+    key = scene.as_pointer()
+    value = SESSIONS.pop(key, {})
+    resources = resources or _PENDING_IMPORTS.get(key) or value.get('resources') or _ImportResources(scene)
+    _PENDING_IMPORTS[key] = resources
+    _scene_resources(scene, resources)
+    scene.camera = None
+    scene.pop('wfrl_scene_kind', None)
+    _finish_removal(key, resources)
 
 
 def _hud():
+    if not _RUNNING:
+        return
     scene = bpy.context.scene
     if not active(scene):
         return
@@ -767,9 +849,18 @@ def _hud():
         blf.draw(0,text)
 
 
+def _callbacks():
+    handlers = bpy.app.handlers
+    return ((handlers.frame_change_post, _frame), (handlers.load_pre, _invalidate),
+            (handlers.undo_pre, _invalidate), (handlers.redo_pre, _invalidate),
+            (handlers.load_post, _loaded), (handlers.undo_post, _loaded),
+            (handlers.redo_post, _loaded))
+
+
 def register(*, standalone=False):
     """Register shared display properties; research playback is explicit."""
-    global HUD_HANDLE
+    from .split_reconstruction_lifecycle import _register_callbacks
+    global HUD_HANDLE, _RUNNING
     definitions = {
         'wfrl_recon_truth_path': bpy.props.StringProperty(name='真值 JSON（可选）',subtype='FILE_PATH'),
         'wfrl_recon_cameras_path': bpy.props.StringProperty(name='相机 JSON（可选）',subtype='FILE_PATH'),
@@ -793,31 +884,47 @@ def register(*, standalone=False):
         'wfrl_recon_inspect_box': bpy.props.BoolProperty(name='检查框',description='标出手动选中的检查区域，不表示缺陷检测结果',
             default=False,update=_inspection_changed),
     }
-    for name, prop in definitions.items():
-        setattr(bpy.types.Scene,name,prop)
-    if not standalone:
-        return
-    for handlers, handler in ((bpy.app.handlers.frame_change_post,_frame),(bpy.app.handlers.load_post,_loaded)):
-        if handler not in handlers:
-            handlers.append(handler)
-    if not bpy.app.timers.is_registered(_tick):
-        bpy.app.timers.register(_tick,first_interval=.02,persistent=True)
-    if not bpy.app.background and HUD_HANDLE is None:
-        HUD_HANDLE = bpy.types.SpaceView3D.draw_handler_add(_hud,(),'WINDOW','POST_PIXEL')
+    added = []
+    try:
+        for name, prop in definitions.items():
+            if not hasattr(bpy.types.Scene, name):
+                setattr(bpy.types.Scene, name, prop)
+                added.append(name)
+        if standalone:
+            with _register_callbacks(_callbacks(), _tick):
+                if not bpy.app.background and HUD_HANDLE is None:
+                    HUD_HANDLE = bpy.types.SpaceView3D.draw_handler_add(_hud, (), 'WINDOW', 'POST_PIXEL')
+            _RUNNING = True
+    except Exception as exc:
+        for name in reversed(added):
+            try:
+                delattr(bpy.types.Scene, name)
+            except Exception as error:
+                exc.add_note('Property cleanup requires retry: ' + str(error))
+        raise
 
 
 def unregister():
-    global HUD_HANDLE
-    if bpy.app.timers.is_registered(_tick):
-        bpy.app.timers.unregister(_tick)
-    for handlers, handler in ((bpy.app.handlers.frame_change_post,_frame),(bpy.app.handlers.load_post,_loaded)):
-        if handler in handlers:
-            handlers.remove(handler)
+    from .split_reconstruction_lifecycle import _remove_callbacks
+    global HUD_HANDLE, _RUNNING
+    _RUNNING = False
+    errors = _remove_callbacks(_callbacks(), _tick)
     if HUD_HANDLE is not None:
-        bpy.types.SpaceView3D.draw_handler_remove(HUD_HANDLE,'WINDOW')
-        HUD_HANDLE = None
+        try:
+            bpy.types.SpaceView3D.draw_handler_remove(HUD_HANDLE, 'WINDOW')
+        except ReferenceError:
+            HUD_HANDLE = None
+        except Exception as exc:
+            errors.append(exc)
+        else:
+            HUD_HANDLE = None
     SESSIONS.clear()
     for name in ('wfrl_recon_truth_path','wfrl_recon_cameras_path','wfrl_recon_texture_path',
                  'wfrl_recon_show_texture','wfrl_recon_show_truth','wfrl_recon_show_cameras') + INSPECTION_PROPERTIES:
         if hasattr(bpy.types.Scene,name):
-            delattr(bpy.types.Scene,name)
+            try:
+                delattr(bpy.types.Scene, name)
+            except Exception as exc:
+                errors.append(exc)
+    if errors:
+        raise errors[0]

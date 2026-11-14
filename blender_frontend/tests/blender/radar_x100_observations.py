@@ -50,7 +50,7 @@ try:
         profiles=[dict(seed=100, budget=512, geometric_coverage=installation.summarize(np.full((2,3),8), windows), occluded_fraction=0.)])
     report = dict(schema=installation.SCHEMA, source_id=session.sampler.source_id,
         geometry_id=session.sampler.geometry_id, sampling_method='AREA', sampling_algorithm=installation.AREA_ALGORITHM,
-        winner_id='candidate', candidates=[choice])
+        winner_id='candidate', candidates=[choice], **installation.profile_metadata())
     stamp = scene.get('wfrl_clearance_time_s')
     runtime.apply_mount_preset(scene, 'SEARCH', search_report=report)
     assert scene.get('wfrl_clearance_time_s') == stamp
@@ -66,10 +66,12 @@ try:
     legacy_choice = {key: value for key, value in choice.items() if key not in {'mechanical', 'detection_profiles'}}
     legacy_choice['profiles'] = [dict(seed=100, budget=512,
         coverage=choice['profiles'][0]['geometric_coverage'], occluded_fraction=0.)]
+    legacy_policy = {key: value for key, value in report['mechanical_policy'].items() if key != 'unit_envelope'}
     for rejected, message in (
             (report | dict(source_id='other'), '来源'),
             (report | dict(errors=[dict(source_time_s=-1., reason='outside passage')]), '未知帧'),
             (report | dict(schema='x100-installation-search.v1', candidates=[legacy_choice]), '版本不受支持'),
+            (report | dict(mechanical_policy=legacy_policy), 'mechanical_policy.unit_envelope.dimensions_whd_m'),
             (report | dict(candidates=[legacy_choice]), '缺少机械约束证据'),
             (report | dict(candidates=[{k: v for k, v in choice.items() if k != 'mechanical'}]), '缺少机械约束证据'),
             (report | dict(candidates=[choice | dict(mechanical=dict(status='PASS_RESEARCH'))]), '缺少运动净空证据'),
@@ -105,7 +107,8 @@ try:
     assert session.blade_result is None and not session.blade_tracker.tracks
     result = dict(status='PASS', addon=addon.__file__, checks=['area_sampler', 'truth_isolation',
         'source_bound_installation', 'clock_preserved', 'unknown_search_rejected', 'rejected_import_preserves_frame',
-        'legacy_search_rejected', 'missing_evidence_rejected', 'rejected_import_preserves_installation',
+        'legacy_search_rejected', 'incompatible_envelope_rejected', 'missing_evidence_rejected',
+        'rejected_import_preserves_installation',
         'source_time_pairing', 'rewind', 'toggle', 'source_invalid_clears_tracking'])
     (out / 'result.json').write_text(json.dumps(result, indent=2))
     print('X100_OBSERVATIONS_PASS', str(out))

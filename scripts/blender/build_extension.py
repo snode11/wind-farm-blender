@@ -1,4 +1,4 @@
-"""Build a byte-reproducible WFRL Blender extension and hash inventory."""
+"""Build a reproducible extension; verify staged ZIP, inventory and checksum before publication."""
 
 from __future__ import annotations
 
@@ -15,6 +15,11 @@ import tomllib
 from typing import NamedTuple
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
+try:
+    from scripts.blender.validate_frontend_package import verify_archive
+except ModuleNotFoundError:
+    from validate_frontend_package import verify_archive
+
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_SOURCE = ROOT / "blender_frontend" / "wfrl_blender"
@@ -26,7 +31,8 @@ RADAR_MODULES = ('__init__.py', 'schema.py', 'ply.py', 'recording.py', 'simulati
 DIST = ROOT / "dist"
 ZIP_TIMESTAMP = (2020, 1, 1, 0, 0, 0)
 EXCLUDED_NAMES = {".DS_Store"}
-EXCLUDED_PARTS = {"__pycache__", ".pytest_cache"}
+EXCLUDED_PARTS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".git", "tests"}
+EXCLUDED_SUFFIXES = (".pyc", ".pyo", ".log", ".tmp", ".swp", ".swo", "~")
 RESEARCH_ONLY_PAYLOADS = ('split_surface_texture.py', 'assets/blade_recon_synth20/',
                           'assets/blade_recon_synth_tex/')
 SAME_SOURCE_MAPPO_MANIFEST_SHA256 = 'd3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde'
@@ -106,7 +112,7 @@ def _payloads() -> list[tuple[str, bytes]]:
         relative = path.relative_to(PACKAGE_SOURCE)
         if (not path.is_file() or path.name in EXCLUDED_NAMES
                 or any(part in EXCLUDED_PARTS for part in relative.parts)
-                or path.suffix == ".pyc"
+                or path.name.endswith(EXCLUDED_SUFFIXES)
                 or relative.as_posix().startswith(RESEARCH_ONLY_PAYLOADS)):
             continue
         if relative.as_posix() in {"protocol.py", "build-info.json"} or relative.parts[:2] == ('_vendor', 'radar_x100'):
@@ -140,6 +146,7 @@ def _validate_farm_payloads(payloads):
     manifest = json.loads(bundled['assets/mappo/manifest.json'])
     for name, expected in manifest['files'].items():
         if (Path(name).name != name
+                or 'assets/mappo/' + name not in bundled
                 or hashlib.sha256(bundled.get('assets/mappo/' + name, b'')).hexdigest() != expected):
             raise ValueError('Farm package integrity mismatch: ' + name)
 
@@ -222,7 +229,11 @@ def _bundle_dual(payloads, package, asset_dir, expected_method):
     prefix = 'assets/' + asset_dir + '/'
     payloads = [(name, data) for name, data in payloads if not name.startswith(prefix)]
     manifest = dict(overlay['manifest'], source_package='../mappo', portable=True)
-    payloads += [(prefix + name, (package / name).read_bytes()) for name in sorted(manifest['files'])]
+    for name in sorted(manifest['files']):
+        data = (package / name).read_bytes()
+        if hashlib.sha256(data).hexdigest() != manifest['files'][name]:
+            raise ValueError('Dual-beam result integrity mismatch: ' + name)
+        payloads.append((prefix + name, data))
     payloads.append((prefix + 'manifest.json', (json.dumps(manifest, ensure_ascii=False, sort_keys=True) + '\n').encode()))
     return payloads
 
@@ -366,8 +377,10 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
     payloads.sort()
     identity = [{"path": name, "sha256": hashlib.sha256(data).hexdigest()}
                 for name, data in payloads]
+    captured = dict(payloads)
     build_info = dict(schema='wfrl.extension-build.v1', version=version,
-        radar_core_sha256={name: hashlib.sha256((RADAR_SOURCE / name).read_bytes()).hexdigest() for name in RADAR_MODULES},
+        radar_core_sha256={name: hashlib.sha256(captured['_vendor/radar_x100/' + name]).hexdigest()
+                           for name in RADAR_MODULES},
         payload_sha256=hashlib.sha256(json.dumps(identity, sort_keys=True,
             separators=(',', ':')).encode()).hexdigest(), payload_files=len(payloads))
     payloads.append(('build-info.json', (json.dumps(build_info, sort_keys=True, indent=2)+'\n').encode()))
@@ -395,6 +408,9 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
             "files": [{"path": name, "sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
                       for name, data in payloads],
         }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        verify_archive(staged_archive, staging / inventory.name)
+        if (staging / checksum.name).read_bytes() != f"{archive_sha256}  {archive.name}\n".encode('ascii'):
+            raise ValueError('Archive checksum sidecar mismatch')
         _publish_outputs(staging, paths, overwrite=overwrite)
     except _PublicationRollbackError:
         cleanup = False

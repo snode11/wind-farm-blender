@@ -1,6 +1,7 @@
 """Explicit filesystem actions for research cameras; no automatic persistence."""
 from pathlib import Path
 import json
+import tempfile
 from copy import deepcopy
 
 import bpy
@@ -9,6 +10,7 @@ from .. import custom_cameras as core, custom_camera_capture as capture
 from .. import camera_projection as projection, playback
 from .. import custom_camera_history as history, custom_camera_preview as preview
 from .ui_helpers import message, diagnostic
+from ..atomic_json import write_json
 
 _PENDING_IMPORT = None
 _SUMMARY_CACHE = {}
@@ -39,9 +41,11 @@ class WFRL_OT_CustomLayoutExport(bpy.types.Operator):
             payload=core.layout_dict(context.scene)
             target=Path(bpy.path.abspath(self.filepath))
             if target.suffix.lower()!='.json':raise ValueError('请使用 .json 文件名')
-            with target.open('x',encoding='utf-8') as stream:
-                json.dump(payload,stream,ensure_ascii=False,indent=2,allow_nan=False)
-                stream.write('\n')
+            from ..video_output import _commit_export
+            with tempfile.TemporaryDirectory(prefix='.wfrl-layout-', dir=target.parent) as directory:
+                staged = Path(directory) / target.name
+                write_json(staged, payload)
+                _commit_export(staged, target)
             self.report({'INFO'},'已导出布局：'+str(target))
             return {'FINISHED'}
         except (ValueError,OSError) as exc:
@@ -161,6 +165,7 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
             self.report({'ERROR'},str(exc))
             return {'CANCELLED'}
         self.area=context.area
+        self.window, self.scene = context.window, context.scene
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -172,22 +177,27 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
     def execute(self,context):
         try:
             area=getattr(self,'area',None) or context.area
-            if area.type!='VIEW_3D':
-                area=next(a for a in context.window.screen.areas if a.type=='VIEW_3D')
+            window = getattr(self, 'window', None) or context.window
+            scene = getattr(self, 'scene', context.scene)
+            if (area is None or area.type != 'VIEW_3D' or window is None
+                    or area not in window.screen.areas or window.scene != scene
+                    or window not in context.window_manager.windows):
+                raise ValueError('发起采集的 3D 视图或场景已变化，请从该视图重新开始')
             self.area=area
             region=next(r for r in area.regions if r.type=='WINDOW')
-            times=requested_times(context.scene)
-            capture.require_preflight(context,times)
-            with context.temp_override(area=area,region=region):
+            with context.temp_override(window=window, screen=window.screen, area=area, region=region):
+                times=requested_times(context.scene)
+                capture.require_preflight(context,times)
                 self.transaction=capture.Capture(context,bpy.path.abspath(self.directory),times)
-            self.transaction.ui_operator=self
-            self.wm=context.window_manager
-            self.timer=self.wm.event_timer_add(.03,window=context.window)
-            self.wm.modal_handler_add(self)
-            self.handle=bpy.types.SpaceView3D.draw_handler_add(self.draw_progress,(), 'WINDOW','POST_PIXEL')
+                self.transaction.ui_operator=self
+                self.wm=context.window_manager
+                self.timer=self.wm.event_timer_add(.03,window=window)
+                if self.wm.modal_handler_add(self) is False:
+                    raise RuntimeError('无法注册相机采集交互处理器')
+                self.handle=bpy.types.SpaceView3D.draw_handler_add(self.draw_progress,(), 'WINDOW','POST_PIXEL')
             area.tag_redraw()
             return {'RUNNING_MODAL'}
-        except (ValueError,OSError,RuntimeError,StopIteration) as exc:
+        except (ValueError,OSError,RuntimeError,ReferenceError,StopIteration) as exc:
             if getattr(self,'transaction',None) and not self.transaction.closed:
                 self.transaction.finish(error=str(exc))
             self.remove_timer()
@@ -199,12 +209,24 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
             preview.draw_controls(bpy.context, capture.progress(), external=True)
 
     def remove_timer(self):
-        if getattr(self,'handle',None):
-            bpy.types.SpaceView3D.draw_handler_remove(self.handle,'WINDOW')
-            self.handle=None
-        if getattr(self,'timer',None):
-            self.wm.event_timer_remove(self.timer)
-            self.timer=None
+        errors = []
+        for name in ('handle', 'timer'):
+            resource = getattr(self, name, None)
+            if resource is None:
+                continue
+            try:
+                if name == 'handle':
+                    bpy.types.SpaceView3D.draw_handler_remove(resource, 'WINDOW')
+                else:
+                    self.wm.event_timer_remove(resource)
+            except (ReferenceError, RuntimeError, ValueError) as exc:
+                from .custom_camera_operators import _removed_handle
+                if not _removed_handle(exc):
+                    errors.append(str(exc))
+                    continue
+            setattr(self, name, None)
+        if errors:
+            raise RuntimeError('；'.join(errors))
 
     def completion_result(self):
         self.remove_timer()

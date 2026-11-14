@@ -7,15 +7,13 @@
 
     DEFAULT ACTION SPACE   每步增量裁到 ±5°/±1°/±1e3   (mdp.py:300-305)
     状态边界               累加值裁到 yaw[-40,40] 等    (mdp.py:311-315)
-    执行机构占空比          超 10% 把该控制量**整个清零** (multiagent_env.py:196-207)
+    执行机构占空比          达到逐控制量 duty_limit 时把该控制量整个清零
 
-第三条最要命：它不是限幅，是清零，而且是**累计预算**式的清零 —— accumulator
-回合内永不衰减，判据 acc/(rate·k·dt) 约束的是"历史平均动作速率"。策略以为
-自己发了 5° 偏航，环境执行 0°，回报照常算 —— 训练曲线上什么都看不出来，只有
-奖励莫名其妙不涨。dt=3 s 时 yaw 的稳态可持续量只有 0.09 °/步（0.1 ×
-ACTUATORS_RATE 0.3 °/s × 3 s），于是 K 步回合内**可达偏航被封在 0.09K 附近**
-（见 `reachable`）：128 步只能走到 16.5°，而尾流偏航的增益要到 20° 才显现。
-`probe_duty_env.py` 在真环境上逐位零偏差地复现了这套时序。
+占空比是清零门控，不是增量限幅。FastFarmDriver 的 yaw 默认走滑动窗口，
+上限由其运行配置给出；pitch 及关闭滑动窗口的 yaw 走 env 累计版 0.1。
+本层按测量中的 duty_limit 判定；缺少该字段或控制量时回退 DUTY_LIMIT。
+sustainable/reachable/notes 不接收测量，只描述 0.1 的累计模型估算，不能
+据此判断滑动窗口的运行预算；运行预算由 budget/apply 的测量决定。
 
 还有两条仿真侧**不检查**、必须我们自己判的：
 
@@ -27,8 +25,9 @@ ACTUATORS_RATE 0.3 °/s × 3 s），于是 K 步回合内**可达偏航被封在
     转矩是顶替不是叠加   GenTrq = TorqueRef                  (DISCON.F90:440)
         外部转矩**完全替换**基线 VS 控制器的输出，而指令带 ±2e4 N·m 只有额定
         43529 N·m（VS_RtPwr/VS_RtGnSp）的 46%。直接把策略输出当转矩下发，气动
-        转矩大于发电转矩，转子加速直到超速 —— 仿真器不会拦，它只会给出越来越
-        大的转速然后发散。
+        转矩大于发电转矩，转子加速。基线变桨在发电机转速超过 PC_RefSpd 后顺桨
+        限速：无外部变桨指令时按 8 °/s 速率限制执行，有外部指令时作为下界；
+        转矩缺口变成功率损失。仿真器没有硬停机，超速仍由本层按转速回读报告。
 
 所以这一层的输出有两部分：改过的指令，和一串 `Event`。Event 才是重点 —— 训练
 面板上要看得见"第 k 步 T2 的偏航被占空比清零了"，而不是只看到奖励不涨。
@@ -48,7 +47,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 # --- NREL 5MW 基线控制器常数，全部来自 DISCON.F90 的 PARAMETER 段 -----------
-GB_RATIO = 97.0            # 齿轮箱速比，与 fastfarm_driver.py:38 同源
+GB_RATIO = 97.0            # NREL 5MW 齿轮箱速比
 VS_RtGnSp = 121.6805       # 额定发电机转速 (rad/s)，DISCON.F90:85
 VS_RtPwr = 5296610.0       # 额定发电功率 (W)，DISCON.F90:86
 VS_MaxTq = 47402.91        # 发电机转矩上限 (N·m)，DISCON.F90:81
@@ -57,7 +56,7 @@ PC_MaxPit = 90.0           # 桨距上限 (deg)，DISCON.F90:63 的 1.570796 rad
 # 基线变速控制器（VS）的转矩-转速曲线常数，DISCON.F90:78-90。这条曲线就是
 # **维持最优叶尖速比**的发电机转矩：GenTrq = f(ω_gen)。外部转矩完全顶替它
 # （DISCON.F90:440），所以合法的运行包线应锚定在这条曲线上 —— 偏低转子加速
-# 超速、偏高转子减速失速（TSR 掉到 ~2 时 BEM 关闭，气动没了，转子停）。
+# 至基线变桨限速、偏高转子减速失速（TSR 掉到 ~2 时 BEM 关闭，气动没了，转子停）。
 VS_CtInSp = 70.16224       # region 1→1½ 切入转速 (rad/s)，DISCON.F90:78
 VS_Rgn2Sp = 91.21091       # region 1½→2 转速 (rad/s)，DISCON.F90:83
 VS_Rgn2K = 2.332287        # region 2 转矩系数 N·m/(rad/s)²，DISCON.F90:82
@@ -73,8 +72,10 @@ VS_TrGnSp = ((VS_Slope25 - math.sqrt(
 def baseline_gen_torque(rpm):
     """基线 VS 控制器在给定**转子转速** rpm 下会下发的发电机转矩 (N·m)。
 
-    逐位复刻 DISCON.F90:426-435 的五段式曲线（换算到发电机高速轴）。这是维持
-    最优叶尖速比的转矩 —— 外部转矩的合法包线就锚定在它上下。rpm 给 nan 时返回
+    按转速复刻 DISCON.F90:426-435 的五段式曲线（换算到发电机高速轴）。DISCON
+    在无外部变桨且桨距 ≥ VS_Rgn3MP 时也取恒功率段，这里只按转速判定；外部
+    转矩下发时 DISCON 不经过该曲线。这是维持最优叶尖速比的转矩 —— 外部转矩的
+    合法包线就锚定在它上下。rpm 给 nan 时返回
     额定转矩的一半作为兜底（既不超速也不至于失速的粗略中点）。
     """
     rpm = np.asarray(rpm, float)
@@ -96,7 +97,7 @@ def baseline_gen_torque(rpm):
     return t
 
 
-#: 外部转矩相对基线 VS 曲线的合法带：低于 (1−LO)·T_vs 会超速，高于 (1+HI)·T_vs
+#: 外部转矩相对基线 VS 曲线的合法带：低于 (1−LO)·T_vs 转子加速至基线变桨限速，高于 (1+HI)·T_vs
 #: 会失速。取 ±0.25 —— region 2 里 T∝ω²，留 25% 让策略能调节又不至把 TSR 拽到
 #: 失速。这两个数经 probe_torque_env.py 在真 FAST.Farm 上验证过不失速。
 TORQUE_ENV_LO = 0.25
@@ -109,15 +110,8 @@ RATED_TORQUE = VS_RtPwr / VS_RtGnSp
 #: 超速判据。ElastoDyn 没有硬停机逻辑，这条是我们自己设的运行包线。
 #: 取额定的 1.1 倍 —— 与 DISCON 用 VS_MaxTq = 1.1 × VS_RtTq 同一个裕度口径。
 RPM_ALARM = 1.1 * RATED_RPM
-#: driver 把反解结果裁在这里（fastfarm_driver.py:41 的 RPM_MAX），所以读到这个
-#: 数只说明"被裁过"，不说明转子真转到了 20 rpm。
-RPM_CLIPPED = 20.0
-#: 转速是 ω=P/(ηT) 反解的，T 趋零时商发散 —— 判"是不是数值问题"要看**转矩**，
-#: 不能看转速大小：driver 已经裁过，靠转速阈值等于在裁剪天花板附近猜。
-#: 低于额定的 30% 时 region 2 都到不了，此时的大转速一律当反解发散。
-DIVERGE_TORQUE_FRAC = 0.3
 
-#: 执行机构占空比上限，multiagent_env.py:205 的 `>= 0.1`
+#: env 累计版上限及缺少 duty_limit 测量时的回退，multiagent_env.py 的 `>= 0.1`
 DUTY_LIMIT = 0.1
 #: 各控制量的执行机构速率 (单位/s)，mdp.py:52。torque 没有条目 ⇒ 不受占空比约束
 ACTUATOR_RATE = {"yaw": 0.3, "pitch": 8.0}
@@ -128,6 +122,11 @@ STATE_BOUND = {"yaw": (-40.0, 40.0), "pitch": (0.0, 45.0),
                "torque": (-2e4, 2e4)}
 
 SEVERITY = ("info", "warn", "block")
+
+
+def control_duty_limit(measure, control):
+    """Read a control's effective limit, falling back to the cumulative env limit."""
+    return float(((measure or {}).get("duty_limit") or {}).get(control, DUTY_LIMIT))
 
 
 @dataclass
@@ -167,6 +166,8 @@ class SafetyLimiter:
         self.controls = list(scene.controls)
         self.ids = [t.id for t in scene.turbines]
         self.max_events = int(max_events)
+        if self.max_events < 0:
+            raise ValueError("max_events 必须为非负整数")
         self.events: List[Event] = []
         self.counts: Dict[str, int] = {}
         self._step = 0
@@ -176,11 +177,10 @@ class SafetyLimiter:
 
     # ------------------------------------------------------------------
     def sustainable(self, control: str) -> float:
-        """该控制量每步可持续的最大 |Δ|，超过它迟早触发占空比清零。
+        """以 DUTY_LIMIT=0.1 估算 env 累计版的每步可持续 |Δ|。
 
-        占空比 = Σ|Δ| / rate / (k·dt)，稳态下每步都发 d 则 = d/(rate·dt)。
-        令其 < 0.1 得 d < 0.1·rate·dt。yaw 在 dt=3 s 下只有 0.09 °/步 ——
-        动作空间给的 ±5° 是它的 55 倍，这个落差是 UI 上必须写出来的一句话。
+        本方法不读取运行测量，也不表示滑动窗口的实际配置。
+        占空比 = Σ|Δ| / rate / (k·dt)，稳态临界量为 limit·rate·dt。
         """
         r = ACTUATOR_RATE.get(control)
         return float("inf") if r is None else DUTY_LIMIT * r * self.dt
@@ -188,10 +188,9 @@ class SafetyLimiter:
     def budget(self, measure: Dict[str, Any], control: str) -> np.ndarray:
         """本步在被清零之前还能发多大的 |Δ| (n,)。没有占空比约束的返回 inf。
 
-        环境判据用的是**上一步结束时**的累计除以 k+1 步（driver._duty 已按 k+1
-        算，与 multiagent_env.py:205 逐位对齐），本步的 |Δ| 不参与判定 —— 也就
-        是说超限那一步是"事后清零"，不是"提前限幅"。所以这里返回的是"还没超"
-        时的余量：一旦 duty 已经 ≥ 0.1，余量是 0，发多少都会被吞。
+        driver 的 duty 表示下一步判据：yaw 滑动窗口取当前窗口，env 累计版
+        取累计除以 k+1 步。本步的 |Δ| 不参与判定；duty 达到该控制量的
+        duty_limit 就返回 0，否则返回 inf。缺少上限时使用 DUTY_LIMIT。
         """
         if control not in ACTUATOR_RATE:
             return np.full(self.n, np.inf)
@@ -200,7 +199,7 @@ class SafetyLimiter:
         if d is None:
             return np.full(self.n, np.inf)
         d = np.asarray(d, float).ravel()
-        return np.where(d >= DUTY_LIMIT, 0.0, np.inf)
+        return np.where(d >= control_duty_limit(measure, control), 0.0, np.inf)
 
     # ------------------------------------------------------------------
     def apply(self, cmd: Dict[str, Any], measure: Optional[Dict[str, Any]] = None,
@@ -224,6 +223,7 @@ class SafetyLimiter:
                 v = np.repeat(v, self.n)
             if v.size != self.n:
                 raise ValueError(f"控制量 {c} 长度 {v.size} != 机组数 {self.n}")
+            finite = np.isfinite(v)
             v = self._nan_guard(c, v, evs)
             v = self._step_bound(c, v, evs)
             v = self._state_bound(c, v, evs)
@@ -231,41 +231,38 @@ class SafetyLimiter:
             if c == "pitch":
                 self._pitch_semantics(v, measure, evs)
             if c == "torque":
-                v = self._torque_semantics(v, measure, evs)
+                v = self._torque_semantics(v, measure, evs, finite)
             out[c] = v
             self.state[c] = self.state[c] + v
         self._record(evs)
         return out, evs
 
     def monitor(self, measure: Dict[str, Any]) -> List[Event]:
-        """看仿真回读判超速。不改指令 —— 这一步已经执行完了。
-
-        "超速"与"反解发散"要靠**转矩**分辨，不是转速大小：转速本身就是
-        ω=P/(ηT) 反解来的，而 driver 已经把它裁在 20 rpm，拿转速阈值去分
-        等于在裁剪天花板附近猜。转矩低于额定的 30% 时机组连 region 2 都没
-        进，这时的大转速一律是数值问题。
-        """
+        """按直接转速回读报告超速；缺测不推断，低转矩不撤销超速报警。"""
         evs: List[Event] = []
         m = measure or {}
-        rpm = np.asarray(m.get("rotor_speed", np.full(self.n, np.nan)), float)
-        tq = np.asarray(m.get("torque", np.full(self.n, np.nan)), float)
-        tq_min = DIVERGE_TORQUE_FRAC * RATED_TORQUE
+        nan = np.full(self.n, np.nan)
+        latest = np.asarray(m.get("rotor_speed", nan), float).ravel()
+        # 区间内全部有效原生样本的峰值及其仿真时刻（solver_outputs.SolverOutputs.sample）；
+        # 没有原生输出读取器的后端不提供这三项。
+        peak = np.asarray(m.get("rotor_speed_interval_max", nan), float).ravel()
+        peak_time = np.asarray(m.get("rotor_speed_interval_max_time", nan), float).ravel()
+        samples = np.asarray(m.get("rotor_speed_interval_samples", np.zeros(self.n)), float).ravel()
         for i in range(self.n):
-            r = float(rpm[i]) if i < rpm.size else float("nan")
+            r = float(latest[i]) if i < latest.size else float("nan")
+            when = None
+            if (i < samples.size and samples[i] > 0
+                    and i < peak.size and np.isfinite(peak[i])):
+                r = float(peak[i])
+                if i < peak_time.size and np.isfinite(peak_time[i]):
+                    when = float(peak_time[i])
             if not np.isfinite(r) or r <= RPM_ALARM:
                 continue
-            t = float(tq[i]) if i < tq.size else float("nan")
-            if np.isfinite(t) and abs(t) < tq_min:
-                evs.append(Event(self._step, self.ids[i], "rotor_speed",
-                                 "转速反解发散", r, r, "warn",
-                                 f"转矩仅 {t:.0f} N·m（< 额定的 "
-                                 f"{DIVERGE_TORQUE_FRAC:.0%}），ω=P/(ηT) 的商"
-                                 f"无意义；driver 已裁在 {RPM_CLIPPED} rpm"))
-            else:
-                evs.append(Event(self._step, self.ids[i], "rotor_speed",
-                                 "超速", r, r, "block",
-                                 f"额定 {RATED_RPM:.2f} rpm，报警线 "
-                                 f"{RPM_ALARM:.2f} rpm"))
+            at = "" if when is None else f"，峰值时刻 t={when:.2f} s"
+            evs.append(Event(self._step, self.ids[i], "rotor_speed",
+                             "超速", r, r, "block",
+                             f"额定 {RATED_RPM:.2f} rpm，报警线 "
+                             f"{RPM_ALARM:.2f} rpm{at}"))
         self._record(evs)
         return evs
 
@@ -317,13 +314,15 @@ class SafetyLimiter:
             return v
         duty = np.asarray(((measure or {}).get("duty") or {}).get(
             c, np.zeros(self.n)), float).ravel()
+        limit = control_duty_limit(measure, c)
+        sustainable = limit * ACTUATOR_RATE[c] * self.dt
+        effect = "本步指令已归零" if enforce else "后端会把本步指令整个归零"
         for i in np.where(over)[0]:
             evs.append(Event(
                 self._step, self.ids[i], c, "执行机构占空比清零",
                 float(v[i]), 0.0 if enforce else float(v[i]), "block",
-                f"占空比 {duty[i]:.3f} ≥ {DUTY_LIMIT}，环境会把本步指令整个"
-                f"归零（multiagent_env.py:196-207）；可持续量仅 "
-                f"{self.sustainable(c):.3g} °/步"))
+                f"占空比 {duty[i]:.3f} ≥ {limit:g}，{effect}；"
+                f"按该上限的可持续量 {sustainable:.3g} °/步"))
         return np.where(over, 0.0, v) if enforce else v
 
     def _pitch_semantics(self, v, measure, evs):
@@ -346,11 +345,12 @@ class SafetyLimiter:
                     f"PitchRef = MAX(PitchRef, PitComT)（DISCON.F90:523），"
                     f"基线在 {pm[i]:.2f}°，外部 {cmd_abs[i]:.2f}° 无效"))
 
-    def _torque_semantics(self, v, measure, evs):
+    def _torque_semantics(self, v, measure, evs, finite):
         """向基线 VS 包线修正转矩，受单步及累加指令边界约束。
 
         当前值距包线过远时只能逐步接近，不能保证一步进入包线。
         事件和内部状态使用 Driver 可提交的 float32 增量；实际转矩仍取决于后端。
+        非有限原始指令对应的增量保持为零，不参与包线修正或生成修正事件。
         """
         tq = np.asarray((measure or {}).get("torque",
                                             np.full(self.n, np.nan)), float)
@@ -366,7 +366,8 @@ class SafetyLimiter:
         lower = np.maximum(-bound, lo - self.state["torque"])
         upper = np.minimum(bound, hi - self.state["torque"])
         adj = np.clip(target - base, lower, upper).astype(np.float32).astype(float)
-        changed = (np.abs(target - (base + v)) > 1e-6) | (np.abs(adj - v) > 1e-6)
+        adj = np.where(finite, adj, 0.0)
+        changed = finite & ((np.abs(target - (base + v)) > 1e-6) | (np.abs(adj - v) > 1e-6))
         for i in np.where(changed)[0]:
             over = (base[i] + v[i]) > t_hi[i]
             incomplete = not t_lo[i] - 1e-6 <= base[i] + adj[i] <= t_hi[i] + 1e-6
@@ -387,44 +388,26 @@ class SafetyLimiter:
         self.events.extend(evs)
         if len(self.events) > self.max_events:
             # 只丢最老的：训练跑几千步时事件量会很大，但最近的那些才是要看的
-            self.events = self.events[-self.max_events:]
+            del self.events[:len(self.events) - self.max_events]
 
     def summary(self) -> List[tuple]:
         """(规则, 次数) 按次数降序，训练面板直接渲染。"""
         return sorted(self.counts.items(), key=lambda kv: -kv[1])
 
     def recent(self, k: int = 20) -> List[Event]:
+        if k == 0:
+            return []
         return self.events[-k:]
 
     def reachable(self, control: str, n_steps: int) -> float:
-        """n_steps 步之内该控制量能累积到的最大变化量。
+        """以 DUTY_LIMIT=0.1 估算 env 累计版在 n_steps 步内的累计变化量。
 
-        占空比不是限幅，是**累计预算**：`_actuation_accumulator` 逐步累加
-        |Δ| 且回合内永不衰减（mdp.py:317-318），判据 acc/(rate·k·dt) 的分母
-        随 k 增长 —— 也就是说它约束的是"历史平均动作速率"。
+        不读取运行测量，不考虑状态边界，也不作为滑动窗口的可达上界。
 
-            reachable ≈ 0.1·rate·dt·K + step_bound
-
-        末项是因为 k=1 时 acc=0 ⇒ frac=0，**第一步永远免费**。稳态下清零占比
-        为 1 − sustainable/step_bound，生效间隔趋近 step_bound/sustainable 步；
-        `probe_duty_env.py` 在 FLORIS 算例（dt=60 s）上与环境逐位零偏差地
-        复现了这三条。
-
-        这个数决定回合长度够不够：yaw 在 dt=3 s 下 K=128 只能走到 16.5°，而
-        尾流偏航的增益要到 20° 上下才显现 —— 回合内到不了最优点，策略也就
-        拿不到"偏航有增益"的证据。
-
-        两处实测才发现、朴素推导会算错的地方：
-
-        · **acc 累加的是动作空间裁剪后的量，不含状态边界。** mdp.py:299-318
-          先 clip(Δ, ±5°) 累加进 accumulator，再 clip(state+Δ, ±40°) 写状态。
-          偏航贴到 ±40° 之后指令不再改变状态，acc 却照涨（实测末端偏航 40°
-          时 acc 已累到 115°）—— 饱和后每一步都在为未发生的动作付占空比。
-        · **accumulator 对非末位 agent 是先读后写，逐机组不同步。**
-          multiagent_env.py:246-249 的回抄在 is_last() 分支之后，而 mdp 的
-          累计值只在那一支里更新，于是遍历序靠前的 agent 抄到的值滞后一步、
-          约束更松。占空比在机组之间**不等价**，而 obs 里又没有 duty ——
-          策略在学一个自己看不见、且逐机组不一致的门控。
+        估算为 DUTY_LIMIT·rate·dt·K + step_bound；末项表示首步累计为零时
+        允许的一次满幅动作。累计器计动作空间裁剪后的量，状态边界截去的
+        部分仍计入占空比；非末位 agent 的累计回抄滞后一个控制步。
+        完整逐机组时序由 probe_duty_env.EnvModel 描述。
         """
         s = self.sustainable(control)
         if math.isinf(s):
@@ -432,23 +415,24 @@ class SafetyLimiter:
         return s * int(n_steps) + STEP_BOUND.get(control, 0.0)
 
     def notes(self, n_steps: Optional[int] = None) -> List[str]:
-        """这份场景下各控制量的可持续量，UI 启动时显示一次。
-
-        给了 n_steps 就同时报回合内可达量 —— 那是判断"这个回合长度下策略有
-        没有机会达到最优点"的唯一依据，比可持续量本身更该出现在面板上。
-        """
+        """报告 DUTY_LIMIT 的累计模型估算；运行限制须读取测量 duty_limit。"""
         out = []
         for c in self.controls:
             s = self.sustainable(c)
             if math.isinf(s):
                 out.append(f"{c}: 不受执行机构占空比约束（mdp.py:52 无条目）")
                 continue
-            line = (f"{c}: 动作空间 ±{STEP_BOUND.get(c, float('nan')):g}/步，"
-                    f"但占空比可持续量仅 {s:.3g}/步（差 "
-                    f"{STEP_BOUND.get(c, float('nan')) / s:.0f} 倍），"
-                    f"持续满幅动作必被清零")
+            bound = STEP_BOUND.get(c, float("nan"))
+            line = f"{c}: 动作空间 ±{bound:g}/步，"
+            if bound > s:
+                line += (f"但占空比可持续量仅 {s:.3g}/步（差 {bound / s:.0f} 倍），"
+                         f"持续满幅动作必被清零")
+            else:
+                line += f"占空比可持续量 {s:.3g}/步，满幅动作不超过占空比可持续量"
             if n_steps:
                 line += (f"；{n_steps} 步回合内最多累积 "
                          f"{self.reachable(c, n_steps):.3g}")
+            line += (f"（累计模型上限 {DUTY_LIMIT:g} 的估算，未使用运行测量；"
+                     "不含状态边界，不代表 yaw 滑动窗口，实际限制以 duty_limit 为准）")
             out.append(line)
         return out

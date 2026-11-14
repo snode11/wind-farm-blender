@@ -6,6 +6,7 @@ within each clipping case. This is a first silhouette backend, not photometry.
 """
 from __future__ import annotations
 
+import math
 import torch
 from torch.utils.checkpoint import checkpoint
 
@@ -57,8 +58,11 @@ def soft_silhouette(vertices, faces, K, T_camera_cv_from_world,
     For efficiency culling margins are detached and extend twelve sigmas from
     projected triangle bounds; gradients are smooth inside this active set.
     """
-    if sigma_px <= 0 or face_chunk <= 0:
-        raise ValueError("sigma_px and face_chunk must be positive")
+    if not math.isfinite(sigma_px) or not math.isfinite(near_m) or sigma_px <= 0 or near_m <= 0 or face_chunk <= 0:
+        raise ValueError("sigma_px, near_m and face_chunk must be positive and finite")
+    if not all(bool(torch.isfinite(value).all()) for value in
+               (vertices, K, T_camera_cv_from_world, T_world_from_blade_root)):
+        raise ValueError("Projection geometry and calibration must be finite")
     width, height = map(int, image_size)
     if width <= 0 or height <= 0:
         raise ValueError("Invalid image size")
@@ -122,11 +126,13 @@ def soft_silhouette(vertices, faces, K, T_camera_cv_from_world,
 
 
 def silhouette_loss(prediction: torch.Tensor, labels: torch.Tensor):
-    """F=1 and B=0 normalized separately; U=2 receives no constraint."""
+    """F/B normalize separately; U is unconstrained; all-U yields no terms."""
     if prediction.shape != labels.shape:
         raise ValueError("Prediction and F/B/U labels have different sizes")
-    if bool(((labels < 0) | (labels > 2)).any()):
+    if not bool(((labels == 0) | (labels == 1) | (labels == 2)).all()):
         raise ValueError("Labels must use B=0, F=1, U=2")
+    if not bool(torch.isfinite(prediction).all()):
+        raise ValueError("Silhouette prediction must be finite")
     foreground, background = labels == 1, labels == 0
     loss = prediction.sum() * 0
     terms = {}

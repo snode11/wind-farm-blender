@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 from wfrl.radar_x100 import ply, schema, recording
 
 
-def import_index(index_path, output):
+def _import_index(index_path, output):
     index_path = Path(index_path).resolve()
     raw_index = index_path.read_bytes()
     document = json.loads(raw_index)
@@ -43,16 +43,26 @@ def import_index(index_path, output):
                     raise ValueError('Invalid explicit fps')
                 time_fields = dict(clock_domain='FILE_FPS:' + session_id,
                     source_time_s=(sequence - rows[0]['sequence']) / fps, quality='FPS_DERIVED')
-            raw = ply.read_ply_bytes(path)
-            observation = ply.ply_frame(path, raw_bytes=raw, sensor_id=document['sensor_id'], session_id=session_id,
-                sequence=sequence, stream=document.get('stream', 'UNKNOWN'),
-                source_kind=source, time=schema.FrameTime(**time_fields))
+            try:
+                raw = ply.read_ply_bytes(path)
+                observation = ply.ply_frame(path, raw_bytes=raw, sensor_id=document['sensor_id'], session_id=session_id,
+                    sequence=sequence, stream=document.get('stream', 'UNKNOWN'),
+                    source_kind=source, time=schema.FrameTime(**time_fields))
+            except (ValueError, KeyError, TypeError) as exc:
+                raise ValueError(f'{path}: {exc}') from exc
             sink.append(observation, row['replay_time_s'], original_ply=raw)
         sink.close()
     except Exception as exc:
         sink.fail(str(exc))
         raise
     return sink.rows
+
+
+def import_index(index_path, output):
+    try:
+        return _import_index(index_path, output)
+    except (ValueError, KeyError, TypeError) as exc:
+        raise ValueError(f'{Path(index_path).resolve()}: {exc}') from exc
 
 
 def main():

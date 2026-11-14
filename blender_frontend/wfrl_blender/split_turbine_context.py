@@ -147,6 +147,22 @@ def _legacy_valid(obj, part, prefix):
     return False
 
 
+def _validate_display_owners(scene, objects, *, removing=False):
+    """Validate display ownership before rebuilding or removing objects."""
+    for obj in objects:
+        if any(owner != scene for owner in getattr(obj, 'users_scene', ())):
+            raise ValueError('模拟展示结构对象与其他场景共享：' + obj.name)
+    if removing:
+        import bpy
+        allowed = {item.as_pointer() for item in
+                   (scene, scene.collection, *scene.collection.children_recursive)}
+        users = bpy.data.user_map(subset=set(objects))
+        for obj in objects:
+            if obj.use_fake_user or any(user != obj and user.as_pointer() not in allowed
+                                        for user in users.get(obj, ())):
+                raise ValueError('模拟展示结构对象由用户保留或被其他数据引用：' + obj.name)
+
+
 def _existing(scene, prefix, names_key, sources):
     saved = scene.get(names_key)
     discovered = [obj for obj in scene.objects if obj.name.startswith(prefix)]
@@ -158,6 +174,7 @@ def _existing(scene, prefix, names_key, sources):
         if (len(discovered) == len(_LEGACY) and
                 all(obj is not None and _legacy_valid(obj, part, prefix)
                     for part, obj in zip(_LEGACY, legacy))):
+            _validate_display_owners(scene, legacy, removing=True)
             return {}, legacy
         raise ValueError('模拟展示结构对象已存在但保存的来源清单缺失：' + prefix)
     if isinstance(saved, str):
@@ -173,7 +190,9 @@ def _existing(scene, prefix, names_key, sources):
     legacy_parts = [name[len(prefix):] if name.startswith(prefix) else '' for name in names]
     if (len(names) == len(_LEGACY) and set(legacy_parts) == set(_LEGACY) and
             all(_legacy_valid(obj, part, prefix) for part, obj in zip(legacy_parts, objects))):
+        _validate_display_owners(scene, objects, removing=True)
         return {}, objects
+    _validate_display_owners(scene, objects)
     existing = {}
     for obj in objects:
         part = obj.name[len(prefix):] if obj.name.startswith(prefix) else ''

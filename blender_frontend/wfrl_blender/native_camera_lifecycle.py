@@ -144,6 +144,10 @@ def close(self, preserve_playback=True):
                 self.resume_generation = playback.generation()
 
     try:
+        for callback in (self.prepare, self.first_paint):
+            if bpy.app.timers.is_registered(callback):
+                self._native['_cleanup_step'](errors, '取消相机准备回调',
+                                             lambda callback=callback: bpy.app.timers.unregister(callback))
         self._native['_cleanup_step'](errors, '结束相机采集', finish_capture)
         self._native['_cleanup_step'](errors, '转移共同播放', transfer_playback)
         self._native['_cleanup_step'](errors, '清理相机视图', self.clear_views)
@@ -160,10 +164,12 @@ def close(self, preserve_playback=True):
         # Window/timer destruction is finalized after this event.
         def schedule_resume():
             bpy.app.timers.register(self.resume_after_close, first_interval=.01)
+            self._native['_PENDING_RESUMES'].append(self.resume_after_close)
             self.resume_scheduled = True
         self._native['_cleanup_step'](errors, '恢复共同播放', schedule_resume)
     self.closed = not (self.entries or self.handle is not None or self.diagram_handle is not None
                        or self.preview_quality is not None or self.source_shading or self.owns_window
+                       or any(bpy.app.timers.is_registered(callback) for callback in (self.prepare, self.first_paint))
                        or (self.resume_when_closed and not self.resume_scheduled))
     if errors:
         self._native['_remember_error'](self.scene, '相机观察恢复未完成：' + '；'.join(errors), append=True)
@@ -215,6 +221,8 @@ def close_window(self):
 def resume_after_close(self):
     bpy = self._native['bpy']
     try:
+        if not self.resume_when_closed:
+            return None
         from . import playback
         self.lifecycle_event('resume_event')
         # Another scene may have started during this delayed restoration.
@@ -234,4 +242,9 @@ def resume_after_close(self):
     except Exception as exc:
         self.lifecycle.append({'event':'resume_error','error':str(exc)})
         self._native['_remember_error'](self.scene, f'恢复共同播放失败：{exc}', append=True)
+    finally:
+        self.resume_when_closed = False
+        pending = self._native['_PENDING_RESUMES']
+        if self.resume_after_close in pending:
+            pending.remove(self.resume_after_close)
     return None

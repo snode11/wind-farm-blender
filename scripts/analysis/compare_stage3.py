@@ -10,6 +10,7 @@ import json
 import os
 import sys
 from pathlib import Path
+import tempfile
 
 import matplotlib
 matplotlib.use("Agg")
@@ -107,20 +108,21 @@ def pair_runs(runs, selected=()):
         pairs = []
         for group in groups.values():
             if any(len(candidates) != 1 for candidates in group.values()):
-                ids = {policy: [r["hist"]["run"]["run_id"] for r in candidates]
+                ids = {policy: [(r["hist"]["run"]["run_id"], r['path']) for r in candidates]
                        for policy, candidates in group.items()}
                 raise ValueError(f"Missing or ambiguous pair {ids}; select --pair ZERO_RUN_ID:LEARN_RUN_ID")
             pairs.append((group["zero"][0], group["learn"][0]))
     seen = set()
     for zero, learn in pairs:
+        pair_paths = f"{zero['path']} vs {learn['path']}"
         for run in (zero, learn):
             _validate_run(run)
         if zero["cfg"]["policy"] != "zero" or learn["cfg"]["policy"] != "learn":
             raise ValueError("Pair order must be zero:learn")
         if _common_config(zero) != _common_config(learn):
-            raise ValueError("Pair common configuration mismatch")
+            raise ValueError(f"Pair common configuration mismatch: {pair_paths}")
         if zero["hist"]["run"]["source_identity"] != learn["hist"]["run"]["source_identity"]:
-            raise ValueError("Pair source/input identity mismatch")
+            raise ValueError(f"Pair source/input identity mismatch: {pair_paths}")
         key = _pair_key(zero)
         if key in seen:
             raise ValueError("A seed/configuration/source may contribute only one independent pair")
@@ -165,6 +167,12 @@ def main():
             key = json.dumps([zero["hist"]["run"]["source_identity"], config,
                               zero["cfg"]["iters"], learn["cfg"]["iters"]], sort_keys=True)
             groups.setdefault(key, []).append((zero, learn, bm, pm, gain))
+        for group in groups.values():
+            with np.errstate(over='ignore', invalid='ignore'):
+                gains = np.asarray([row[4] for row in group])
+                if not np.isfinite([gains.mean(), gains.std()]).all():
+                    paths_used = [run['path'] for row in group for run in row[:2]]
+                    raise ValueError(f'Seed gain statistics must be finite: {paths_used}')
     except ValueError as exc:
         print(f"Comparison refused: {exc}", file=sys.stderr)
         return 1
@@ -190,22 +198,28 @@ def main():
                             else "不通过：增益均值落在 seed 散布之内，还不能归因于策略"))
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    for zero, learn in pairs:
-        line, = ax.plot(np.arange(1, len(learn["hist"]["power_norm"]) + 1),
-                        learn["hist"]["power_norm"], "-o", ms=2.5,
-                        label=f"seed {learn['cfg']['seed']} / {learn['hist']['run']['run_id'][:12]}")
-        ax.axhline(float(np.mean(zero["hist"]["power_norm"])), ls="--", lw=1,
-                   alpha=.5, color=line.get_color())
-    ax.set_xlabel("iter")
-    ax.set_ylabel(r"$P_{farm}/u_\infty^3$  [kW/(m/s)$^3$]")
-    ax.set_title("Matched baseline and policy runs")
-    ax.grid(True, alpha=.3)
-    ax.legend(fontsize=8)
-    fig.tight_layout()
-    out = os.path.join(paths.RUNS, f"stage3_{args.tag}_curves.png")
-    fig.savefig(out, dpi=130)
-    plt.close(fig)
-    print(f"\n→ {out}")
+    try:
+        for zero, learn in pairs:
+            line, = ax.plot(np.arange(1, len(learn["hist"]["power_norm"]) + 1),
+                            learn["hist"]["power_norm"], "-o", ms=2.5,
+                            label=f"seed {learn['cfg']['seed']} / {learn['hist']['run']['run_id'][:12]}")
+            ax.axhline(float(np.mean(zero["hist"]["power_norm"])), ls="--", lw=1,
+                       alpha=.5, color=line.get_color())
+        ax.set_xlabel("iter")
+        ax.set_ylabel(r"$P_{farm}/u_\infty^3$  [kW/(m/s)$^3$]")
+        ax.set_title("Matched baseline and policy runs")
+        ax.grid(True, alpha=.3)
+        ax.legend(fontsize=8)
+        fig.tight_layout()
+        out = os.path.join(paths.RUNS, f"stage3_{args.tag}_curves.png")
+        with tempfile.TemporaryDirectory(prefix=".analysis-plot-",
+                                         dir=os.path.dirname(os.path.abspath(out))) as staging:
+            staged = Path(staging) / Path(out).name
+            fig.savefig(staged, dpi=130)
+            os.replace(staged, out)
+        print(f"\n→ {out}")
+    finally:
+        plt.close(fig)
     return 0
 
 

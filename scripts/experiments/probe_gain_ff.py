@@ -29,8 +29,40 @@ SETTLE = 30          # 之后跑到尾流稳定（下游影响滞后 ~46 步，�
 READ = 12            # 末段平均的步数
 
 
+def valid_measurement(m, key):
+    values = np.asarray(m[key], float).ravel()
+    valid = np.isfinite(values)
+    if f"{key}_valid" in m:
+        declared = np.asarray(m[f"{key}_valid"])
+        if declared.dtype.kind != "b" or declared.size != values.size:
+            raise ValueError(f"{key}_valid must contain one boolean per turbine")
+        valid &= declared.ravel()
+    return values, valid
+
+
+def summarize_readings(measurements, up):
+    """Yaw counts turbine samples; farm power counts complete control steps."""
+    yaws, powers = [], []
+    for m in measurements:
+        yaw, yaw_valid = valid_measurement(m, "yaw")
+        yaws.extend(yaw[up][yaw_valid[up]])
+        power, power_valid = valid_measurement(m, "power")
+        if power.size and power_valid.all():
+            total = float(power.sum())
+            if np.isfinite(total):
+                powers.append(total)
+    return (float(np.mean(yaws)) if yaws else None,
+            float(np.mean(powers)) if powers else None,
+            {"yaw": len(yaws), "power": len(powers)})
+
+
+def describe(value, count, unit):
+    result = "无有效数据" if value is None else f"{value:.4f} {unit}"
+    return f"{result}（有效样本数={count}）"
+
+
 def run_one(d_deg, scene=None):
-    """上游机组每步偏 d_deg，返回 (末端上游平均偏航, 末段平均全场功率MW, 上游idx)。
+    """返回上游平均偏航、平均全场功率MW、上游idx及有效样本数；空均值为None。
 
     scene=None 走预注册 turb3 env；给了场景 YAML 则走 SceneRuntime（turb6 等
     自定义布局）。上游机组 = x 最小的那些（一列/一行的最前，可能多台）。
@@ -44,7 +76,7 @@ def run_one(d_deg, scene=None):
         n = drv.n
         xs = drv.xcoords
         step = lambda push: drv.step(push)                       # noqa: E731
-        read_m = lambda m: (m["power"], m["yaw"])                # noqa: E731
+        read_m = lambda m: m                                    # noqa: E731
     else:
         sc = load_scene(scene)
         rt = SceneRuntime(sc, max_steps=budget, warmup_steps=WARMUP)
@@ -52,27 +84,28 @@ def run_one(d_deg, scene=None):
         n = sc.n
         xs = np.asarray(sc.xcoords)
         step = lambda push: rt.step(yaw_delta=push)              # noqa: E731
-        read_m = lambda fr: (rt.last_measure["power"],           # noqa: E731
-                             rt.last_measure["yaw"])
+        read_m = lambda fr: rt.last_measure                     # noqa: E731
         drv = rt
     up = np.where(xs <= xs.min() + 1.0)[0]      # 上游机组（x 最小）
-    if scene is None:
-        for _ in range(WARMUP):
+    measurements = []
+    try:
+        if scene is None:
+            for _ in range(WARMUP):
+                step(np.zeros(n))
+        push = np.zeros(n)
+        push[up] = d_deg
+        for _ in range(PUSH):
+            step(push)
+        for _ in range(SETTLE):
             step(np.zeros(n))
-    push = np.zeros(n)
-    push[up] = d_deg
-    for _ in range(PUSH):
-        step(push)
-    for _ in range(SETTLE):
-        step(np.zeros(n))
-    powers, yaws = [], []
-    for _ in range(READ):
-        out = step(np.zeros(n))
-        pw, yw = read_m(out)
-        powers.append(float(np.sum(pw)))
-        yaws.append(float(np.mean(np.ravel(yw)[up])))
-    drv.close() if scene else drv.close(purge=True)
-    return float(np.mean(yaws)), float(np.mean(powers)), list(up)
+        for _ in range(READ):
+            m = read_m(step(np.zeros(n)))
+            measurements.append({key: np.asarray(value).copy() for key, value in m.items()
+                                 if key in ("yaw", "yaw_valid", "power", "power_valid")})
+    finally:
+        drv.close() if scene else drv.close(purge=True)
+    yaw, power, counts = summarize_readings(measurements, up)
+    return yaw, power, list(up), counts
 
 
 def main():
@@ -83,21 +116,37 @@ def main():
           f"read={READ})", flush=True)
     rows = []
     for d in (0.0, 1.0, 2.0, 3.0, 5.0):
-        yaw, p, up = run_one(d, scene=scene)
-        rows.append((d, yaw, p))
-        print(f"  每步偏 {d:.0f}° → 上游({len(up)}台)平均偏航 {yaw:5.1f}° → "
-              f"全场功率 {p:.4f} MW", flush=True)
+        yaw, p, up, counts = run_one(d, scene=scene)
+        rows.append((d, yaw, p, counts))
+        print(f"  每步偏 {d:.0f}° → 上游({len(up)}台)平均偏航 "
+              f"{describe(yaw, counts['yaw'], '°')} → "
+              f"全场功率 {describe(p, counts['power'], 'MW')}", flush=True)
     p0 = rows[0][2]
-    print(f"\n零偏航基线功率: {p0:.4f} MW")
+    print(f"\n零偏航基线功率: {describe(p0, rows[0][3]['power'], 'MW')}")
+    if p0 is None:
+        print("GAIN_FF_UNAVAILABLE — 基线无有效数据，不能计算增益")
+        return 0
+    if p0 == 0:
+        print("GAIN_FF_UNAVAILABLE — 基线为零，不能计算相对增益")
+        return 0
     print("相对基线增益：")
-    best = (0.0, 0.0, p0)
-    for d, yaw, p in rows:
+    best = rows[0]
+    for d, yaw, p, counts in rows:
+        if p is None:
+            print(f"  每步 {d:.0f}° → 无有效数据（有效样本数=0）")
+            continue
         g = (p - p0) / p0 * 100
-        print(f"  每步 {d:.0f}° (偏到 {yaw:.1f}°) → {g:+.2f}%")
+        print(f"  每步 {d:.0f}° (偏到 {describe(yaw, counts['yaw'], '°')}) → "
+              f"{g:+.2f}%（功率有效样本数={counts['power']}，基线={rows[0][3]['power']}）")
         if p > best[2]:
-            best = (d, yaw, p)
+            best = (d, yaw, p, counts)
     bg = (best[2] - p0) / p0 * 100
-    print(f"\n最优：每步 {best[0]:.0f}° 偏到 {best[1]:.1f}° → 增益 {bg:+.2f}%")
+    print(f"\n有效功率数据中的最优：每步 {best[0]:.0f}° "
+          f"偏到 {describe(best[1], best[3]['yaw'], '°')} → 增益 {bg:+.2f}% "
+          f"（功率有效样本数={best[3]['power']}，基线={rows[0][3]['power']}）")
+    if any(row[1] is None or row[2] is None for row in rows):
+        print("GAIN_FF_UNAVAILABLE — 部分扫描无有效数据，不能给出完整可达性结论")
+        return 0
     if bg > 1.0:
         print(f"GAIN_FF_OK — FAST.Farm 上有 {bg:.1f}% 正增益可拿，值得训练")
     else:

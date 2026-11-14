@@ -6,8 +6,9 @@ It is specific to the reviewed material-rendered passage, not a general segmente
 """
 from __future__ import annotations
 
+from .artifact_paths import save_image, save_numpy
+
 import hashlib
-import json
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
@@ -17,7 +18,11 @@ from .dataset import load_bundle, iter_rgb, write_json
 
 
 def segment_rgb(rgb, camera_id, *, with_contours=False):
-    rgb = np.asarray(rgb, dtype=np.uint8)
+    rgb = np.asarray(rgb)
+    if (rgb.ndim != 3 or rgb.shape[2] != 3 or not rgb.size or not np.isfinite(rgb).all()
+            or (rgb < 0).any() or (rgb > 255).any()):
+        raise ValueError('RGB must be a finite nonempty HxWx3 image in [0,255]')
+    rgb = rgb.astype(np.uint8)
     h, w = rgb.shape[:2]
     channels = rgb.astype(float)
     low, high = channels.min(axis=2), channels.max(axis=2)
@@ -48,6 +53,8 @@ def segment_rgb(rgb, camera_id, *, with_contours=False):
     # Outside image and the border band are unknown, not silhouette edges.
     labels[:3] = 2; labels[-3:] = 2; labels[:,:3] = 2; labels[:,-3:] = 2
     yy,xx = np.nonzero(labels == 1)
+    if not len(xx):
+        raise ValueError(f'No usable foreground after uncertainty and occlusion exclusion in {camera_id} frame')
     center = [float(xx.mean()),float(yy.mean())]
     annotation = {'method': 'RGB contrast + largest connected component; fixed first-passage thresholds',
                     'white_threshold': {'min_channel_gt':105, 'max_minus_min_lt':65},
@@ -91,12 +98,12 @@ def create_observations(bundle_dir, out_dir, fit_frame_ids, heldout_frame_ids, r
             segmented = segment_rgb(rgb,camera,with_contours=with_contours)
             labels, annotation = segmented[:2]
             filename = f'{camera}_{i:06d}_FBU.png'
-            Image.fromarray(labels).save(out/filename)
+            save_image(Image.fromarray(labels), out/filename)
             key = f'{camera}_{i:06d}'
-            image = Image.fromarray(rgb); image.thumbnail((480,270)); image.save(out/f'{key}_rgb.jpg',quality=94)
+            image = Image.fromarray(rgb); image.thumbnail((480,270)); save_image(image, out/f'{key}_rgb.jpg',quality=94)
             palette=np.asarray([[20,70,130],[0,245,80],[255,180,0]],dtype=np.uint8)
             overlay=(rgb.astype(float)*.65+palette[labels]*.35).astype(np.uint8)
-            image=Image.fromarray(overlay);image.thumbnail((480,270)); image.save(out/f'{key}_overlay.jpg',quality=94)
+            image=Image.fromarray(overlay);image.thumbnail((480,270)); save_image(image, out/f'{key}_overlay.jpg',quality=94)
             thumbnails.append((camera,i,image.copy()))
             cal=calibration[(camera,i)]
             entries.append({'camera_id':camera,'frame_id':i,'sim_time_s':motion[i]['sim_time_s'],
@@ -106,8 +113,8 @@ def create_observations(bundle_dir, out_dir, fit_frame_ids, heldout_frame_ids, r
                             'split':'heldout' if i in heldout_frame_ids else 'fit'})
             if with_contours:
                 points, valid = segmented[2:]
-                np.save(out/f'{key}_contour.npy', points, allow_pickle=False)
-                Image.fromarray(valid.astype(np.uint8)*255).save(out/f'{key}_contour_valid.png')
+                save_numpy(np.save, out/f'{key}_contour.npy', points, allow_pickle=False)
+                save_image(Image.fromarray(valid.astype(np.uint8)*255), out/f'{key}_contour_valid.png')
                 entries[-1].update(contour_points_path=str((out/f'{key}_contour.npy').resolve()),
                                    contour_valid_path=str((out/f'{key}_contour_valid.png').resolve()),
                                    contour_uncertainty_px=3.0)
@@ -128,5 +135,5 @@ def create_observations(bundle_dir, out_dir, fit_frame_ids, heldout_frame_ids, r
     canvas=Image.new('RGB',(480*cols,294*rows),'white');draw=ImageDraw.Draw(canvas)
     for j,(camera,i,im) in enumerate(thumbnails):
         x,y=(j%cols)*480,(j//cols)*294;canvas.paste(im,(x,y));draw.text((x+5,y+272),f'{camera} frame {i} / '+('heldout' if i in heldout_frame_ids else 'fit'),fill='black')
-    canvas.save(out/'FBU_review.jpg',quality=94)
+    save_image(canvas, out/'FBU_review.jpg',quality=94)
     return entries, reference

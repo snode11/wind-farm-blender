@@ -13,6 +13,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.lidar.compare_dual_beam_methods import coverage, load_verified, statistics
+from scripts.lidar import compare_dual_beam_methods
+from scripts.lidar._atomic_output import new_directory
 from wfrl.lidar.dual_beam_replay import digest
 
 SCHEMA = 'wfrl.dual-beam-time-refinement.v1'
@@ -132,6 +134,8 @@ def verify_run_inputs(coarse_run, fine_run):
         inventories.append(inventory)
     if set(inventories[0]) != set(inventories[1]):
         raise ValueError('Different input inventories')
+    if not any(path.suffix.lower() == '.fst' for path, _ in inventories[0].values()):
+        raise ValueError('Missing actual FST temporal input')
     comparisons = []
     for identity in sorted(inventories[0]):
         (a, ah), (b, bh) = inventories[0][identity], inventories[1][identity]
@@ -236,6 +240,12 @@ def load_comparison(path, candidate_override=None):
         manifest = packages[name]['overlay']['manifest']
         if manifest['source_hashes'] != report['source_hashes'] or manifest['source_fps'] != report['source_fps']:
             raise ValueError('Comparison source hash/fps link differs')
+    recomputed = compare_dual_beam_methods.compare_packages(packages['baseline'], packages['candidate'])
+    for field in ('fixed_window_samples', 'complete_passage_minima', 'metrics',
+                  'coverage', 'passage_minimum_statistics'):
+        if field not in report or not compare_dual_beam_methods.numerical_reproduction(
+                report[field], recomputed[field])['passed']:
+            raise ValueError('Comparison evidence differs from verified packages: ' + field)
     return dict(report=report, packages=packages, path=path, sha256=digest(path))
 
 
@@ -243,12 +253,19 @@ def grid_records(bundle):
     """Retain every source time, with reasons also for invalid/outside rows."""
     report = bundle['report']
     windows = {(r['turbine_id'], r['time_s']):r for r in report['fixed_window_samples']}
+    if len(windows) != len(report['fixed_window_samples']):
+        raise ValueError('Duplicate scored window row')
     result = {}
     for turbine, data in bundle['packages']['candidate']['overlay']['results'].items():
         other = bundle['packages']['baseline']['overlay']['results'][turbine]
         for index, row in enumerate(data['samples']):
             time = row['time_s']; key = (turbine, time)
             window = windows.get(key)
+            if (window is not None) != (row['passage_id'] is not None):
+                raise ValueError('Scored window does not cover the complete fixed source window')
+            if window is not None and any(window[field] != row[field]
+                    for field in ('expected_blade_id', 'passage_id')):
+                raise ValueError('Scored window identity differs from source row')
             record = dict(turbine_id=turbine, time_s=time,
                           expected_blade_id=row['expected_blade_id'], passage_id=row['passage_id'],
                           boundary_truncated=window['boundary_truncated'] if window else False,
@@ -262,6 +279,12 @@ def grid_records(bundle):
                     raise ValueError('Method grids differ')
                 rec = raw['reconstruction']
                 if window:
+                    fresh = rec['valid'] and rec['blade_id'] == row['expected_blade_id']
+                    expected = dict(fresh_valid=fresh,
+                        estimate_clearance_m=rec['clearance_estimate'] if fresh else None,
+                        error_m=rec['clearance_estimate']-raw['evaluation']['clearance_reference_m'] if fresh else None)
+                    if not compare_dual_beam_methods.numerical_reproduction(window[name], expected)['passed']:
+                        raise ValueError('Scored window prediction/error differs from verified source row')
                     record[name] = deepcopy(window[name])
                 else:
                     record[name] = dict(fresh_valid=False, reason='outside_fixed_window',
@@ -396,9 +419,10 @@ def main(argv=None):
         source_method_summaries={k:dict(metrics=b['report']['metrics'],coverage=b['report']['coverage']) for k,b in zip(('coarse','fine'),bundles)},
         s1_events={k:{tid:deepcopy(v['events']) for tid,v in b['packages']['candidate']['overlay']['results'].items()} for k,b in zip(('coarse','fine'),bundles)},
         evidence_tool_hashes={str(Path(__file__).relative_to(ROOT)):digest(__file__)})
-    out=args.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    (out/'comparison.json').write_text(json.dumps(report,ensure_ascii=False,allow_nan=False,indent=2)+'\n', encoding='utf-8')
-    (out/'report.md').write_text(markdown_report(report), encoding='utf-8')
+    out=args.output.resolve()
+    with new_directory(out) as staged:
+        (staged/'comparison.json').write_text(json.dumps(report,ensure_ascii=False,allow_nan=False,indent=2)+'\n', encoding='utf-8')
+        (staged/'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(out)
 
 

@@ -1,6 +1,7 @@
 """Camera configuration and wall-clock screen capture for all runtime modes."""
 import time
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import bpy
 
@@ -13,21 +14,21 @@ _ACTIVE = None
 def _watch_recording():
     if _ACTIVE is None:
         return None
-    if not _ACTIVE._session_valid():
+    if _ACTIVE._closed or not _ACTIVE._session_valid():
         _ACTIVE._finish('CANCELLED', '录制源窗口或场景已变化')
-        return None
+        return .25 if _ACTIVE is not None else None
     return .25
 
 
 def _ensure_recording_watch():
     if not bpy.app.timers.is_registered(_watch_recording):
-        bpy.app.timers.register(_watch_recording, first_interval=.25)
+        bpy.app.timers.register(_watch_recording, first_interval=.25, persistent=True)
 
 
 def _stop_recording(_unused=None):
     if _ACTIVE is not None:
         _ACTIVE._finish('CANCELLED', '场景重载、撤销或功能关闭')
-    if bpy.app.timers.is_registered(_watch_recording):
+    if _ACTIVE is None and bpy.app.timers.is_registered(_watch_recording):
         bpy.app.timers.unregister(_watch_recording)
 
 
@@ -37,7 +38,37 @@ class WFRL_OT_PresentationMode(bpy.types.Operator):
     bl_description = '切换演示/开发界面：隐藏或显示工具栏、工具标题栏和操作手柄，不影响仿真或训练'
 
     def execute(self, context):
-        set_presentation_mode(context, not context.workspace.get('presentation_mode', False))
+        properties, chrome = [], []
+        try:
+            if context.workspace is None or context.scene is None:
+                raise ValueError('演示模式需要有效的工作区和场景')
+            for owner, key in ((context.workspace, 'presentation_mode'),
+                               (context.scene, 'wfrl_presentation_mode')):
+                properties.append((owner, key, key in owner, owner.get(key)))
+            if context.screen:
+                for area in context.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        space = area.spaces.active
+                        for name in ('show_region_toolbar', 'show_region_tool_header', 'show_gizmo'):
+                            chrome.append((space, name, getattr(space, name)))
+            set_presentation_mode(context, not context.workspace.get('presentation_mode', False))
+        except Exception as exc:
+            errors = [str(exc)]
+            for owner, key, present, value in properties:
+                try:
+                    if present:
+                        owner[key] = value
+                    elif key in owner:
+                        del owner[key]
+                except Exception as error:
+                    errors.append(f'{key} 恢复失败：{error}')
+            for space, name, value in chrome:
+                try:
+                    setattr(space, name, value)
+                except Exception as error:
+                    errors.append(f'{name} 恢复失败：{error}')
+            self.report({'ERROR'}, '; '.join(errors))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 
@@ -45,6 +76,17 @@ def _directory(scene):
     directory = Path(bpy.path.abspath(scene.wfrl_capture_directory)).expanduser()
     directory.mkdir(parents=True, exist_ok=True)
     return directory
+
+
+def _screenshot(path):
+    """Publish a window PNG only after Blender has completed the file."""
+    with TemporaryDirectory(prefix='.wfrl-capture-', dir=path.parent) as temporary:
+        pending = Path(temporary) / path.name
+        if 'FINISHED' not in bpy.ops.screen.screenshot(filepath=str(pending)):
+            raise RuntimeError('Blender cancelled the screenshot')
+        if not pending.is_file() or pending.stat().st_size == 0:
+            raise RuntimeError('Blender did not save a complete screenshot')
+        pending.replace(path)
 
 
 class WindowRequired:
@@ -61,9 +103,7 @@ class WFRL_OT_CaptureScreenshot(WindowRequired, bpy.types.Operator):
     def execute(self, context):
         try:
             path = _directory(context.scene) / f'wfrl-{time.time_ns()}.png'
-            result = bpy.ops.screen.screenshot(filepath=str(path))
-            if 'FINISHED' not in result:
-                raise RuntimeError('Blender cancelled the screenshot')
+            _screenshot(path)
             context.scene['wfrl_capture_status'] = str(path)
             self.report({'INFO'}, f'Saved {path.name}')
         except (OSError, RuntimeError) as exc:
@@ -91,6 +131,7 @@ class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         self._scene = scene
+        self._scene_name = getattr(scene, 'name', '')
         self._window = context.window
         self._closed = False
         self._index = 0
@@ -131,8 +172,7 @@ class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
         now = time.monotonic()
         elapsed = now - self._started
         if elapsed >= self._duration or self._index >= self._total:
-            self._finish('COMPLETE')
-            return {'FINISHED'}
+            return {'FINISHED'} if self._finish('COMPLETE') else {'CANCELLED'}
         if now < self._next_capture:
             return {'PASS_THROUGH'}
         try:
@@ -153,8 +193,7 @@ class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
             raise ReferenceError('录制源窗口或场景已变化')
         frame = self._scene.frame_current
         path = self._directory / f'{self._index:06d}.png'
-        if 'FINISHED' not in bpy.ops.screen.screenshot(filepath=str(path)):
-            raise RuntimeError('Screenshot cancelled')
+        _screenshot(path)
         self._frames.append({'file': path.name, 'elapsed_s': elapsed,
                              'display_frame': frame})
         self._index += 1
@@ -170,30 +209,56 @@ class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
 
     def _finish(self, status, error=''):
         global _ACTIVE
-        if self._closed:
-            return
+        first_close = not self._closed
         self._closed = True
-        if _ACTIVE is self:
-            _ACTIVE = None
+        if not first_close and _ACTIVE is not self:
+            return
+        cleanup_errors = []
         try:
             if self._timer is not None:
                 self._manager.event_timer_remove(self._timer)
-        except (ReferenceError, RuntimeError):
-            pass
-        label = f'{status} / {self._index} PNG frames / {self._directory}'
-        try:
-            write_json(self._directory / 'manifest.json', {
-                'status': status, 'requested_fps': self._fps, 'duration_s': self._duration,
-                'error': error or None,
-                'format': 'PNG window sequence', 'clock': 'wall-clock',
-                'note': 'Actual capture timestamps retained; slow captures drop samples, never control steps.',
-                'frames': self._frames})
-        except (OSError, ValueError) as exc:
-            label = f'Manifest write failed: {exc}'
+            self._timer = None
+        except ReferenceError:
+            self._timer = None
+        except RuntimeError as exc:
+            cleanup_errors.append(str(exc))
+        if not cleanup_errors:
+            try:
+                if bpy.app.timers.is_registered(_watch_recording):
+                    bpy.app.timers.unregister(_watch_recording)
+            except RuntimeError as exc:
+                cleanup_errors.append(str(exc))
+        if first_close:
+            self._finish_error = ''
+            self._finish_label = f'{status} / {self._index} PNG frames / {self._directory}'
+            try:
+                write_json(self._directory / 'manifest.json', {
+                    'status': status, 'requested_fps': self._fps, 'duration_s': self._duration,
+                    'error': error or None,
+                    'format': 'PNG window sequence', 'clock': 'wall-clock',
+                    'note': 'Actual capture timestamps retained; slow captures drop samples, never control steps.',
+                    'frames': self._frames})
+            except (OSError, ValueError) as exc:
+                self._finish_label = f'Manifest write failed: {exc}'
+                self._finish_error = self._finish_label
+                self.report({'ERROR'}, self._finish_error)
+        label = self._finish_label
+        if cleanup_errors:
+            try:
+                _ensure_recording_watch()
+            except RuntimeError as exc:
+                cleanup_errors.append(str(exc))
+            label = 'FAILED / 录制计时器清理待重试：' + '; '.join(cleanup_errors)
+            self.report({'ERROR'}, label)
         try:
             self._scene['wfrl_capture_status'] = label
         except ReferenceError:
             pass
+        if not cleanup_errors:
+            if _ACTIVE is self:
+                _ACTIVE = None
+            self._scene = self._window = self._manager = None
+        return not cleanup_errors and not self._finish_error
 
     def cancel(self, context):
         if _ACTIVE is self:
@@ -286,5 +351,10 @@ def status_for(scene):
     job = _ACTIVE
     if job is None:
         return TaskStatus('recording')
-    return TaskStatus('recording', True, job._scene == scene, 'RECORDING',
-                      job._scene.name, '', '')
+    valid = not job._closed and job._session_valid()
+    try:
+        owned = job._scene == scene
+    except ReferenceError:
+        owned = False
+    return TaskStatus('recording', True, owned, 'RECORDING' if valid else 'CANCELLING',
+                      job._scene_name, '', '')

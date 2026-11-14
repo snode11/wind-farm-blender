@@ -103,11 +103,13 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
                     state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
                     box.label(text=f'{entry.turbine_id}  ·  {state}  ·  {entry.rpm:.2f} RPM')
                     box.label(text=f'朝向 {entry.yaw_deg:.1f}°  ·  叶轮 {entry.azimuth_deg:.1f}°')
-                    if entry.individual_pitch:
-                        pitches = ' / '.join(f'{getattr(entry, f"pitch_b{i}_deg"):.1f}°' for i in range(1, 4))
-                        box.label(text=f'独立桨距  {pitches}')
+                    actual = [getattr(entry, f'pitch_actual_b{i}_deg') for i in range(1, 4)]
+                    if entry.individual_pitch or max(actual) - min(actual) > 1e-9:
+                        pitches = ' / '.join(f'{pitch:.1f}°' for pitch in actual)
+                        label = '独立桨距' if entry.individual_pitch else '实际桨距'
+                        box.label(text=f'{label}  {pitches}')
                     else:
-                        box.label(text=f'统一桨距  {entry.pitch_deg:.1f}°')
+                        box.label(text=f'统一桨距  {actual[0]:.1f}°')
         else:
             entry = entries[0]
             state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
@@ -133,6 +135,8 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             last = scene.get('wfrl_manual_last_video')
             if last:
                 body.label(text='已导出 ' + os.path.basename(last), icon='CHECKMARK')
+            if scene.get('wfrl_manual_error'):
+                body.label(text=scene['wfrl_manual_error'], icon='ERROR')
         header, body = layout.panel('wfrl_manual_live_stream', default_closed=False)
         header.label(text='现场视频')
         if body:

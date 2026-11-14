@@ -14,6 +14,148 @@ from .editor_persistence import EditorPersistence
 _LOG = logging.getLogger(__name__)
 
 
+class _TimeState:
+    """Retain displayed geometry without relying on a failed deformation to rerun."""
+
+    def __init__(self, session):
+        from .. import clearance_replay, tip_tracking
+        self.session = session
+        scene, flex = session.scene, session.flex
+        self.frame = getattr(scene, 'frame_current', None)
+        self.subframe = getattr(scene, 'frame_subframe', 0.)
+        self.records = getattr(session, 'records', None)
+        self.properties = {key: scene[key] for key in scene.keys() if self._time_property(key)}
+        self.reader = clearance_replay._READERS.get(scene.as_pointer())
+        self.attributes = []
+
+        def retain(owner, names):
+            for name in names:
+                if hasattr(owner, name):
+                    value = getattr(owner, name)
+                    if name == 'rotation_axis_angle':
+                        value = tuple(value)
+                    else:
+                        value = value.copy() if hasattr(value, 'copy') else copy.copy(value)
+                    self.attributes.append((owner, name, value))
+
+        retain(scene, ('wfrl_clearance_show_config',))
+        retain(flex, ('enabled', 'frame_error', 'last_telemetry_frame'))
+        self.visibility, self.curves, self.materials, self.beams = [], [], [], []
+        for obj in getattr(scene, 'objects', ()):
+            retain(obj, ('location', 'rotation_euler', 'rotation_quaternion',
+                         'rotation_axis_angle', 'scale', 'hide_viewport', 'hide_render'))
+            if hasattr(obj, 'hide_get'):
+                self.visibility.append((obj, obj.hide_get()))
+            if getattr(obj, 'type', None) == 'CURVE':
+                curve = obj.data
+                if curve is not None and all(s.type == 'POLY' for s in curve.splines):
+                    splines = []
+                    for spline in curve.splines:
+                        points = np.empty(len(spline.points) * 4, dtype=np.float32)
+                        spline.points.foreach_get('co', points)
+                        splines.append((points, spline.use_cyclic_u, spline.material_index))
+                    self.curves.append((curve, splines))
+                    retain(curve, ('bevel_depth',))
+                    if hasattr(curve, 'materials'):
+                        self.materials.append((curve.materials, tuple(curve.materials)))
+            if hasattr(obj, 'keys') and 'wfrl_beam_active' in obj:
+                self.beams.append((obj, obj['wfrl_beam_active']))
+        trail = tip_tracking.active(scene)
+        if trail is not None:
+            for name in ('points', 'times', 'completed', 'last_frame', 'last_time',
+                         'last_angle', 'turn_angle', 'compare_since', '_geometry_revision', '_drawn'):
+                self.attributes.append((trail, name, copy.deepcopy(getattr(trail, name))))
+        objects = [row[0] for row in (*getattr(flex, 'blades', ()), *getattr(flex, 'towers', ()))]
+        objects.extend(getattr(session, 'helpers', ()))
+        objects.append(getattr(session, 'repair_source', None))
+        comparison = getattr(flex, 'comparison', None)
+        if comparison is not None:
+            retain(comparison, ('rows', 'labels'))
+            objects.extend(comparison.objects)
+        self.meshes = []
+        seen = set()
+        for obj in objects:
+            if obj is None:
+                continue
+            try:
+                mesh = obj.data
+            except ReferenceError:
+                # Removed helper objects are also ignored by update_attachments.
+                continue
+            if mesh is None or not hasattr(mesh, 'vertices'):
+                continue
+            identity = mesh.as_pointer() if hasattr(mesh, 'as_pointer') else id(mesh)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            coordinates = np.empty(len(mesh.vertices) * 3, dtype=np.float32)
+            mesh.vertices.foreach_get('co', coordinates)
+            self.meshes.append((mesh, coordinates))
+
+    @staticmethod
+    def _time_property(key):
+        return (key.startswith(('defect_', 'wfrl_clearance_', 'wfrl_flex_', 'wfrl_tip_trail_'))
+                or key == 'wfrl_home_load_error')
+
+    @staticmethod
+    def _restore_curve(curve, saved):
+        if (len(curve.splines) != len(saved) or
+                any(spline.type != 'POLY' or len(spline.points) * 4 != len(points)
+                    for spline, (points, _cyclic, _material) in zip(curve.splines, saved))):
+            curve.splines.clear()
+            for points, _cyclic, _material in saved:
+                curve.splines.new('POLY').points.add(len(points) // 4 - 1)
+        for spline, (points, cyclic, material) in zip(curve.splines, saved):
+            spline.points.foreach_set('co', points)
+            spline.use_cyclic_u, spline.material_index = cyclic, material
+
+    def restore(self, error):
+        from .. import clearance_replay
+        scene, flex = self.session.scene, self.session.flex
+        self.session.records = self.records
+
+        def attempt(operation):
+            try:
+                operation()
+            except BaseException as rollback_error:
+                error.add_note('Defect time restoration failed: ' + str(rollback_error))
+                _LOG.exception('Defect time restoration failed')
+
+        if self.frame is not None:
+            attempt(lambda: scene.frame_set(self.frame, subframe=self.subframe))
+            attempt(lambda: setattr(scene, 'frame_current', self.frame))
+            attempt(lambda: setattr(scene, 'frame_subframe', self.subframe))
+        for owner, name, value in self.attributes:
+            attempt(lambda owner=owner, name=name, value=value: setattr(owner, name, value))
+        for obj, hidden in self.visibility:
+            attempt(lambda obj=obj, hidden=hidden: obj.hide_set(hidden))
+        for mesh, coordinates in self.meshes:
+            attempt(lambda mesh=mesh, coordinates=coordinates: mesh.vertices.foreach_set('co', coordinates))
+            attempt(lambda mesh=mesh: mesh.update())
+        for curve, splines in self.curves:
+            attempt(lambda curve=curve, splines=splines: self._restore_curve(curve, splines))
+        for materials, saved in self.materials:
+            if tuple(materials) != saved:
+                attempt(lambda materials=materials: materials.clear())
+                for material in saved:
+                    attempt(lambda materials=materials, material=material: materials.append(material))
+        for obj, active in self.beams:
+            attempt(lambda obj=obj, active=active: obj.__setitem__('wfrl_beam_active', active))
+        for key in tuple(scene.keys()):
+            if self._time_property(key) and key not in self.properties:
+                attempt(lambda key=key: scene.pop(key))
+        for key, value in self.properties.items():
+            attempt(lambda key=key, value=value: scene.__setitem__(key, value))
+        if self.reader is None:
+            clearance_replay._READERS.pop(scene.as_pointer(), None)
+        else:
+            clearance_replay._READERS[scene.as_pointer()] = self.reader
+        # Matrices and interpolated geometry can contain partially written poses.
+        for name in ('_world_matrices', '_update_geometry'):
+            if hasattr(flex, name):
+                setattr(flex, name, None)
+
+
 class EditorSession(EditorGeometry, EditorPersistence):
 
     def __init__(self, scene, document=None):
@@ -124,10 +266,12 @@ class EditorSession(EditorGeometry, EditorPersistence):
         _editor.sync_defect_list(self, document)
 
     def set_time(self, t):
+        """Commit a seek only after deformation succeeds; restore display on failure."""
         from . import editor as _editor
         if not math.isfinite(t) or not self.flex.times[0] <= t <= self.flex.times[-1]:
             raise ValueError('时刻超出 NREL 源数据时间线')
-        _editor._UPDATING=True
+        previous = _TimeState(self)
+        updating, _editor._UPDATING = _editor._UPDATING, True
         try:
             f=1+(t-self.flex.times[0])*60
             self.scene.frame_set(math.floor(f),subframe=f-math.floor(f))
@@ -142,7 +286,14 @@ class EditorSession(EditorGeometry, EditorPersistence):
             self.scene['defect_time_s']=t
             self.records=None
             self.scene['defect_analysis_status']='NOT_EVALUATED'
-        finally: _editor._UPDATING=False
+        except BaseException as error:
+            try:
+                previous.restore(error)
+            except BaseException as rollback_error:
+                error.add_note('Defect time restoration failed: ' + str(rollback_error))
+                _LOG.exception('Defect time restoration failed')
+            raise
+        finally: _editor._UPDATING=updating
 
     def begin(self, index=None, kind='fine_crack'):
         from . import editor as _editor
@@ -213,15 +364,27 @@ class EditorSession(EditorGeometry, EditorPersistence):
     def discard_preview(self):
         if self.preview is not None:
             self.geometry.activate(self.payload)
-            self.store.cancel(self.preview)
-            self.preview=None
+            previous, self.preview = self.preview, None
+            self.store._cancel_after_error(previous)
             self.update_helpers(self.store.document)
 
     def preview_draft(self):
-        self.discard_preview()
-        self.preview=self.store.prepare(self.draft)
-        self.geometry.activate(self.preview.resource)
-        self.update_helpers(self.draft)
+        previous = self.preview
+        candidate = self.store.prepare(self.draft)
+        try:
+            self.geometry.activate(candidate.resource)
+            self.update_helpers(candidate.document)
+        except BaseException:
+            try:
+                self.geometry.activate(previous.resource if previous is not None else self.payload)
+                self.update_helpers(previous.document if previous is not None else self.store.document)
+            except Exception:
+                _LOG.exception('Defect preview failed; display restoration also failed')
+            self.store._cancel_after_error(candidate)
+            raise
+        self.preview = candidate
+        if previous is not None:
+            self.store._cancel_after_error(previous)
 
     def finish(self, commit=False):
         from . import editor as _editor
@@ -342,7 +505,8 @@ def detach(scene=None,*,restore=True):
         # preview or access a scene whose RNA has already been deleted.
         s.geometry.active = None
         for payload in (getattr(s, 'payload', None), s.healthy_payload,
-                        s.preview.resource if s.preview is not None else None):
+                        s.preview.resource if s.preview is not None else None,
+                        *list(getattr(s.geometry, 'pending', []))):
             if payload is not None:
                 attempt(lambda payload=payload: s.geometry.dispose(payload))
         if not failed and restore:

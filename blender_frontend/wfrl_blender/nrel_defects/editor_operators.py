@@ -2,9 +2,19 @@
 import math
 import logging
 import time
+from copy import deepcopy
 import bpy
 
 _LOG = logging.getLogger(__name__)
+
+
+def _restore_properties(target, values, error):
+    for key, value in values.items():
+        try:
+            setattr(target, key, value)
+        except Exception as exc:
+            error.add_note(f'Editor property rollback failed for {key}: {exc}')
+            _LOG.exception('Defect editor property rollback failed')
 
 
 def action_unavailable(s, p, action):
@@ -114,12 +124,32 @@ class NREL_OT_defect_action(bpy.types.Operator):
             if self.action == 'RETRY_CLEANUP':
                 s.store.retry_disposals(strict=True)
             elif self.action in ('NEW', 'EDIT'):
-                d = s.begin(None if self.action == 'NEW' else p.selected, p.kind)
-                p.selected = s.draft_index
-                _editor.props_from_defect(p, d)
+                before = {key: getattr(p, key) for key in (
+                    'selected', 'kind', 'turbine_id', 'blade_id', 'side', 'span', 'u', 'theta',
+                    'length', 'width', 'depth', 'seed', 'enabled', 'edge_roughness', 'crater_fraction')}
+                try:
+                    d = s.begin(None if self.action == 'NEW' else p.selected, p.kind)
+                    p.selected = s.draft_index
+                    _editor.props_from_defect(p, d)
+                except BaseException as error:
+                    if s.draft is not None:
+                        try:
+                            s.finish(False)
+                        except Exception as exc:
+                            error.add_note(f'Edit rollback failed: {exc}')
+                            _LOG.exception('Defect edit rollback failed')
+                    _restore_properties(p, before, error)
+                    raise
             elif self.action in ('PREVIEW', 'CONFIRM'):
-                _editor.draft_from_props(s, p)
-                s.preview_draft() if self.action == 'PREVIEW' else s.finish(True)
+                draft, before = s.draft, deepcopy(s.draft)
+                try:
+                    _editor.draft_from_props(s, p)
+                    s.preview_draft() if self.action == 'PREVIEW' else s.finish(True)
+                except BaseException:
+                    if s.draft is draft:
+                        draft.clear()
+                        draft.update(before)
+                    raise
             elif self.action == 'CANCEL':
                 s.finish(False)
             elif self.action in ('COPY', 'DELETE', 'TOGGLE'):
@@ -143,11 +173,28 @@ class NREL_OT_defect_action(bpy.types.Operator):
             elif self.action in ('CLOSEUP', 'OBLIQUE'):
                 s.closeup(s.draft_index if s.draft is not None else p.selected, self.action == 'OBLIQUE')
             elif self.action.startswith('CAMERA'):
-                s.scene.camera = s.camera(int(self.action[-1]))
-                for area in context.screen.areas:
-                    if area.type == 'VIEW_3D':
-                        area.spaces.active.overlay.show_overlays = False
-                        area.spaces.active.region_3d.view_perspective = 'CAMERA'
+                camera = s.camera(int(self.action[-1]))
+                previous_camera = s.scene.camera
+                views = [(area.spaces.active, area.spaces.active.overlay.show_overlays,
+                          area.spaces.active.region_3d.view_perspective)
+                         for area in (context.screen.areas if context.screen else ())
+                         if area.type == 'VIEW_3D']
+                try:
+                    s.scene.camera = camera
+                    for space, _overlays, _perspective in views:
+                        space.overlay.show_overlays = False
+                        space.region_3d.view_perspective = 'CAMERA'
+                except BaseException as error:
+                    for target, key, value in [(s.scene, 'camera', previous_camera)] + [
+                            entry for space, overlays, perspective in views for entry in (
+                                (space.overlay, 'show_overlays', overlays),
+                                (space.region_3d, 'view_perspective', perspective))]:
+                        try:
+                            setattr(target, key, value)
+                        except Exception as exc:
+                            error.add_note(f'Camera view rollback failed: {exc}')
+                            _LOG.exception('Defect camera view rollback failed')
+                    raise
             elif self.action == 'ANALYZE':
                 if s.draft is not None:
                     raise ValueError('请先确认或取消编辑')
@@ -188,25 +235,42 @@ class NREL_OT_defect_pick(bpy.types.Operator):
         'MOUSEROTATE', 'MOUSESMARTZOOM', 'NDOF_MOTION',
     })
 
+    @classmethod
+    def poll(cls, context):
+        from . import editor as _editor
+        try:
+            s = _editor.session(context)
+            return (s is not None and s.draft is not None and not s.busy
+                    and not getattr(s, 'closing', False) and s.healthy_payload is None
+                    and context.area is not None and context.area.type == 'VIEW_3D')
+        except (AttributeError, ReferenceError):
+            return False
+
     def invoke(self, context, event):
         from . import editor as _editor
         s = _editor.session(context)
-        if s is None or s.draft is None or context.area.type != 'VIEW_3D':
+        if not self.poll(context):
             self.report({'ERROR'}, '先新建或编辑缺陷，再在三维视口中选择位置')
             return {'CANCELLED'}
+        self.pick_session, self.pick_draft = s, s.draft
         context.window_manager.modal_handler_add(self)
         context.workspace.status_text_set('左键选择健康参考表面；中键或滚轮调整视图；Esc 或右键取消选点')
         return {'RUNNING_MODAL'}
 
     def cancel(self, context):
-        context.workspace.status_text_set(None)
+        self.pick_session = self.pick_draft = None
+        try:
+            context.workspace.status_text_set(None)
+        except (AttributeError, ReferenceError):
+            _LOG.warning('Defect picker workspace is no longer available', exc_info=True)
 
     def modal(self, context, event):
         from . import editor as _editor
         from .. import viewport
         s = _editor.session(context)
-        if event.type in {'ESC', 'RIGHTMOUSE'} or s is None or s.draft is None:
-            context.workspace.status_text_set(None)
+        if (event.type in {'ESC', 'RIGHTMOUSE'} or not self.poll(context)
+                or s is not self.pick_session or s.draft is not self.pick_draft):
+            self.cancel(context)
             return {'CANCELLED'}
         # Press, release and hover outside the invoking view's drawing region
         # belong to the sidebar, header or another area; only its drawing
@@ -223,13 +287,24 @@ class NREL_OT_defect_pick(bpy.types.Operator):
             try:
                 p = context.scene.wfrl_nrel_defects
                 a = s.locate_ray(origin, direction, p.blade_id, p.turbine_id)
-                p.span, p.u, p.side = a['s_m'], a['u'], a['surface_side']
-                p.status = '位置已选定；点击“更新预览”检查效果'
-                context.workspace.status_text_set(None)
-                _editor.redraw_editor(context)
-                return {'FINISHED'}
             except Exception as exc:
                 self.report({'WARNING'}, str(exc))
+                return {'RUNNING_MODAL'}
+            before = {key: getattr(p, key) for key in ('span', 'u', 'side')}
+            try:
+                p.span, p.u, p.side = a['s_m'], a['u'], a['surface_side']
+                p.status = '位置已选定；点击“更新预览”检查效果'
+            except Exception as exc:
+                _restore_properties(p, before, exc)
+                self.report({'ERROR'}, str(exc))
+                self.cancel(context)
+                return {'CANCELLED'}
+            self.cancel(context)
+            try:
+                _editor.redraw_editor(context)
+            except (ReferenceError, RuntimeError):
+                _LOG.warning('Defect picker viewport redraw failed', exc_info=True)
+            return {'FINISHED'}
         return {'RUNNING_MODAL'}
 
 
@@ -262,6 +337,16 @@ class NREL_OT_defect_scan(bpy.types.Operator):
     bl_idname = 'wfrl.nrel_defect_scan'
     bl_label = '扫描固定三相机'
 
+    @classmethod
+    def poll(cls, context):
+        from . import editor as _editor
+        try:
+            return (context.window is not None and context.window_manager is not None
+                    and context.view_layer is not None and not _editor.action_unavailable(
+                        _editor.session(context), context.scene.wfrl_nrel_defects, 'SCAN'))
+        except (AttributeError, ReferenceError):
+            return False
+
     def invoke(self, context, event):
         from . import editor as _editor
         from .defect_timeline import FrameMapping
@@ -277,6 +362,8 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             reason = _editor.action_unavailable(s, p, 'SCAN')
             if reason:
                 raise ValueError(reason)
+            if not self.poll(context):
+                raise ValueError('扫描需要有效的编辑器窗口和视图层')
             # RNA FloatProperty stores float32; recover an intended integral
             # frame count before strict timing validation (e.g. 2/60 seconds).
             duration = float(p.scan_duration)
@@ -322,7 +409,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
 
     def finish_scan(self, context, cancelled=False, error=None, *, restore_time=True, resume_playback=True):
         from . import editor as _editor
-        from .defect_outputs import save_records, write_json, update_run, save_review
+        from .defect_outputs import save_records, write_json, update_run, save_review, _staged_run
         from .defect_timeline import summarize_intervals
         from .. import playback
         if self.finished:
@@ -364,15 +451,16 @@ class NREL_OT_defect_scan(bpy.types.Operator):
                 _LOG.warning('Defect scan playback could not resume', exc_info=True)
         complete = not cancelled and error is None and self.index == self.mapping.frame_count
         try:
-            save_records(self.run, self.rows)
-            write_json(self.run['output']/'visible_intervals.json', dict(
-                completed=complete, completed_frames=self.index, next_frame_index=None if complete else self.index,
-                frame_mapping=self.mapping.to_dict(), error=error,
-                intervals=summarize_intervals(self.rows, self.mapping, complete)))
-            self.run['manifest']['state'] = 'FAILED' if error else 'G_SCAN_COMPLETE' if complete else 'G_SCAN_PARTIAL'
-            self.run['manifest']['products']['visible_intervals'] = dict(state='GENERATED', complete=complete)
-            update_run(self.run)
-            save_review(s, self.run)
+            with _staged_run(self.run) as staged:
+                save_records(staged, self.rows)
+                write_json(staged['output']/'visible_intervals.json', dict(
+                    completed=complete, completed_frames=self.index, next_frame_index=None if complete else self.index,
+                    frame_mapping=self.mapping.to_dict(), error=error,
+                    intervals=summarize_intervals(self.rows, self.mapping, complete)))
+                staged['manifest']['state'] = 'FAILED' if error else 'G_SCAN_COMPLETE' if complete else 'G_SCAN_PARTIAL'
+                staged['manifest']['products']['visible_intervals'] = dict(state='GENERATED', complete=complete)
+                update_run(staged)
+                save_review(s, staged)
         except Exception as exc:
             complete = False
             error = '; '.join(filter(None, (error, 'OUTPUT_FAILED: '+repr(exc))))

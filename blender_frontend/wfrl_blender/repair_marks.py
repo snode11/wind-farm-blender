@@ -36,9 +36,10 @@ def _attribute(mesh, name, kind, values):
     attr.data.foreach_set('value', values)
 
 
-def _attachment(source):
+def _attachment(source, resources):
     import bpy
     tree = bpy.data.node_groups.new(NAME + '.SurfaceAttachment', 'GeometryNodeTree')
+    resources.append(tree)
     tree[_OWNER] = True
     tree.interface.new_socket(name='Geometry', in_out='INPUT', socket_type='NodeSocketGeometry')
     tree.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
@@ -95,9 +96,10 @@ def _attachment(source):
     return tree
 
 
-def _material():
+def _material(resources):
     import bpy
     mat = bpy.data.materials.new(NAME + '.RepairedPaint')
+    resources.append(mat)
     mat[_OWNER] = True
     mat.diffuse_color = (.49, .52, .48, 1)
     mat.use_nodes = True
@@ -203,29 +205,37 @@ def _footprint(blade):
 
 
 def _owned(obj, blade):
-    # Also migrate the already delivered standalone repaint when encountered.
-    return bool(obj.get(_OWNER) or (obj.name == NAME and obj.parent == blade
-                and obj.get('repair_example') and obj.get('kind') == 'synthetic_repaint'))
+    # Standalone synthetic repaint objects carry the repair_example identity.
+    return bool(obj.parent == blade and (obj.get(_OWNER) or (obj.name == NAME
+                and obj.get('repair_example') and obj.get('kind') == 'synthetic_repaint')))
 
 
-def _remove(objects):
+def _check_removable(objects):
+    for obj in objects:
+        if (len(obj.users_scene) > 1 or obj.library is not None
+                or obj.use_fake_user):
+            raise ValueError('NREL repair object is shared or retained; cannot replace it')
+
+
+def _remove(objects, resources=()):
     """Remove only managed patch objects and their unreferenced resources."""
     import bpy
-    resources = []
+    _check_removable(objects)
+    resources = list(resources)
     for obj in objects:
-        legacy = bool(obj.get('repair_example'))
-        if obj.data is not None and (obj.data.get(_OWNER) or legacy):
+        if obj.data is not None and obj.data.get(_OWNER):
             resources.append(obj.data)
             resources.extend(material for material in obj.data.materials
-                             if material is not None and (material.get(_OWNER) or legacy))
+                             if material is not None and material.get(_OWNER))
         resources.extend(modifier.node_group for modifier in obj.modifiers
                          if modifier.type == 'NODES' and modifier.node_group is not None
-                         and (modifier.node_group.get(_OWNER) or legacy))
+                         and modifier.node_group.get(_OWNER))
         bpy.data.objects.remove(obj, do_unlink=True)
     # Mesh removal releases its material references, so inspect materials last.
     unique = {resource.as_pointer(): resource for resource in resources}
     for resource in unique.values():
-        if resource.users == 0:
+        if (resource.users == 0 and not resource.use_fake_user
+                and resource.library is None and getattr(resource, 'shape_keys', None) is None):
             bpy.data.batch_remove(ids=(resource,))
 
 
@@ -256,15 +266,38 @@ def ensure(scene, *, force=False):
         return patch
     if patch is not None and not _owned(patch, blade):
         raise ValueError('NREL repair object name is occupied by an unmanaged object')
+    if source is not None and not _owned(source, blade):
+        raise ValueError('NREL repair reference name is occupied by an unmanaged object')
+    for name, local in ((NAME, patch), (SOURCE_NAME, source)):
+        if local is None and bpy.data.objects.get(name) is not None:
+            raise ValueError('NREL repair name is occupied in another scene: ' + name)
+    previous = [obj for obj in list(scene.objects) if _owned(obj, blade)]
+    _check_removable(previous)
     # Compute first, preserving the existing mark if the reference is invalid.
     vertices, faces, uv_values, anchors = _footprint(blade)
     from mathutils import Matrix
-    _remove([obj for obj in list(scene.objects) if _owned(obj, blade)])
     collection = next((collection for collection in blade.users_collection
                        if collection.name in scene.collection.children), None)
     if collection is None:
         collection = blade.users_collection[0] if blade.users_collection else scene.collection
+    objects, resources = [], []
+    try:
+        patch, source = _build(blade, scene, collection, signature, vertices, faces,
+                               uv_values, anchors, objects, resources, Matrix)
+    except Exception:
+        _remove(objects, resources)
+        raise
+    _remove(previous)
+    source.name = SOURCE_NAME
+    patch.name = NAME
+    return patch
+
+
+def _build(blade, scene, collection, signature, vertices, faces, uv_values, anchors,
+           objects, resources, Matrix):
+    import bpy
     source = bpy.data.objects.new(SOURCE_NAME, blade.data)
+    objects.append(source)
     collection.objects.link(source)
     source[_OWNER] = True
     source['source_target_name'] = TARGET_NAME
@@ -278,9 +311,10 @@ def ensure(scene, *, force=False):
         source.hide_set(True, view_layer=view_layer)
     source.hide_select = True
     mesh = bpy.data.meshes.new(NAME + '.Mesh')
+    resources.append(mesh)
     mesh[_OWNER] = True
     mesh.from_pydata(vertices, [], faces)
-    mesh.materials.append(_material())
+    mesh.materials.append(_material(resources))
     uv = mesh.uv_layers.new(name='RepairUV')
     for polygon in mesh.polygons:
         polygon.use_smooth = True
@@ -291,13 +325,14 @@ def ensure(scene, *, force=False):
         _attribute(mesh, f'repair_w{index}', 'FLOAT', [row[1][index] for row in anchors])
     mesh.update()
     patch = bpy.data.objects.new(NAME, mesh)
+    objects.append(patch)
     collection.objects.link(patch)
     patch.parent = blade
     patch.matrix_parent_inverse = Matrix.Identity(4)
     patch.matrix_basis = Matrix.Identity(4)
     patch.color = mesh.materials[0].diffuse_color
     modifier = patch.modifiers.new('Follow B1 reference surface', 'NODES')
-    modifier.node_group = _attachment(source)
+    modifier.node_group = _attachment(source, resources)
     patch[_OWNER] = True
     patch['repair_generation_version'] = VERSION
     patch['target_topology_sha256'] = signature
@@ -313,7 +348,7 @@ def ensure(scene, *, force=False):
     patch['target_vertices'] = len(blade.data.vertices)
     patch['target_polygons'] = len(blade.data.polygons)
     patch['attachment'] = 'reference triangle indices and barycentric weights; native Geometry Nodes'
-    return patch
+    return patch, source
 
 
 def remove(scene):

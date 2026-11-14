@@ -17,6 +17,7 @@ from wfrl.camera_video.data import SourceGeometry, blade_root_frame
 from wfrl.lidar.dual_beam import validate_inner_origins
 from wfrl.lidar.physics import first_hit
 from wfrl.lidar.dual_beam_replay import digest
+from scripts.lidar._atomic_output import write_text
 
 
 def plane_triangles(points, triangles, y):
@@ -134,7 +135,7 @@ def main():
                  expected_window_half_angle_deg=15,angles_deg=args.angles,sample_kind='source',
                  scores=scores,implementation_sha256=implementation_hash)
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    with args.output.open('x', encoding='utf-8') as f:json.dump(payload,f,ensure_ascii=False,indent=2,allow_nan=False)
+    write_text(args.output, json.dumps(payload,ensure_ascii=False,indent=2,allow_nan=False), exclusive=True)
     for s in scores[:10]:print({k:v for k,v in s.items() if k!='by_turbine'},flush=True)
 
 

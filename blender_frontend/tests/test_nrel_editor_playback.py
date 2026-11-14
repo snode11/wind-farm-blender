@@ -1,5 +1,5 @@
 """Editor transactions preserve Blender's single-player scene and window owner."""
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace as NS
@@ -257,7 +257,7 @@ def test_scan_resume_handles_native_window_collection_and_owner(editor_runtime, 
     r.set_player(r.other if foreign_player else None, live=foreign_player)
     stub_module('wfrl_blender.nrel_defects.defect_outputs',
         save_records=lambda *_args: None, write_json=lambda *_args: None,
-        update_run=lambda *_args: None, save_review=lambda *_args: None)
+        update_run=lambda *_args: None, save_review=lambda *_args: None, _staged_run=nullcontext)
     stub_module('wfrl_blender.nrel_defects.defect_timeline', summarize_intervals=lambda *_args: [])
     scan = r.namespace.NREL_OT_defect_scan()
     scan.finished = False

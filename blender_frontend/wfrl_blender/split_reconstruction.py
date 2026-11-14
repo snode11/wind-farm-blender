@@ -133,38 +133,40 @@ from .split_reconstruction_lifecycle import (
 )
 
 
-def register():
+def _callbacks():
     import bpy
     from . import split_mappo_texture
+    return ((bpy.app.handlers.load_pre, _load_pre),
+            (bpy.app.handlers.load_post, _load_post),
+            (bpy.app.handlers.save_pre, _save_pre),
+            (bpy.app.handlers.undo_post, _history_post),
+            (bpy.app.handlers.redo_post, _history_post),
+            (bpy.app.handlers.depsgraph_update_post, _depsgraph_post),
+            (bpy.app.handlers.frame_change_post, split_mappo_texture.frame_changed))
+
+
+def register():
+    import bpy
+    from .split_reconstruction_lifecycle import _register_callbacks
     global _REGISTERED
+    previous = _REGISTERED
     _REGISTERED = True
-    for collection, callback in ((bpy.app.handlers.load_pre, _load_pre),
-                                 (bpy.app.handlers.load_post, _load_post),
-                                 (bpy.app.handlers.save_pre, _save_pre),
-                                 (bpy.app.handlers.undo_post, _history_post),
-                                 (bpy.app.handlers.redo_post, _history_post),
-                                 (bpy.app.handlers.depsgraph_update_post, _depsgraph_post),
-                                 (bpy.app.handlers.frame_change_post, split_mappo_texture.frame_changed)):
-        bpy.app.handlers.persistent(callback)
-        if callback not in collection:
-            collection.append(callback)
-    _ensure_timer()
+    try:
+        with _register_callbacks(_callbacks(), None if bpy.app.background else _tick, first_interval=.1):
+            pass
+    except Exception:
+        _REGISTERED = previous
+        raise
 
 
 def unregister():
-    import bpy
-    from . import split_mappo_texture
+    from .split_reconstruction_lifecycle import _remove_callbacks
     global _REGISTERED
     _REGISTERED = False
-    if bpy.app.timers.is_registered(_tick):
-        bpy.app.timers.unregister(_tick)
-    for collection, callback in ((bpy.app.handlers.load_pre, _load_pre),
-                                 (bpy.app.handlers.load_post, _load_post),
-                                 (bpy.app.handlers.save_pre, _save_pre),
-                                 (bpy.app.handlers.undo_post, _history_post),
-                                 (bpy.app.handlers.redo_post, _history_post),
-                                 (bpy.app.handlers.depsgraph_update_post, _depsgraph_post),
-                                 (bpy.app.handlers.frame_change_post, split_mappo_texture.frame_changed)):
-        if callback in collection:
-            collection.remove(callback)
-    _load_pre(None)
+    errors = _remove_callbacks(_callbacks(), _tick)
+    try:
+        _load_pre(None)
+    except Exception as exc:
+        errors.append(exc)
+    if errors:
+        raise errors[0]

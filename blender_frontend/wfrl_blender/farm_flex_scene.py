@@ -7,6 +7,9 @@ from . import farm_flex as _farm
 from . import performance
 
 
+_PENDING_BINDINGS = []
+
+
 def _validate_scene_manifest(manifest, *, overlay=None):
     """Check the metadata used to place turbines and their measurement rigs."""
     try:
@@ -54,6 +57,21 @@ def is_active(scene):
     return _farm.ready_for(scene) is not None
 
 
+def _raise_cleanup_errors(errors):
+    if errors:
+        for error in errors[1:]:
+            errors[0].add_note('Farm replay cleanup also failed: ' + str(error))
+        raise errors[0]
+
+
+def _keep_cleanup_handler():
+    import bpy
+    from bpy.app.handlers import persistent
+    persistent(_farm.on_load_pre)
+    if _farm.on_load_pre not in bpy.app.handlers.load_pre:
+        bpy.app.handlers.load_pre.append(_farm.on_load_pre)
+
+
 class _MeshBindings:
     """Own one replay binding's new meshes and reversible object assignments."""
     _OWNER = 'wfrl_farm_flex_owned'
@@ -98,16 +116,59 @@ class _MeshBindings:
         self.replaced.clear()
 
     def rollback(self):
+        errors, pending = [], []
         for obj, previous, mesh in reversed(self.replaced):
             try:
                 if obj.data == mesh:
                     obj.data = previous
             except ReferenceError:
                 pass
+            except Exception as exc:
+                errors.append(exc)
+                pending.append((obj, previous, mesh))
+        self.replaced[:] = reversed(pending)
+        retained = []
         for mesh in self.created:
-            self._release(mesh)
-        self.created.clear()
-        self.replaced.clear()
+            try:
+                self._release(mesh)
+            except Exception as exc:
+                errors.append(exc)
+                retained.append(mesh)
+            else:
+                if any(mesh is row[2] for row in pending):
+                    retained.append(mesh)
+        self.created[:] = retained
+        _raise_cleanup_errors(errors)
+
+
+class _BindingRollback:
+    """Retain failed construction resources until their scene can retry cleanup."""
+    def __init__(self, scene, meshes, comparison=None):
+        self.scene, self.meshes, self.comparison = scene, meshes, comparison
+
+    def run(self):
+        errors = []
+        if self.comparison is not None:
+            try:
+                self.comparison.close()
+            except Exception as exc:
+                errors.append(exc)
+            else:
+                self.comparison = None
+        try:
+            self.meshes.rollback()
+        except Exception as exc:
+            errors.append(exc)
+        if errors:
+            if self not in _PENDING_BINDINGS:
+                _PENDING_BINDINGS.append(self)
+            try:
+                _keep_cleanup_handler()
+            except Exception as exc:
+                errors.append(exc)
+        elif self in _PENDING_BINDINGS:
+            _PENDING_BINDINGS.remove(self)
+        _raise_cleanup_errors(errors)
 
 
 class _SceneBinding:
@@ -118,14 +179,13 @@ class _SceneBinding:
         self.frame_error = ''
         try:
             self._bind(scene, path, _package=_package)
-        except Exception:
+            self._meshes.commit()
+        except Exception as exc:
             try:
-                if self.comparison is not None:
-                    self.comparison.close()
-            finally:
-                self._meshes.rollback()
+                _BindingRollback(scene, self._meshes, self.comparison).run()
+            except Exception as cleanup_error:
+                exc.add_note('Farm binding cleanup pending: ' + str(cleanup_error))
             raise
-        self._meshes.commit()
 
     def _bind(self,scene,path,*,_package=None):
         import bpy
@@ -324,7 +384,7 @@ def detach(scene=None, *, restore=True):
     """Release handlers and mesh references before scene destruction or unload."""
     import bpy
     from . import split_turbine_context
-    split_turbine_context.clear_runtime(scene)
+    from . import clearance_replay
     if scene is None:
         entries = list(_farm._ACTIVES.items())
     else:
@@ -335,21 +395,41 @@ def detach(scene=None, *, restore=True):
             entries = [(key, active) for key, active in _farm._ACTIVES.items()
                        if active.scene is scene]
     actives = [active for _key, active in entries]
+    for key, active in entries:
+        clearance_replay._READERS.pop(key, None)
+        active.enabled = False
+    errors = []
+    try:
+        split_turbine_context.clear_runtime(scene)
+    except Exception as exc:
+        errors.append(exc)
     from .nrel_defects import editor
-    editor.detach(scene, restore=restore)
+    try:
+        editor.detach(scene, restore=restore)
+    except Exception as exc:
+        errors.append(exc)
     # End camera drafts before invalidating their replay and parent references.
     import sys
     custom = sys.modules.get(__package__ + '.panels.custom_cameras')
     if custom is not None and (scene is None or
             getattr(getattr(custom, '_ACTIVE', None), 'scene', None) == scene):
-        custom.cancel_on_load()
-    from . import clearance_replay
+        try:
+            custom.cancel_on_load()
+        except Exception as exc:
+            errors.append(exc)
+    for pending in list(_PENDING_BINDINGS):
+        if scene is None or pending.scene == scene:
+            try:
+                pending.run()
+            except Exception as exc:
+                errors.append(exc)
     for key, active in entries:
-        _farm._ACTIVES.pop(key, None)
-        clearance_replay._READERS.pop(key, None)
-        active.enabled = False
+        before = len(errors)
         if active.comparison is not None:
-            active.comparison.close()
+            try:
+                active.comparison.close()
+            except Exception as exc:
+                errors.append(exc)
         if restore:
             for obj, rest, *_ in active.blades:
                 try:
@@ -357,32 +437,53 @@ def detach(scene=None, *, restore=True):
                     obj.data.update()
                 except ReferenceError:
                     pass
+                except Exception as exc:
+                    errors.append(exc)
         try:
             active.scene['wfrl_flex_active'] = False
         except ReferenceError:
             pass
+        except Exception as exc:
+            errors.append(exc)
         if restore:
-            active.restore_support()
+            try:
+                active.restore_support()
+            except Exception as exc:
+                errors.append(exc)
         active.cache.clear()
         active._world_matrices = None
         active._update_geometry = None
         active._deformation_batches = None
+        # A failed cleanup retains a disabled owner so detach can retry it.
+        if len(errors) == before and _farm._ACTIVES.get(key) is active:
+            _farm._ACTIVES.pop(key)
     if _farm._ACTIVE in actives:
-        _farm._ACTIVE = next(iter(_farm._ACTIVES.values()), None)
-    if not _farm._ACTIVES:
+        _farm._ACTIVE = next((active for active in _farm._ACTIVES.values() if active.enabled), None)
+    if not any(active.enabled for active in _farm._ACTIVES.values()):
         if _farm.update in bpy.app.handlers.frame_change_post:
             bpy.app.handlers.frame_change_post.remove(_farm.update)
-        if _farm.on_load_pre in bpy.app.handlers.load_pre:
+        if _farm._ACTIVES or _PENDING_BINDINGS:
+            try:
+                _keep_cleanup_handler()
+            except Exception as exc:
+                errors.append(exc)
+        elif _farm.on_load_pre in bpy.app.handlers.load_pre:
             bpy.app.handlers.load_pre.remove(_farm.on_load_pre)
+    _raise_cleanup_errors(errors)
 
 
 def on_load_pre(_unused):
     # Detach removes this handler; clear trails here before handler-list mutation
     # can skip the following load_pre callback.
     from . import tip_tracking
-    _farm.clear_package_cache()
-    tip_tracking.on_load_pre(_unused)
-    _farm.detach(restore=False)
+    errors = []
+    for cleanup in (_farm.clear_package_cache, lambda: tip_tracking.on_load_pre(_unused),
+                    lambda: _farm.detach(restore=False)):
+        try:
+            cleanup()
+        except Exception as exc:
+            errors.append(exc)
+    _raise_cleanup_errors(errors)
 
 
 def attach(scene,path,*,_package=None):
@@ -390,6 +491,7 @@ def attach(scene,path,*,_package=None):
     from . import tip_tracking
     replacing = False
     retained = _farm._MeshBindings()
+    handler_state = []
     try:
         # Validate before releasing the old scene runtime. In particular a
         # FULL_COPY scene contains renamed objects and must not detach an
@@ -436,33 +538,76 @@ def attach(scene,path,*,_package=None):
         active=_farm.FarmFlex(scene,path,_package=package)
         _farm._ACTIVES[scene.as_pointer()] = active
         _farm._ACTIVE = active
+        from .nrel_defects import editor
+        for handlers, callbacks in (
+                (bpy.app.handlers.frame_change_post, (_farm.update, tip_tracking.update, editor.frame_changed)),
+                (bpy.app.handlers.load_pre, (_farm.on_load_pre, tip_tracking.on_load_pre))):
+            handler_state.append((handlers, callbacks,
+                                  [(i, fn) for i, fn in enumerate(handlers) if fn in callbacks]))
+        # Tip sampling must follow mesh deformation at the same simulation time.
+        if _farm.update in bpy.app.handlers.frame_change_post:bpy.app.handlers.frame_change_post.remove(_farm.update)
+        if tip_tracking.update in bpy.app.handlers.frame_change_post:
+            bpy.app.handlers.frame_change_post.remove(tip_tracking.update)
+        bpy.app.handlers.frame_change_post.append(_farm.update)
+        from bpy.app.handlers import persistent
+        persistent(_farm.on_load_pre)
+        if _farm.on_load_pre not in bpy.app.handlers.load_pre:
+            bpy.app.handlers.load_pre.append(_farm.on_load_pre)
+        tip_tracking.register()
+        editor.restore_saved(scene)
+        # Freeze editor drafts after the replay handler has sampled the new frame.
+        if editor.frame_changed in bpy.app.handlers.frame_change_post:
+            bpy.app.handlers.frame_change_post.remove(editor.frame_changed)
+        bpy.app.handlers.frame_change_post.append(editor.frame_changed)
+        scene.frame_set(1)
+        if active.frame_error or _farm.ready_for(scene) is not active:
+            raise ValueError('Replay initial frame unavailable: ' +
+                             (active.frame_error or 'reader or runtime is no longer bound'))
+        retained.commit()
     except Exception as exc:
-        retained.rollback()
         from . import clearance_replay
-        scene['wfrl_home_load_error'] = '形变包加载失败：' + str(exc)
+        errors = []
+        try:
+            _BindingRollback(scene, retained).run()
+        except Exception as cleanup_error:
+            errors.append(cleanup_error)
         if replacing:
-            _farm.detach(scene, restore=False)
+            try:
+                _farm.detach(scene, restore=False)
+            except Exception as cleanup_error:
+                errors.append(cleanup_error)
+        for handlers, callbacks, positions in handler_state:
+            try:
+                for callback in callbacks:
+                    if callback in handlers:
+                        handlers.remove(callback)
+                for index, callback in positions:
+                    if callback in (_farm.update, _farm.on_load_pre) and not any(
+                            active.enabled for active in _farm._ACTIVES.values()):
+                        continue
+                    handlers.insert(index, callback)
+            except Exception as cleanup_error:
+                errors.append(cleanup_error)
+        if _farm._ACTIVES or _PENDING_BINDINGS:
+            try:
+                _keep_cleanup_handler()
+            except Exception as cleanup_error:
+                errors.append(cleanup_error)
         if replacing or _farm.active_for(scene) is None:
-            scene['wfrl_flex_active'] = False
-            clearance_replay.clear(scene,'三机形变包未就绪：' + str(exc))
+            try:
+                scene['wfrl_flex_active'] = False
+                scene['wfrl_flex_frame_valid'] = False
+                clearance_replay.clear(scene,'三机形变包未就绪：' + str(exc))
+            except Exception as cleanup_error:
+                errors.append(cleanup_error)
+        message = '形变包加载失败：' + str(exc)
+        for cleanup_error in errors:
+            exc.add_note('Farm binding cleanup pending: ' + str(cleanup_error))
+            message += '; 清理待确认：' + str(cleanup_error)
+        try:
+            scene['wfrl_home_load_error'] = message
+        except ReferenceError:
+            pass
         raise
-    retained.commit()
     scene.pop('wfrl_home_load_error', None)
-    # Tip sampling must follow mesh deformation at the same simulation time.
-    if _farm.update in bpy.app.handlers.frame_change_post:bpy.app.handlers.frame_change_post.remove(_farm.update)
-    if tip_tracking.update in bpy.app.handlers.frame_change_post:
-        bpy.app.handlers.frame_change_post.remove(tip_tracking.update)
-    bpy.app.handlers.frame_change_post.append(_farm.update)
-    from bpy.app.handlers import persistent
-    persistent(_farm.on_load_pre)
-    if _farm.on_load_pre not in bpy.app.handlers.load_pre:
-        bpy.app.handlers.load_pre.append(_farm.on_load_pre)
-    tip_tracking.register()
-    from .nrel_defects import editor
-    editor.restore_saved(scene)
-    # Freeze editor drafts after the replay handler has sampled the new frame.
-    if editor.frame_changed in bpy.app.handlers.frame_change_post:
-        bpy.app.handlers.frame_change_post.remove(editor.frame_changed)
-    bpy.app.handlers.frame_change_post.append(editor.frame_changed)
-    scene.frame_set(1)
     return active

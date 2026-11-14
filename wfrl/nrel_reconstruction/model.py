@@ -7,7 +7,8 @@ prior, not a copy of an exact test surface.
 """
 from __future__ import annotations
 
-import json
+from .artifact_paths import atomic_open
+
 from pathlib import Path
 
 import numpy as np
@@ -20,6 +21,11 @@ TEMPLATE_SOURCE = "https://www.nrel.gov/docs/fy09osti/38060.pdf"
 
 def linear_weights(samples: np.ndarray, stations: np.ndarray) -> np.ndarray:
     """Linear station interpolation; endpoints remain constant."""
+    samples, stations = np.asarray(samples), np.asarray(stations)
+    if (samples.ndim != 1 or stations.ndim != 1 or len(stations) < 2
+            or not np.isfinite(samples).all() or not np.isfinite(stations).all()
+            or np.any(np.diff(stations) <= 0)):
+        raise ValueError("Linear samples must be finite and stations must strictly increase")
     result = np.zeros((len(samples), len(stations)), dtype=np.float64)
     for row, z in enumerate(samples):
         right = int(np.clip(np.searchsorted(stations, z, side="right"), 1, len(stations) - 1))
@@ -193,9 +199,15 @@ def write_ply(path: str | Path, vertices, faces) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     vertices, faces = np.asarray(vertices), np.asarray(faces)
+    if not faces.size:
+        faces = faces.reshape((-1, 3))
     if not np.isfinite(vertices).all() or vertices.ndim != 2 or vertices.shape[1] != 3:
         raise ValueError("Invalid mesh vertices")
-    with path.open("w", encoding="utf-8") as handle:
+    if (faces.ndim != 2 or faces.shape[1] != 3 or not np.isfinite(faces).all()
+            or not np.equal(faces, np.floor(faces)).all()
+            or (faces.size and (faces.min() < 0 or faces.max() >= len(vertices)))):
+        raise ValueError("Mesh faces must contain three finite in-range integer indices")
+    with atomic_open(path, "w", encoding="utf-8") as handle:
         handle.write("ply\nformat ascii 1.0\n")
         handle.write(f"element vertex {len(vertices)}\nproperty float x\nproperty float y\nproperty float z\n")
         handle.write(f"element face {len(faces)}\nproperty list uchar int vertex_indices\nend_header\n")

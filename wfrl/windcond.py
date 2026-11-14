@@ -1,8 +1,8 @@
 """内置风况预设与按回合索引可复现的调度。
 
 FAST.Farm 的风况校验和记录合同见 docs/training/FASTFarm风况.md。
-预设解析器的 fastfarm 分支会清除预设风向；训练入口使用 floris 分支保留
-方向请求，并交给实际后端应用或拒绝。标量风速由驱动校验并记录。
+预设方向使用气象学风向（270°为西风），由实际后端在回合开始时应用。
+FAST.Farm 通过平地布局旋转实现方向；标量风速由驱动校验并记录。
 """
 
 from numbers import Integral
@@ -29,10 +29,10 @@ PRESETS = {
         label="强风 20 m/s",
         note="远超额定，顺桨角度大、载荷高。看桨距和叶根弯矩的量级。"),
     "veer": dict(
-        wind_speed=8.0, wind_direction=240.0, turb=None, floris_only=True,
+        wind_speed=8.0, wind_direction=240.0, turb=None, floris_only=False,
         label="中风 8 m/s · 风向 240°",
         note="斜吹。尾流不再沿机组连线，下游机组部分脱离尾流。"
-             "**仅 FLORIS 后端**：FAST.Farm 接口拒绝非固定坐标方向。"),
+             "FAST.Farm 在回合边界旋转布局，运行中途不改变方向。"),
     "turb": dict(
         wind_speed=None, wind_direction=None, turb="90m_08mps.bts",
         floris_only=False,
@@ -42,6 +42,22 @@ PRESETS = {
 }
 
 ORDER = ["calm", "rated", "strong", "gale", "veer", "turb"]
+
+
+def resolve_turbulence(name=None, *, wind_speed=None, ti=None, seed=None, library_dir=None):
+    """选择已有 BTS，返回可传给驱动或场景 turbulence 的绝对路径。
+
+    TI 使用百分数（8 表示 8%）或 IEC 类别 A/B/C；不在 reset 时生成风场。
+    """
+    from wfrl.inflow import resolve_bts
+
+    if name is not None:
+        if any(value is not None for value in (wind_speed, ti, seed)):
+            raise ValueError("湍流名称与 (wind_speed, ti, seed) 不能同时指定")
+        selection = name
+    else:
+        selection = (wind_speed, ti, seed)
+    return resolve_bts(selection, library_dir=library_dir)
 
 # `mdp.py:46` 的状态空间边界。抽样风速必须裁到这里,和 benchmark 的 reset 同口径。
 WS_BOUNDS = (3.0, 28.0)
@@ -62,17 +78,13 @@ def describe():
 def resolve(name, backend="fastfarm"):
     """名字 → (wind_speed, wind_direction, turb)；未知名字抛错并列出可选。
 
-    此解析器的 FAST.Farm 分支返回 None 风向；不执行后端风况校验。
+    两个后端均保留风向；实际算例的覆盖范围由后端校验。
     """
     _check_backend(backend)
     if not isinstance(name, str) or name not in PRESETS:
         raise ValueError(f"未知风况 {name!r}。可选：\n{describe()}")
     p = PRESETS[name]
     wd = p["wind_direction"]
-    if backend != "floris" and wd is not None:
-        print(f"[风况] {name}: FAST.Farm 改不了风向，{wd:.0f}° 的请求已忽略"
-              f"（风速仍然生效）", flush=True)
-        wd = None
     return p["wind_speed"], wd, p["turb"]
 
 
@@ -93,6 +105,13 @@ def _indexed_schedule(sample):
     return schedule
 
 
+def _positive_wind_speed(value):
+    speed = float(value)
+    if not _np.isfinite(speed) or speed <= 0:
+        raise ValueError("风速必须为有限正数，单位 m/s")
+    return speed
+
+
 # ---------------------------------------------------------------------------
 # 逐回合的来流调度 —— 训练用
 # ---------------------------------------------------------------------------
@@ -107,7 +126,8 @@ def make_wind_schedule(spec, seed=0, backend="fastfarm"):
       none         不指定风速，交给 mdp 抽样
 
     回合索引从 0 开始，不设回合总数或时长。preset 的风向由 resolve 决定；
-    其他调度不指定风向。此二元返回接口不传递 BTS 文件选择。
+    其他调度不指定风向。显式风速须为有限正数，不按抽样边界裁剪。
+    此二元返回接口不传递 BTS 文件选择。
     """
     _check_backend(backend)
     if spec is not None and not isinstance(spec, str):
@@ -122,7 +142,7 @@ def make_wind_schedule(spec, seed=0, backend="fastfarm"):
         return _indexed_schedule(lambda ep: (None, None))
 
     if head == "pin":
-        u = float(arg)
+        u = _positive_wind_speed(arg)
         return _indexed_schedule(lambda ep: (u, None))
 
     if head == "preset":
@@ -132,7 +152,7 @@ def make_wind_schedule(spec, seed=0, backend="fastfarm"):
     if head == "cycle":
         if not arg or any(not x.strip() for x in arg.split(",")):
             raise ValueError("cycle: 后面要给非空风速列表，例如 cycle:6,8,10")
-        us = [float(x) for x in arg.split(",")]
+        us = [_positive_wind_speed(x) for x in arg.split(",")]
         return _indexed_schedule(lambda ep: (us[ep % len(us)], None))
 
     if head == "weibull":

@@ -66,7 +66,7 @@ class Recorder:
                     or (self.last_time is not None and replay_time_s < self.last_time)):
                 raise ValueError('Recording times must be finite and nondecreasing')
             name = f'frames/{self.rows:08d}.ply'
-            raw = encode_ply(frame.points) if original_ply is None else original_ply
+            raw = encode_ply(frame.points) if original_ply is None else memoryview(original_ply).tobytes()
             if original_ply is not None:
                 from .ply import decode_ply
                 if decode_ply(raw).tobytes() != frame.points.tobytes():
@@ -89,8 +89,8 @@ class Recorder:
             self.rows += 1
             self.last_time = replay_time_s
             self.last_identity = frame.identity
-        except Exception as exc:
-            self.fail(str(exc))
+        except BaseException as exc:
+            self.fail(str(exc) or type(exc).__name__)
             raise
 
     def fail(self, reason):
@@ -118,9 +118,9 @@ class Recorder:
             self._manifest('COMPLETE')
             (self.path / 'INCOMPLETE').unlink()
             self.state = 'COMPLETE'
-        except Exception as exc:
+        except BaseException as exc:
             self.state = 'RECORDING'
-            self.fail(str(exc))
+            self.fail(str(exc) or type(exc).__name__)
             raise
 
 

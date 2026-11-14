@@ -4,25 +4,20 @@
 
 `multiagent_env.py:220-227`:
 
-    normalized_powers = powers * 1e3 / (self.state()["freewind_measurements"][0] ** 3)
+    normalized_powers = powers * 1e3 / self.mdp.freestream_speed(next_state) ** 3
     reward = normalized_powers.mean() - self.load_coef * load_penalty
     reward = np.array([self.reward_shaper(reward)])
 
 所以**原始 reward 本来就已经除过 u³**,量纲是 kW/(m/s)³,数值上就是训练脚本里
 那条 `P/u^3` 曲线(实测 ≈3.3)。分母 `freewind_measurements[0]` 不是算例设定的
-风速,而是 `interface.py:327` `upstream_point = np.argmax(speeds)` —— 全场逐机组
-测速的**最大值**,即没被遮挡的那台。这一点很重要:它逐步跟随真实来流,不是常数。
+风速,而是 FAST.Farm 接口 `_wait_for_sim_output` 里 `upstream_point = np.argmax(speeds)`
+—— 全场逐机组测速的**最大值**,即没被遮挡的那台。它逐步跟随真实来流,不是常数。
+分子功率与分母来流取自同一次 MPI 交换(`next_state`),并裁到状态空间的
+风速上下界;单智能体环境 `simple_env.py` 用同一口径。
 
-但有两个已确认的缺陷:
-
-1. **分母滞后一个控制步。** reward 在 `multiagent_env.py:226` 算,而
-   `self._state = next_state` 在 228 行 —— 用的是**上一步**的来流。定常来流下
-   无所谓;来流变化时,分子已经是 u_t³ 的功率、分母还是 u_{t-1}³,那一步的
-   相对误差就是 (u_t/u_{t-1})³ − 1。
-2. **`StepPercentage` 在这个已经归一化的量上再做一次逐步相对差分:**
-   r̃_t = (r_t − r_{t−1}) / r_{t−1}。定常来流下 r_t 几乎不动,信号退化成噪声的
-   相对差;来流一变,上面那个滞后失配被**整段放大**成一个与策略无关的大信号。
-   README §6 的 "u 8→8.5 就产生 +19.9% 奖励" 就是这么来的(1.06³−1 = 19.1%)。
+`StepPercentage` 在这个已经归一化的量上再做一次逐步相对差分:
+r̃_t = (r_t − r_{t−1}) / r_{t−1}。定常来流下 r_t 几乎不动,信号退化成噪声的
+相对差;来流变化时,同一策略下 P/u³ 本身的变化也会被差分放大成与策略无关的信号。
 
 ## 这里提供的替代
 

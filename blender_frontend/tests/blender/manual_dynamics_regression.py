@@ -77,9 +77,12 @@ def run(dynamics, shake=True, seconds=20.0, fps=30):  # 2.4 deg per frame at 12 
         job.pop('rig')
     passes = []
     best = {}
+    record = {}
     try:
         for frame in range(plan['frames']):
-            down.apply_motion(scene, job, frame)
+            sample = down.apply_motion(scene, job, frame)
+            if 'structural_motion' in sample:
+                record[frame] = sample['structural_motion']
             depsgraph = bpy.context.evaluated_depsgraph_get()
             depsgraph.update()
             azimuth, _ = down.pose_at(plan['turbines'][0], frame / fps)
@@ -92,7 +95,6 @@ def run(dynamics, shake=True, seconds=20.0, fps=30):  # 2.4 deg per frame at 12 
                 key = (index, int((frame / fps * 12 / 60) + (index - 1) / 3 + .5))
                 if gap < 30 and (key not in best or gap < best[key][0]):
                     best[key] = (gap, (1 - view.y) * 1080, (tip.xy - tower.xy).length, frame)
-        record = dict(job.get('dynamics', {}))
     finally:
         down._end_motion(job)
     for (index, _rev), (gap, y, distance, frame) in sorted(best.items(), key=lambda kv: kv[1][3]):

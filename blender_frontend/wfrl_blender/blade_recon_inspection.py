@@ -168,10 +168,14 @@ def ensure_material(mat, *, register=None):
 
 
 def _coordinates(scene, rotor):
-    radius = max(float(rotor.tpl.r[0]), min(float(rotor.tpl.r[-1]),
-        float(getattr(scene, 'wfrl_recon_inspect_radius', 59.))))
-    tau = float(getattr(scene, 'wfrl_recon_inspect_tau', .6)) % 1.
-    size = max(.3, float(getattr(scene, 'wfrl_recon_inspect_size', 2.)))
+    radius = float(getattr(scene, 'wfrl_recon_inspect_radius', 59.))
+    tau = float(getattr(scene, 'wfrl_recon_inspect_tau', .6))
+    size = float(getattr(scene, 'wfrl_recon_inspect_size', 2.))
+    if not np.isfinite((radius, tau, size)).all():
+        raise ValueError('局部检查位置和范围必须是有限数值')
+    radius = max(float(rotor.tpl.r[0]), min(float(rotor.tpl.r[-1]), radius))
+    tau %= 1.
+    size = max(.3, size)
     blade = max(0, min(2, int(getattr(scene, 'wfrl_recon_inspect_blade', '1')) - 1))
     return blade, radius, tau, size
 
@@ -189,11 +193,14 @@ def update(scene, blades, rotor, *, register=None):
     span = float(rotor.tpl.r[-1] - rotor.tpl.r[0])
     circumference = _perimeter(rotor, radius)
     threshold = float(getattr(scene, 'wfrl_recon_texture_threshold', .06))
+    gain = float(getattr(scene, 'wfrl_recon_texture_gain', 6.))
+    if not np.isfinite((threshold, gain)).all():
+        raise ValueError('纹理增强阈值和强度必须是有限数值')
     mode = getattr(scene, 'wfrl_recon_texture_mode', 'ORIGINAL')
     values = {
         'Contrast': float(mode == 'CONTRAST'),
         'FalseColor': float(mode == 'FALSE_COLOR'),
-        'Gain': float(getattr(scene, 'wfrl_recon_texture_gain', 6.)),
+        'Gain': gain,
         'Baseline': _linear(BASE_SRGB),
         'Lower': _linear(BASE_SRGB - threshold),
         'Upper': _linear(BASE_SRGB + threshold),
@@ -293,10 +300,12 @@ def _surface_sample(sequence, obj, blade, index, radius, tau):
 
 
 def focus(context, sequence, blades, areas=None, scene=None, index=None):
-    """Pause and face the selected estimated surface; repeated clicks are stable."""
+    """Face the selected surface in the calling 3D area or explicit areas only."""
     from . import playback
     scene = scene or context.scene
-    screen = context.screen
+    if areas is None:
+        caller = getattr(context, 'area', None)
+        areas = (caller,) if caller is not None and caller.type == 'VIEW_3D' else ()
     playback.cancel(scene)
     blade, radius, tau, size = _coordinates(scene, sequence.rotor)
     if blade >= len(blades):
@@ -310,8 +319,8 @@ def focus(context, sequence, blades, areas=None, scene=None, index=None):
                        (right.y, up.y, normal.y),
                        (right.z, up.z, normal.z))).to_quaternion()
     views = 0
-    if screen or areas is not None:
-        for area in (areas if areas is not None else screen.areas):
+    if areas:
+        for area in areas:
             if area.type != 'VIEW_3D':
                 continue
             space = area.spaces.active

@@ -23,6 +23,7 @@ from scripts.lidar.compare_dual_beam_methods import (
     NUMERICAL_TOLERANCE_M, coverage, expected_window, independent_clearance,
     load_verified, statistics, structural_reference_points, tower_at,
 )
+from scripts.lidar._atomic_output import new_directory, write_text
 from wfrl.camera_video.data import blade_root_frame
 from wfrl.lidar.dual_beam import METHOD_VERSIONS, observe, reconstruct, s1_state, validate_calibration
 from wfrl.lidar.dual_beam_replay import digest
@@ -187,7 +188,7 @@ def summarize_samples(samples, combo, dt):
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n', encoding='utf-8')
+    write_text(path, json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n')
 
 
 def run(baseline, output):
@@ -199,101 +200,102 @@ def run(baseline, output):
     origins, directions, limits = validate_calibration(config)
     plans = freeze_windows(sources, overlay, config)
     output = Path(output).resolve()
-    output.mkdir(parents=True, exist_ok=False)
-    declaration = dict(schema='wfrl.dual-beam-actual-pointing-declaration.v1', status='FROZEN_BEFORE_RAY_LOOPS',
-                       angle_amplitude_deg=ANGLE_AMPLITUDE_DEG, sign_order=['S2_angle', 'S3_angle'],
-                       combinations=[dict(id=combination_id(s), signs=list(s)) for s in POINTING_COMBINATIONS],
-                       coordinate_frame='rotation about source nacelle material +y, then source nacelle world rotation',
-                       perturbation_location='directions changed before first-hit observe; resulting ranges are re-intersected',
-                       range_perturbation_m=0., s1='nominal re-hit once per window; identical observation reused in every combination',
-                       source_grid='original saved grid only; no interpolation or new physical simulation',
-                       expected_window_half_angle_deg=config['expected_window_half_angle_deg'],
-                       expected_window_rule='each source blade azimuth within fixed half-angle of downward 180 degrees',
-                       expected_samples=sum(map(len, plans.values())),
-                       expected_samples_by_turbine={t: len(rows) for t, rows in plans.items()},
-                       fixed_windows=plans, effective_calibration=deepcopy(config),
-                       methods=METHOD_VERSIONS, baseline_manifest_sha256=digest(verified['path']/'manifest.json'),
-                       source_hashes=overlay['manifest']['source_hashes'], numerical_tolerance_m=NUMERICAL_TOLERANCE_M,
-                       s3_branch_definition='first-object blade slant range < 12 m: near; >= 12 m: far; other objects: non_blade; descriptive only',
-                       scope='deterministic +/-0.2 degree endpoint combinations; no probability model, hardware guarantee, independent acceptance or whole-system bound')
-    write_json(output/'declaration.json', declaration)
-    declaration_hash = digest(output/'declaration.json')
-    result = dict(schema='wfrl.dual-beam-actual-pointing-stress.v1', status='REVIEW_ONLY',
-                  performance_status='PENDING_ACCEPTANCE', declaration_sha256=declaration_hash,
-                  declaration=declaration, source_fps=overlay['manifest']['source_fps'], turbines={},
-                  scoring_definition='estimate minus independent transported structural reference clearance; each at its own global height',
-                  integrity=dict(s1_unchanged=True, nominal_observations_reproduced=True,
-                                 max_nominal_numeric_residual_m=0., max_independent_estimate_residual_m=0.))
-    pooled = []
-    for turbine, source in sources.items():
-        references = structural_reference_points(source)
-        samples = []
-        for window_index, planned in enumerate(plans[turbine]):
-            index, time_s = planned['source_index'], planned['time_s']
-            nacelle, transforms = source.nacelles[index], source.transforms[index]
-            blades = (np.einsum('bsij,bsvj->bsvi', transforms[..., :3], source.blade_reference)
-                      + transforms[:, :, None, :, 3]).reshape(3, -1, 3)+source.layout
-            tower = tower_at(source, index)
-            nominal = forward_observations(time_s, nacelle, source.layout, origins, directions, (0, 0),
-                                           blades, source.blade_triangles, tower, source.tower_triangles, limits)
-            saved = overlay['results'][turbine]['samples'][index]
-            for beam in ('S1', 'S2', 'S3'):
-                residual = verify_nominal_observation(nominal[beam], saved['observations'][beam])
-                result['integrity']['max_nominal_numeric_residual_m'] = max(
-                    result['integrity']['max_nominal_numeric_residual_m'], residual)
-            if s1_state(nominal['S1']) != saved['s1_observation_state']:
-                raise ValueError('Nominal S1 state differs from independent baseline observation')
-            row = dict(planned, turbine_id=turbine, nominal_observations=nominal,
-                       s1_observation_state=s1_state(nominal['S1']), combinations={})
-            hub, _ = blade_root_frame(source.scalars, source.poses[index], 1, nacelle)
-            clearance = lambda point: horizontal_clearance(point, tower, source.tower_triangles)[0]
-            for signs in POINTING_COMBINATIONS:
-                actual = forward_observations(time_s, nacelle, source.layout, origins, directions, signs,
-                                              blades, source.blade_triangles, tower, source.tower_triangles,
-                                              limits, nominal_s1=nominal['S1'])
-                pairs = {method: reconstruct(actual['S2'], actual['S3'], hub+source.layout,
-                                             config['effective_length_m'], clearance, time_s=time_s,
-                                             limits=limits, method=method) for method in METHOD_VERSIONS}
-                # Real terminal transforms enter only this independent scoring
-                # branch, after both estimators have consumed identical returns.
-                methods = {method: dict(reconstruction=pair, evaluation=evaluate_pair(
-                    pair, references[index], tower, source.tower_triangles)) for method, pair in pairs.items()}
-                for value in methods.values():
-                    residual = value['evaluation']['independent_estimate_residual_m']
-                    if residual is not None:
-                        result['integrity']['max_independent_estimate_residual_m'] = max(
-                            result['integrity']['max_independent_estimate_residual_m'], residual)
-                row['combinations'][combination_id(signs)] = dict(
-                    signs=list(signs), observations={s: actual[s] for s in ('S2', 'S3')},
-                    beam_changes={s: observation_changes(nominal[s], actual[s]) for s in ('S1', 'S2', 'S3')},
-                    methods=methods)
-            samples.append(row)
-            if window_index % 100 == 0:
-                print(turbine, window_index+1, '/', len(plans[turbine]), flush=True)
-        result['turbines'][turbine] = dict(samples=samples, combinations={
-            combination_id(s): summarize_samples(samples, combination_id(s), 1./source.manifest['source_fps'])
-            for s in POINTING_COMBINATIONS})
-        # Prefix passage IDs for pooled coverage so distinct turbine passages
-        # cannot merge. Numeric metrics are weighted by individual samples.
-        for row in samples:
-            pooled.append({**row, 'passage_id': turbine+'/'+row['passage_id']})
-    result['pooled_combinations'] = {combination_id(s): summarize_samples(
-        pooled, combination_id(s), 1./result['source_fps']) for s in POINTING_COMBINATIONS}
-    result['s1'] = dict(nominal_window_samples=len(pooled),
-                       nominal_hits=sum(r['s1_observation_state'] == 'triggered' for r in pooled),
-                       unknown_samples=sum(r['s1_observation_state'] == 'unknown' for r in pooled),
-                       unchanged_for_all_combinations=True,
-                       scope='independent raw S1 on fixed windows; no new full-grid alarm or hold package is fabricated')
-    result['runtime'] = dict(python=platform.python_version(), numpy=np.__version__)
-    names = ('scripts/lidar/stress_dual_beam_pointing.py', 'tests/lidar/test_dual_beam_pointing.py',
-             'scripts/lidar/compare_dual_beam_methods.py', 'wfrl/lidar/dual_beam.py',
-             'wfrl/lidar/dual_beam_replay.py', 'wfrl/lidar/physics.py',
-             'wfrl/lidar/moving_tower.py', 'wfrl/camera_video/data.py')
-    result['implementation_hashes'] = {name: digest(ROOT/name) for name in names}
-    if digest(output/'declaration.json') != declaration_hash:
-        raise ValueError('Pointing declaration changed during the experiment')
-    write_json(output/'pointing-stress.json', result)
-    print(output/'pointing-stress.json', flush=True)
+    destination = output
+    with new_directory(destination) as output:
+        declaration = dict(schema='wfrl.dual-beam-actual-pointing-declaration.v1', status='FROZEN_BEFORE_RAY_LOOPS',
+                           angle_amplitude_deg=ANGLE_AMPLITUDE_DEG, sign_order=['S2_angle', 'S3_angle'],
+                           combinations=[dict(id=combination_id(s), signs=list(s)) for s in POINTING_COMBINATIONS],
+                           coordinate_frame='rotation about source nacelle material +y, then source nacelle world rotation',
+                           perturbation_location='directions changed before first-hit observe; resulting ranges are re-intersected',
+                           range_perturbation_m=0., s1='nominal re-hit once per window; identical observation reused in every combination',
+                           source_grid='original saved grid only; no interpolation or new physical simulation',
+                           expected_window_half_angle_deg=config['expected_window_half_angle_deg'],
+                           expected_window_rule='each source blade azimuth within fixed half-angle of downward 180 degrees',
+                           expected_samples=sum(map(len, plans.values())),
+                           expected_samples_by_turbine={t: len(rows) for t, rows in plans.items()},
+                           fixed_windows=plans, effective_calibration=deepcopy(config),
+                           methods=METHOD_VERSIONS, baseline_manifest_sha256=digest(verified['path']/'manifest.json'),
+                           source_hashes=overlay['manifest']['source_hashes'], numerical_tolerance_m=NUMERICAL_TOLERANCE_M,
+                           s3_branch_definition='first-object blade slant range < 12 m: near; >= 12 m: far; other objects: non_blade; descriptive only',
+                           scope='deterministic +/-0.2 degree endpoint combinations; no probability model, hardware guarantee, independent acceptance or whole-system bound')
+        write_json(output/'declaration.json', declaration)
+        declaration_hash = digest(output/'declaration.json')
+        result = dict(schema='wfrl.dual-beam-actual-pointing-stress.v1', status='REVIEW_ONLY',
+                      performance_status='PENDING_ACCEPTANCE', declaration_sha256=declaration_hash,
+                      declaration=declaration, source_fps=overlay['manifest']['source_fps'], turbines={},
+                      scoring_definition='estimate minus independent transported structural reference clearance; each at its own global height',
+                      integrity=dict(s1_unchanged=True, nominal_observations_reproduced=True,
+                                     max_nominal_numeric_residual_m=0., max_independent_estimate_residual_m=0.))
+        pooled = []
+        for turbine, source in sources.items():
+            references = structural_reference_points(source)
+            samples = []
+            for window_index, planned in enumerate(plans[turbine]):
+                index, time_s = planned['source_index'], planned['time_s']
+                nacelle, transforms = source.nacelles[index], source.transforms[index]
+                blades = (np.einsum('bsij,bsvj->bsvi', transforms[..., :3], source.blade_reference)
+                          + transforms[:, :, None, :, 3]).reshape(3, -1, 3)+source.layout
+                tower = tower_at(source, index)
+                nominal = forward_observations(time_s, nacelle, source.layout, origins, directions, (0, 0),
+                                               blades, source.blade_triangles, tower, source.tower_triangles, limits)
+                saved = overlay['results'][turbine]['samples'][index]
+                for beam in ('S1', 'S2', 'S3'):
+                    residual = verify_nominal_observation(nominal[beam], saved['observations'][beam])
+                    result['integrity']['max_nominal_numeric_residual_m'] = max(
+                        result['integrity']['max_nominal_numeric_residual_m'], residual)
+                if s1_state(nominal['S1']) != saved['s1_observation_state']:
+                    raise ValueError('Nominal S1 state differs from independent baseline observation')
+                row = dict(planned, turbine_id=turbine, nominal_observations=nominal,
+                           s1_observation_state=s1_state(nominal['S1']), combinations={})
+                hub, _ = blade_root_frame(source.scalars, source.poses[index], 1, nacelle)
+                clearance = lambda point: horizontal_clearance(point, tower, source.tower_triangles)[0]
+                for signs in POINTING_COMBINATIONS:
+                    actual = forward_observations(time_s, nacelle, source.layout, origins, directions, signs,
+                                                  blades, source.blade_triangles, tower, source.tower_triangles,
+                                                  limits, nominal_s1=nominal['S1'])
+                    pairs = {method: reconstruct(actual['S2'], actual['S3'], hub+source.layout,
+                                                 config['effective_length_m'], clearance, time_s=time_s,
+                                                 limits=limits, method=method) for method in METHOD_VERSIONS}
+                    # Real terminal transforms enter only this independent scoring
+                    # branch, after both estimators have consumed identical returns.
+                    methods = {method: dict(reconstruction=pair, evaluation=evaluate_pair(
+                        pair, references[index], tower, source.tower_triangles)) for method, pair in pairs.items()}
+                    for value in methods.values():
+                        residual = value['evaluation']['independent_estimate_residual_m']
+                        if residual is not None:
+                            result['integrity']['max_independent_estimate_residual_m'] = max(
+                                result['integrity']['max_independent_estimate_residual_m'], residual)
+                    row['combinations'][combination_id(signs)] = dict(
+                        signs=list(signs), observations={s: actual[s] for s in ('S2', 'S3')},
+                        beam_changes={s: observation_changes(nominal[s], actual[s]) for s in ('S1', 'S2', 'S3')},
+                        methods=methods)
+                samples.append(row)
+                if window_index % 100 == 0:
+                    print(turbine, window_index+1, '/', len(plans[turbine]), flush=True)
+            result['turbines'][turbine] = dict(samples=samples, combinations={
+                combination_id(s): summarize_samples(samples, combination_id(s), 1./source.manifest['source_fps'])
+                for s in POINTING_COMBINATIONS})
+            # Prefix passage IDs for pooled coverage so distinct turbine passages
+            # cannot merge. Numeric metrics are weighted by individual samples.
+            for row in samples:
+                pooled.append({**row, 'passage_id': turbine+'/'+row['passage_id']})
+        result['pooled_combinations'] = {combination_id(s): summarize_samples(
+            pooled, combination_id(s), 1./result['source_fps']) for s in POINTING_COMBINATIONS}
+        result['s1'] = dict(nominal_window_samples=len(pooled),
+                           nominal_hits=sum(r['s1_observation_state'] == 'triggered' for r in pooled),
+                           unknown_samples=sum(r['s1_observation_state'] == 'unknown' for r in pooled),
+                           unchanged_for_all_combinations=True,
+                           scope='independent raw S1 on fixed windows; no new full-grid alarm or hold package is fabricated')
+        result['runtime'] = dict(python=platform.python_version(), numpy=np.__version__)
+        names = ('scripts/lidar/stress_dual_beam_pointing.py', 'tests/lidar/test_dual_beam_pointing.py',
+                 'scripts/lidar/compare_dual_beam_methods.py', 'wfrl/lidar/dual_beam.py',
+                 'wfrl/lidar/dual_beam_replay.py', 'wfrl/lidar/physics.py',
+                 'wfrl/lidar/moving_tower.py', 'wfrl/camera_video/data.py')
+        result['implementation_hashes'] = {name: digest(ROOT/name) for name in names}
+        if digest(output/'declaration.json') != declaration_hash:
+            raise ValueError('Pointing declaration changed during the experiment')
+        write_json(output/'pointing-stress.json', result)
+    print(destination/'pointing-stress.json', flush=True)
     return result
 
 

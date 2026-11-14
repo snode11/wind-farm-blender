@@ -77,7 +77,10 @@ def horizontal_clearance(tip, points, triangles):
     The surface polygon and its discretization are retained without fitting a circle.
     """
     tip = np.asarray(tip, float)
-    tri = np.asarray(points)[triangles]
+    points = np.asarray(points, float)
+    if tip.shape != (3,) or not np.isfinite(tip).all() or not np.isfinite(points).all():
+        raise ValueError('Invalid tip or moving tower geometry')
+    tri = points[triangles]
     tri = tri[(tri[:, :, 2].min(1) <= tip[2]) & (tri[:, :, 2].max(1) >= tip[2])]
     segments = []
     for face in tri:
@@ -95,6 +98,10 @@ def horizontal_clearance(tip, points, triangles):
     if not segments:
         raise ValueError('Tip height does not intersect moving tower')
     seg = np.asarray(segments)
+    # Adjacent height slabs share the same section edge at their common ring.
+    # Count that geometric edge once in the odd-even polygon classifier.
+    _, unique = np.unique(seg, axis=0, return_index=True)
+    seg = seg[np.sort(unique)]
     a, edge = seg[:, 0], seg[:, 1] - seg[:, 0]
     length = np.sum(edge * edge, axis=1)
     u = np.clip(np.sum((tip - a) * edge, axis=1) / length, 0, 1)
@@ -127,6 +134,8 @@ def separated_from_tower(points, triangles, tower_points, tower_triangles):
     Passing certifies separation of these discrete surfaces. Failure is unresolved.
     """
     tri = points[triangles]; tower = tower_points[tower_triangles]
+    if not len(tri) or not len(tower) or not np.isfinite(tri).all() or not np.isfinite(tower).all():
+        return False
     lo, hi = tri[:, :, 2].min(1), tri[:, :, 2].max(1)
     tlo, thi = tower[:, :, 2].min(1), tower[:, :, 2].max(1)
     active = (lo <= thi.max()) & (hi >= tlo.min())

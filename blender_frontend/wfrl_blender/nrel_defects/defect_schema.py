@@ -86,10 +86,12 @@ def _number(value, name, low, high=None, allow_zero=False):
         raise ValueError(f'{name} is out of supported range')
 
 
-def _required_keys(value, required, label):
+def _required_keys(value, required, label, optional=()):
     if not isinstance(value, dict): raise ValueError(f'{label} must be an object')
     missing = set(required)-set(value)
     if missing: raise ValueError(f'{label} missing {sorted(missing)}')
+    unknown = set(value)-set(required)-set(optional)
+    if unknown: raise ValueError(f'{label}: unknown fields {sorted(unknown)}')
 
 
 def _orient(a, b, c): return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
@@ -148,14 +150,17 @@ def validate_document(document, surface):
         if item['turbine_id'] not in surface.turbine_ids or type(item['blade_id']) is not int or item['blade_id'] not in (1, 2, 3):
             raise ValueError('Unknown turbine_id or blade_id in NREL scene')
         kind = item['morphology']
-        if kind not in PRESETS: raise ValueError(f'Unsupported morphology: {kind}')
+        if not isinstance(kind, str) or kind not in PRESETS: raise ValueError(f'Unsupported morphology: {kind}')
         preset = PRESETS[kind]
         if item['representation'] != preset['representation']: raise ValueError('Morphology/representation mismatch')
         if not isinstance(item['cause'], str) or not item['cause']: raise ValueError('cause must be a nonempty string')
-        _required_keys(item['anchor'], ('s_m', 'u', 'surface_side', 'theta_deg'), 'anchor')
+        _required_keys(item['anchor'], ('s_m', 'u', 'surface_side', 'theta_deg'), 'anchor', ('region_hint',))
         surface.frame(item['anchor'])
         shape = item['shape']
-        _required_keys(shape, ('length_m', 'max_width_m', 'depth_m', 'seed', 'generator_version'), 'shape')
+        shape_keys = ('length_m', 'max_width_m', 'depth_m', 'seed', 'generator_version')
+        if kind in PATCH_KINDS: shape_keys += ('edge_roughness',)
+        if kind == 'lightning': shape_keys += ('crater_fraction',)
+        _required_keys(shape, shape_keys, 'shape')
         _number(shape['length_m'], 'length_m', 0, 5.)
         _number(shape['max_width_m'], 'max_width_m', 0, min(1., shape['length_m']))
         _number(shape['depth_m'], 'depth_m', 0, .1, allow_zero=True)
@@ -166,10 +171,8 @@ def validate_document(document, surface):
         if preset['representation'] != 'appearance' and shape['depth_m'] <= 0:
             raise ValueError('Geometric defect needs positive depth')
         if kind in PATCH_KINDS:
-            _required_keys(shape, ('edge_roughness',), 'patch shape')
             _number(shape['edge_roughness'], 'edge_roughness', 0., .5, allow_zero=True)
         if kind == 'lightning':
-            _required_keys(shape, ('crater_fraction',), 'lightning shape')
             _number(shape['crater_fraction'], 'crater_fraction', .15, .6, allow_zero=True)
         _required_keys(item['appearance'], ('preset_id', 'preset_version'), 'appearance')
         if item['appearance'] != dict(preset_id=preset['preset_id'], preset_version='v1'):

@@ -8,6 +8,7 @@ import numpy as np
 from scripts.lidar.audit_prebend_baseline import metrics
 from wfrl.lidar.physics import Calibration, first_hit, read_surface, tip_reference, simplified_estimate
 from wfrl.lidar.moving_tower import horizontal_clearance, background_hit
+from scripts.lidar._atomic_output import updated_files
 
 
 def audit(package, output):
@@ -73,9 +74,9 @@ def audit(package, output):
             lowest_truth_frames=[dict(time_s=r['time_s'],blade_id=r['blade_id'],truth_m=r['truth_m'],angle_deg=r['angle_deg'],in_old_window=abs(r['angle_deg'])<=3,B2_valid=r['beams']['B2']['valid']) for r in lows])
         all_rows[tid]=rows
         print(tid, result[tid]['old_window'],result[tid]['extended_window'],flush=True)
-    output.mkdir(parents=True,exist_ok=True)
-    (output/'window-summary.json').write_text(json.dumps(result,indent=2,allow_nan=False), encoding='utf-8')
-    (output/'window-rows.json').write_text(json.dumps(all_rows,separators=(',',':'),allow_nan=False), encoding='utf-8')
+    with updated_files(output) as staged:
+        (staged/'window-summary.json').write_text(json.dumps(result,indent=2,allow_nan=False), encoding='utf-8')
+        (staged/'window-rows.json').write_text(json.dumps(all_rows,separators=(',',':'),allow_nan=False), encoding='utf-8')
     return result
 
 

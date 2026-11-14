@@ -35,8 +35,11 @@ from __future__ import annotations
 
 import math
 import os
+import stat
+import tempfile
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from numbers import Real
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -61,6 +64,40 @@ class SceneError(ValueError):
     """场景文件不合法。消息里必须带上出错的字段路径，UI 直接显示这条。"""
 
 
+def _number(value, path):
+    if (isinstance(value, bool) or not isinstance(value, Real)
+            or getattr(getattr(value, "dtype", None), "kind", None) in ("m", "M")):
+        raise SceneError(f"{path} 必须是有限数值")
+    try:
+        result = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise SceneError(f"{path} 必须是有限数值") from exc
+    if not math.isfinite(result):
+        raise SceneError(f"{path} 必须是有限数值")
+    return result
+
+
+def _text(value, path):
+    if not isinstance(value, str) or not value.strip():
+        raise SceneError(f"{path} 必须是非空字符串")
+    return value
+
+
+def _list(value, path):
+    if not isinstance(value, list):
+        raise SceneError(f"{path} 必须是列表")
+    return value
+
+
+def _mapping(value, path, fields):
+    if not isinstance(value, dict):
+        raise SceneError(f"{path} 必须是映射")
+    unknown = set(value) - set(fields)
+    if unknown:
+        raise SceneError(f"{path} 含未知字段 {sorted(map(repr, unknown))}")
+    return value
+
+
 @dataclass
 class Turbine:
     id: str
@@ -80,6 +117,7 @@ class SensorSpec:
     params: Dict[str, Any] = field(default_factory=dict)
 
     def turbine_indices(self, turbines: List[Turbine]) -> List[int]:
+        _text(self.turbines, f"sensors[{self.type}].turbines")
         if self.turbines == "all":
             return list(range(len(turbines)))
         want = {s.strip() for s in str(self.turbines).split(",") if s.strip()}
@@ -105,6 +143,9 @@ class Scene:
     sensors: List[SensorSpec] = field(default_factory=list)
     terrain: Optional[str] = None          # 渲染装饰，见 TERRAINS；不进物理
     source_path: Optional[str] = None
+    # Boolean switches plus enumerated parameter-set choices (e.g. dynamic_stall_parameters).
+    physics: Dict[str, Union[bool, str]] = field(default_factory=dict)
+    substructure: Optional[Dict[str, Any]] = None
 
     # ---- 派生量 ----------------------------------------------------------
     @property
@@ -138,23 +179,42 @@ class Scene:
             out.append(f"来流由湍流盒 {self.turbulence} 决定，speed 字段被忽略")
         if len(TURBINES) == 1:
             out.append("模板只含 NREL 5MW 一种机型，不支持混排")
+        if self.substructure is None:
+            out.append("单桩与海面外观不代表已计算水动力；海上求解须显式配置 substructure")
+        else:
+            out.append("OC3 海上模型配置包含 HydroDyn/SubDyn；是否已有有效求解读数以遥测 hydrodynamics 状态为准")
         return out
 
     # ---- 校验 ------------------------------------------------------------
     def validate(self) -> "Scene":
+        from wfrl.physics_options import validate_physics, validate_substructure
+        try:
+            validate_physics(self.physics)
+            self.substructure = validate_substructure(self.substructure, self.physics,
+                                                     direction=self.wind_direction)
+        except ValueError as exc:
+            raise SceneError(str(exc)) from exc
+        if self.backend != 'fastfarm' and (any(self.physics.values()) or self.substructure is not None):
+            raise SceneError('physics and substructure options require backend fastfarm')
+        _text(self.name, "name")
+        _text(self.backend, "backend")
+        _text(self.turbine, "turbine")
         if self.backend not in BACKENDS:
             raise SceneError(f"backend 必须是 {BACKENDS}，收到 {self.backend!r}")
         if self.turbine not in TURBINES:
             raise SceneError(f"turbine 必须是 {TURBINES}，收到 {self.turbine!r}")
-        if self.n < 1:
+        if not _list(self.turbines, "layout"):
             raise SceneError("layout 至少要有一台机组")
-        if not math.isfinite(self.dt) or self.dt <= 0:
+        if _number(self.dt, "dt") <= 0:
             raise SceneError(f"dt 必须为有限正数，收到 {self.dt}")
         if int(self.dt) != self.dt:
             raise SceneError(f"dt 必须为整数秒；当前 WFCRL case 不支持小数步长，收到 {self.dt}")
         for index, turbine in enumerate(self.turbines):
-            if not (math.isfinite(turbine.x) and math.isfinite(turbine.y)):
-                raise SceneError(f"layout[{index}] 坐标必须是有限数值")
+            if not isinstance(turbine, Turbine):
+                raise SceneError(f"layout[{index}] 必须是 Turbine")
+            _text(turbine.id, f"layout[{index}].id")
+            _number(turbine.x, f"layout[{index}].x")
+            _number(turbine.y, f"layout[{index}].y")
 
         ids = [t.id for t in self.turbines]
         dup = {i for i in ids if ids.count(i) > 1}
@@ -173,33 +233,47 @@ class Scene:
                         f"({MIN_SPACING_D}D)，高分辨率盒子会重叠")
 
         lo, hi = WS_BOUNDS
-        if not (lo <= self.wind_speed <= hi):
+        if not (lo <= _number(self.wind_speed, "inflow.speed") <= hi):
             raise SceneError(
                 f"inflow.speed={self.wind_speed} 超出 [{lo}, {hi}] m/s")
-        if not (0.0 <= self.wind_direction < 360.0):
+        if not (0.0 <= _number(self.wind_direction, "inflow.direction") < 360.0):
             raise SceneError(
                 f"inflow.direction={self.wind_direction} 须在 [0, 360)")
 
+        _list(self.controls, "controls")
         bad = [c for c in self.controls if c not in CONTROLS]
         if bad:
             raise SceneError(f"controls 含未知量 {bad}，可选 {CONTROLS}")
         if not self.controls:
             raise SceneError("controls 不能为空")
 
-        if self.turbulence and self.backend != "fastfarm":
-            raise SceneError("inflow.turbulence 只有 fastfarm 后端支持")
+        if self.turbulence is not None:
+            _text(self.turbulence, "inflow.turbulence")
+            if self.backend != "fastfarm":
+                raise SceneError("inflow.turbulence 只有 fastfarm 后端支持")
 
+        if self.terrain is not None:
+            _text(self.terrain, "terrain")
         if self.terrain not in TERRAINS:
             raise SceneError(
                 f"terrain 必须是 {TERRAINS}（渲染装饰），收到 {self.terrain!r}")
 
         from wfrl.channels import registry as _reg
-        for s in self.sensors:
+        for index, s in enumerate(_list(self.sensors, "sensors")):
+            path = f"sensors[{index}]"
+            if not isinstance(s, SensorSpec):
+                raise SceneError(f"{path} 必须是 SensorSpec")
+            _text(s.type, path + ".type")
+            _text(s.mount, path + ".mount")
+            _text(s.turbines, path + ".turbines")
             if s.type not in _reg.available():
                 raise SceneError(
-                    f"未知传感器 {s.type!r}，可用: {sorted(_reg.available())}")
-            s.turbine_indices(self.turbines)      # 顺带查 on 里的 id
-            _reg.get(s.type).validate(self, s)
+                    f"{path}.type 未知传感器 {s.type!r}，可用: {sorted(_reg.available())}")
+            try:
+                s.turbine_indices(self.turbines)
+                _reg.get(s.type).validate(self, s)
+            except ValueError as exc:
+                raise SceneError(f"{path}: {exc}") from exc
         return self
 
     # ---- 转成 WFCRL 的 FarmCase ------------------------------------------
@@ -209,12 +283,28 @@ class Scene:
         self.validate()
         from wfcrl.environments.data_cases import FastFarmCase, FlorisCase
         if self.backend == "fastfarm":
-            case = FastFarmCase(
+            class PhysicsCase(FastFarmCase):
+                @property
+                def simul_params(case_self):
+                    params = dict(super().simul_params)
+                    if any(case_self.physics.values()):
+                        params['physics'] = dict(case_self.physics)
+                    if case_self.substructure is not None:
+                        params['substructure'] = dict(case_self.substructure)
+                    if case_self.direction != 270.:
+                        params['direction'] = case_self.direction
+                    return params
+            case_type = PhysicsCase if any(self.physics.values()) or self.substructure is not None or self.wind_direction != 270. else FastFarmCase
+            case = case_type(
                 num_turbines=self.n, xcoords=self.xcoords, ycoords=self.ycoords,
                 dt=int(self.dt), buffer_window=1, t_init=100, max_iter=max_iter,
                 set_wind_direction=True,
             )
             case.wind_time_series = self.turbulence
+            if case_type is PhysicsCase:
+                case.physics = dict(self.physics)
+                case.substructure = None if self.substructure is None else dict(self.substructure)
+                case.direction = self.wind_direction
             return case
         case = FlorisCase(
             num_turbines=self.n, xcoords=self.xcoords, ycoords=self.ycoords,
@@ -246,6 +336,8 @@ class Scene:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            **({'physics': dict(self.physics)} if any(self.physics.values()) else {}),
+            **({'substructure': dict(self.substructure)} if self.substructure is not None else {}),
             "name": self.name,
             "backend": self.backend,
             "turbine": self.turbine,
@@ -263,27 +355,27 @@ class Scene:
 
 
 def from_dict(d: Dict[str, Any], source_path: str = None) -> Scene:
+    """读取配置；省略可选字段使用默认值，显式错误值与未知字段拒绝。"""
     if not isinstance(d, dict):
         raise SceneError("场景文件顶层必须是映射（YAML 字典）")
-    layout = d.get("layout") or []
-    if not isinstance(layout, list):
-        raise SceneError("layout 必须是列表")
+    _mapping(d, "scene", {"name", "backend", "turbine", "dt", "layout", "inflow",
+                          "controls", "sensors", "terrain", "physics", "substructure"})
+    layout = _list(d.get("layout", []), "layout")
     turbines = []
     for k, item in enumerate(layout):
-        if not isinstance(item, dict):
-            raise SceneError(f"layout[{k}] 必须是映射")
-        try:
-            turbines.append(Turbine(id=str(item.get("id", f"T{k+1}")),
-                                    x=float(item["x"]), y=float(item["y"])))
-        except (KeyError, TypeError, ValueError) as e:
-            raise SceneError(f"layout[{k}] 坐标不合法: {e}") from e
+        path = f"layout[{k}]"
+        _mapping(item, path, {"id", "x", "y"})
+        for key in ("x", "y"):
+            if key not in item:
+                raise SceneError(f"{path}.{key} 缺失")
+        turbines.append(Turbine(id=_text(item.get("id", f"T{k+1}"), path + ".id"),
+                                x=_number(item["x"], path + ".x"),
+                                y=_number(item["y"], path + ".y")))
 
-    inflow = d.get("inflow") or {}
-    if not isinstance(inflow, dict):
-        raise SceneError("inflow 必须是映射")
+    inflow = _mapping(d.get("inflow", {}), "inflow", {"speed", "direction", "turbulence"})
 
     sensors = []
-    for k, item in enumerate(d.get("sensors") or []):
+    for k, item in enumerate(_list(d.get("sensors", []), "sensors")):
         if not isinstance(item, dict) or "type" not in item:
             raise SceneError(f"sensors[{k}] 必须是映射且含 type")
         # YAML 1.1 把裸 on/off/yes/no 解析成布尔，键会变成 True/False。若不拦，
@@ -293,29 +385,65 @@ def from_dict(d: Dict[str, Any], source_path: str = None) -> Scene:
             raise SceneError(
                 f"sensors[{k}] 出现被 YAML 解析成布尔的键（写了 on/off/yes/no?）；"
                 f"挂载目标的字段名是 turbines")
-        unknown = set(item) - {"type", "mount", "turbines", "params"}
-        if unknown:
-            raise SceneError(f"sensors[{k}] 含未知字段 {sorted(unknown)}")
+        path = f"sensors[{k}]"
+        _mapping(item, path, {"type", "mount", "turbines", "params"})
+        params = item.get("params", {})
+        if params is not None and not isinstance(params, dict):
+            raise SceneError(f"{path}.params 必须是映射")
         sensors.append(SensorSpec(
-            type=str(item["type"]), mount=str(item.get("mount", "nacelle")),
-            turbines=str(item.get("turbines", "all")),
-            params=dict(item.get("params") or {})))
+            type=_text(item["type"], path + ".type"),
+            mount=_text(item.get("mount", "nacelle"), path + ".mount"),
+            turbines=_text(item.get("turbines", "all"), path + ".turbines"),
+            params=dict(params or {})))
 
     sc = Scene(
-        name=str(d.get("name", "untitled")),
-        backend=str(d.get("backend", "fastfarm")).lower(),
-        turbine=str(d.get("turbine", "nrel5mw")).lower(),
-        dt=float(d.get("dt", 3.0)),
+        name=_text(d.get("name", "untitled"), "name"),
+        backend=_text(d.get("backend", "fastfarm"), "backend").lower(),
+        turbine=_text(d.get("turbine", "nrel5mw"), "turbine").lower(),
+        dt=_number(d.get("dt", 3.0), "dt"),
         turbines=turbines,
-        wind_speed=float(inflow.get("speed", 8.0)),
-        wind_direction=float(inflow.get("direction", 270.0)),
-        turbulence=inflow.get("turbulence") or None,
-        controls=[str(c).lower() for c in (d.get("controls") or ["yaw"])],
+        wind_speed=_number(inflow.get("speed", 8.0), "inflow.speed"),
+        wind_direction=_number(inflow.get("direction", 270.0), "inflow.direction"),
+        turbulence=inflow.get("turbulence"),
+        controls=[_text(c, f"controls[{i}]").lower()
+                  for i, c in enumerate(_list(d.get("controls", ["yaw"]), "controls"))],
         sensors=sensors,
-        terrain=(str(d["terrain"]).lower() if d.get("terrain") else None),
+        terrain=(_text(d["terrain"], "terrain").lower() if d.get("terrain") is not None else None),
         source_path=source_path,
+        physics=d.get('physics', {}),
+        substructure=d.get('substructure'),
     )
     return sc.validate()
+
+
+class _SceneLoader(yaml.SafeLoader):
+    def __init__(self, stream):
+        super().__init__(stream)
+        self._checked_mappings = set()
+
+    def flatten_mapping(self, node):
+        if node in self._checked_mappings:
+            return
+        self._checked_mappings.add(node)
+        keys = set()
+        for key_node, _ in node.value:
+            # YAML merge 的显式覆盖仍按 SafeLoader 的合并规则处理。
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                key = "<<"
+            else:
+                key = self.construct_object(key_node)
+            try:
+                duplicate = key in keys
+                keys.add(key)
+            except TypeError as exc:
+                raise yaml.constructor.ConstructorError(
+                    "while constructing a mapping", node.start_mark,
+                    "unhashable mapping key", key_node.start_mark) from exc
+            if duplicate:
+                raise yaml.constructor.ConstructorError(
+                    "while constructing a mapping", node.start_mark,
+                    f"duplicate key {key!r}", key_node.start_mark)
+        super().flatten_mapping(node)
 
 
 def load_scene(path: str) -> Scene:
@@ -324,16 +452,26 @@ def load_scene(path: str) -> Scene:
         raise SceneError(f"场景文件不存在: {path}")
     with open(path, "r", encoding="utf-8") as fp:
         try:
-            d = yaml.safe_load(fp)
+            d = yaml.load(fp, Loader=_SceneLoader)
         except yaml.YAMLError as e:
             raise SceneError(f"YAML 解析失败: {e}") from e
     return from_dict(d, source_path=path)
 
 
 def dump_scene(scene: Scene, path: str) -> str:
+    """以 UTF-8 YAML 原子替换目标；写入失败保留已有文件。"""
     scene.validate()
     path = os.path.abspath(path)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fp:
-        yaml.safe_dump(scene.to_dict(), fp, allow_unicode=True, sort_keys=False)
+    target = os.path.realpath(path)
+    directory = os.path.dirname(target)
+    os.makedirs(directory, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".wfrl-scene-", dir=directory) as temporary:
+        staged = os.path.join(temporary, "scene")
+        with open(staged, "w", encoding="utf-8") as fp:
+            yaml.safe_dump(scene.to_dict(), fp, allow_unicode=True, sort_keys=False)
+            fp.flush()
+            os.fsync(fp.fileno())
+        if os.path.exists(target):
+            os.chmod(staged, stat.S_IMODE(os.stat(target).st_mode))
+        os.replace(staged, target)
     return path

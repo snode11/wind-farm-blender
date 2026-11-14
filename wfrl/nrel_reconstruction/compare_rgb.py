@@ -5,6 +5,8 @@ and 45 are explicitly nonblind temporal validation, not an independent test.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_write_text
+
 import argparse
 from collections.abc import Mapping, Sequence
 import hashlib
@@ -200,7 +202,7 @@ def compare_rgb(model_paths: Mapping[str,str|Path], observations: Sequence[Mappi
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True,exist_ok=True)
     report["output_json"] = str((output_dir/"rgb_comparison.json").resolve())
-    (output_dir/"rgb_comparison.json").write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+"\n",encoding="utf-8")
+    atomic_write_text(output_dir/"rgb_comparison.json", json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+"\n",encoding="utf-8")
     return report
 
 

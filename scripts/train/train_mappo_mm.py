@@ -17,7 +17,6 @@ Usage:
 import argparse
 import os
 from collections import OrderedDict
-from uuid import uuid4
 
 import numpy as np
 from gymnasium import spaces
@@ -32,10 +31,15 @@ from wfcrl import environments as envs
 from wfrl import multimodal as mm
 from wfrl.mappo_sb3 import ENV_ID, MAX_STEPS, MAParallelVecEnv
 from wfrl.sb3_checkpoint import (
-    require_checkpoint_files, validate_model_normalization, validate_normalization,
+    validate_model_normalization, validate_normalization,
 )
 
 from wfrl import paths
+
+if __package__:
+    from .train_ppo import CheckpointPair
+else:
+    from train_ppo import CheckpointPair
 
 LOG_DIR = os.path.join(paths.LOGS, "mappo_mm")
 CKPT_DIR = paths.CKPT
@@ -44,6 +48,18 @@ VECNORM_PATH = os.path.join(CKPT_DIR, "vecnormalize_mappo_mm.pkl")
 
 # 只对这些 key 做 running mean/std 归一化；图像不归一化（会毁掉空间结构）
 NORM_KEYS = ["yaw", "wind_speed", "wind_direction", "vibration"]
+
+
+def _checkpoint_pair():
+    return CheckpointPair(MODEL_PATH, VECNORM_PATH, norm_keys=NORM_KEYS)
+
+
+def _require_checkpoint_files():
+    return _checkpoint_pair().require()
+
+
+def save_checkpoint_pair(model, venv):
+    return _checkpoint_pair().save(model, venv)
 
 
 def _get_fi(par_env):
@@ -92,6 +108,9 @@ class MMVecEnv(MAParallelVecEnv):
 
 
 def make_venv(norm_reward=True, training=True, use_image=True, *, norm_path=None):
+    model_path = None
+    if norm_path is not None and os.path.abspath(norm_path) == os.path.abspath(VECNORM_PATH):
+        model_path, norm_path = _checkpoint_pair().resolve()
     if norm_path is not None and not os.path.isfile(norm_path):
         raise FileNotFoundError(f"Required normalization file is missing: {norm_path}")
     raw = envs.make(ENV_ID, controls=["yaw"], max_num_steps=MAX_STEPS)
@@ -105,6 +124,7 @@ def make_venv(norm_reward=True, training=True, use_image=True, *, norm_path=None
             venv = VecNormalize.load(norm_path, base)
             check_for_correct_spaces(base, venv.observation_space, venv.action_space)
             venv._wfrl_normalization_path = os.path.abspath(norm_path)
+            venv._wfrl_model_path = os.path.abspath(model_path) if model_path is not None else None
         validate_normalization(venv, norm_keys=NORM_KEYS)
         venv.training = training
         venv.norm_reward = norm_reward
@@ -116,11 +136,13 @@ def make_venv(norm_reward=True, training=True, use_image=True, *, norm_path=None
 
 def build_model(venv, resume=False):
     if resume:
-        require_checkpoint_files(MODEL_PATH, VECNORM_PATH)
-        if venv.__dict__.get("_wfrl_normalization_path") != os.path.abspath(VECNORM_PATH):
+        model_path = venv.__dict__.get("_wfrl_model_path")
+        if model_path is None:
             raise ValueError("Restore VecNormalize before loading a multimodal IPPO checkpoint")
-        print(f"[mm] resuming from {MODEL_PATH}.zip")
-        model = PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        if not os.path.isfile(model_path):
+            raise FileNotFoundError(f"Required checkpoint file is missing: {model_path}")
+        print(f"[mm] resuming from {model_path}")
+        model = PPO.load(model_path, env=venv, tensorboard_log=LOG_DIR)
         validate_model_normalization(model, venv, norm_keys=NORM_KEYS)
         return model
     return PPO(
@@ -185,7 +207,7 @@ def main():
 
     restore = args.resume or args.eval_only
     if restore:
-        require_checkpoint_files(MODEL_PATH, VECNORM_PATH)
+        _require_checkpoint_files()
     if not args.eval_only:
         os.makedirs(LOG_DIR, exist_ok=True)
         os.makedirs(CKPT_DIR, exist_ok=True)
@@ -202,11 +224,8 @@ def main():
               f"image={'on' if use_image else 'off'} …")
         model.learn(total_timesteps=args.timesteps, progress_bar=args.progress_bar,
                     reset_num_timesteps=not args.resume)
-        checkpoint_id = uuid4().hex
-        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = checkpoint_id
-        model.save(MODEL_PATH)
-        venv.save(VECNORM_PATH)
-        print(f"[mm] saved → {MODEL_PATH}.zip")
+        model_path, _ = save_checkpoint_pair(model, venv)
+        print(f"[mm] saved → {model_path}")
     finally:
         venv.close()
 

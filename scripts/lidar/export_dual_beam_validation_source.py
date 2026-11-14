@@ -18,6 +18,7 @@ import re
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from scripts.lidar._atomic_output import new_directory, write_text
 from wfrl.blender_bridge.blade_flex_export import fit_sections
 from wfrl.camera_video.data import blade_root_frame
 from wfrl.lidar.physics import read_surface
@@ -36,8 +37,8 @@ def digest(path):
 
 
 def save_json(path, value):
-    Path(path).write_text(json.dumps(value, ensure_ascii=False, allow_nan=False,
-                                   separators=(',', ':'))+'\n', encoding='utf-8')
+    write_text(path, json.dumps(value, ensure_ascii=False, allow_nan=False,
+                                separators=(',', ':'))+'\n')
 
 
 def exact_output_grid(columns, fps, duration_s):
@@ -66,7 +67,8 @@ def exact_output_grid(columns, fps, duration_s):
 
 def read_output(path):
     """Strict ASCII parser: malformed numerical rows cannot disappear silently."""
-    lines = Path(path).read_text(encoding='latin-1').splitlines()
+    raw = path.read() if hasattr(path, 'read') else Path(path).read_bytes()
+    lines = raw.decode('latin-1').splitlines()
     headers = [(i, line.split()) for i, line in enumerate(lines)
                if line.split()[:1] == ['Time'] and len(line.split()) > 1]
     if len(headers) != 1:
@@ -107,7 +109,9 @@ class SurfaceInventory:
     def __init__(self, run):
         self.run = Path(run).resolve()
         self.path = self.run/'compressed-surfaces.json'
-        content = json.loads(self.path.read_text(encoding='utf-8'))
+        raw = self.path.read_bytes()
+        self.sha256 = hashlib.sha256(raw).hexdigest()
+        content = json.loads(raw)
         entries = content.get('surfaces')
         if not isinstance(entries, list):
             raise ValueError('Missing compressed surface inventory')
@@ -148,7 +152,8 @@ class SurfaceInventory:
 
 def _input_values(path):
     result = {}
-    for line in Path(path).read_text(encoding='utf-8').splitlines():
+    raw = path.read() if hasattr(path, 'read') else Path(path).read_bytes()
+    for line in raw.decode('utf-8').splitlines():
         tokens = line.split()
         if len(tokens) >= 2:
             result[tokens[1]] = tokens[0].strip('"')
@@ -156,7 +161,8 @@ def _input_values(path):
 
 
 def _beam_curve(path):
-    lines = Path(path).read_text(encoding='utf-8').splitlines()
+    raw = path.read() if hasattr(path, 'read') else Path(path).read_bytes()
+    lines = raw.decode('utf-8').splitlines()
     starts = [i+2 for i, line in enumerate(lines) if line.split()[:1] == ['kp_xr']]
     if len(starts) != 1:
         raise ValueError('Missing BeamDyn reference coordinates')
@@ -167,9 +173,11 @@ def _beam_curve(path):
         raise ValueError('Invalid BeamDyn reference coordinates') from error
 
 
-def validate_reference(run, reference, config):
+def validate_reference(run, reference, config, *, snapshots=None, loaded_bytes=None, run_snapshots=None):
     """Compare actual structure and declared curve; a loaded rest is rejected."""
     run, reference = Path(run).resolve(), Path(reference).resolve()
+    snapshots = {} if snapshots is None else snapshots
+    run_snapshots = {} if run_snapshots is None else run_snapshots
     # Absolute paths in the original declaration are historical namespaces.
     # A relocated copy is identified by frozen bytes, not its former mount point.
     if digest(reference/'probe-config.json') != config.get('reference_config_sha256'):
@@ -181,9 +189,11 @@ def validate_reference(run, reference, config):
     declaration_path = reference.parent/'protocol-declaration.json'
     if expected_inventory is None and declaration_path.is_file():
         expected_inventory = json.loads(declaration_path.read_text(encoding='utf-8')).get('reference_inventory_sha256')
-    if not expected_inventory or digest(inventory_path) != expected_inventory:
+    inventory_bytes = inventory_path.read_bytes()
+    if not expected_inventory or hashlib.sha256(inventory_bytes).hexdigest() != expected_inventory:
         raise ValueError('Reference inventory differs from frozen pre-solver hash')
-    inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
+    snapshots['reference-inventory.json'] = inventory_bytes
+    inventory = json.loads(inventory_bytes)
     required_reference = {'probe-config.json', 'FarmInputs/FFTest_WT1.fst',
         'FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat',
         *(f'5MW_Baseline/{name}' for name in BEAM_FILES),
@@ -193,36 +203,43 @@ def validate_reference(run, reference, config):
         raise ValueError('Frozen reference inventory misses required physics/surfaces')
     for name, record in inventory.items():
         path = _relative_file(reference, name)
-        if digest(path) != record['sha256'] or path.stat().st_size != record['bytes']:
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != record['sha256'] or len(raw) != record['bytes']:
             raise ValueError('Frozen reference file integrity mismatch: '+name)
-    loaded = json.loads((run/'probe-config.json').read_text(encoding='utf-8'))
-    rest = json.loads((reference/'probe-config.json').read_text(encoding='utf-8'))
+        snapshots[name] = raw
+    loaded = json.loads((run/'probe-config.json').read_bytes() if loaded_bytes is None else loaded_bytes)
+    rest = json.loads(snapshots['probe-config.json'])
     if (loaded.get('structural_module') != 'BeamDyn'
             or rest.get('structural_module') != 'BeamDyn'
             or loaded.get('unloaded') or not rest.get('unloaded')):
         raise ValueError('A loaded BeamDyn run and separate unloaded reference are required')
-    curve = _beam_curve(run/'5MW_Baseline'/BEAM_FILES[0])
-    other = _beam_curve(reference/'5MW_Baseline'/BEAM_FILES[0])
+    curve_name = '5MW_Baseline/'+BEAM_FILES[0]
+    material_name = '5MW_Baseline/'+BEAM_FILES[1]
+    curve = _beam_curve(BytesIO(run_snapshots[curve_name]) if curve_name in run_snapshots else run/curve_name)
+    other = _beam_curve(BytesIO(snapshots['5MW_Baseline/'+BEAM_FILES[0]]))
     if (curve.shape != (49, 4) or not np.isfinite(curve).all()
             or not np.array_equal(curve, other)
             or not np.allclose(curve, loaded.get('reference_curve'), atol=1e-9, rtol=0)
             or not np.allclose(curve, rest.get('reference_curve'), atol=1e-9, rtol=0)
-            or digest(run/'5MW_Baseline'/BEAM_FILES[1])
-            != digest(reference/'5MW_Baseline'/BEAM_FILES[1])):
+            or (hashlib.sha256(run_snapshots[material_name]).hexdigest() if material_name in run_snapshots
+                else digest(run/material_name))
+            != hashlib.sha256(snapshots['5MW_Baseline/'+BEAM_FILES[1]]).hexdigest()):
         raise ValueError('Independent reference structure/curve mismatch')
-    fst = _input_values(reference/'FarmInputs/FFTest_WT1.fst')
-    ed = _input_values(reference/'FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat')
+    fst = _input_values(BytesIO(snapshots['FarmInputs/FFTest_WT1.fst']))
+    ed = _input_values(BytesIO(snapshots['FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat']))
     if (float(fst.get('Gravity', 'nan')) != 0 or fst.get('CompInflow') != '0'
             or float(ed.get('RotSpeed', 'nan')) != 0):
         raise ValueError('Reference is not zero-gravity/still-air/stationary')
     return loaded, rest, curve
 
 
-def _load_scalars(run, reference):
+def _load_scalars(run, reference, reference_bytes=None, run_bytes=None):
     scalars = json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text(encoding='utf-8'))['scalars']
     keys = ('TipRad', 'HubRad', 'OverHang', 'TowerHt', 'Twr2Shft', 'ShftTilt', 'PreCone(1)')
     for folder in (run, reference):
-        inputs = _input_values(folder/'FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat')
+        name = 'FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat'
+        snapshots = reference_bytes if folder == reference else run_bytes
+        inputs = _input_values(BytesIO(snapshots[name]) if snapshots is not None and name in snapshots else folder/name)
         if any(not np.isclose(float(inputs.get(key, 'nan')), scalars[key], atol=1e-8, rtol=0)
                for key in keys):
             raise ValueError('Actual turbine geometry differs from root-frame scalars')
@@ -233,22 +250,35 @@ def export(run, reference, output, start=None, end=None):
     run, reference, output = map(lambda p: Path(p).resolve(), (run, reference, output))
     if output.exists():
         raise ValueError('Output directory already exists')
-    config = json.loads((run/'run-config.json').read_text(encoding='utf-8'))
+    config_bytes = (run/'run-config.json').read_bytes()
+    config_sha256 = hashlib.sha256(config_bytes).hexdigest()
+    config = json.loads(config_bytes)
     exit_path = run/'exit-status.json'
-    completion = json.loads(exit_path.read_text(encoding='utf-8')) if exit_path.is_file() else {}
+    exit_bytes = exit_path.read_bytes() if exit_path.is_file() else b'{}'
+    completion = json.loads(exit_bytes)
     if (config.get('status') != 'SOLVER_COMPLETE' or completion.get('status') != 'COMPLETE'
             or completion.get('exit_code') != 0):
         raise ValueError('Successful complete runner execution is not proven')
+    run_bytes = {}
     for item in config.get('inputs', []):
         path = _relative_file(run, item['path'])
-        if digest(path) != item['sha256'] or path.stat().st_size != item['bytes']:
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != item['sha256'] or len(raw) != item['bytes']:
             raise ValueError('Actual solver input integrity mismatch: '+item['path'])
-    loaded, rest, curve = validate_reference(run, reference, config)
+        run_bytes[str(path.relative_to(run))] = raw
+    reference_bytes = {}
+    probe_bytes = (run/'probe-config.json').read_bytes()
+    loaded, rest, curve = validate_reference(run, reference, config,
+                                           snapshots=reference_bytes, loaded_bytes=probe_bytes,
+                                           run_snapshots=run_bytes)
     raw_path = run/'FarmInputs/FFTest_WT1.out'
-    columns, units = read_output(raw_path)
+    raw_output = raw_path.read_bytes()
+    raw_output_sha256 = hashlib.sha256(raw_output).hexdigest()
+    columns, units = read_output(BytesIO(raw_output))
     complete_times, clock = exact_output_grid(columns, config['fps'], config['duration_s'])
     log_path = run/'solver.log'
-    if not log_path.is_file() or 'OpenFAST terminated normally.' not in log_path.read_text(errors='replace', encoding='utf-8'):
+    log_bytes = log_path.read_bytes() if log_path.is_file() else b''
+    if 'OpenFAST terminated normally.' not in log_bytes.decode('utf-8', errors='replace'):
         raise ValueError('Complete solver execution is not proven')
     start = complete_times[0] if start is None else float(start)
     end = complete_times[-1] if end is None else float(end)
@@ -271,7 +301,7 @@ def export(run, reference, output, start=None, end=None):
                 raise ValueError('Missing BeamDyn tip channel or unexpected displacement unit')
     poses = np.column_stack([columns[name][indices] for name in channels])
     poses[:, 1] = np.degrees(np.unwrap(np.radians(columns['Azimuth'])))[indices]
-    scalars = _load_scalars(run, reference)
+    scalars = _load_scalars(run, reference, reference_bytes, run_bytes)
     inventory = SurfaceInventory(run)
     reference_hashes = {}
 
@@ -281,8 +311,9 @@ def export(run, reference, output, start=None, end=None):
         if len(candidates) != 1:
             raise ValueError('Ambiguous/missing unloaded reference '+kind)
         path = candidates[0]
-        reference_hashes[str(path)] = digest(path)
-        return read_surface(path)
+        raw = reference_bytes[str(path.relative_to(reference))]
+        reference_hashes[str(path)] = hashlib.sha256(raw).hexdigest()
+        return read_surface(BytesIO(raw))
 
     blade_refs, blade_triangles = [], None
     for blade in (1, 2, 3):
@@ -357,84 +388,85 @@ def export(run, reference, output, start=None, end=None):
     if max(max_surface, max_support, max_nacelle_channel) > SURFACE_TOLERANCE_M or max_component > COMPONENT_TOLERANCE_M:
         raise ValueError(f'Original interface tolerances failed: blade={max_surface}, support={max_support}, '
                          f'nacelle={max_nacelle_channel}, tip_components={max_component}')
-    output.mkdir(parents=True, exist_ok=False)
-    np.savez_compressed(output/'geometry.npz', times=times, poses=poses[:, None], transforms=transforms)
-    np.savez_compressed(output/'tower-motion.npz', times=times, heights=heights, transforms=towers, nacelle=nacelles)
-    np.savez_compressed(output/'reference-surfaces.npz', blades=refs.reshape(3, -1, 3),
-                        triangles=blade_triangles, tower=tower_ref, tower_triangles=tower_triangles)
-    reference_payload = dict(schema='wfrl.blade-reference.v1', structural_module='BeamDyn',
-        model=loaded['model'], curve=curve.tolist(), tip_local_m=tip_local.tolist(),
-        definition='x=-(z/61.5)^2; y=0; metres; z from blade root',
-        reference_state='independent zero-load stationary solve', precone_deg=scalars['PreCone(1)'],
-        source_note='Independent engineering operating screen; NREL 5MW derivative; no real-machine equivalence claim',
-        sources=loaded.get('structural_source', {}))
-    save_json(output/'blade-reference.json', reference_payload)
-    raw_source = dict(path=os.path.relpath(raw_path, output), original_path=str(raw_path),
-                      path_reference='source output directory', sha256=digest(raw_path))
-    save_json(output/'deflection-t1.json', dict(schema='wfrl.tip-deflection.t1.v3', turbine_id='T1', unit='m',
-        reference='BeamDyn structural tip; independent unloaded prebend', frame='BeamDyn pitched root xyz',
-        geometry_sha256=digest(output/'geometry.npz'), tower_motion_sha256=digest(output/'tower-motion.npz'),
-        reference_sha256=digest(output/'blade-reference.json'), times=times.tolist(), poses=poses.tolist(),
-        simulation=simulation.tolist(), scalars=scalars, sources={'T1': raw_source}))
-    telemetry = {}
-    for name, channel, unit, scale in (('power', 'GenPwr', 'MW', .001), ('torque', 'GenTq', 'N m', 1000.)):
-        if channel in columns:
-            if units.get(channel) != {'GenPwr': '(kW)', 'GenTq': '(kN-m)'}[channel]:
-                raise ValueError('Unexpected raw telemetry unit: '+channel)
-            telemetry[name] = dict(values=(columns[channel][indices]*scale).tolist(), unit=unit, source_channel=channel)
-    save_json(output/'telemetry.json', dict(schema='wfrl.farm-telemetry.v1', geometry_sha256=digest(output/'geometry.npz'),
-        times=times.tolist(), sources={'T1': raw_source}, turbines={'T1': telemetry},
-        status='AVAILABLE_SOURCE_CHANNELS' if telemetry else 'UNAVAILABLE_SOURCE_CHANNELS',
-        reason=None if telemetry else config.get('telemetry_boundary', 'Generator power/torque channels absent from actual solver output')))
-    statistics = dict(expected_samples=0, valid_samples=0, valid_ratio=None, mae_m=None, max_abs_error_m=None,
-        p95_abs_error_m=None, max_positive_bias_m=None, passage_count=0, missed_passage_count=0,
-        status='NOT_COMPUTED_SOURCE_GEOMETRY_ONLY')
-    save_json(output/'data.json', {'T1': dict(motion=motion, measurements=[], cumulative=[], statistics=statistics)})
-    save_json(output/'source-surfaces.json', dict(schema='wfrl.compressed-source-surfaces.v1', run_path=str(run),
-        reference_path=str(reference), run_package=os.path.relpath(run, output),
-        reference_package=os.path.relpath(reference, output), path_reference='source output directory',
-        reference_inventory_sha256=digest(reference/'reference-inventory.json'),
-        compressed_inventory_sha256=digest(inventory.path),
-        surfaces=list(inventory.used.values()), reference_surfaces=reference_hashes))
-    source_run = dict(config, status='SOLVER_COMPLETE_FULL_RAW_CLOCK_VERIFIED', case_dir=str(run),
-        unloaded_reference=str(reference), blade_model='beamdyn-prebend', blade_config=loaded,
-        run_package=os.path.relpath(run, output), reference_package=os.path.relpath(reference, output),
-        path_reference='source output directory',
-        reference_inventory_sha256=digest(reference/'reference-inventory.json'),
-        run_config_sha256=digest(run/'run-config.json'), raw_output=raw_source,
-        solver_log_sha256=digest(log_path), exit_status_sha256=digest(exit_path),
-        probe_config_sha256=digest(run/'probe-config.json'), compressed_inventory_sha256=digest(inventory.path),
-        full_raw_clock=clock, exported_grid_indices=[int(indices[0]), int(indices[-1])],
-        exported_window_s=[float(times[0]), float(times[-1])],
-        boundary='Independent engineering operating screen; prescribed RPM and pitch; no policy; numerical simulation only; no field validation')
-    save_json(output/'source-run.json', source_run)
-    save_json(output/'interface-audit.json', dict(status='PASSED_ORIGINAL_INTERFACE_TOLERANCES',
-        max_surface_fit_error_m=max_surface, max_support_fit_error_m=max_support,
-        max_nacelle_channel_error_m=max_nacelle_channel, max_component_error_m=max_component,
-        max_component_by_blade_m=np.max(abs(error), axis=(0, 2)).tolist(),
-        surface_tolerance_m=SURFACE_TOLERANCE_M, component_tolerance_m=COMPONENT_TOLERANCE_M,
-        reference_tip_world_m=np.asarray(reference_tips).tolist(), effective_length_m=float(np.linalg.norm(tip_local)),
-        raw_clock=clock, exported_sample_count=len(times), no_interpolation=True,
-        mapping='Independent unloaded sections fitted to actual VTP; terminal section transform applied once; rigid root frame independently computed',
-        physical_validation='NOT_PERFORMED'))
-    manifest = dict(schema='wfrl.farm-flex-review.v3', status='REVIEW_ONLY', source='OpenFAST',
-        turbine_ids=['T1'], layout_m=[[0., 0., 0.]], source_fps=config['fps'],
-        segment=dict(start_s=float(times[0]), end_s=float(times[-1])), includes_rigid_motion=True,
-        tower_model='elastodyn-flexible', structural_module='BeamDyn', model=loaded['model'],
-        provenance_label='independent engineering operating screen; prescribed rpm/no policy',
-        run_path=str(run), run_config_sha256=digest(run/'run-config.json'),
-        run_package=os.path.relpath(run, output), reference_package=os.path.relpath(reference, output),
-        path_reference='source output directory',
-        probe_config_sha256=digest(run/'probe-config.json'),
-        reference_frame='independent zero-load stationary solve', interface_only=False,
-        performance_status='PENDING_ACCEPTANCE', physical_validation='NOT_PERFORMED',
-        max_surface_fit_error_m=max_surface, max_support_fit_error_m=max_support,
-        max_component_error_m=max_component, measurement_window_deg=3,
-        replay=dict(threshold_m=7., hysteresis_m=.1, max_hold_s=5., passage_margin=1.25),
-        calibration=dict(origin_m=[-2., 0., 87.6]),
-        clearance_definition='Terminal contour surface minimum to same-global-height moving tower section; not whole-blade minimum',
-        files={p.name: digest(p) for p in output.iterdir() if p.is_file()})
-    save_json(output/'manifest.json', manifest)
+    destination = output
+    with new_directory(destination) as output:
+        np.savez_compressed(output/'geometry.npz', times=times, poses=poses[:, None], transforms=transforms)
+        np.savez_compressed(output/'tower-motion.npz', times=times, heights=heights, transforms=towers, nacelle=nacelles)
+        np.savez_compressed(output/'reference-surfaces.npz', blades=refs.reshape(3, -1, 3),
+                            triangles=blade_triangles, tower=tower_ref, tower_triangles=tower_triangles)
+        reference_payload = dict(schema='wfrl.blade-reference.v1', structural_module='BeamDyn',
+            model=loaded['model'], curve=curve.tolist(), tip_local_m=tip_local.tolist(),
+            definition='x=-(z/61.5)^2; y=0; metres; z from blade root',
+            reference_state='independent zero-load stationary solve', precone_deg=scalars['PreCone(1)'],
+            source_note='Independent engineering operating screen; NREL 5MW derivative; no real-machine equivalence claim',
+            sources=loaded.get('structural_source', {}))
+        save_json(output/'blade-reference.json', reference_payload)
+        raw_source = dict(path=os.path.relpath(raw_path, destination), original_path=str(raw_path),
+                          path_reference='source output directory', sha256=raw_output_sha256)
+        save_json(output/'deflection-t1.json', dict(schema='wfrl.tip-deflection.t1.v3', turbine_id='T1', unit='m',
+            reference='BeamDyn structural tip; independent unloaded prebend', frame='BeamDyn pitched root xyz',
+            geometry_sha256=digest(output/'geometry.npz'), tower_motion_sha256=digest(output/'tower-motion.npz'),
+            reference_sha256=digest(output/'blade-reference.json'), times=times.tolist(), poses=poses.tolist(),
+            simulation=simulation.tolist(), scalars=scalars, sources={'T1': raw_source}))
+        telemetry = {}
+        for name, channel, unit, scale in (('power', 'GenPwr', 'MW', .001), ('torque', 'GenTq', 'N m', 1000.)):
+            if channel in columns:
+                if units.get(channel) != {'GenPwr': '(kW)', 'GenTq': '(kN-m)'}[channel]:
+                    raise ValueError('Unexpected raw telemetry unit: '+channel)
+                telemetry[name] = dict(values=(columns[channel][indices]*scale).tolist(), unit=unit, source_channel=channel)
+        save_json(output/'telemetry.json', dict(schema='wfrl.farm-telemetry.v1', geometry_sha256=digest(output/'geometry.npz'),
+            times=times.tolist(), sources={'T1': raw_source}, turbines={'T1': telemetry},
+            status='AVAILABLE_SOURCE_CHANNELS' if telemetry else 'UNAVAILABLE_SOURCE_CHANNELS',
+            reason=None if telemetry else config.get('telemetry_boundary', 'Generator power/torque channels absent from actual solver output')))
+        statistics = dict(expected_samples=0, valid_samples=0, valid_ratio=None, mae_m=None, max_abs_error_m=None,
+            p95_abs_error_m=None, max_positive_bias_m=None, passage_count=0, missed_passage_count=0,
+            status='NOT_COMPUTED_SOURCE_GEOMETRY_ONLY')
+        save_json(output/'data.json', {'T1': dict(motion=motion, measurements=[], cumulative=[], statistics=statistics)})
+        save_json(output/'source-surfaces.json', dict(schema='wfrl.compressed-source-surfaces.v1', run_path=str(run),
+            reference_path=str(reference), run_package=os.path.relpath(run, destination),
+            reference_package=os.path.relpath(reference, destination), path_reference='source output directory',
+            reference_inventory_sha256=hashlib.sha256(reference_bytes['reference-inventory.json']).hexdigest(),
+            compressed_inventory_sha256=inventory.sha256,
+            surfaces=list(inventory.used.values()), reference_surfaces=reference_hashes))
+        source_run = dict(config, status='SOLVER_COMPLETE_FULL_RAW_CLOCK_VERIFIED', case_dir=str(run),
+            unloaded_reference=str(reference), blade_model='beamdyn-prebend', blade_config=loaded,
+            run_package=os.path.relpath(run, destination), reference_package=os.path.relpath(reference, destination),
+            path_reference='source output directory',
+            reference_inventory_sha256=hashlib.sha256(reference_bytes['reference-inventory.json']).hexdigest(),
+            run_config_sha256=config_sha256, raw_output=raw_source,
+            solver_log_sha256=hashlib.sha256(log_bytes).hexdigest(), exit_status_sha256=hashlib.sha256(exit_bytes).hexdigest(),
+            probe_config_sha256=hashlib.sha256(probe_bytes).hexdigest(), compressed_inventory_sha256=inventory.sha256,
+            full_raw_clock=clock, exported_grid_indices=[int(indices[0]), int(indices[-1])],
+            exported_window_s=[float(times[0]), float(times[-1])],
+            boundary='Independent engineering operating screen; prescribed RPM and pitch; no policy; numerical simulation only; no field validation')
+        save_json(output/'source-run.json', source_run)
+        save_json(output/'interface-audit.json', dict(status='PASSED_ORIGINAL_INTERFACE_TOLERANCES',
+            max_surface_fit_error_m=max_surface, max_support_fit_error_m=max_support,
+            max_nacelle_channel_error_m=max_nacelle_channel, max_component_error_m=max_component,
+            max_component_by_blade_m=np.max(abs(error), axis=(0, 2)).tolist(),
+            surface_tolerance_m=SURFACE_TOLERANCE_M, component_tolerance_m=COMPONENT_TOLERANCE_M,
+            reference_tip_world_m=np.asarray(reference_tips).tolist(), effective_length_m=float(np.linalg.norm(tip_local)),
+            raw_clock=clock, exported_sample_count=len(times), no_interpolation=True,
+            mapping='Independent unloaded sections fitted to actual VTP; terminal section transform applied once; rigid root frame independently computed',
+            physical_validation='NOT_PERFORMED'))
+        manifest = dict(schema='wfrl.farm-flex-review.v3', status='REVIEW_ONLY', source='OpenFAST',
+            turbine_ids=['T1'], layout_m=[[0., 0., 0.]], source_fps=config['fps'],
+            segment=dict(start_s=float(times[0]), end_s=float(times[-1])), includes_rigid_motion=True,
+            tower_model='elastodyn-flexible', structural_module='BeamDyn', model=loaded['model'],
+            provenance_label='independent engineering operating screen; prescribed rpm/no policy',
+            run_path=str(run), run_config_sha256=config_sha256,
+            run_package=os.path.relpath(run, destination), reference_package=os.path.relpath(reference, destination),
+            path_reference='source output directory',
+            probe_config_sha256=hashlib.sha256(probe_bytes).hexdigest(),
+            reference_frame='independent zero-load stationary solve', interface_only=False,
+            performance_status='PENDING_ACCEPTANCE', physical_validation='NOT_PERFORMED',
+            max_surface_fit_error_m=max_surface, max_support_fit_error_m=max_support,
+            max_component_error_m=max_component, measurement_window_deg=3,
+            replay=dict(threshold_m=7., hysteresis_m=.1, max_hold_s=5., passage_margin=1.25),
+            calibration=dict(origin_m=[-2., 0., 87.6]),
+            clearance_definition='Terminal contour surface minimum to same-global-height moving tower section; not whole-blade minimum',
+            files={p.name: digest(p) for p in output.iterdir() if p.is_file()})
+        save_json(output/'manifest.json', manifest)
     return manifest
 
 

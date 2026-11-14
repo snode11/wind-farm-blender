@@ -6,6 +6,8 @@ It loads only the selected small label images and never stores iteration images.
 """
 from __future__ import annotations
 
+from .artifact_paths import atomic_write_text
+
 import copy
 import json
 import resource
@@ -44,6 +46,12 @@ class OptimizationConfig:
     seed: int = 20261002
     threads: int = 4
 
+    def __post_init__(self):
+        for name in ("learning_rate", "image_weight", "foreground_distance_weight",
+                     "relative_change_weight", "smoothness_weight", "sigma_px"):
+            if not np.isfinite(getattr(self, name)):
+                raise ValueError(f"Optimization {name} must be finite")
+
 
 def _tensor(value, device, dtype=torch.float32):
     return torch.as_tensor(value, dtype=dtype, device=device)
@@ -62,7 +70,7 @@ def _load_labels(observation):
             from PIL import Image
             with Image.open(path) as image:
                 array = np.array(image, copy=True)
-    if array.ndim != 2 or not np.isin(array, [0, 1, 2]).all():
+    if array.ndim != 2 or not array.size or not np.isin(array, [0, 1, 2]).all():
         raise ValueError("Observation labels must be HxW with B=0/F=1/U=2")
     # PIL-backed arrays may be read-only; Torch warns and permits unsafe writes
     # to those buffers. Own the small selected label image before conversion.
@@ -83,9 +91,13 @@ def _prepare(observations, image_size, device, require_contours=False):
             raise ValueError("Observation matrices need K 3x3 and rigid transforms 4x4")
         if not all(bool(torch.isfinite(item).all()) for item in (K, camera, root)):
             raise ValueError("Nonfinite calibration / motion")
+        if K[0, 0] <= 0 or K[1, 1] <= 0 or not torch.allclose(K[2], K.new_tensor([0, 0, 1]), atol=1e-8):
+            raise ValueError("Calibration must be pinhole K with positive focal lengths")
         for transform in (camera, root):
             rotation = transform[:3, :3]
-            if not torch.allclose(rotation.T @ rotation, torch.eye(3, device=device), atol=1e-3) or float(torch.det(rotation)) < 0.999:
+            if (not torch.allclose(transform[3], transform.new_tensor([0, 0, 0, 1]), atol=1e-6)
+                    or not torch.allclose(rotation.T @ rotation, torch.eye(3, device=device), atol=1e-3)
+                    or float(torch.det(rotation)) < 0.999):
                 raise ValueError("Calibration / root transform must be proper rigid poses in metres")
         prepared.append({"labels": labels, "K": K, "camera": camera, "root": root,
                          "camera_id": observation["camera_id"], "frame_id": int(observation["frame_id"]),
@@ -148,11 +160,14 @@ def _image_loss(model, observation, size, config):
 
 
 def _residuals(model, prepared, size, config):
+    """Report absent image terms as null; nonfinite computed losses are errors."""
     residuals = []
     with torch.no_grad():
         for observation in prepared:
             loss, terms = _image_loss(model, observation, size, config)
+            _finite_loss(loss, "image")
             contour_missing = config.image_objective == "projected_contour" and not float(terms["contour_terms_available"])
+            silhouette_missing = config.image_objective == "soft_silhouette" and not terms
             term_values = {name: (None if contour_missing and name in {
                 "candidate_to_observed", "observed_to_candidate", "candidate_to_observed_mean_px",
                 "observed_to_candidate_mean_px"} else float(value)) for name, value in terms.items()}
@@ -161,7 +176,7 @@ def _residuals(model, prepared, size, config):
                               "foreground_pixels": observation["foreground_pixels"],
                               "background_pixels": observation["background_pixels"],
                               "uncertain_pixels": observation["uncertain_pixels"],
-                              "image_loss": None if contour_missing else float(loss),
+                              "image_loss": None if contour_missing or silhouette_missing else float(loss),
                               "terms": term_values,
                               "missing_terms": (["candidate_to_observed", "observed_to_candidate"]
                                                 if contour_missing
@@ -170,7 +185,13 @@ def _residuals(model, prepared, size, config):
     return residuals
 
 
+def _finite_loss(loss, name):
+    if not bool(torch.isfinite(loss).all()):
+        raise RuntimeError(f"Nonfinite {name} loss")
+
+
 def _fit(initial, observations, config, image_weight):
+    """Run the declared iteration budget; missing or nonfinite fitting losses abort."""
     model = copy.deepcopy(initial)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     history, elapsed = [], time.perf_counter()
@@ -185,6 +206,7 @@ def _fit(initial, observations, config, image_weight):
             values = model.regularization()
             regularization = (config.relative_change_weight * values["relative_parameter_change"]
                               + config.smoothness_weight * values["span_smoothness"])
+            _finite_loss(regularization, "regularization")
             regularization.backward()
             image_sum = 0.0
             # Every fitting image has equal weight. A graph is discarded after
@@ -195,9 +217,13 @@ def _fit(initial, observations, config, image_weight):
                     batch_loss = model.center_raw.sum() * 0
                     for observation in batch:
                         item_loss, terms = _image_loss(model, observation, size, config)
+                        _finite_loss(item_loss, "image")
                         if config.image_objective == "projected_contour" and not float(terms["contour_terms_available"]):
                             raise RuntimeError("Missing trusted/predicted contour terms in a fitting frame")
+                        if config.image_objective == "soft_silhouette" and not terms:
+                            raise RuntimeError("Missing silhouette image terms in a fitting frame")
                         batch_loss = batch_loss + item_loss / len(fitting)
+                    _finite_loss(image_weight * batch_loss, "weighted image")
                     image_sum += float(batch_loss.detach())
                     (image_weight * batch_loss).backward()
             gradients = [parameter.grad for parameter in model.parameters() if parameter.grad is not None]
@@ -205,6 +231,8 @@ def _fit(initial, observations, config, image_weight):
                 raise RuntimeError("Nonfinite / absent optimizer gradients")
             torch.nn.utils.clip_grad_norm_(model.parameters(), 10.0)
             optimizer.step()
+            if not all(bool(torch.isfinite(parameter).all()) for parameter in model.parameters()):
+                raise RuntimeError("Nonfinite optimizer parameters after step")
             history.append({"stage": stage_index, "iteration": iteration,
                             "resolution": list(size), "image_loss": image_sum,
                             "regularization_loss": float(regularization.detach()),
@@ -261,6 +289,12 @@ def reconstruct(observations, output_dir, reference_state, config=None):
         raise ValueError("Unknown image objective")
     if "t_ref_sim_time_s" not in reference_state:
         raise ValueError("Reference state requires a frozen t_ref_sim_time_s")
+    try:
+        reference_time = float(reference_state["t_ref_sim_time_s"])
+    except (TypeError, ValueError) as error:
+        raise ValueError("Reference time must be finite") from error
+    if not np.isfinite(reference_time):
+        raise ValueError("Reference time must be finite")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     if (output_dir / "T1_B1.ply").exists():
@@ -294,9 +328,9 @@ def reconstruct(observations, output_dir, reference_state, config=None):
     for name, model in models.items():
         write_ply(output_dir / f"{name}.ply", model().detach().cpu().numpy(), model.faces.cpu().numpy())
         metadata = {**sidecar, **model.metadata(), "model_name": name}
-        (output_dir / f"{name}.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+        atomic_write_text(output_dir / f"{name}.json", json.dumps(metadata, indent=2), encoding="utf-8")
         all_residuals[name] = _residuals(model, prepared, config.resolutions[-1], config)
-    (output_dir / "model_state.json").write_text(json.dumps({**sidecar, "models": {name: model.metadata() for name, model in models.items()}}, indent=2), encoding="utf-8")
+    atomic_write_text(output_dir / "model_state.json", json.dumps({**sidecar, "models": {name: model.metadata() for name, model in models.items()}}, indent=2), encoding="utf-8")
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     runtime = {"wall_s": time.perf_counter() - started, "prior_only_wall_s": prior_elapsed,
                "video_fit_wall_s": final_elapsed, "peak_process_rss_bytes": int(peak if sys.platform == "darwin" else peak * 1024),
@@ -316,8 +350,8 @@ def reconstruct(observations, output_dir, reference_state, config=None):
                                           for name, residuals in all_residuals.items()},
                     "heldout_status": "AVAILABLE" if any(item["split"] == "heldout" for item in prepared) else "NO_HELDOUT_OBSERVATIONS",
                     "limitations": ["silhouette constraints only", "thickness/twist/backside fixed priors", "near-reference static shape; no free per-frame deformation"]}
-    (output_dir / "optimization.json").write_text(json.dumps(optimization, indent=2), encoding="utf-8")
-    (output_dir / "runtime_metrics.json").write_text(json.dumps(runtime, indent=2), encoding="utf-8")
+    atomic_write_text(output_dir / "optimization.json", json.dumps(optimization, indent=2), encoding="utf-8")
+    atomic_write_text(output_dir / "runtime_metrics.json", json.dumps(runtime, indent=2), encoding="utf-8")
     # A conservative region can be image-constrained in silhouette while its
     # backside and thickness are still prior-only. Coverage is not claimed from
     # closed topology. Save actual source frame IDs for independent inspection.
@@ -332,6 +366,6 @@ def reconstruct(observations, output_dir, reference_state, config=None):
                                 if config.image_objective == "projected_contour" else
                                 "RGB F/B/U silhouettes; U and outside-image have no negative loss"),
                 "backside_and_thickness": "prior_only", "full_surface_recovery": False}
-    (output_dir / "surface_evidence.json").write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+    atomic_write_text(output_dir / "surface_evidence.json", json.dumps(evidence, indent=2), encoding="utf-8")
     return {"status": "MODEL_FIT_COMPLETED_GEOMETRY_EFFECT_UNSCORED", "output_dir": str(output_dir.resolve()),
             "reference_state": sidecar, "runtime": runtime, "backend_check": check}

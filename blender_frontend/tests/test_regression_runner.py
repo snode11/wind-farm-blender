@@ -436,8 +436,8 @@ def test_stop_process_uses_available_force_termination(monkeypatch, has_sigkill,
 
     runner.stop_process(process, owner, grace=0)
 
-    assert owner.signal.call_args_list == ([call(15), call(9)]
-                                          if has_sigkill and not term_stops else [call(15)])
+    assert owner.signal.call_args_list == ([call(15)] if term_stops else
+                                          [call(15), call(9 if has_sigkill else 15)])
     assert process.kill.call_count == int(not has_sigkill and not term_stops)
     process.wait.assert_called_once_with(timeout=0)
     assert not alive
@@ -451,7 +451,7 @@ def test_stop_without_sigkill_rejects_unconfirmed_cleanup(monkeypatch):
     with pytest.raises(RuntimeError, match='cleanup unconfirmed'):
         runner.stop_process(process, owner, grace=0)
 
-    owner.signal.assert_called_once_with(15)
+    assert owner.signal.call_args_list == [call(15), call(15)]
     process.kill.assert_called_once_with()
     process.wait.assert_not_called()
 

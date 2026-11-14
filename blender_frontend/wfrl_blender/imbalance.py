@@ -123,17 +123,25 @@ def read_package(path, source_path, *, _source=None):
         _require(manifest.get('schema') == 'wfrl.blade-response-package.v1'
                  and set(manifest['files']) == {'results.json'}
                  and set(manifest['source_hashes']) == SOURCE_FILES, 'analysis manifest')
+        source_bytes = {}
         for name, expected in manifest['source_hashes'].items():
-            actual = _source.hashes.get(name) if _source is not None else _digest(source_path / name)
+            if _source is None:
+                raw = (source_path / name).read_bytes()
+                actual = hashlib.sha256(raw).hexdigest()
+                if name in {'manifest.json', 'telemetry.json'}:
+                    source_bytes[name] = raw
+            else:
+                actual = _source.hashes.get(name)
             _require(actual == expected, 'source identity mismatch: ' + name)
-        _require(_digest(path / 'results.json') == manifest['files']['results.json'], 'result integrity mismatch')
+        result_bytes = (path / 'results.json').read_bytes()
+        _require(hashlib.sha256(result_bytes).hexdigest() == manifest['files']['results.json'], 'result integrity mismatch')
         source = (_source.manifest if _source is not None else
-                  json.loads((source_path / 'manifest.json').read_bytes()))
+                  json.loads(source_bytes['manifest.json']))
         _require(all(source['files'][name] == manifest['source_hashes'][name]
                      for name in SOURCE_FILES - {'manifest.json'}), 'source inventory differs')
         telemetry = (_source.telemetry if _source is not None else
-                     json.loads((source_path / 'telemetry.json').read_bytes()))
-        return validate(json.loads((path / 'results.json').read_bytes()), source, telemetry)
+                     json.loads(source_bytes['telemetry.json']))
+        return validate(json.loads(result_bytes), source, telemetry)
     except (KeyError, TypeError, IndexError, AttributeError) as error:
         raise ValueError('Blade response: malformed analysis package') from error
 

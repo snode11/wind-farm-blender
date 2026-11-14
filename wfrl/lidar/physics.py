@@ -3,7 +3,6 @@ The estimator deliberately accepts only a slant range and fixed calibration.
 OpenFAST VTP is solver-generated AeroDyn section geometry, not the frontend mesh.
 """
 from dataclasses import dataclass
-from pathlib import Path
 import math
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -31,8 +30,20 @@ def simplified_estimate(slant_range_m, valid, theta_deg, y_lidar_m, r_tip_m):
 
 def read_surface(path):
     root=ET.parse(path).getroot()
-    points=np.fromstring(root.find('.//Points/DataArray').text,sep=' ').reshape(-1,3)
-    arrays={a.attrib['Name']:np.fromstring(a.text,sep=' ',dtype=int) for a in root.findall('.//Polys/DataArray')}
+    piece=root.find('.//Piece')
+    if piece is None or piece.find('./Points/DataArray') is None:
+        raise ValueError(f'invalid surface {path}')
+    points=np.asarray((piece.find('./Points/DataArray').text or '').split(),dtype=float).reshape(-1,3)
+    arrays={a.attrib['Name']:np.asarray((a.text or '').split(),dtype=int) for a in piece.findall('./Polys/DataArray')}
+    offsets=arrays.get('offsets',np.array([],dtype=int))
+    connectivity=arrays.get('connectivity',np.array([],dtype=int))
+    if (not len(points) or not np.isfinite(points).all() or not len(offsets)
+            or np.any(np.diff(np.r_[0,offsets])<3) or offsets[-1]!=len(connectivity)
+            or np.any(connectivity<0) or np.any(connectivity>=len(points))):
+        raise ValueError(f'invalid surface topology {path}')
+    for name,count in (('NumberOfPoints',len(points)),('NumberOfPolys',len(offsets))):
+        if name in piece.attrib and int(piece.attrib[name])!=count:
+            raise ValueError(f'invalid surface {name} {path}')
     triangles=[];start=0
     if np.all(np.diff(np.r_[0,arrays['offsets']])==4):
         quads=arrays['connectivity'].reshape(-1,4)
@@ -48,7 +59,11 @@ def read_surface(path):
 def first_hit(origin, direction, points, triangles):
     """Two-sided Moller-Trumbore, first positive surface hit; no back-face culling."""
     origin=np.asarray(origin,dtype=float);direction=np.asarray(direction,dtype=float)
-    if not np.isclose(np.linalg.norm(direction),1,atol=1e-10): raise ValueError('direction must be normalized')
+    points=np.asarray(points,dtype=float)
+    if (origin.shape!=(3,) or direction.shape!=(3,) or points.ndim!=2 or points.shape[1]!=3
+            or not all(np.isfinite(a).all() for a in (origin,direction,points))):
+        raise ValueError('invalid ray or surface geometry')
+    if not np.isclose(np.linalg.norm(direction),1,atol=1e-10,rtol=0): raise ValueError('direction must be normalized')
     tri=points[triangles];e1=tri[:,1]-tri[:,0];e2=tri[:,2]-tri[:,0]
     p=np.cross(np.broadcast_to(direction,e2.shape),e2);det=np.einsum('ij,ij->i',e1,p)
     safe=np.abs(det)>1e-11;inv=np.zeros_like(det);inv[safe]=1/det[safe]
@@ -65,7 +80,10 @@ def tower_radius(z):
 
 def truth_clearance(tip):
     """Independent point-to-horizontal circle distance for documented rigid NREL tower."""
-    tip=np.asarray(tip,dtype=float);r=tower_radius(float(tip[2]));rho=float(np.linalg.norm(tip[:2]))
+    tip=np.asarray(tip,dtype=float)
+    if tip.shape!=(3,) or not np.isfinite(tip).all(): raise ValueError('invalid tip reference')
+    r=tower_radius(float(tip[2]));rho=float(np.linalg.norm(tip[:2]))
+    if not math.isfinite(rho): raise ValueError('invalid radial distance')
     if rho==0: return -r,[r,0.,float(tip[2])]
     wall=[float(tip[0]*r/rho),float(tip[1]*r/rho),float(tip[2])]
     return rho-r,wall
@@ -74,7 +92,10 @@ def tip_reference(points, sections):
     """Perimeter-coordinate centroid at outermost solver AeroDyn section.
     This explicit reference is NOT whole-blade minimum collision clearance.
     """
-    if len(points)%sections: raise ValueError('surface section topology mismatch')
+    points=np.asarray(points,dtype=float)
+    if (type(sections) is not int or sections<=0 or points.ndim!=2 or points.shape[1]!=3
+            or not len(points) or len(points)%sections or not np.isfinite(points).all()):
+        raise ValueError('surface section topology mismatch')
     return points[-len(points)//sections:].mean(axis=0)
 
 def collision_excluded(points,triangles):
@@ -87,7 +108,7 @@ def collision_excluded(points,triangles):
     False still means unresolved, not proof of an actual collision.
     """
     tri=np.asarray(points,dtype=float)[triangles]
-    if not np.isfinite(tri).all():
+    if not len(tri) or not np.isfinite(tri).all():
         return False
     low=tri[:,:,2].min(1);high=tri[:,:,2].max(1)
     overlap=(low<=87.6)&(high>=0)

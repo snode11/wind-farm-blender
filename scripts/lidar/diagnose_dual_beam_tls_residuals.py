@@ -21,6 +21,7 @@ from scripts.lidar.compare_dual_beam_methods import (
     NUMERICAL_TOLERANCE_M, NEAR_SLANT_RANGE_M, independent_clearance,
     load_verified, statistics, structural_reference_points, tower_at,
 )
+from scripts.lidar._atomic_output import new_directory
 from wfrl.camera_video.data import blade_root_frame
 from wfrl.lidar.dual_beam_replay import digest
 from wfrl.lidar.physics import first_hit
@@ -422,13 +423,13 @@ def markdown_report(report):
         '每个反事实点均按自身全局高度重新截取同刻变形塔筒。以下方向、长度和交互项使用真实叶尖构造，仅用于评分后诊断；不可作为估计器输入或补偿。', '',
         '| 范围 | 样本 | bias / m | MAE / m | 方向项平均 / m | 长度项平均 / m | 交互项平均 / m | 方向夹角平均 / ° |',
         '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
-    for label, summary in [('全部', report['pooled']), *report['groups']['turbine'].items()]:
+    for label, summary in [('全部', report['pooled']), *report['groups'].get('turbine', {}).items()]:
         metric = summary['metrics']; c = summary['clearance_contributions_m']
         lines.append(f"| {label} | {metric['error_samples']} | {number(metric['bias_m'])} | {number(metric['mae_m'])} | {number(c['direction']['bias_m'])} | {number(c['length']['bias_m'])} | {number(c['interaction']['bias_m'])} | {number(summary['direction_to_true_chord_deg']['mean'])} |")
     lines += ['', '刚性零载参考使用同一时刻的根部姿态、pitch、方位角、机舱和布置。直叶尖仅移除独立零载结构叶尖的横向预弯分量；柔性差包含保存变换中的全部叶片变形，不能由此单独归因给某个模态。', '',
         '| 范围 | 固定长度 − 真径向长度平均 / m | 预弯相对直参考净空平均差 / m | 柔性相对刚性预弯净空平均差 / m | 柔性相对刚性预弯叶尖位移平均 / m |',
         '| --- | ---: | ---: | ---: | ---: |']
-    for label, summary in [('全部', report['pooled']), *report['groups']['turbine'].items()]:
+    for label, summary in [('全部', report['pooled']), *report['groups'].get('turbine', {}).items()]:
         rigid = summary['rigid_reference_clearance_differences_m']
         lines.append(f"| {label} | {number(summary['fixed_minus_actual_radial_length_m']['mean'])} | {number(rigid['prebend_minus_straight']['mean'])} | {number(rigid['flexible_minus_prebend']['mean'])} | {number(summary['rigid_reference']['flexible_minus_rigid_prebent_tip_norm_m']['mean'])} |")
     lines += ['', '首交三角形由同刻已验证源表面重算，斜距需在 1e-8 m 内一致，再通过其顶点索引映射源 AeroDyn 展向站位邻域。三角形重心坐标仅追踪同一物质点的零载参考与加载位移；不猜测站位，不把站位输入算法。', '',
@@ -470,9 +471,9 @@ def main(argv=None):
             'wfrl/lidar/physics.py','wfrl/lidar/dual_beam_replay.py')},
         estimator_sha256_before=estimator_before, estimator_sha256_after=digest(estimator_path),
         estimator_and_packages_unchanged=True, runtime=dict(python=platform.python_version(), numpy=np.__version__))
-    args.output.mkdir(parents=True, exist_ok=False)
-    (args.output/'diagnostics.json').write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+'\n', encoding='utf-8')
-    (args.output/'report.md').write_text(markdown_report(report), encoding='utf-8')
+    with new_directory(args.output) as staged:
+        (staged/'diagnostics.json').write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+'\n', encoding='utf-8')
+        (staged/'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(json.dumps(dict(output=str(args.output.resolve()), diagnosed_pairs=report['diagnosed_pairs'],
         mae_m=report['pooled']['metrics']['mae_m'], worse_pairs=report['candidate_worse_sample_count']),ensure_ascii=False))
     return report

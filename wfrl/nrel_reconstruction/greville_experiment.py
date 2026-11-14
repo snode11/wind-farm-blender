@@ -5,6 +5,8 @@ Run `fit` inside the saved OS isolation policy. Both meshes are signed before
 """
 from __future__ import annotations
 
+from .artifact_paths import save_numpy
+
 import argparse
 import copy
 import hashlib
@@ -22,7 +24,7 @@ from .artifact_paths import frozen_path, relocated_path
 from .dataset import write_json
 from .greville_model import GrevilleBladeModel
 from .model import BladeModel, write_ply
-from .optimize import OptimizationConfig, _image_loss, _prepare, _residuals
+from .optimize import OptimizationConfig, _finite_loss, _image_loss, _prepare, _residuals
 
 
 BRANCHES = ['original_raw', 'physical_reference_center', 'greville_normalized']
@@ -97,6 +99,7 @@ def fit_coordinate(initial, observations, config, image_weight):
             values = model.regularization()
             regularization = (config.relative_change_weight * values['relative_parameter_change']
                               + config.smoothness_weight * values['span_smoothness'])
+            _finite_loss(regularization, 'regularization')
             regularization.backward()
             image_sum = 0.0
             if image_weight:
@@ -104,9 +107,11 @@ def fit_coordinate(initial, observations, config, image_weight):
                     batch_loss = next(model.parameters()).sum() * 0
                     for observation in fitting[begin:begin + config.batch_size]:
                         loss, terms = _image_loss(model, observation, size, config)
+                        _finite_loss(loss, 'image')
                         if not float(terms['contour_terms_available']):
                             raise RuntimeError('Missing fitting contour')
                         batch_loss = batch_loss + loss / len(fitting)
+                    _finite_loss(image_weight * batch_loss, 'weighted image')
                     image_sum += float(batch_loss.detach())
                     (image_weight * batch_loss).backward()
             parameters = list(model.parameters())
@@ -223,7 +228,7 @@ def compare(observations, output_dir, reference_state, config):
         models = {'initial_template':start, 'prior_only':prior, 'T1_B1':final}
         for kind, model in models.items():
             write_ply(dest / f'{kind}.ply', model().detach().numpy(), model.faces.numpy())
-            np.savez_compressed(dest / f'{kind}_exact.npz', vertices=model().detach().numpy(), faces=model.faces.numpy())
+            save_numpy(np.savez_compressed, dest / f'{kind}_exact.npz', vertices=model().detach().numpy(), faces=model.faces.numpy())
             write_json(dest / f'{kind}.json', {**sidecar, **model.metadata(), 'model_name':kind})
         write_json(dest / 'model_state.json', {**sidecar, 'models':{k:m.metadata() for k,m in models.items()}})
         prepared = _prepare(fitting, config.resolutions[-1], config.device, require_contours=True)

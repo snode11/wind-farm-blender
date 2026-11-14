@@ -120,6 +120,9 @@ class DetectionConfig:
     # Rectangular azimuth/elevation half angles of the hardware gate and noise search domain.
     azimuth_limit_deg: float = PROFILE['azimuth_deg']
     elevation_limit_deg: float = PROFILE['elevation_deg']
+    # ANGULAR keeps |azimuth|/|elevation| within the half angles; PROJECTIVE is a pinhole
+    # camera rectangle with the same half angles (simulation.FOV_SHAPES).
+    field_of_view_shape: str = 'ANGULAR'
     # ms flag: abs(radial velocity) above this speed.
     ms_velocity_threshold_m_s: float = 1e-6
     # Vendor field mapping; None keeps mag/rcs/snr unknown (NaN). With an offset, snr is the
@@ -192,6 +195,9 @@ class DetectionConfig:
                 or self.noise_figure_db > 100 or self.processing_gain_db > 100
                 or self.velocity_min_m_s >= self.velocity_max_m_s
                 or self.azimuth_limit_deg > 90 or self.elevation_limit_deg > 90
+                or self.field_of_view_shape not in ('ANGULAR', 'PROJECTIVE')
+                or (self.field_of_view_shape == 'PROJECTIVE'
+                    and max(self.azimuth_limit_deg, self.elevation_limit_deg) > 89.9)
                 or not .01 <= self.azimuth_half_power_deg <= 180
                 or not .01 <= self.elevation_half_power_deg <= 90
                 or self.fluctuation_model not in {'SWERLING_0', 'SWERLING_1'}
@@ -526,7 +532,8 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
         unknown_attributes=['vendor_label'] if vendor_fields else ['mag', 'rcs', 'snr', 'vendor_label'],
         label_semantics='NOT_GENERATED',
         ms_semantics=f'Synthetic abs(radial_velocity_m_s) > {config.ms_velocity_threshold_m_s:g} m/s; not a vendor classifier',
-        field_of_view_deg=[config.azimuth_limit_deg, config.elevation_limit_deg])
+        field_of_view_deg=[config.azimuth_limit_deg, config.elevation_limit_deg],
+        field_of_view_shape=config.field_of_view_shape)
     if vendor_fields:
         provenance['vendor_field_semantics'] = (
             'Mapped from model quantities with the calibration in observation_model.parameters: '
@@ -548,7 +555,8 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
             or np.any(rcs < 0)):
         raise ValueError('Invalid detection scatterers')
     from .simulation import in_fov
-    geometric_inside = in_fov(xyz, (config.azimuth_limit_deg, config.elevation_limit_deg))
+    geometric_inside = in_fov(xyz, (config.azimuth_limit_deg, config.elevation_limit_deg),
+                              config.field_of_view_shape)
     velocity_inside = (velocity >= config.velocity_min_m_s) & (velocity <= config.velocity_max_m_s)
     inside = geometric_inside & velocity_inside
     polar, velocity, rcs = _polar(xyz[inside]), velocity[inside], rcs[inside]
@@ -566,9 +574,10 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
     total_power = np.bincount(inverse, weights=power, minlength=cells)
     total_rcs = np.bincount(inverse, weights=rcs, minlength=cells)
     contributors = np.bincount(inverse, minlength=cells)
-    centroid = np.column_stack([np.bincount(inverse, weights=power * polar[:, i], minlength=cells)
-                                / total_power for i in range(3)])
-    speed = np.bincount(inverse, weights=power * velocity, minlength=cells) / total_power
+    weights = power / total_power[inverse]
+    centroid = np.column_stack([np.bincount(inverse, weights=weights * polar[:, i], minlength=cells)
+                                for i in range(3)])
+    speed = np.bincount(inverse, weights=weights * velocity, minlength=cells)
     target_rng, dropout_rng, false_rng, error_rng = [np.random.Generator(np.random.PCG64(s))
         for s in np.random.SeedSequence([seed, template.sequence]).spawn(4)]
     noise = config.detector_noise_power_w
@@ -611,8 +620,13 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
     measured_xyz = _xyz(positions)
     angular_tolerance = np.degrees(1e-12)
     angle_limits = np.array([config.azimuth_limit_deg, config.elevation_limit_deg])
-    accepted = ((positions[:, 0] >= lower[0]) & (positions[:, 0] <= upper[0])
-                & (np.abs(positions[:, 1:]) <= angle_limits + angular_tolerance).all(axis=1)
+    if config.field_of_view_shape == 'PROJECTIVE':
+        from .simulation import fov_mask
+        # The search grid bounds the rectangle; estimates outside it are rejected here.
+        direction_inside = fov_mask(measured_xyz, tuple(angle_limits), 'PROJECTIVE')
+    else:
+        direction_inside = (np.abs(positions[:, 1:]) <= angle_limits + angular_tolerance).all(axis=1)
+    accepted = ((positions[:, 0] >= lower[0]) & (positions[:, 0] <= upper[0]) & direction_inside
                 & (speeds >= config.velocity_min_m_s) & (speeds <= config.velocity_max_m_s))
     points = np.zeros(int(accepted.sum()), dtype=POINT_DTYPE)
     for axis, name in enumerate(('x', 'y', 'z')):

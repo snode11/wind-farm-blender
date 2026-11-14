@@ -23,8 +23,11 @@ def detection_configuration(args):
             or not 1 <= args.output_point_limit <= 4096 or args.detection_min_points < 1
             or not args.noise_seeds or len(args.noise_seeds) > 32 or any(s < 0 for s in args.noise_seeds)):
         raise ValueError('Invalid detection evaluation profile')
-    values = json.loads(args.detection_config.read_text(encoding='utf-8')) if args.detection_config else {}
-    return DetectionConfig(**values)
+    try:
+        values = json.loads(args.detection_config.read_bytes()) if args.detection_config else {}
+        return DetectionConfig(**values)
+    except (OSError, ValueError, TypeError) as exc:
+        raise ValueError(f'{args.detection_config or "DetectionConfig"}: {exc}') from exc
 
 
 def evaluate_detection_grid(sampler, times, *, roi, integration_budget=16384,
@@ -143,6 +146,11 @@ def runs(mask):
 
 def passages(times, angles, half_window):
     """Split stopped/reversing source intervals; preserve boundary-truncated encounters."""
+    times, angles = np.asarray(times, float), np.asarray(angles, float)
+    if (times.ndim != 1 or angles.shape != times.shape
+            or not np.isfinite(times).all() or not np.isfinite(angles).all()
+            or np.any(np.diff(times) <= 0) or not 0 < half_window < 180):
+        raise ValueError('Invalid source grid, angles or passage window')
     delta=np.diff(angles)
     direction=np.sign(delta)
     changes=np.flatnonzero(np.diff(direction)!=0)+1

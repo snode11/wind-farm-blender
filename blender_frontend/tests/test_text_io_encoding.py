@@ -33,6 +33,9 @@ def _assert_text_file_io_uses_explicit_encoding(source_root, *, excluded_parts=(
                 continue
             if name not in {'read_text', 'write_text', 'open'}:
                 continue
+            # atomic_json.write_text always writes UTF-8 and takes no encoding.
+            if owner == 'atomic_json' and name == 'write_text':
+                continue
             keywords = {keyword.arg: keyword.value for keyword in node.keywords}
             if name == 'open':
                 # os.open uses descriptor flags, not text encodings.

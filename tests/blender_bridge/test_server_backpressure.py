@@ -82,3 +82,23 @@ def test_invalid_handshake_timeout_rejected_before_listening(timeout):
     finally:
         if server is not None:
             server.close()
+
+
+def test_oversized_observation_is_skipped_with_one_nonfatal_error(controlled_server, monkeypatch):
+    from wfrl.blender_bridge import messages
+    server, _, wire = controlled_server
+    payload = interactive_progress(snapshot(3), 'run', 2)
+    monkeypatch.setattr(messages, 'MAX_FRAME_BYTES', 1500)
+    before = server.sequence
+    server._send('training_stats', payload)
+    server._send('training_stats', payload)          # same run: reported only once
+    assert [item['kind'] for item in server.pending] == ['error']
+    assert server.sequence == before + 1             # skipped frames consume no sequence
+    monkeypatch.setattr(messages, 'MAX_FRAME_BYTES', 1024 * 1024)
+    server._flush()
+    error = FrameDecoder().feed(wire)[0]['payload']
+    assert error['code'] == 'FRAME_TOO_LARGE' and error['fatal'] is False
+    assert not server.close_after_flush
+    server.client.close.assert_not_called()
+    server._send('training_stats', payload)          # within the limit it is delivered again
+    assert [item['kind'] for item in server.pending] == ['training_stats']

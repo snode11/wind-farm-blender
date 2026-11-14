@@ -13,6 +13,7 @@ sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import stacked_camera_rig as rig, custom_cameras as core
 from wfrl_blender import camera_projection as projection, custom_camera_preview as preview
+from scripts.blender.export_geometry import write_export_files
 output_dir = os.environ.get('WFRL_TEST_OUTPUT')
 OUT = (Path(output_dir) if output_dir is not None
        else Path(tempfile.gettempdir()) / 'wfrl-three-camera-search')
@@ -38,10 +39,13 @@ def score_camera(cam,interval):
     origin=np.asarray(p.location)
     samples=np.flatnonzero((face_spans>=interval[0])&(face_spans<=interval[1])
                           & (np.einsum('ij,ij->i',normals,origin-centres)>0))
+    if not len(samples):
+        raise ValueError('No front-facing surface samples in the requested interval')
     samples=samples[::max(1,len(samples)//80)]
     view=(centres[samples]-origin)@basis
     half=np.tan(np.radians([p.fov,p.vfov])/2)
-    inside=(view[:,2]<0)&(np.abs(view[:,:2])<=-view[:,2,None]*half).all(axis=1)
+    inside=((view[:,2]<-p.clip_near_m)&(view[:,2]>=-p.clip_far_m)
+            &(np.abs(view[:,:2])<=-view[:,2,None]*half).all(axis=1))
     visible=0;occluders={}
     deps=bpy.context.evaluated_depsgraph_get();eye=cam.matrix_world.translation.copy()
     for index,within in zip(samples,inside):
@@ -58,7 +62,7 @@ def score_camera(cam,interval):
             direction=Vector(world[:3,:3]@basis@np.array([u*half[0],v*half[1],-1.])).normalized()
             hit,*_=scene.ray_cast(deps,eye,direction,distance=.5)
             blocked+=int(hit)
-    return {'visible':visible,'sampled':len(samples),'visible_ratio':visible/max(1,len(samples)),
+    return {'visible':visible,'sampled':len(samples),'visible_ratio':visible/len(samples),
             'near_blocked':blocked,'near_total':91,'occluders':occluders,
             'hfov':p.fov,'vfov':p.vfov,'interval':interval}
 
@@ -88,17 +92,19 @@ with preview.without_annotations(scene,bpy.context.view_layer):
         except (ValueError,RuntimeError) as exc:failed.append({'index':i,'reason':str(exc)})
 results.sort(key=lambda r:r['score'],reverse=True)
 assert results,'no valid supported camera layout'
-(OUT/'search.json').write_text(json.dumps({'intervals':INTERVALS,'reference_frame':1,'reference_time_s':117.,
-    'results':results,'rejected':failed},ensure_ascii=False,indent=2), encoding='utf-8')
+outputs = {OUT/'search.json': json.dumps({'intervals':INTERVALS,'reference_frame':1,
+    'reference_time_s':float(scene['wfrl_clearance_time_s']),
+    'results':results,'rejected':failed},ensure_ascii=False,indent=2,allow_nan=False)}
 for i,row in enumerate(results[:5]):
-    (OUT/f'candidate-{i+1}.json').write_text(json.dumps(row['layout'],ensure_ascii=False,indent=2), encoding='utf-8')
+    outputs[OUT/f'candidate-{i+1}.json'] = json.dumps(row['layout'],ensure_ascii=False,indent=2,allow_nan=False)
 print('BEST',[(r['index'],r['score'],r['point']) for r in results[:5]],flush=True)
 
 # Full-length overlapping sections: retain the whole selected section in frame.
 layout=results[0]['layout']
 core.restore_layout(scene,layout);bpy.context.view_layer.update()
-(OUT/'recommended.json').write_text(json.dumps(core.layout_dict(scene),ensure_ascii=False,indent=2), encoding='utf-8')
-(OUT/'recommended-check.json').write_text(json.dumps({'intervals':INTERVALS,'framing_scale':[1.,1.,1.],
+outputs[OUT/'recommended.json'] = json.dumps(core.layout_dict(scene),ensure_ascii=False,indent=2,allow_nan=False)
+outputs[OUT/'recommended-check.json'] = json.dumps({'intervals':INTERVALS,'framing_scale':[1.,1.,1.],
     'cameras':results[0]['cameras'],'mount':rig.pose(scene),'layout_hash':core.layout_hash(core.layout_dict(scene)),
-    'method':'front-facing triangle-centre samples and near-ray grid; not continuous coverage'},ensure_ascii=False,indent=2), encoding='utf-8')
+    'method':'front-facing triangle-centre samples and near-ray grid; not continuous coverage'},ensure_ascii=False,indent=2,allow_nan=False)
+write_export_files(outputs)
 print('RECOMMENDED',results[0]['cameras'],flush=True)

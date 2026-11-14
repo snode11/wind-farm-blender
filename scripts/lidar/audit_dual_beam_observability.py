@@ -10,6 +10,8 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from dataclasses import dataclass
+import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
 import sys
@@ -19,6 +21,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.lidar.compare_dual_beam_methods import independent_clearance
+from scripts.lidar._atomic_output import new_directory, write_text
 from wfrl.camera_video.data import blade_root_frame
 from wfrl.lidar.dual_beam import validate_calibration
 from wfrl.lidar.dual_beam_replay import digest
@@ -262,26 +265,31 @@ def audit_case(model, case):
 def load_independent_model(source, calibration):
     """Read a strict whitelist; geometry.npz/tower-motion.npz/data.json are unused."""
     source, calibration = Path(source).resolve(), Path(calibration).resolve()
-    manifest = json.loads((source/'manifest.json').read_text(encoding='utf-8'))
+    manifest_bytes = (source/'manifest.json').read_bytes()
+    manifest = json.loads(manifest_bytes)
     if (manifest.get('schema') != 'wfrl.farm-flex-review.v3'
             or manifest.get('status') != 'REVIEW_ONLY'
             or manifest.get('reference_frame') != 'independent zero-load stationary solve'):
         raise ValueError('Requires independently supplied zero-load v3 reference surface')
     names = ('reference-surfaces.npz', 'blade-reference.json', 'deflection-t1.json')
-    hashes = {'manifest.json': digest(source/'manifest.json')}
+    hashes = {'manifest.json': hashlib.sha256(manifest_bytes).hexdigest()}
+    snapshots = {}
     for name in names:
-        actual = digest(source/name)
+        snapshots[name] = (source/name).read_bytes()
+        actual = hashlib.sha256(snapshots[name]).hexdigest()
         if manifest['files'].get(name) != actual:
             raise ValueError('Independent source input hash mismatch: '+name)
         hashes[name] = actual
-    scalars = json.loads((source/'deflection-t1.json').read_text(encoding='utf-8'))['scalars']
-    reference = json.loads((source/'blade-reference.json').read_text(encoding='utf-8'))
+    scalars = json.loads(snapshots['deflection-t1.json'])['scalars']
+    reference = json.loads(snapshots['blade-reference.json'])
     if reference.get('reference_state') != 'independent zero-load stationary solve':
         raise ValueError('Unloaded structural tip provenance is required')
     tip = np.asarray(reference['tip_local_m'], float)
     if tip.shape != (3,) or not np.isfinite(tip).all() or tip[2] <= 0:
         raise ValueError('Invalid independent unloaded structural tip')
-    with np.load(source/'reference-surfaces.npz', allow_pickle=False) as archive:
+    reference_archive = BytesIO(snapshots['reference-surfaces.npz'])
+    reference_archive.name = str(source/'reference-surfaces.npz')
+    with np.load(reference_archive, allow_pickle=False) as archive:
         blades = archive['blades'].astype(float).reshape(3, 19, -1, 3)
         triangles = archive['triangles'].copy()
         tower, tower_triangles = archive['tower'].astype(float), archive['tower_triangles'].copy()
@@ -299,12 +307,13 @@ def load_independent_model(source, calibration):
                 or not np.issubdtype(topology.dtype, np.integer) or np.any(topology < 0)
                 or np.any(topology >= len(mesh))):
             raise ValueError('Invalid independent nominal surface topology')
-    config = json.loads(calibration.read_text(encoding='utf-8'))
+    calibration_bytes = calibration.read_bytes()
+    config = json.loads(calibration_bytes)
     origins, directions, limits = validate_calibration(config)
     model = IndependentModel(local, weights, triangles, tower, tower_triangles, tip, scalars,
                              origins, directions, limits)
     inputs = dict(source_path=str(source), source_input_hashes=hashes, calibration_path=str(calibration),
-                  calibration_sha256=digest(calibration), effective_calibration=config,
+                  calibration_sha256=hashlib.sha256(calibration_bytes).hexdigest(), effective_calibration=config,
                   rest_inverse_round_trip_residual_m=max(residuals),
                   tip_reference=reference,
                   independent_nominal_tower='unchanged independent reference-surfaces tower; no saved tower motion',
@@ -317,64 +326,66 @@ def load_independent_model(source, calibration):
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2)+'\n', encoding='utf-8')
+    write_text(path, json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2)+'\n')
 
 
 def run(source, calibration, output):
     model, inputs = load_independent_model(source, calibration)
-    output = Path(output).resolve(); output.mkdir(parents=True, exist_ok=False)
-    declaration = dict(schema='wfrl.dual-beam-observability-declaration.v1', status='FROZEN_BEFORE_CASE_LOOPS',
-        cases=analytic_cases(), input=inputs, model_status='ILLUSTRATIVE_ANALYTIC_TEST_MODES_NOT_VALIDATED',
-        mode_definition='blade-1 local +x offsets a_k*s^k, k=2,3,4, s=clip((z-HubRad)/(tip_z-HubRad),0,1) at independent nominal sections; amplitudes m; others undeformed',
-        attachment_span_m=float(model.scalars['HubRad']), tip_span_m=float(model.tip_local[2]),
-        mode_powers=list(POWERS), nominal_amplitudes_m=[0., 0., 0.],
-        rigid_pose='analytic rest nacelle/yaw 0; fixed phase and common pitch; inverse rest mapping then current analytic rigid mapping once',
-        tower_status='independent unloaded reference tower, static; no moving tower simulation is reproduced',
-        ray_model='instantaneous ideal opaque first positive triangle/tower/ground intersection; S2/S3 recomputed for every perturbation',
-        finite_difference_step_m=FD_STEP_M, half_step_check_m=FD_STEP_M/2,
-        derivative_convergence_absolute_m_per_m=DERIVATIVE_CONVERGENCE_ABSOLUTE,
-        derivative_convergence_relative=DERIVATIVE_CONVERGENCE_RELATIVE,
-        rank_relative_tolerance=RANK_RELATIVE_TOLERANCE, rank_absolute_tolerance=RANK_ABSOLUTE_TOLERANCE,
-        normalization=dict(state_scale_m=STATE_SCALE_M, range_scale_m=RANGE_SCALE_M),
-        finite_probe_coefficient_l2_m=PROBE_COEFFICIENT_NORM_M,
-        probe_basis='declared illustrative amplitude only; no physical uncertainty or probability bound',
-        scope='21 analytic pose cases selected before ray validity; no saved-frame coverage, performance acceptance or physical validation',
-        implementation_hashes={name: digest(ROOT/name) for name in (
-            'scripts/lidar/audit_dual_beam_observability.py', 'tests/lidar/test_dual_beam_observability.py',
-            'scripts/lidar/compare_dual_beam_methods.py', 'wfrl/camera_video/data.py',
-            'wfrl/lidar/physics.py', 'wfrl/lidar/moving_tower.py', 'wfrl/lidar/dual_beam.py')})
-    write_json(output/'declaration.json', declaration)
-    cases = [audit_case(model, case) for case in declaration['cases']]
-    valid = [c for c in cases if c['observability'] is not None]
-    summary = dict(declared_cases=len(cases), nominal_two_range_cases=sum(c['nominal_range_pair_available'] for c in cases),
-        local_derivative_cases=len(valid), local_derivative_unavailable_cases=len(cases)-len(valid),
-        rank_counts=dict(Counter(str(c['observability']['rank']) for c in valid)),
-        null_clearance_sensitive_cases=sum(c['observability']['maximum_null_clearance_sensitivity_m_per_m'] > 1e-8 for c in valid),
-        max_null_clearance_sensitivity_m_per_m=max((c['observability']['maximum_null_clearance_sensitivity_m_per_m'] for c in valid), default=None),
-        unknown_clearance_outputs=len(cases),
-        unknown_reason='no independently validated structural modes, amplitude bounds, or dynamics; two ranges cannot certify the three TEST coordinates',
-        derivative_unavailable_reasons=dict(Counter(c['finite_difference']['reason'] for c in cases if c['observability'] is None)))
-    result = dict(schema='wfrl.dual-beam-observability.v1', status='DEVELOPMENT_DIAGNOSTIC_ONLY',
-        performance_status='PENDING_ACCEPTANCE', physical_validation='NOT_PERFORMED',
-        declaration_sha256=digest(output/'declaration.json'), declaration=declaration, summary=summary, cases=cases,
-        runtime=dict(python=sys.version.split()[0], numpy=np.__version__))
-    write_json(output/'results.json', result)
-    report = ['# 双束柔性可观测性开发诊断', '',
-        '状态：DEVELOPMENT_DIAGNOSTIC_ONLY；多项式为说明性 TEST 形状，未做结构或物理验证；默认方法与 TLS 候选均未替换。', '',
-        '只读取独立零载参考表面、固定结构参数、零载结构叶尖与标定。参考世界表面先逆转零载根部刚体坐标，再施加已声明的解析方位角/pitch 一次；没有读取本帧真实站位或终端柔性变换。塔筒使用静态零载参考，未复现真实动态工况。', '',
-        '三个状态为叶片 1 局部 +x 方向的 a₂ s²、a₃ s³、a₄ s⁴，s=clip((z−HubRad)/(tip_z−HubRad),0,1)，本包 HubRad=1.5m、tip_z=63m、叶根到尖展长61.5m；a 的单位为 m。它们在叶片连接根部位移与斜率为零，叶尖权重为 1。该族只说明面外形状自由度，不代表 NREL 制造商模态、实际振型或完整叶片状态。', '',
-        '预声明 21 个方位角/pitch 组合；没有按 TLS 有效样本、真净空或真误差选样，RPM 不参与。S2/S3 每次重新计算全部叶片、塔筒和地面竞争首交。对象、叶片、三角形、近远支路变化会明确导致局部导数不可用。', '',
-        f"声明案例 {len(cases)}；名义双量测可用 {summary['nominal_two_range_cases']}；局部导数可用 {len(valid)}；不可用 {summary['local_derivative_unavailable_cases']}；量测零空间具有净空一阶敏感性的案例 {summary['null_clearance_sensitive_cases']}。", '',
-        'Jacobian dr/da 和净空梯度 dc/da 均以 m/m 表示。归一化定义 q=a/1m、y=r/1m，SVD 使用相同尺度的欧氏范数；1m 仅为坐标单位，不是设备噪声或允许结构扰动。中心差分 ±0.001m 与半步一致性一起输出，预声明绝对/相对收敛容限均为1e−5；不通过则导数不可用。三形状 DOF、两距离的局部秩最多为 2。', '',
-        '零空间方向上的 ±1m 系数 L2 扰动再次射线求交，其距离与净空变化见逐案例 JSON。有限扰动可能产生二阶测距变化、换面或失效；这些探针不是误差预算，也不是具有保证的净空区间。', '',
-        '全部 21 例净空认证输出为 UNKNOWN_UNVALIDATED_SHAPE_PRIOR。尚未取得独立验证的模态、幅值范围与动态约束，因此不能以本诊断恢复真实形变或发布保护边界。这是解析案例的未知输出，不能换算为原有 1794 样本的覆盖损失。', '',
-        '| 案例 | 两量测 | 局部导数 | 秩 | 最大零空间净空敏感性 m/m |',
-        '|---|---|---|---|---|']
-    for case in cases:
-        o = case['observability']
-        report.append(f"| {case['id']} | {case['nominal_range_pair_available']} | {o is not None} | {o['rank'] if o else '-'} | {o['maximum_null_clearance_sensitivity_m_per_m'] if o else '-'} |")
-    report += ['', '详细输入 SHA-256、声明、所有成功/失效首交、每列差分、半步比较、SVD 与有限探针均保存于 declaration.json / results.json。']
-    (output/'report.md').write_text('\n'.join(report)+'\n', encoding='utf-8')
+    output = Path(output).resolve()
+    destination = output
+    with new_directory(destination) as output:
+        declaration = dict(schema='wfrl.dual-beam-observability-declaration.v1', status='FROZEN_BEFORE_CASE_LOOPS',
+            cases=analytic_cases(), input=inputs, model_status='ILLUSTRATIVE_ANALYTIC_TEST_MODES_NOT_VALIDATED',
+            mode_definition='blade-1 local +x offsets a_k*s^k, k=2,3,4, s=clip((z-HubRad)/(tip_z-HubRad),0,1) at independent nominal sections; amplitudes m; others undeformed',
+            attachment_span_m=float(model.scalars['HubRad']), tip_span_m=float(model.tip_local[2]),
+            mode_powers=list(POWERS), nominal_amplitudes_m=[0., 0., 0.],
+            rigid_pose='analytic rest nacelle/yaw 0; fixed phase and common pitch; inverse rest mapping then current analytic rigid mapping once',
+            tower_status='independent unloaded reference tower, static; no moving tower simulation is reproduced',
+            ray_model='instantaneous ideal opaque first positive triangle/tower/ground intersection; S2/S3 recomputed for every perturbation',
+            finite_difference_step_m=FD_STEP_M, half_step_check_m=FD_STEP_M/2,
+            derivative_convergence_absolute_m_per_m=DERIVATIVE_CONVERGENCE_ABSOLUTE,
+            derivative_convergence_relative=DERIVATIVE_CONVERGENCE_RELATIVE,
+            rank_relative_tolerance=RANK_RELATIVE_TOLERANCE, rank_absolute_tolerance=RANK_ABSOLUTE_TOLERANCE,
+            normalization=dict(state_scale_m=STATE_SCALE_M, range_scale_m=RANGE_SCALE_M),
+            finite_probe_coefficient_l2_m=PROBE_COEFFICIENT_NORM_M,
+            probe_basis='declared illustrative amplitude only; no physical uncertainty or probability bound',
+            scope='21 analytic pose cases selected before ray validity; no saved-frame coverage, performance acceptance or physical validation',
+            implementation_hashes={name: digest(ROOT/name) for name in (
+                'scripts/lidar/audit_dual_beam_observability.py', 'tests/lidar/test_dual_beam_observability.py',
+                'scripts/lidar/compare_dual_beam_methods.py', 'wfrl/camera_video/data.py',
+                'wfrl/lidar/physics.py', 'wfrl/lidar/moving_tower.py', 'wfrl/lidar/dual_beam.py')})
+        write_json(output/'declaration.json', declaration)
+        cases = [audit_case(model, case) for case in declaration['cases']]
+        valid = [c for c in cases if c['observability'] is not None]
+        summary = dict(declared_cases=len(cases), nominal_two_range_cases=sum(c['nominal_range_pair_available'] for c in cases),
+            local_derivative_cases=len(valid), local_derivative_unavailable_cases=len(cases)-len(valid),
+            rank_counts=dict(Counter(str(c['observability']['rank']) for c in valid)),
+            null_clearance_sensitive_cases=sum(c['observability']['maximum_null_clearance_sensitivity_m_per_m'] > 1e-8 for c in valid),
+            max_null_clearance_sensitivity_m_per_m=max((c['observability']['maximum_null_clearance_sensitivity_m_per_m'] for c in valid), default=None),
+            unknown_clearance_outputs=len(cases),
+            unknown_reason='no independently validated structural modes, amplitude bounds, or dynamics; two ranges cannot certify the three TEST coordinates',
+            derivative_unavailable_reasons=dict(Counter(c['finite_difference']['reason'] for c in cases if c['observability'] is None)))
+        result = dict(schema='wfrl.dual-beam-observability.v1', status='DEVELOPMENT_DIAGNOSTIC_ONLY',
+            performance_status='PENDING_ACCEPTANCE', physical_validation='NOT_PERFORMED',
+            declaration_sha256=digest(output/'declaration.json'), declaration=declaration, summary=summary, cases=cases,
+            runtime=dict(python=sys.version.split()[0], numpy=np.__version__))
+        write_json(output/'results.json', result)
+        report = ['# 双束柔性可观测性开发诊断', '',
+            '状态：DEVELOPMENT_DIAGNOSTIC_ONLY；多项式为说明性 TEST 形状，未做结构或物理验证；默认方法与 TLS 候选均未替换。', '',
+            '只读取独立零载参考表面、固定结构参数、零载结构叶尖与标定。参考世界表面先逆转零载根部刚体坐标，再施加已声明的解析方位角/pitch 一次；没有读取本帧真实站位或终端柔性变换。塔筒使用静态零载参考，未复现真实动态工况。', '',
+            '三个状态为叶片 1 局部 +x 方向的 a₂ s²、a₃ s³、a₄ s⁴，s=clip((z−HubRad)/(tip_z−HubRad),0,1)，本包 HubRad=1.5m、tip_z=63m、叶根到尖展长61.5m；a 的单位为 m。它们在叶片连接根部位移与斜率为零，叶尖权重为 1。该族只说明面外形状自由度，不代表 NREL 制造商模态、实际振型或完整叶片状态。', '',
+            '预声明 21 个方位角/pitch 组合；没有按 TLS 有效样本、真净空或真误差选样，RPM 不参与。S2/S3 每次重新计算全部叶片、塔筒和地面竞争首交。对象、叶片、三角形、近远支路变化会明确导致局部导数不可用。', '',
+            f"声明案例 {len(cases)}；名义双量测可用 {summary['nominal_two_range_cases']}；局部导数可用 {len(valid)}；不可用 {summary['local_derivative_unavailable_cases']}；量测零空间具有净空一阶敏感性的案例 {summary['null_clearance_sensitive_cases']}。", '',
+            'Jacobian dr/da 和净空梯度 dc/da 均以 m/m 表示。归一化定义 q=a/1m、y=r/1m，SVD 使用相同尺度的欧氏范数；1m 仅为坐标单位，不是设备噪声或允许结构扰动。中心差分 ±0.001m 与半步一致性一起输出，预声明绝对/相对收敛容限均为1e−5；不通过则导数不可用。三形状 DOF、两距离的局部秩最多为 2。', '',
+            '零空间方向上的 ±1m 系数 L2 扰动再次射线求交，其距离与净空变化见逐案例 JSON。有限扰动可能产生二阶测距变化、换面或失效；这些探针不是误差预算，也不是具有保证的净空区间。', '',
+            '全部 21 例净空认证输出为 UNKNOWN_UNVALIDATED_SHAPE_PRIOR。尚未取得独立验证的模态、幅值范围与动态约束，因此不能以本诊断恢复真实形变或发布保护边界。这是解析案例的未知输出，不能换算为原有 1794 样本的覆盖损失。', '',
+            '| 案例 | 两量测 | 局部导数 | 秩 | 最大零空间净空敏感性 m/m |',
+            '|---|---|---|---|---|']
+        for case in cases:
+            o = case['observability']
+            report.append(f"| {case['id']} | {case['nominal_range_pair_available']} | {o is not None} | {o['rank'] if o else '-'} | {o['maximum_null_clearance_sensitivity_m_per_m'] if o else '-'} |")
+        report += ['', '详细输入 SHA-256、声明、所有成功/失效首交、每列差分、半步比较、SVD 与有限探针均保存于 declaration.json / results.json。']
+        (output/'report.md').write_text('\n'.join(report)+'\n', encoding='utf-8')
     return result
 
 

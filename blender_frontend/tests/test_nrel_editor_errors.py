@@ -1,5 +1,6 @@
 """Editor failures preserve primary diagnostics, retry ownership and callback recovery."""
 import json
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace as NS
 from unittest.mock import Mock
@@ -193,7 +194,7 @@ def test_corrupt_saved_document_is_rejected_even_if_status_rna_is_gone(editor_ru
 def scan_runtime(editor_runtime, stub_module):
     r = editor_runtime
     outputs = stub_module('wfrl_blender.nrel_defects.defect_outputs',
-        save_records=Mock(), write_json=Mock(), update_run=Mock(), save_review=Mock())
+        save_records=Mock(), write_json=Mock(), update_run=Mock(), save_review=Mock(), _staged_run=nullcontext)
     stub_module('wfrl_blender.nrel_defects.defect_timeline', summarize_intervals=lambda *_args: [])
     scan = r.namespace.NREL_OT_defect_scan()
     scan.finished = False

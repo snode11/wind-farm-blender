@@ -228,8 +228,9 @@ def test_resume_restores_statistics_and_adds_steps(harness):
     assert h.loaded[0].num_timesteps == expected_steps
     assert h.environments[0].obs_rms["yaw"].count > 123.0
     assert h.environments[0].ret_rms.count > 125.0
-    saved = PPO.load(h.cli.MODEL_PATH)
-    with open(h.cli.VECNORM_PATH, "rb") as stream:
+    model_path, norm_path = h.cli._require_checkpoint_files()
+    saved = PPO.load(model_path)
+    with norm_path.open("rb") as stream:
         norm = pickle.load(stream)
     assert saved.num_timesteps == expected_steps
     assert saved._wfrl_checkpoint_id == norm._wfrl_checkpoint_id != "pair-a"

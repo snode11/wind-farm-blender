@@ -250,6 +250,8 @@ class SourceGeometry:
         for row in self.measurements:
             if row.get("center_truth_m") is None:
                 continue
+            if not np.isfinite(row['center_truth_m']):
+                raise ValueError("Event center_truth must be finite when present")
             value = self.sample(row["time_s"])["clearance_m"][int(row["blade_id"]) - 1]
             if value is None:
                 raise ValueError("Event center_truth has no reconstructable tower section")

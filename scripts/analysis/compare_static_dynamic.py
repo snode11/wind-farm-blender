@@ -10,6 +10,8 @@
 import argparse
 import json
 import os
+from pathlib import Path
+import tempfile
 
 import numpy as np
 
@@ -17,8 +19,41 @@ RUNS_DIR = "runs"
 
 
 def _load(path):
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        hist, config = data['hist'], data['hist']['cfg']
+        if (not isinstance(config, dict) or type(config['seed']) is not int
+                or type(config['iters']) is not int or config['iters'] <= 0):
+            raise ValueError('Expected seed and positive iteration budget in configuration')
+        json.dumps(config, allow_nan=False)
+        if 'run' in hist and hist['run'].get('status') != 'completed':
+            raise ValueError('History run is not completed')
+        for key in ('reward', 'power_mw', 'explained_var'):
+            values = np.asarray(hist[key], dtype=float)
+            if values.shape != (config['iters'],) or not np.isfinite(values).all():
+                raise ValueError(f'{key} requires one finite value per iteration')
+            with np.errstate(over='ignore', invalid='ignore'):
+                if not np.isfinite([values.mean(), values[-5:].mean()]).all():
+                    raise ValueError(f'{key} means must be finite')
+        return data
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        raise ValueError(f'Invalid history {path}: {exc}') from exc
+
+
+def _validate_comparison(runs, sources):
+    reference = None
+    for index, ((_, _, data), path) in enumerate(zip(runs, sources)):
+        config = data['hist']['cfg']
+        backend = 'Floris' if index == 0 else 'Fastfarm'
+        if (config.get('env_id') != f'Dec_Turb3_Row1_{backend}'
+                or data.get('env_id', config['env_id']) != config['env_id']
+                or config.get('recurrent') is not (index == 2)):
+            raise ValueError(f'Invalid backend/layout/network configuration: {path}')
+        common = {k: v for k, v in config.items() if k not in {'env_id', 'recurrent'}}
+        if reference is not None and common != reference:
+            raise ValueError(f'Comparison configuration/seed mismatch: {sources[0]} vs {path}')
+        reference = common
 
 
 def _tail_mean(xs, k=5):
@@ -37,8 +72,11 @@ def main():
 
     runs = [("静态 MAPPO (FLORIS)", "tab:blue", _load(args.static)),
             ("动态 MAPPO (FAST.Farm)", "tab:red", _load(args.dynamic))]
-    if args.dynamic_gru and os.path.exists(args.dynamic_gru):
+    sources = [args.static, args.dynamic]
+    if args.dynamic_gru:
         runs.append(("动态 GRU-MAPPO", "tab:purple", _load(args.dynamic_gru)))
+        sources.append(args.dynamic_gru)
+    _validate_comparison(runs, sources)
 
     import matplotlib
     matplotlib.use("Agg")
@@ -53,19 +91,29 @@ def main():
                ("power_mw", "farm total power (MW, avg)"),
                ("explained_var", "critic explained_var")]
     fig, ax = plt.subplots(1, 3, figsize=(16, 4.5))
-    for label, color, d in runs:
-        h = d["hist"]
-        its = np.arange(1, len(h["reward"]) + 1)
-        for j, (key, _) in enumerate(metrics):
-            ax[j].plot(its, h[key], "-o", color=color, label=label, ms=4)
-    for j, (_, title) in enumerate(metrics):
-        ax[j].set_title(title); ax[j].set_xlabel("iter")
-        ax[j].grid(True, alpha=0.3); ax[j].legend(fontsize=8)
-    fig.suptitle("静态 vs 动态 —— 真 MAPPO（同布局 Turb3_Row1，同算法同超参）")
-    fig.tight_layout()
-    os.makedirs(RUNS_DIR, exist_ok=True)
-    fig.savefig(args.out, dpi=120)
-    print(f"[compare] 对比图 -> {args.out}", flush=True)
+    try:
+        for label, color, d in runs:
+            h = d["hist"]
+            its = np.arange(1, len(h["reward"]) + 1)
+            for j, (key, _) in enumerate(metrics):
+                ax[j].plot(its, h[key], "-o", color=color, label=label, ms=4)
+        for j, (_, title) in enumerate(metrics):
+            ax[j].set_title(title); ax[j].set_xlabel("iter")
+            ax[j].grid(True, alpha=0.3); ax[j].legend(fontsize=8)
+        fig.suptitle("静态 vs 动态 —— 真 MAPPO（同布局 Turb3_Row1，同算法同超参）")
+        fig.tight_layout()
+        os.makedirs(RUNS_DIR, exist_ok=True)
+        target = Path(args.out)
+        if not target.suffix:
+            target = target.with_suffix("." + plt.rcParams["savefig.format"])
+        with tempfile.TemporaryDirectory(prefix=".analysis-plot-",
+                                         dir=target.resolve().parent) as staging:
+            staged = Path(staging) / target.name
+            fig.savefig(staged, dpi=120)
+            os.replace(staged, target)
+        print(f"[compare] 对比图 -> {args.out}", flush=True)
+    finally:
+        plt.close(fig)
 
     # 数值摘要（末 5 iter 均值）
     print("\n== 收敛摘要（末 5 iter 均值）==")

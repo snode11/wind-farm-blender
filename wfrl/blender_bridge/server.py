@@ -1,6 +1,7 @@
 """Single-owner loopback server with bounded nonblocking framed I/O."""
 from collections import deque
 from copy import deepcopy
+from enum import Enum, auto
 import ipaddress
 import math
 import select
@@ -8,11 +9,23 @@ import socket
 import time
 import uuid
 from .backend_session import BackendSession, _aged_payload
-from .messages import FrameDecoder, SessionSequenceGuard, ProtocolError, encode_message, TRAINING_STATS_CAPABILITY
+from .messages import (FrameDecoder, FrameTooLarge, SessionSequenceGuard, ProtocolError, encode_message,
+                       TRAINING_STATS_CAPABILITY, bounded_diagnostic)
+
+
+_RELIABLE = frozenset({'lifecycle', 'safety_event', 'error'})
+_OBSERVATIONS = frozenset({'snapshot', 'training_stats'})
+_AGED = _OBSERVATIONS | {'safety_event'}
 
 
 class _SendQueueFull(ProtocolError):
     pass
+
+
+class _SendResult(Enum):
+    QUEUED = auto()
+    DEFERRED = auto()
+    DROPPED = auto()
 
 
 class BridgeServer:
@@ -43,6 +56,7 @@ class BridgeServer:
         self.pending_bytes = 0
         self.backlog = deque()
         self._deferred = {}
+        self._oversize_reported = set()
         self.close_after_flush = False
         self.negotiated_capabilities = frozenset()
         self.ready = False
@@ -84,34 +98,97 @@ class BridgeServer:
     def _connection_capabilities(self, capabilities):
         return [cap for cap in capabilities if cap != TRAINING_STATS_CAPABILITY] + sorted(self.negotiated_capabilities)
 
-    def _send(self, kind, payload, *, retain=True):
-        if kind == 'training_stats' and TRAINING_STATS_CAPABILITY not in self.negotiated_capabilities:
-            return
+    def _prepare_payload(self, kind, payload):
         if kind in ('hello_ack', 'lifecycle'):
             payload = dict(payload, capabilities=self._connection_capabilities(payload['capabilities']))
-        if kind in {'training_stats', 'snapshot'}:
-            payload = deepcopy(payload)
-        self.sequence += 1
+        field = 'reason' if kind == 'lifecycle' else 'message'
+        if kind in _RELIABLE and isinstance(payload.get(field), str):
+            payload = dict(payload, **{field: bounded_diagnostic(payload[field])})
+        return deepcopy(payload)
+
+    def _encode(self, kind, payload, sequence):
         data = encode_message(dict(protocol_version=1, type=kind, session_id=self.session.session_id,
-                                   sequence=self.sequence, payload=payload))
+                                   sequence=sequence, payload=payload))
+        if kind not in _OBSERVATIONS and len(data) > self.max_queue_bytes:
+            raise FrameTooLarge(f'Frame of {len(data)} bytes exceeds the {self.max_queue_bytes}-byte send budget')
+        return data
+
+    def _retain_event(self, kind, payload, queued_at=None):
+        """Retain only encodable reliable payloads with their original age baseline."""
+        if kind not in _RELIABLE:
+            return False
+        if queued_at is None:
+            queued_at = time.monotonic()
+        payload = self._prepare_payload(kind, payload)
+        aged = _aged_payload(payload, max(0., time.monotonic() - queued_at)) if kind in _AGED else payload
+        try:
+            self._encode(kind, aged, self.sequence + 1)
+        except (ProtocolError, ValueError, TypeError):
+            return False
+        self.backlog.append((kind, payload, queued_at))
+        return True
+
+    def _send(self, kind, payload, *, retain=True, queued_at=None):
+        if kind == 'training_stats' and TRAINING_STATS_CAPABILITY not in self.negotiated_capabilities:
+            return _SendResult.DROPPED
+        if self.close_after_flush:
+            if retain and self._retain_event(kind, payload, queued_at):
+                return _SendResult.DEFERRED
+            return _SendResult.DROPPED
+        payload = self._prepare_payload(kind, payload)
+        if queued_at is None:
+            queued_at = time.monotonic()
+        aged = _aged_payload(payload, max(0., time.monotonic() - queued_at)) if kind in _AGED else payload
+        sequence = self.sequence + 1
+        try:
+            data = self._encode(kind, aged, sequence)
+        except FrameTooLarge as exc:
+            if kind not in _OBSERVATIONS:
+                raise
+            # A replaceable observation over the frame limit is skipped, not fatal.
+            self._report_oversized(kind, payload, exc)
+            return _SendResult.DROPPED
+        self.sequence = sequence
         # Partially sent frames are immutable; unsent observations can coalesce.
         self._drop_replaceable(kind, payload, len(data))
         key = self._observation_key(kind, payload)
         self._deferred.pop(key, None)
         if self.pending_bytes + len(data) > self.max_queue_bytes:
-            if kind in {'snapshot', 'training_stats'}:
-                self._deferred[key] = payload, time.monotonic()
-                return
+            if kind in _OBSERVATIONS:
+                self._deferred[key] = payload, queued_at
+                return _SendResult.DEFERRED
             raise _SendQueueFull('Server send queue overflow')
         self.pending.append(dict(kind=kind, payload=payload, frame=data, offset=0,
-                                 sequence=self.sequence, queued_monotonic=time.monotonic(), retain=retain))
+                                 sequence=self.sequence, queued_monotonic=queued_at, retain=retain))
         self.pending_bytes += len(data)
         if kind == 'error' and payload.get('fatal'):
             self.close_after_flush = True
+            self._deferred.clear()
+        return _SendResult.QUEUED
+
+    def _report_oversized(self, kind, payload, exc):
+        """Commit a once-per-run diagnostic only after accepting it for delivery."""
+        scope = (kind, payload.get('run_id'))
+        if scope in self._oversize_reported:
+            return
+        if kind == 'error' and payload.get('code') == 'FRAME_TOO_LARGE':
+            return
+        turbines = len(payload.get('turbines') or ())
+        detail = f'; {turbines} turbines in the frame' if turbines else ''
+        notice = dict(code='FRAME_TOO_LARGE', fatal=False, message=(
+            f'{kind} skipped: {exc}{detail}. Reduce payload size to fit the frame and send queue limits.'))
+        try:
+            result = self._send('error', notice)
+        except _SendQueueFull:
+            result = _SendResult.DEFERRED if self._retain_event('error', notice) else _SendResult.DROPPED
+        except FrameTooLarge:
+            result = _SendResult.DROPPED
+        if result is not _SendResult.DROPPED:
+            self._oversize_reported.add(scope)
 
     def _retain_reliable_pending(self):
-        retained = [(item['kind'], item['payload']) for item in self.pending
-                    if item['kind'] in {'lifecycle', 'safety_event', 'error'} and item['retain']]
+        retained = [(item['kind'], item['payload'], item['queued_monotonic']) for item in self.pending
+                    if item['kind'] in _RELIABLE and item['retain']]
         if retained:
             self.backlog = deque(retained + list(self.backlog))
         self.pending.clear()
@@ -125,14 +202,20 @@ class BridgeServer:
         self.client = None; self.ready = False; self.close_after_flush = False
 
     def _queue_session_events(self):
+        if self.close_after_flush:
+            return
         # One reliable batch may be outstanding. Backpressure leaves later
         # events in the session's bounded buffer, including while disconnected.
         if any(item['kind'] in {'lifecycle', 'safety_event', 'error'} for item in self.pending):
             return
-        while self.backlog:
-            kind, payload = self.backlog[0]
+        while self.backlog and not self.close_after_flush:
+            kind, payload, queued_at = self.backlog[0]
             try:
-                self._send(kind, payload)
+                self._send(kind, payload, queued_at=queued_at)
+            except FrameTooLarge as exc:
+                self.backlog.popleft()
+                self._report_oversized(kind, payload, exc)
+                continue
             except _SendQueueFull:
                 if self.pending:
                     return
@@ -141,33 +224,49 @@ class BridgeServer:
         if any(item['kind'] in {'lifecycle', 'safety_event', 'error'} for item in self.pending):
             return
         events = self.session.poll()
+        queued_at = time.monotonic()
         for index, (kind, payload) in enumerate(events):
             try:
-                self._send(kind, payload)
+                self._send(kind, payload, queued_at=queued_at)
+            except FrameTooLarge as exc:
+                self._report_oversized(kind, payload, exc)
+            except _SendQueueFull:
+                for reliable_kind, reliable_payload in events[index:]:
+                    self._retain_event(reliable_kind, reliable_payload, queued_at)
+                raise
             except (ProtocolError, ValueError, TypeError):
-                reliable = [event for event in events[index:]
-                            if event[0] in {'lifecycle', 'safety_event', 'error'}]
-                self.backlog.extend(reliable)
+                for reliable_kind, reliable_payload in events[index + 1:]:
+                    self._retain_event(reliable_kind, reliable_payload, queued_at)
                 raise
         if not any(item['kind'] in {'lifecycle', 'safety_event', 'error'} for item in self.pending):
-            for key, (payload, queued_at) in list(self._deferred.items()):
-                self._send(key[0], _aged_payload(payload, max(0., time.monotonic() - queued_at)))
+            for key, entry in list(self._deferred.items()):
+                payload, queued_at = entry
+                result = self._send(key[0], payload, queued_at=queued_at)
+                if result is not _SendResult.DEFERRED and self._deferred.get(key) is entry:
+                    self._deferred.pop(key)
 
     def _flush(self):
         if not self.pending:
             return
         item = self.pending[0]
-        if item['kind'] in {'training_stats', 'snapshot'} and item['offset'] == 0:
+        if item['kind'] in _AGED and item['offset'] == 0:
             if not select.select([], [self.client], [], 0)[1]:
                 return
             # Always derive from the original ages: would-block retries must not
             # compound elapsed queue time. Once bytes leave, framing is immutable.
             elapsed = max(0., time.monotonic() - item['queued_monotonic'])
             payload = _aged_payload(item['payload'], elapsed)
-            frame = encode_message(dict(protocol_version=1, type=item['kind'],
-                session_id=self.session.session_id, sequence=item['sequence'], payload=payload))
+            try:
+                frame = self._encode(item['kind'], payload, item['sequence'])
+            except FrameTooLarge as exc:
+                self.pending.popleft()
+                self.pending_bytes -= len(item['frame'])
+                self._report_oversized(item['kind'], item['payload'], exc)
+                return
             pending_bytes = self.pending_bytes + len(frame) - len(item['frame'])
             if pending_bytes > self.max_queue_bytes:
+                if item['kind'] in _RELIABLE:
+                    raise _SendQueueFull('Aged reliable frame requires draining the send queue')
                 self.pending.popleft()
                 self.pending_bytes -= len(item['frame'])
                 key = self._observation_key(item['kind'], item['payload'])
@@ -266,12 +365,12 @@ class BridgeServer:
                                 raise ValueError('Bridge shutdown is pending; only cleanup and synchronization commands are available')
                             self.session.command(message['payload'])
                         except (ValueError, TypeError, OSError) as exc:
-                            payload = dict(code='COMMAND_REJECTED', message=str(exc), fatal=False,
+                            payload = dict(code='COMMAND_REJECTED', message=bounded_diagnostic(str(exc)), fatal=False,
                                            command_sequence=message['sequence'])
                             try:
                                 self._send('error', payload)
-                            except (ProtocolError, ValueError, TypeError):
-                                self.backlog.append(('error', payload))
+                            except _SendQueueFull:
+                                self._retain_event('error', payload)
                                 raise
                 if self.close_after_flush:
                     break

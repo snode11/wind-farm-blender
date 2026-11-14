@@ -1,0 +1,44 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.5.1",
+  "extension_version": "0.5.1",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.1",
+  "archive": {
+    "name": "wfrl_blender-0.5.1.zip",
+    "path": "publication/blender-0.5.1/package/wfrl_blender-0.5.1.zip",
+    "bytes": 93044245,
+    "file_count": 245,
+    "sha256": "f4bdf1bec98c3bb6502ba1f88ea21109bb92a5658950c7376e8fbd72923df478",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl_blender-0.5.1.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl_blender-0.5.1.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl_blender-0.5.1.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "main",
+    "synchronized_branch": "main",
+    "tag": "v0.5.1",
+    "archive_name": "wind-farm-blender-0.5.1.zip",
+    "download_url": "https://github.com/snode11/wind-farm-blender/archive/refs/tags/v0.5.1.zip",
+    "identity_record_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json",
+    "archive_generator": "GitHub automatic source archive of v0.5.1",
+    "commit": "7dc31d33b2ac8477d00567b962c88c09fd861910"
+  },
+  "validation": {
+    "verification": "publication/blender-0.5.1/verification.json",
+    "daily_installation": "publication/daily-installation.json",
+    "scope": "Ordinary release: content/version consistency and one local extension build. Retained experiment evidence is attached without rerunning simulations.",
+    "package_build": "PASS",
+    "tests": "NOT_RUN",
+    "isolated_installation": "NOT_RUN",
+    "window_gpu": "NOT_RUN",
+    "performance": "NOT_RUN",
+    "scientific_accuracy": "NOT_RUN"
+  },
+  "research": {
+    "summary": "publication/blender-0.5.1/experiment-summary.md",
+    "attachments": "publication/blender-0.5.1/experiments.json",
+    "scope": "Published: experiment summary, four CSV tables, inflow archive and dependency sources. Full original experiment archive remains local. Measurements retain their original source identities."
+  },
+  "remote_asset_download_verification": false
+}

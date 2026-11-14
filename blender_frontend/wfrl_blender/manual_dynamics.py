@@ -203,45 +203,74 @@ def _matrix(values):
     return Matrix([values[0:4], values[4:8], values[8:12], values[12:16]])
 
 
-def _bake(blade):
+def _bake(blade, owner=None):
     """Copy of the blade's evaluated mesh (edge bevel applied), so the bevel is not recomputed per frame.
 
     All manual blades share one mesh and modifier stack, so one copy serves every blade."""
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = bpy.data.meshes.new_from_object(blade.evaluated_get(depsgraph), preserve_all_data_layers=True,
                                            depsgraph=depsgraph)
-    mesh.name = blade.data.name + BAKED_SUFFIX
-    mesh['wfrl_flap_baked'] = True
-    if 'wfrl_blade_model' in blade.data:
-        mesh['wfrl_blade_model'] = blade.data['wfrl_blade_model']
-    mesh['wfrl_flap_span'] = _span(mesh)
+    if owner is not None:
+        owner['baked'] = mesh
+    try:
+        mesh.name = blade.data.name + BAKED_SUFFIX
+        mesh['wfrl_flap_baked'] = True
+        if 'wfrl_blade_model' in blade.data:
+            mesh['wfrl_blade_model'] = blade.data['wfrl_blade_model']
+        mesh['wfrl_flap_span'] = _span(mesh)
+    except BaseException:
+        if owner is None:
+            bpy.data.meshes.remove(mesh)
+        raise
     return mesh
 
 
-def _attach(entry, baked):
+def _attach(entry, baked, rig=None):
     """Bend the turbine's blades using ``baked``; a restore record is kept on each object."""
     group = _node_group()
     ids = _socket_ids(group)
+    required = dict(Geometry='NodeSocketGeometry', Direction='NodeSocketVector',
+                    Tip='NodeSocketFloat', Root='NodeSocketFloat', Length='NodeSocketFloat')
+    missing = required.keys() - ids.keys()
+    if missing:
+        raise ValueError('结构运动节点组缺少输入：' + ', '.join(sorted(missing)))
+    for item in group.interface.items_tree:
+        if item.item_type == 'SOCKET' and item.in_out == 'INPUT' and item.name in required:
+            if not item.identifier or item.socket_type != required[item.name]:
+                raise ValueError(f'结构运动节点组输入类型无效：{item.name}')
     low, length = baked['wfrl_flap_span']
-    blades = []
-    for index in range(1, 4):
-        blade = getattr(entry, f'blade{index}_object')
-        if _RESTORE_KEY not in blade:
+    if rig is None:
+        rig = dict(blades=[], root=None)
+    rig['attached'] = False
+    rig['ids'] = ids
+    try:
+        for index in range(1, 4):
+            blade = getattr(entry, f'blade{index}_object')
+            if _RESTORE_KEY in blade or blade.modifiers.get(MODIFIER) is not None:
+                raise RuntimeError(f'叶片已有结构运动恢复记录：{blade.name}')
             kept = [[m.name, m.show_viewport, m.show_render] for m in blade.modifiers]
             blade[_RESTORE_KEY] = json.dumps(dict(mesh=blade.data.name, modifiers=kept))
+            rig['blades'].append((index, blade, None))
             for modifier in blade.modifiers:
-                modifier.show_viewport = modifier.show_render = False
+                modifier.show_viewport = False
+                modifier.show_render = False
             blade.data = baked
-        modifier = blade.modifiers.get(MODIFIER) or blade.modifiers.new(MODIFIER, 'NODES')
-        modifier.node_group = group
-        _set_input(modifier, ids['Root'], low)
-        _set_input(modifier, ids['Length'], length)
-        _set_input(modifier, ids['Tip'], 0.0)
-        blades.append((index, blade, modifier))
-    root = entry.yaw_object.parent
-    if _LEAN_KEY not in root:
+            modifier = blade.modifiers.new(MODIFIER, 'NODES')
+            rig['blades'][-1] = (index, blade, modifier)
+            modifier.node_group = group
+            _set_input(modifier, ids['Root'], low)
+            _set_input(modifier, ids['Length'], length)
+            _set_input(modifier, ids['Tip'], 0.0)
+        root = entry.yaw_object.parent
+        if _LEAN_KEY in root:
+            raise RuntimeError('塔架已有结构运动恢复记录')
+        rig['root'] = root
         root[_LEAN_KEY] = [value for row in root.matrix_basis for value in row]
-    return dict(ids=ids, blades=blades, root=root)
+    except BaseException:
+        _detach(rig)
+        raise
+    rig['attached'] = True
+    return rig
 
 
 def _restore_blade(blade):
@@ -254,8 +283,9 @@ def _restore_blade(blade):
         return
     record = json.loads(record)
     mesh = bpy.data.meshes.get(record['mesh'])
-    if mesh is not None:
-        blade.data = mesh
+    if mesh is None:
+        raise RuntimeError(f'无法恢复叶片网格：{record["mesh"]}')
+    blade.data = mesh
     for name, viewport, render in record['modifiers']:
         modifier = blade.modifiers.get(name)
         if modifier is not None:
@@ -272,15 +302,28 @@ def _restore_root(root):
 
 
 def _detach(rig):
-    for _index, blade, _modifier in rig['blades']:
+    errors = []
+    for record in tuple(rig['blades']):
+        _index, blade, _modifier = record
         try:
             _restore_blade(blade)
         except ReferenceError:
             pass
-    try:
-        _restore_root(rig['root'])
-    except ReferenceError:
-        pass
+        except Exception as exc:
+            errors.append(str(exc))
+            continue
+        rig['blades'].remove(record)
+    if rig.get('root') is not None:
+        try:
+            _restore_root(rig['root'])
+        except ReferenceError:
+            rig['root'] = None
+        except Exception as exc:
+            errors.append(str(exc))
+        else:
+            rig['root'] = None
+    if errors:
+        raise RuntimeError('结构运动恢复失败：' + '；'.join(errors))
 
 
 def _remove_unused_baked():
@@ -349,12 +392,17 @@ def start(scene, job, turbine, seed=None):
     job['dynamics_seed'] = random.randrange(1 << 30) if seed is None else int(seed)
     entry = next(e for e in scene.wfrl_manual_turbines if e.turbine_id == turbine)
     job['dynamics_signals'] = make_signals(job['dynamics_seed'], [turbine])
-    job['dynamics'] = {}
-    job['dynamics_rig'] = dict(turbine=turbine, rig=_attach(entry, _bake(entry.blade1_object)))
+    state = job['dynamics_rig'] = dict(turbine=turbine, rig=dict(blades=[], root=None), baked=None)
+    try:
+        state['baked'] = _bake(entry.blade1_object, state)
+        _attach(entry, state['baked'], state['rig'])
+    except BaseException:
+        end(job)
+        raise
 
 
 def apply(scene, job, frame, poses):
-    """Pose bends and tower lean for ``frame``. ``poses`` maps turbine id to (rpm, azimuth, pitches)."""
+    """Apply blade bends and tower lean and return the frame's sample."""
     state = job.get('dynamics_rig')
     if not state:
         return
@@ -363,19 +411,26 @@ def apply(scene, job, frame, poses):
     rpm, azimuth, pitches = poses[tid]
     tips, tower = sample(job['dynamics_signals'][tid], rpm, azimuth, pitches, frame / job['plan']['fps'])
     _pose(entry, state['rig'], tips, tower)
-    job['dynamics'][frame] = {tid: dict(tip_flap_m=[round(v, 4) for v in tips], tower_top_m=round(tower, 4))}
+    return {tid: dict(tip_flap_m=[round(v, 4) for v in tips], tower_top_m=round(tower, 4))}
 
 
 def end(job):
     """Remove the export bend and restore the turbine."""
-    state = job.pop('dynamics_rig', None)
+    state = job.get('dynamics_rig')
     if state:
         _detach(state['rig'])
-        _remove_unused_baked()
+        mesh = state.get('baked')
+        if mesh is not None:
+            try:
+                if mesh.users == 0:
+                    bpy.data.meshes.remove(mesh)
+            except ReferenceError:
+                pass
+        job.pop('dynamics_rig', None)
 
 
 def sidecar(job, data):
-    """Record the model and per-frame values in a video sidecar."""
+    """Record the structural motion model and seed in the sidecar header."""
     if 'dynamics_seed' not in job:
         return
     data['structural_motion'] = dict(
@@ -389,10 +444,6 @@ def sidecar(job, data):
                'load * (common + %.2f cos(azimuth_b + %.0f deg) + blade imbalance + per-blade term); bend shape '
                '(3 s^2 - s^3) / 2 along the span; azimuth_b 0 = blade up' % (SHEAR_TIP_M, SHEAR_PHASE_DEG)),
         tower='rigid lean of the whole turbine about the tower base giving the tower-top fore-aft deviation')
-    for row in data['samples']:
-        values = job['dynamics'].get(row['frame'])
-        if values:
-            row['structural_motion'] = values
 
 
 # Live viewport: every turbine on the manual-control clock ---------------------------------------
@@ -425,10 +476,13 @@ def live_update(scene, now):
         if max(loads) > 0.0:
             active = True
             rig = state['rigs'].get(tid)
-            if rig is None:
+            if rig is None or not rig.get('attached'):
+                if rig is not None:
+                    _detach(rig)
                 if state['baked'] is None:
                     state['baked'] = _bake(entry.blade1_object)
-                rig = state['rigs'][tid] = _attach(entry, state['baked'])
+                rig = state['rigs'][tid] = dict(blades=[], root=None)
+                _attach(entry, state['baked'], rig)
             if tid not in state['signals']:
                 state['signals'][tid] = make_signals(hash((state['seed'], tid)), [tid])[tid]
             tips, tower = deviation(state['signals'][tid], loads, entry.azimuth_deg, now - state['start'])

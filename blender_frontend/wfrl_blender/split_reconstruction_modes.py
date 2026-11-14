@@ -115,7 +115,10 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
     source = _core._source_camera(scene, [source_area])
     if source is None:
         raise ValueError('MAPPO 场景相机尚未就绪')
-    previous_session = _core._SESSIONS.get(_core._key(window))
+    from .split_reconstruction_timing import spec_from_scene
+    spec_from_scene(scene)
+    key = _core._key(window)
+    previous_session = _core._SESSIONS.get(key)
     try:
         with split_texture_settings.rollback_on_error(scene):
             if use_same_source or use_texture is True:
@@ -148,9 +151,9 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
             elif use_texture is None and not use_same_source:
                 right_navigation = _core._saved_return_navigation(scene)
             scene['split_review_enabled'] = True
-            for key, value in _core._METADATA.items():
-                if key not in scene:
-                    scene[key] = value
+            for name, value in _core._METADATA.items():
+                if name not in scene:
+                    scene[name] = value
             job = dict(window=window, scene=scene, screen=window.screen, stage='layout',
                        navigation=_core._navigation(source_area.spaces.active), deadline=_core.time.monotonic() + 15,
                        frame=scene.frame_current, subframe=scene.frame_subframe,
@@ -158,8 +161,8 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
                        explicit=True, detail=bool(texture.active(scene) and
                                                  scene.get(texture.DETAIL, False)))
             scene['split_review_status'] = 'PREPARING'
-            _core._SESSIONS.pop(_core._key(window), None)
-            _core._JOBS[_core._key(window)] = job
+            _core._SESSIONS.pop(key, None)
+            _core._JOBS[key] = job
             factor, balanced = _core._layout_factor(areas)
             rebuild = bool(reset_layout and len(areas) > 1 and not balanced)
             if _core._pair(scene, window.screen) is None or rebuild:
@@ -169,32 +172,50 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
                         split_factor=factor, rebuild=rebuild)
             _core._ensure_timer()
     except Exception:
-        _core._JOBS.pop(_core._key(window), None)
+        layout = cameras._LAYOUT_JOB
+        if (layout is not None and layout.get('scene') == scene
+                and layout.get('window') == window):
+            cameras.cancel_view_layout()
+        _core._JOBS.pop(key, None)
         if previous_session is not None:
-            _core._SESSIONS[_core._key(window)] = previous_session
+            _core._SESSIONS[key] = previous_session
         raise
     return True
 
 
 def fit(context, reset_layout=False):
-    from . import cameras
+    from . import cameras, split_texture_settings
     if cameras._LAYOUT_JOB is not None or _core._key(context.window) in _core._JOBS:
         raise ValueError('请等待当前布局调整完成')
-    texture = _core.texture_adapter(context.scene)
-    if texture.active(context.scene):
-        context.scene[texture.DETAIL] = False
-    if reset_layout or _core._pair(context.scene, context.window.screen) is None:
-        return _core.enter(context, reset_layout=True)
-    if not _core.enabled(context.scene):
-        return _core.enter(context, reset_layout=reset_layout)
-    areas = _core._pair(context.scene, context.window.screen)
-    areas[0].spaces.active.region_3d.view_perspective = 'PERSP'
-    areas[1].spaces.active.region_3d.view_perspective = 'CAMERA'
-    now = _core.time.monotonic()
-    _core._JOBS[_core._key(context.window)] = dict(window=context.window, scene=context.scene,
-        screen=context.window.screen, stage='fit', settle=now + _core._DEBOUNCE, deadline=now + 15)
-    context.scene['split_review_status'] = 'PREPARING'
-    _core._ensure_timer()
+    with split_texture_settings.rollback_on_error(context.scene):
+        texture = _core.texture_adapter(context.scene)
+        if texture.active(context.scene):
+            context.scene[texture.DETAIL] = False
+        if reset_layout or _core._pair(context.scene, context.window.screen) is None:
+            return _core.enter(context, reset_layout=True)
+        if not _core.enabled(context.scene):
+            return _core.enter(context, reset_layout=reset_layout)
+        areas = _core._pair(context.scene, context.window.screen)
+        saved = [_core._navigation(area.spaces.active) for area in areas]
+        key = _core._key(context.window)
+        now = _core.time.monotonic()
+        job = dict(window=context.window, scene=context.scene, screen=context.window.screen,
+                   stage='fit', settle=now + _core._DEBOUNCE, deadline=now + 15)
+        try:
+            areas[0].spaces.active.region_3d.view_perspective = 'PERSP'
+            areas[1].spaces.active.region_3d.view_perspective = 'CAMERA'
+            _core._JOBS[key] = job
+            context.scene['split_review_status'] = 'PREPARING'
+            _core._ensure_timer()
+        except Exception as exc:
+            if _core._JOBS.get(key) is job:
+                _core._JOBS.pop(key, None)
+            for area, values in zip(areas, saved):
+                try:
+                    _core._restore_navigation(area.spaces.active, values)
+                except Exception as error:
+                    exc.add_note('View restoration failed: ' + str(error))
+            raise
     return True
 
 
@@ -253,12 +274,23 @@ def exit_mode(context):
         _core._restore_presentation(area.spaces.active, presentation)
     if source:
         scene.camera = source
-    _core._JOBS[_core._key(window)] = dict(window=window, scene=scene, screen=window.screen, stage='exit',
+    key = _core._key(window)
+    job = dict(window=window, scene=scene, screen=window.screen, stage='exit',
         navigation=navigation, presentation=presentation, source=source, deadline=_core.time.monotonic() + 15)
-    with bpy.context.temp_override(window=window, area=source_area):
-        cameras.set_view_layout(context, 'SINGLE', camera_names=(source.name,) if source else None)
-    scene['split_review_status'] = 'EXITING'
-    _core._ensure_timer()
+    _core._JOBS[key] = job
+    try:
+        with bpy.context.temp_override(window=window, area=source_area):
+            cameras.set_view_layout(context, 'SINGLE', camera_names=(source.name,) if source else None)
+        scene['split_review_status'] = 'EXITING'
+        _core._ensure_timer()
+    except Exception as exc:
+        if _core._JOBS.get(key) is job:
+            _core._JOBS.pop(key, None)
+            layout = cameras._LAYOUT_JOB
+            if layout is not None and layout.get('scene') == scene and layout.get('window') == window:
+                cameras.cancel_view_layout()
+            _core._set_error(scene, exc)
+        raise
     return True
 
 

@@ -19,7 +19,10 @@ _LAST_STATUS = None
 
 def _tick():
     global _LAST_STATUS
-    service.stream.poll()
+    try:
+        service.stream.poll()
+    except (OSError, ValueError, RuntimeError) as exc:
+        service.stream.fail('RTSP 状态读取失败：' + str(exc))
     current = service.status_for()
     changed = current != _LAST_STATUS
     _LAST_STATUS = current
@@ -54,10 +57,14 @@ class WFRL_OT_VideoExport(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
+        started = False
         try:
             service.export.start(_source(context), bpy.path.abspath(self.filepath))
+            started = True
             _watch()
         except (OSError, ValueError, RuntimeError) as exc:
+            if started:
+                service.export.stop(timeout=0)
             if not service.export.active:
                 service.export.error = service.export.message = str(exc)
             self.report({'ERROR'}, str(exc))
@@ -76,13 +83,17 @@ class WFRL_OT_VideoStream(bpy.types.Operator):
 
     def execute(self, context):
         prefs = get_preferences(context)
+        started = False
         try:
             service.stream.start(_source(context),
                                  bpy.path.abspath(prefs.video_ffmpeg) if prefs.video_ffmpeg else '',
                                  bpy.path.abspath(prefs.video_mediamtx) if prefs.video_mediamtx else '',
                                  prefs.video_rtsp_port, prefs.video_rtsp_lan)
+            started = True
             _watch()
         except (OSError, ValueError, RuntimeError) as exc:
+            if started:
+                service.stream.stop(error=str(exc))
             if not service.stream.active:
                 service.stream.state, service.stream.message = 'ERROR', str(exc)
             self.report({'ERROR'}, str(exc))

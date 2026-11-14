@@ -3,8 +3,42 @@
 These fittings are illustrative, not additional NREL engineering dimensions.
 """
 import math
+from functools import wraps
 
 
+def _rollback_new_resources(build):
+    """Release allocations from a failed synchronous display build, never old IDs.
+
+    Inventory checks run only at construction boundaries, outside frame updates.
+    Objects are released before their data; retained data remains owned by Blender.
+    """
+    @wraps(build)
+    def guarded(*args, **kwargs):
+        import bpy
+        pools = [(name, getattr(bpy.data, name)) for name in
+                 ('objects', 'meshes', 'curves', 'cameras', 'materials', 'collections')]
+        before = [{item.as_pointer() for item in pool} for _, pool in pools]
+        try:
+            return build(*args, **kwargs)
+        except BaseException as error:
+            for (name, pool), existing in zip(pools, before):
+                for item in list(pool):
+                    try:
+                        if item.as_pointer() in existing or item.library or item.use_fake_user:
+                            continue
+                        if name == 'objects':
+                            pool.remove(item, do_unlink=True)
+                        elif item.users == 0 and getattr(item, 'shape_keys', None) is None:
+                            pool.remove(item)
+                    except ReferenceError:
+                        pass
+                    except (RuntimeError, ValueError) as cleanup_error:
+                        error.add_note(f'Display resource cleanup failed ({name}): {cleanup_error}')
+            raise
+    return guarded
+
+
+@_rollback_new_resources
 def blade_root_fitting_mesh(role, model):
     """Build local presentation fittings; NREL dimensions keep their own contract.
 
@@ -56,21 +90,33 @@ def recess_yaw_seal(obj, tower_height):
     """Keep the illustrative seal inside the 1.90 m pedestal envelope."""
     if obj.get('wfrl_seal_geometry_revision', 0) >= 1:
         return
+    if (type(tower_height) not in (int, float) or not math.isfinite(tower_height)
+            or obj.library or len(obj.users_scene) > 1 or obj.data.library
+            or obj.data.users > 1 or obj.data.shape_keys is not None):
+        raise ValueError('Yaw seal requires finite height and an independent editable mesh: ' + obj.name)
     n, m = 64, 8
     if len(obj.data.vertices) != n * m:
         raise ValueError('Unexpected yaw seal mesh: ' + obj.name)
-    for i in range(n):
-        a = math.tau * i / n
-        for j in range(m):
-            b = math.tau * j / m
-            radius = 1.89 + .008 * math.cos(b)
-            obj.data.vertices[i * m + j].co = (
-                radius * math.cos(a), radius * math.sin(a),
-                tower_height + .13 + .008 * math.sin(b))
-    obj.data.update()
-    obj['wfrl_seal_geometry_revision'] = 1
+    previous = [tuple(vertex.co) for vertex in obj.data.vertices]
+    try:
+        for i in range(n):
+            a = math.tau * i / n
+            for j in range(m):
+                b = math.tau * j / m
+                radius = 1.89 + .008 * math.cos(b)
+                obj.data.vertices[i * m + j].co = (
+                    radius * math.cos(a), radius * math.sin(a),
+                    tower_height + .13 + .008 * math.sin(b))
+        obj.data.update()
+        obj['wfrl_seal_geometry_revision'] = 1
+    except Exception:
+        for vertex, value in zip(obj.data.vertices, previous):
+            vertex.co = value
+        obj.data.update()
+        raise
 
 
+@_rollback_new_resources
 def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell, *, material_factory=None):
     from .scene_builder import _mesh_object, _finish
     from .materials import get_material

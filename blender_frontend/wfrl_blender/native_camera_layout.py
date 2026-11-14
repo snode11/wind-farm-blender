@@ -9,12 +9,13 @@ def start(self):
     self.window_id = self.window.as_pointer()
     self.owns_window=True
     self.workspace=self.window.workspace
-    # The source window stays available but need not run another Eevee view.
-    # Restore its exact shading when the camera window closes.
-    for area in bpy.context.window.screen.areas:
-        if area.type == 'VIEW_3D':
+    # Only the calling source area uses the temporary shading budget.
+    source = next((w for w in bpy.context.window_manager.windows
+                   if w.as_pointer() == self.source_window_id), None)
+    for area in source.screen.areas if source else ():
+        if area.as_pointer() == self.source_area_id and area.type == 'VIEW_3D':
             shading = area.spaces.active.shading
-            self.source_shading.append((bpy.context.window.as_pointer(), area.as_pointer(), shading.type))
+            self.source_shading.append((self.source_window_id, area.as_pointer(), shading.type))
             shading.type = 'SOLID'
     self.preview_quality = self.quality_settings()
     self.apply_quality()

@@ -28,6 +28,7 @@ results/runs/*.log
 /outputs/
 /results/verify/
 /ci-results/
+/data/turbulence/
 /fort.[0-9]*
 
 # LaTeX 编译产物
@@ -76,7 +77,14 @@ example*.png
 /publication/blender-0.3.42.7/delivery/
 /publication/blender-0.3.42.8/package/*.zip
 /publication/blender-0.3.42.8/delivery/
+/publication/blender-0.5.0/package/*.zip
+/publication/blender-0.5.0/delivery/
+/publication/blender-0.5.0.0.1/package/*.zip
+/publication/blender-0.5.0.0.1/delivery/
 # Internal proposal, bid and vendor documents stay local
 /docs/proposal/**/*.docx
 /docs/proposal/**/*.pdf
 ~$*
+
+/publication/blender-0.5.1/package/*.zip
+/publication/blender-0.5.1/delivery/

@@ -1,6 +1,6 @@
 # 跨平台协作开发
 
-发布版本为 **0.3.42.8**（GitHub 标签 `v0.3.42.8`，Blender manifest 为 `0.3.42+8`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
+发布版本为 **0.5.1**（GitHub 标签 `v0.5.1`，Blender manifest 为 `0.5.1`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
 ## 仓库与分支
 
@@ -30,6 +30,8 @@ print([m.__file__ for n, m in sys.modules.items() if n.endswith('wfrl_blender')]
 ```
 
 完整环境、构建身份与原生检查入口见[项目技能](../../.agents/skills/windfarm-blender-dev/SKILL.md)和[验证入口](../../.agents/skills/windfarm-blender-dev/references/verification.md)。
+
+FAST.Farm 控制器是平台二进制：`servo_dll/DISCON_WT1.dll` 与 `SC_DLL.dll` 须在目标系统按同一份源码编译，不能跨 macOS／Windows 复制；修改 `DISCON.F90` 后各平台分别重编并核对。Windows 的 MPI、求解器定位与控制器编译要求见[Windows FAST.Farm 后端](../setup/setup_local.md#windows-fastfarm-后端)，该路线尚未实机验证。
 
 ## 模块与接口
 

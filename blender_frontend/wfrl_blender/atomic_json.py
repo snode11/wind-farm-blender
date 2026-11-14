@@ -1,4 +1,5 @@
 """Atomic UTF-8 JSON and text output using a temporary file beside the destination."""
+from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
@@ -9,19 +10,44 @@ import uuid
 
 def write_json(path, value, *, mkdir=False):
     """Flush and sync strict JSON before replacement; create parents only on request."""
-    def write(handle):
+    with _open_atomic(path, mkdir=mkdir) as handle:
         json.dump(value, handle, ensure_ascii=False, indent=2, allow_nan=False)
         handle.write('\n')
 
-    _write_atomic(path, write, mkdir=mkdir)
+
+@contextmanager
+def write_json_array(path, metadata, key):
+    """Write a JSON object with one incrementally appended array and publish on success."""
+    if not isinstance(metadata, dict) or not isinstance(key, str):
+        raise TypeError('A streamed array requires object metadata and a string field name')
+    if key in metadata:
+        raise ValueError(f'Array field already present: {key}')
+    header = json.dumps(metadata, ensure_ascii=False, indent=2, allow_nan=False)
+    with _open_atomic(path, mkdir=False) as handle:
+        handle.write(header[:-1].rstrip())
+        if metadata:
+            handle.write(',')
+        handle.write(f'\n  {json.dumps(key, ensure_ascii=False)}: [')
+        has_items = False
+
+        def append(item):
+            nonlocal has_items
+            row = json.dumps(item, ensure_ascii=False, allow_nan=False, separators=(',', ':'))
+            handle.write((',\n' if has_items else '\n') + '    ' + row)
+            has_items = True
+
+        yield append
+        handle.write('\n  ]\n}\n' if has_items else ']\n}\n')
 
 
 def write_text(path, text, *, mkdir=False):
     """Flush and sync UTF-8 text unchanged, without adding or translating newlines."""
-    _write_atomic(path, lambda handle: handle.write(text), mkdir=mkdir)
+    with _open_atomic(path, mkdir=mkdir) as handle:
+        handle.write(text)
 
 
-def _write_atomic(path, write, *, mkdir):
+@contextmanager
+def _open_atomic(path, *, mkdir):
     path = Path(path)
     if mkdir:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -48,7 +74,7 @@ def _write_atomic(path, write, *, mkdir):
             descriptor = None
             if mode is not None:
                 os.fchmod(handle.fileno(), mode)
-            write(handle)
+            yield handle
             handle.flush()
             if mode is not None and mode & (stat.S_ISUID | stat.S_ISGID):
                 # Writes can clear set-ID bits; restore them before syncing.

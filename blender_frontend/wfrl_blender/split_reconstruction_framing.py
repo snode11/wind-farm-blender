@@ -1,8 +1,59 @@
 """Saved-pose bounds and camera/free-view framing for split comparisons."""
 from __future__ import annotations
 
+from contextlib import contextmanager
+
+
+def _finite(values):
+    try:
+        return all(_core.math.isfinite(value) for value in values)
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
+def _check_points(points):
+    if any(len(point) != 3 or not _finite(point) for point in points):
+        raise ValueError('取景坐标必须是有限三维点')
+
+
+def _canvas(area):
+    region = _core._region(area)
+    if (area.type != 'VIEW_3D' or region is None
+            or not _finite((region.width, region.height)) or min(region.width, region.height) <= 0):
+        raise ValueError('可用三维视口尺寸无效')
+    rectangle = _core._rectangle(area)
+    if not _finite(rectangle) or min(rectangle[2:]) <= 0:
+        raise ValueError('可用三维视口尺寸无效')
+    return region
+
+
+@contextmanager
+def _framing_transaction(areas):
+    states = []
+    for area in areas:
+        space = area.spaces.active
+        camera = space.camera
+        data = getattr(camera, 'data', None)
+        scale = data.ortho_scale if data is not None and data.type == 'ORTHO' else None
+        states.append((area, _core._navigation(space), data, scale))
+    try:
+        yield
+    except Exception as exc:
+        for area, navigation, data, scale in states:
+            for restore in (lambda: _core._restore_navigation(area.spaces.active, navigation),
+                            lambda: setattr(data, 'ortho_scale', scale) if scale is not None else None,
+                            area.tag_redraw):
+                try:
+                    restore()
+                except (ReferenceError, RuntimeError) as restore_error:
+                    exc.add_note(f'取景状态恢复失败: {restore_error}')
+        raise
+
 
 def _corners(low, high):
+    _check_points((low, high))
+    if any(a > b for a, b in zip(low, high)):
+        raise ValueError('取景包围盒上下界无效')
     return [(x, y, z) for x in (low[0], high[0]) for y in (low[1], high[1])
             for z in (low[2], high[2])]
 
@@ -11,11 +62,17 @@ def _saved_corners(obj):
     """Cache bounds of all saved poses; resize callbacks only project 8 corners."""
     import numpy as np
     texture_bounds = obj.get('split_texture_bounds') if hasattr(obj, 'get') else None
-    if texture_bounds is not None and len(texture_bounds) == 6:
+    if texture_bounds is not None:
+        if len(texture_bounds) != 6:
+            raise ValueError('取景包围盒必须包含六个坐标')
         return _core._corners(texture_bounds[:3], texture_bounds[3:])
     keys = obj.data.shape_keys
     if not keys:
-        return tuple(tuple(v) for v in obj.bound_box)
+        corners = tuple(tuple(v) for v in obj.bound_box)
+        _check_points(corners)
+        return corners
+    if not obj.data.vertices or not keys.key_blocks:
+        return ()
     key = (obj.data.as_pointer(), keys.as_pointer(), len(keys.key_blocks), len(obj.data.vertices))
     if key not in _core._BOUNDS:
         low, high = np.full(3, np.inf), np.full(3, -np.inf)
@@ -23,6 +80,8 @@ def _saved_corners(obj):
         for pose in keys.key_blocks:
             pose.data.foreach_get('co', coordinates)
             xyz = coordinates.reshape(-1, 3)
+            if not np.isfinite(xyz).all():
+                raise ValueError('形态键包含无效取景坐标')
             low = np.minimum(low, xyz.min(axis=0))
             high = np.maximum(high, xyz.max(axis=0))
         _core._BOUNDS[key] = _core._corners(low, high)
@@ -58,6 +117,8 @@ def _points(scene, area, *, reconstruction):
         if rotor is not None and root is not None:
             hub = rotor.matrix_world.translation
             radius = float(root.get('rotor_diameter_m', 0.)) / 2
+            if not _finite((radius,)) or radius < 0:
+                raise ValueError('转子直径必须是有限非负数')
             for obj in scene.objects:
                 if obj.name.startswith('WFRL.Turbine.T1.Blade') and obj.type == 'MESH':
                     radius = max(radius, max((obj.matrix_world @ Vector(corner) - hub).length
@@ -66,16 +127,17 @@ def _points(scene, area, *, reconstruction):
                 radius = radius * 1.15 + 2.
                 points.extend(hub + Vector(corner) for corner in
                               _core._corners((-radius,) * 3, (radius,) * 3))
+    _check_points(points)
     return points
 
 
 def _project(area, points):
     from bpy_extras.view3d_utils import location_3d_to_region_2d
-    region, rv = _core._region(area), area.spaces.active.region_3d
+    region, rv = _canvas(area), area.spaces.active.region_3d
+    _check_points(points)
     rv.update()
     projected = [location_3d_to_region_2d(region, rv, point) for point in points]
-    projected = [point for point in projected if point is not None]
-    if not projected:
+    if not projected or any(point is None or not _finite((point.x, point.y)) for point in projected):
         return None
     xs, ys = [point.x for point in projected], [point.y for point in projected]
     return min(xs), min(ys), max(xs), max(ys)
@@ -83,6 +145,26 @@ def _project(area, points):
 
 def _fit_camera(area, points, *, orbit_center):
     """Fit via viewport pan/zoom; only the private display camera may widen."""
+    if area.spaces.active.region_3d.view_perspective != 'CAMERA' or not points:
+        return
+    _canvas(area)
+    _check_points(points)
+    _check_points((orbit_center,))
+    with _framing_transaction((area,)):
+        _fit_camera_view(area, points, orbit_center=orbit_center)
+
+
+def _projection_bounds(area, points):
+    bounds = _core._project(area, points)
+    if bounds is None or not _finite(bounds) or bounds[2] < bounds[0] or bounds[3] < bounds[1]:
+        raise ValueError('无法投影完整取景几何')
+    if not _finite((bounds[2] - bounds[0], bounds[3] - bounds[1],
+                    bounds[0] + bounds[2], bounds[1] + bounds[3])):
+        raise ValueError('投影包围盒超出有限数值范围')
+    return bounds
+
+
+def _fit_camera_view(area, points, *, orbit_center):
     import bpy
     rv = area.spaces.active.region_3d
     if rv.view_perspective != 'CAMERA' or not points:
@@ -109,7 +191,8 @@ def _fit_camera(area, points, *, orbit_center):
         try:
             view_preferences.smooth_view = 0
             with bpy.context.temp_override(area=area, region=_core._region(area)):
-                bpy.ops.view3d.view_camera()
+                if 'FINISHED' not in bpy.ops.view3d.view_camera():
+                    raise RuntimeError('无法切换重建相机视图')
         finally:
             view_preferences.smooth_view = smooth_view
     scale = bpy.context.preferences.system.ui_scale
@@ -118,9 +201,7 @@ def _fit_camera(area, points, *, orbit_center):
     target = (x + margin, y + margin, max(1, width - 2 * margin), max(1, height - title - 2 * margin))
     rv.view_camera_zoom = 0
     rv.view_camera_offset = (0, 0)
-    bounds = _core._project(area, points)
-    if bounds is None:
-        return
+    bounds = _projection_bounds(area, points)
     factor = min(target[2] / max(1, bounds[2] - bounds[0]),
                  target[3] / max(1, bounds[3] - bounds[1]))
     minimum_factor = (_core.math.sqrt(2) - .6) ** 2 / 2
@@ -132,21 +213,14 @@ def _fit_camera(area, points, *, orbit_center):
         # may widen to fit extreme/narrow panes; source/calibration stays intact.
         camera.data.ortho_scale *= minimum_factor / max(factor, 1e-6) * 1.02
         bpy.context.view_layer.update()
-        bounds = _core._project(area, points)
-        if bounds is None:
-            return
+        bounds = _projection_bounds(area, points)
         factor = min(target[2] / max(1, bounds[2] - bounds[0]),
                      target[3] / max(1, bounds[3] - bounds[1]))
     rv.view_camera_zoom = max(-30, min(600, (_core.math.sqrt(2 * factor) - _core.math.sqrt(2)) * 50))
-    bounds = _core._project(area, points)
-    if bounds is None:
-        return
+    bounds = _projection_bounds(area, points)
     center = ((bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2)
     rv.view_camera_offset = (.01, .01)
-    shifted = _core._project(area, points)
-    if shifted is None:
-        rv.view_camera_offset = (0, 0)
-        return
+    shifted = _projection_bounds(area, points)
     shift = ((shifted[0] + shifted[2]) / 2 - center[0],
              (shifted[1] + shifted[3]) / 2 - center[1])
     target_center = target[0] + target[2] / 2, target[1] + target[3] / 2
@@ -164,8 +238,12 @@ def _perspective_distance(points, scale_x, scale_y, bounds, near=.1):
     lateral orbit-centre offset needed to centre the unobscured canvas.
     """
     left, bottom, right, top = bounds
+    _check_points(points)
+    if not points or not _finite((scale_x, scale_y, near, *bounds)):
+        raise ValueError('取景参数必须为有限数值')
     cx, cy = (left + right) / 2, (bottom + top) / 2
-    if min(scale_x, scale_y, right - left, top - bottom) <= 0:
+    if (not _finite((cx, cy, right - left, top - bottom))
+            or min(scale_x, scale_y, right - cx, cx - left, top - cy, cy - bottom) <= 0):
         raise ValueError('可用三维视口尺寸无效')
     distance = max(1., max(point[2] + max(.1, near * 2) for point in points))
     for x, y, z in points:
@@ -175,11 +253,23 @@ def _perspective_distance(points, scale_x, scale_y, bounds, near=.1):
             (scale_y * y + top * z) / (top - cy),
             (-scale_y * y - bottom * z) / (cy - bottom))
     distance *= 1.06
-    return distance, (-cx * distance / scale_x, -cy * distance / scale_y, 0.)
+    offset = (-cx * distance / scale_x, -cy * distance / scale_y, 0.)
+    if not _finite((distance, *offset)):
+        raise ValueError('取景距离超出有限数值范围')
+    return distance, offset
 
 
 def _fit_free(area, points):
     """One analytic fit; never iterate on matrices awaiting Blender redraw."""
+    if not points:
+        return
+    _canvas(area)
+    _check_points(points)
+    with _framing_transaction((area,)):
+        _fit_free_view(area, points)
+
+
+def _fit_free_view(area, points):
     import bpy
     from mathutils import Vector
     if not points:
@@ -188,8 +278,11 @@ def _fit_free(area, points):
     low = [min(point[i] for point in points) for i in range(3)]
     high = [max(point[i] for point in points) for i in range(3)]
     center = Vector([(a + b) / 2 for a, b in zip(low, high)])
+    _check_points((center,))
     rv.view_perspective = 'PERSP'
     projection = rv.window_matrix.copy()
+    if not _finite(value for row in projection for value in row):
+        raise ValueError('取景投影矩阵包含无效数值')
     if abs(projection[3][3]) > 1e-6:
         # CAMERA/ORTHO -> PERSP needs one redraw. The staged second fit handles
         # this transition; do not derive a perspective distance from old optics.
@@ -216,7 +309,8 @@ def _fit_free(area, points):
 def _fit_pair(window, areas, *, explicit=False):
     import bpy
     from . import split_turbine_context
-    with bpy.context.temp_override(window=window, area=areas[0], region=_core._region(areas[0])):
+    with _framing_transaction(areas), bpy.context.temp_override(
+            window=window, area=areas[0], region=_core._region(areas[0])):
         if explicit:
             _core._fit_free(areas[0], _core._points(window.scene, areas[0], reconstruction=False))
         # Automatic resize fitting never changes a manually orbited right view.

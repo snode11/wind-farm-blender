@@ -3,6 +3,7 @@ from collections import deque
 from functools import lru_cache
 import hashlib
 import json
+import math
 from pathlib import Path
 from time import monotonic
 import tomllib
@@ -10,6 +11,13 @@ import tomllib
 _HANDLE = None
 _DRAWS = {}
 WINDOW_SECONDS = 2.0
+_ERROR = None
+
+
+def _record_error(exc):
+    """Keep failure type only; exception text may contain private values."""
+    global _ERROR
+    _ERROR = type(exc).__name__
 
 
 @lru_cache(maxsize=1)
@@ -75,40 +83,69 @@ def _key(context):
 def _draw():
     import bpy
     from . import playback
-    context = bpy.context
-    if context.window and context.area and context.scene:
-        observe(_key(context), context.scene.frame_current+context.scene.frame_subframe,
-            playing=playback.is_playing(context.scene),
-            enabled=context.scene.wfrl_diagnostics_sampling)
+    try:
+        context = bpy.context
+        if context.window and context.area and context.scene:
+            observe(_key(context), context.scene.frame_current+context.scene.frame_subframe,
+                playing=playback.is_playing(context.scene),
+                enabled=context.scene.wfrl_diagnostics_sampling)
+    except Exception as exc:
+        _record_error(exc)
 
 
 def snapshot(context):
     from . import farm_flex, playback
-    scene = context.scene
-    flex = farm_flex.active_for(scene) if farm_flex.is_active(scene) else None
-    info = build_information().copy()
-    info.update(source_path=str(farm_flex.saved_package(scene)) if flex else scene.get('wfrl_farm_flex_path'),
-        source_hz=flex.manifest.get('source_fps') if flex else None,
-        timeline_hz=scene.get('wfrl_clearance_timebase_fps') if flex else None,
-        simulation_time_s=scene.get('wfrl_clearance_time_s'),
-        viewport_fps=rate(_key(context)) if context.window and context.area
-            and scene.wfrl_diagnostics_sampling and playback.is_playing(scene) else None,
+    info = dict(version=None, build=None, packaged=None, module=__package__,
+        addon_root=str(Path(__file__).resolve().parent), source_path=None, source_hz=None,
+        timeline_hz=None, simulation_time_s=None, viewport_fps=None, sampling=None, playing=None,
         fps_scope='Distinct scene frames observed in this viewport POST_PIXEL over the last 2 seconds; not display scanout',
-        sampling=scene.wfrl_diagnostics_sampling,
-        playing=playback.is_playing(scene))
+    )
+    errors = []
+    try:
+        info.update(build_information())
+    except Exception as exc:
+        errors.append(type(exc).__name__)
+    try:
+        scene = context.scene
+        flex = farm_flex.active_for(scene) if farm_flex.is_active(scene) else None
+        info.update(source_path=str(farm_flex.saved_package(scene)) if flex else scene.get('wfrl_farm_flex_path'),
+            source_hz=flex.manifest.get('source_fps') if flex else None,
+            timeline_hz=scene.get('wfrl_clearance_timebase_fps') if flex else None,
+            simulation_time_s=scene.get('wfrl_clearance_time_s'),
+            viewport_fps=rate(_key(context)) if context.window and context.area
+                and scene.wfrl_diagnostics_sampling and playback.is_playing(scene) else None,
+            sampling=scene.wfrl_diagnostics_sampling,
+            playing=playback.is_playing(scene))
+    except Exception as exc:
+        errors.append(type(exc).__name__)
+    if errors or _ERROR:
+        info['diagnostic_errors'] = errors + ([_ERROR] if _ERROR else [])
     return info
 
 
 def draw_panel(layout, context):
+    try:
+        _draw_panel(layout, context)
+    except Exception as exc:
+        _record_error(exc)
+        layout.label(text='诊断信息暂不可用')
+
+
+def _draw_panel(layout, context):
     from .panels.ui_helpers import message
     info = snapshot(context)
-    layout.label(text='版本：'+info['version']+' · '+('安装包' if info['packaged'] else '工作区'))
-    layout.label(text='构建：'+info['build'][:12])
+    origin = '未知' if info['packaged'] is None else '安装包' if info['packaged'] else '工作区'
+    layout.label(text='版本：'+(info['version'] or '不可用')+' · '+origin)
+    layout.label(text='构建：'+(info['build'][:12] if info['build'] else '不可用'))
     message(layout, '模块：'+info['module'], context=context)
     if info['source_path']:
         message(layout, '数据：'+Path(info['source_path']).name, context=context)
     if info['source_hz'] is not None:
-        layout.label(text=f"源采样 {info['source_hz']:g} Hz · 时间轴 {info['timeline_hz']:g} Hz")
+        def frequency(value):
+            return f'{value:g} Hz' if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else '未知'
+        layout.label(text=f"源采样 {frequency(info['source_hz'])} · 时间轴 {frequency(info['timeline_hz'])}")
+    if info.get('diagnostic_errors'):
+        layout.label(text='部分诊断信息不可用')
     layout.prop(context.scene, 'wfrl_diagnostics_sampling', text='采样当前视口播放帧率')
     value = info['viewport_fps']
     layout.label(text=f'当前视口：{value:.1f} FPS（近 2 秒）' if value is not None
@@ -118,16 +155,41 @@ def draw_panel(layout, context):
 
 
 def clear():
+    global _ERROR
     _DRAWS.clear()
+    _ERROR = None
+
+
+def _remove_draw_handler(bpy):
+    global _HANDLE
+    handle = getattr(bpy, '_wfrl_diagnostics_handle', None)
+    if handle is not None:
+        try:
+            bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
+        except (ReferenceError, ValueError):
+            pass
+        except Exception as exc:
+            _record_error(exc)
+            return False
+        del bpy._wfrl_diagnostics_handle
+    _HANDLE = None
+    return True
 
 
 def register():
+    try:
+        _register()
+    except Exception as exc:
+        unregister()
+        _record_error(exc)
+
+
+def _register():
     import bpy
     from bpy.app.handlers import persistent
     global _HANDLE
-    previous = getattr(bpy, '_wfrl_diagnostics_handle', None)
-    if previous is not None:
-        bpy.types.SpaceView3D.draw_handler_remove(previous, 'WINDOW')
+    if not _remove_draw_handler(bpy):
+        return
     old_load = getattr(bpy, '_wfrl_diagnostics_load_handler', None)
     if old_load in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.remove(old_load)
@@ -146,15 +208,10 @@ def _on_load(_unused):
 
 def unregister():
     import bpy
-    global _HANDLE
-    handle = getattr(bpy, '_wfrl_diagnostics_handle', None)
-    if handle is not None:
-        bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
-        del bpy._wfrl_diagnostics_handle
-    _HANDLE = None
+    clear()
+    _remove_draw_handler(bpy)
     load = getattr(bpy, '_wfrl_diagnostics_load_handler', _on_load)
     if load in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.remove(load)
     if hasattr(bpy, '_wfrl_diagnostics_load_handler'):
         del bpy._wfrl_diagnostics_load_handler
-    clear()
