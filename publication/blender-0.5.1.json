@@ -18,10 +18,11 @@
     "branch": "main",
     "synchronized_branch": "main",
     "tag": "v0.5.1",
-    "archive_name": "wind-farm-blender-source-0.5.1.zip",
-    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-blender-source-0.5.1.zip",
+    "archive_name": "wind-farm-blender-0.5.1.zip",
+    "download_url": "https://github.com/snode11/wind-farm-blender/archive/refs/tags/v0.5.1.zip",
     "identity_record_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json",
-    "archive_generator": "git archive of release tag"
+    "archive_generator": "GitHub automatic source archive of v0.5.1",
+    "commit": "7dc31d33b2ac8477d00567b962c88c09fd861910"
   },
   "validation": {
     "verification": "publication/blender-0.5.1/verification.json",
@@ -37,7 +38,7 @@
   "research": {
     "summary": "publication/blender-0.5.1/experiment-summary.md",
     "attachments": "publication/blender-0.5.1/experiments.json",
-    "scope": "Retained measurements preserve their original source identities. Latest physics comparisons do not include the full temporary output series."
+    "scope": "Published: experiment summary, four CSV tables, inflow archive and dependency sources. Full original experiment archive remains local. Measurements retain their original source identities."
   },
   "remote_asset_download_verification": false
 }

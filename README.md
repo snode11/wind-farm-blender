@@ -46,7 +46,7 @@ FAST.Farm 实时遥测提供按求解器采样时间对齐的曲线与 JSON 导�
 
 ## 实验资料
 
-0.5.1 随附[中文实验摘要](publication/blender-0.5.1/experiment-summary.md)、保留的原始测量与 CSV、四组 TurbSim 来流及匹配的后端依赖源码。摘要覆盖风向／尾流、动态失速参数、BeamDyn 扭转、OC3 单桩、偏航和高风速；完整时序是否保留、统计窗口、失败状态与待确认门槛分别说明。附件见 [0.5.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.1)。
+0.5.1 随附[中文实验摘要](publication/blender-0.5.1/experiment-summary.md)、偏航／高风速 CSV、四组 TurbSim 来流及匹配的后端依赖源码。摘要覆盖风向／尾流、动态失速参数、BeamDyn 扭转、OC3 单桩、偏航和高风速；完整时序是否保留、统计窗口、失败状态与待确认门槛分别说明。附件见 [0.5.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.1)。
 
 ## 工作区训练与后端
 

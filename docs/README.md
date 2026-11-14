@@ -8,7 +8,7 @@
 
 | 内容 | 入口 |
 | --- | --- |
-| 物理实验与保存数据 | [0.5.1 中文摘要、原始测量与来流下载](../publication/blender-0.5.1/experiment-summary.md) |
+| 物理实验与保存数据 | [0.5.1 中文摘要、CSV 与来流下载](../publication/blender-0.5.1/experiment-summary.md) |
 | 当前功能与限制 | [Blender 功能总览](blender/Blender前端功能总览与规划.md)、[发布状态与验证范围](blender/发布状态与验证范围.md) |
 | 自动检查与本地复用 | [Python 合同、Blender 后台与发布身份检查](development/自动检查.md) |
 | 脚本与策略评估 | [脚本索引](../scripts/README.md)、[Blender checkpoint 评估](demos/Blender策略评估.md) |

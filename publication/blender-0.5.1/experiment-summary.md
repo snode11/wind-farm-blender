@@ -7,12 +7,13 @@
 | 资料 | 内容 |
 | --- | --- |
 | [0.5.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.1) | Blender 扩展、主项目源码、配套依赖源码、实验资料与校验文件 |
-| [实验数据包](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-experiments-0.5.1.zip) | 保留的偏航／高风速轨迹、求解器遥测、MPI 与世界模型验证原始输出、脚本、日志、输入和报告；可直接用 Excel 查看派生 CSV |
+| [偏航逐样本 CSV](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/yaw-timeseries.csv) · [偏航汇总](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/yaw-summary.csv) | 1,280 行逐机组样本，包含时刻、功率、偏航与桨距；可直接用 Excel 阅读 |
+| [高风速逐样本 CSV](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/high-wind-timeseries.csv) · [高风速汇总](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/high-wind-summary.csv) | 300 行样本，包含转速、桨距、功率与风速；汇总保留超速样本数 |
 | [湍流来流包](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.zip) | 4 个 TurbSim 盒子（8/12 m/s × TI 8%/16%，seed=42）、输入、原始汇总与清单；另含高风速实验引用的 random-gust.bts |
 | [后端依赖源码](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz) | `wfcrl-env` 提交 `eec42a7e1fab8464088fcb375338d451d75ae3f2`，包含物理选项、BeamDyn、OC3 与一致化翼型参数的配套实现 |
 | [交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json) | 固定源码提交、附件名称、大小与 SHA-256 |
 
-实验包内 `tables/yaw-timeseries.csv` 和 `tables/high-wind-timeseries.csv` 为保存 JSON 的逐样本展开，不插值、不补值；`tables/yaw-summary.csv` 与 `tables/high-wind-summary.csv` 给出对应汇总。每行保留算例与记录 ID，可回到原始 JSON。单位依据同目录原始报告与 Driver 输出合同。
+四份 CSV 作为独立 Release 附件提供，来自本地保存 JSON 的逐样本展开与汇总，不插值、不补值。每行保留算例与记录 ID；单位依据原始报告与 Driver 输出合同。完整原始实验归档、原始 JSON、日志及对应旧依赖仅在本地保留，未作为 0.5.1 附件提供。源码使用 GitHub 的 v0.5.1 标签归档。
 
 ## 风向与尾流对照
 
@@ -63,7 +64,7 @@ FAST.Farm 三机对照为 8 m/s、Hs=2 m、Tp=8 s、120 s，统计 60–120 s、
 
 ## 偏航与高风速保存轨迹
 
-数据对象为 2026-11-13 的本机运行，使用 `wfcrl-env fdb6569` 的恢复依赖；其原始依赖归档随实验包保留，不能将这些测量当作 `eec42a7` 或 0.5.1 扩展的重复验收。
+数据对象为 2026-11-13 的本机运行，使用 `wfcrl-env fdb6569` 的恢复依赖；其原始依赖归档仅在本地保留，不能将这些测量当作 `eec42a7` 或 0.5.1 扩展的重复验收。
 
 | 8 m/s 算例 | 实际末帧偏航 | 各机平均功率 / MW | 全场 / MW | 统计窗口 / s |
 | --- | --- | --- | ---: | --- |
@@ -72,7 +73,7 @@ FAST.Farm 三机对照为 8 m/s、Hs=2 m、Tp=8 s、120 s，统计 60–120 s、
 | 三机零偏航 | 约 0° / 0° / 0° | 1.7070 / 0.5644 / 0.4773 | 2.7487 | 468–510 |
 | 三机仅 T2 目标 20° | 约 0° / 20° / 0° | 1.7070 / 0.4523 / 0.6361 | 2.7954 | 468–510 |
 
-三机该窗口内的全场均值差约 +1.70%；这不是训练策略收益或长期最优偏航证明。每案 160 个耦合步的完整保存轨迹包含在 `p1_yaw_loop.json`。
+三机该窗口内的全场均值差约 +1.70%；这不是训练策略收益或长期最优偏航证明。每案 160 个耦合步的完整保存轨迹位于本地 `p1_yaw_loop.json`；对应逐机组样本作为 CSV 提供。
 
 | 单机工况 | 转子转速 / rpm | 实测桨距 / ° | 100 个耦合步的判读 |
 | --- | --- | --- | --- |
@@ -80,12 +81,12 @@ FAST.Farm 三机对照为 8 m/s、Hs=2 m、Tp=8 s、120 s，统计 60–120 s、
 | 稳态 28 m/s | 12.098–12.103 | 约 25.87 | 均低于报警线；切出与停机行为未验证 |
 | random-gust.bts | 10.05–14.36 | 0–16.2 | 10 步超过报警线；峰值约 14.36 rpm，变桨参与调节 |
 
-原始 `p2_high_wind.json` 保留逐步功率、转速、桨距与轮毂风速。阵风超速是否可接受、报警门槛与控制参数如何设定仍待确认。两份 JSON 的 `record_status` 保留采集时的 `running` 字段，CSV 不据此改写为运行终态。
+本地原始 `p2_high_wind.json` 保留逐步功率、转速、桨距与轮毂风速。阵风超速是否可接受、报警门槛与控制参数如何设定仍待确认。两份 JSON 的 `record_status` 保留采集时的 `running` 字段，CSV 不据此改写为运行终态。
 
 ## 证据边界与复查
 
-- 实验数据包包含 `outputs/validation/` 下所选的完整保留目录：`local-validation-20261113`、`extended-telemetry-validation-9kpeoe7e`、`solver-telemetry-validation-kyjc9vv2`、`mpi-link-validation-b0ov772c`、`world-model-validation-79d6iyba` 和 `wfcrl-dependency-fdb6569`。报告中的失败、缺测、跳过与来源字段保持原样，2026-11-11 的控制器／MPI 结论只属于对应运行对象。
-- 世界模型目录中的大部分原始测量属于 2026-11-11；其中文能力报告覆盖至 2026-11-14。它不是 2026-11-14 各专项完整原始时序的替代品。最新五份专题文档原样置于包内 `docs/`，文档链接可结合主项目源码阅读。
-- 数据包的 inventory 记录来源相对路径、大小和 SHA-256。历史绝对路径仅标识实验来源；恢复、执行与依赖配置使用 [本地环境说明](../../docs/setup/setup_local.md)。原始测量不为可携带性而改写。
+- 完整原始实验归档未作为公开附件提供。本地 `outputs/validation/` 保留目录：`local-validation-20261113`、`extended-telemetry-validation-9kpeoe7e`、`solver-telemetry-validation-kyjc9vv2`、`mpi-link-validation-b0ov772c`、`world-model-validation-79d6iyba` 和 `wfcrl-dependency-fdb6569`。报告中的失败、缺测、跳过与来源字段保持原样，2026-11-11 的控制器／MPI 结论只属于对应运行对象。
+- 世界模型目录中的大部分原始测量属于 2026-11-11；其中文能力报告覆盖至 2026-11-14。它不是 2026-11-14 各专项完整原始时序的替代品。五份专题文档位于项目源码的 `docs/`，可通过本摘要中的链接阅读。
+- 公开交付清单记录 CSV、来流及依赖附件的名称、大小与 SHA-256；来流包另有逐文件 inventory。历史绝对路径仅标识实验来源；恢复、执行与依赖配置使用 [本地环境说明](../../docs/setup/setup_local.md)。原始测量不为可携带性而改写。
 - 0.5.1 交付检查为内容／版本对应与一次扩展构建。没有因发布而重跑实验、回归、Blender 安装或可见窗口验证。既有实验结果不转记为该 ZIP 的科学精度验收。
 - 服务器／网页部署、Windows/Linux 实跑、长期湍流与极端工况、现场精度及认证级疲劳寿命没有由本资料验收。

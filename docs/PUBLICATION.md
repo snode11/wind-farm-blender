@@ -29,11 +29,11 @@
 
 0.5.1 扩展包含 X100 面积材料采样、安装搜索报告导入和叶片关联／连续估计。有限候选安装搜索通过配套源码运行。用法见[观测研究](blender/X100观测研究.md)，对应的安装搜索、预算对照、独立误差评价、后台及画布证据保留在[outputs/x100-observation-research](../outputs/x100-observation-research/)。该目录同样由 Git 忽略，本地保留不代表已上传到资源 Release。报告、日志、源码摘要与最终图像属于验证依据，临时场景、合成输入及隔离配置不作为分发或复验依赖。
 
-公开完整源码归档为 [wind-farm-blender-source-0.5.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-blender-source-0.5.1.zip)，对应 [`v0.5.1` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.5.1)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；扩展从固定源码构建的摘要与源码归档身份见[交付身份](../publication/blender-0.5.1.json)。归档保留 v0.5.1 标签内的文档快照；公开附件与安装验证的当前状态以 main 分支的说明及交付身份为准。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
+公开完整源码归档为 [GitHub 自动源码 ZIP](https://github.com/snode11/wind-farm-blender/archive/refs/tags/v0.5.1.zip)，对应 [`v0.5.1` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.5.1)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；扩展从固定源码构建的摘要与源码归档身份见[交付身份](../publication/blender-0.5.1.json)。归档保留 v0.5.1 标签内的文档快照；公开附件与安装验证的当前状态以 main 分支的说明及交付身份为准。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
 
 ## 实验资料
 
-0.5.1 的[实验摘要](../publication/blender-0.5.1/experiment-summary.md)索引保存的遥测／偏航／高风速数据、最新物理专项数值表与复现入口。`wind-farm-experiments-0.5.1.zip` 保留所选原始目录和派生 CSV；`wind-farm-inflow-0.5.1.zip` 保留四个湍流盒及阵风输入。各包的 inventory 与 SHA-256 随 Release 提供，数据范围和缺失的完整临时时序见摘要。后端依赖使用同一 Release 的 `wfcrl-dependency-0.5.1.tar.gz`；配套源码提交和附件身份见交付清单。
+0.5.1 的[实验摘要](../publication/blender-0.5.1/experiment-summary.md)索引保存的遥测／偏航／高风速数据、最新物理专项数值表与复现入口。四份偏航／高风速 CSV 作为独立附件提供，完整原始实验归档在本地保留、未公开提供；`wind-farm-inflow-0.5.1.zip` 保留四个湍流盒及阵风输入。已提供归档的校验文件随 Release 提供，CSV 身份见交付清单，数据范围和缺失的完整临时时序见摘要。后端依赖使用同一 Release 的 `wfcrl-dependency-0.5.1.tar.gz`；配套源码提交和附件身份见交付清单。
 
 ## 恢复与使用
 
