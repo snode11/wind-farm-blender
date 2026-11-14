@@ -28,6 +28,7 @@ results/runs/*.log
 /outputs/
 /results/verify/
 /ci-results/
+/data/turbulence/
 /fort.[0-9]*
 
 # LaTeX 编译产物

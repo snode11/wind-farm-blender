@@ -43,6 +43,22 @@ PRESETS = {
 
 ORDER = ["calm", "rated", "strong", "gale", "veer", "turb"]
 
+
+def resolve_turbulence(name=None, *, wind_speed=None, ti=None, seed=None, library_dir=None):
+    """选择已有 BTS，返回可传给驱动或场景 turbulence 的绝对路径。
+
+    TI 使用百分数（8 表示 8%）或 IEC 类别 A/B/C；不在 reset 时生成风场。
+    """
+    from wfrl.inflow import resolve_bts
+
+    if name is not None:
+        if any(value is not None for value in (wind_speed, ti, seed)):
+            raise ValueError("湍流名称与 (wind_speed, ti, seed) 不能同时指定")
+        selection = name
+    else:
+        selection = (wind_speed, ti, seed)
+    return resolve_bts(selection, library_dir=library_dir)
+
 # `mdp.py:46` 的状态空间边界。抽样风速必须裁到这里,和 benchmark 的 reset 同口径。
 WS_BOUNDS = (3.0, 28.0)
 
