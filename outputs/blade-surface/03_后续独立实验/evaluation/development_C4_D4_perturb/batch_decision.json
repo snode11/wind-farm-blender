@@ -1,0 +1,289 @@
+{
+  "status": "COMPLETED",
+  "planned": 40,
+  "completed": 40,
+  "failed": 0,
+  "jobs": [
+    {
+      "id": "perturbations/p00/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.9982953750295565,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p00/A3_C4"
+    },
+    {
+      "id": "perturbations/p01/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.983667999971658,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p01/A3_C4"
+    },
+    {
+      "id": "perturbations/p02/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.9338129999814555,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p02/A3_C4"
+    },
+    {
+      "id": "perturbations/p03/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.954149666009471,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p03/A3_C4"
+    },
+    {
+      "id": "perturbations/p04/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.992518625105731,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p04/A3_C4"
+    },
+    {
+      "id": "perturbations/p05/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.9907850000308827,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p05/A3_C4"
+    },
+    {
+      "id": "perturbations/p06/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0264607910066843,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p06/A3_C4"
+    },
+    {
+      "id": "perturbations/p07/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0267725830199197,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p07/A3_C4"
+    },
+    {
+      "id": "perturbations/p08/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0430369169916958,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p08/A3_C4"
+    },
+    {
+      "id": "perturbations/p09/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.049327834043652,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p09/A3_C4"
+    },
+    {
+      "id": "perturbations/p10/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0435717090731487,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p10/A3_C4"
+    },
+    {
+      "id": "perturbations/p11/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.041552332928404,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p11/A3_C4"
+    },
+    {
+      "id": "perturbations/p12/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0151498339837417,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p12/A3_C4"
+    },
+    {
+      "id": "perturbations/p13/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.018742874963209,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p13/A3_C4"
+    },
+    {
+      "id": "perturbations/p14/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0531883330550045,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p14/A3_C4"
+    },
+    {
+      "id": "perturbations/p15/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0464196249376982,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p15/A3_C4"
+    },
+    {
+      "id": "perturbations/p16/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.0629215840017423,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p16/A3_C4"
+    },
+    {
+      "id": "perturbations/p17/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.038864167057909,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p17/A3_C4"
+    },
+    {
+      "id": "perturbations/p18/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.065619000000879,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p18/A3_C4"
+    },
+    {
+      "id": "perturbations/p19/A3_C4",
+      "exit_code": 0,
+      "wall_s": 3.075333792017773,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p19/A3_C4"
+    },
+    {
+      "id": "perturbations/p00/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.0490019579883665,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p00/A3_D4"
+    },
+    {
+      "id": "perturbations/p01/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.055851834011264,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p01/A3_D4"
+    },
+    {
+      "id": "perturbations/p02/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.0583222499117255,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p02/A3_D4"
+    },
+    {
+      "id": "perturbations/p03/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.0593703750055283,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p03/A3_D4"
+    },
+    {
+      "id": "perturbations/p04/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.0919145829975605,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p04/A3_D4"
+    },
+    {
+      "id": "perturbations/p05/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.1036925830412656,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p05/A3_D4"
+    },
+    {
+      "id": "perturbations/p06/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.000531749916263,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p06/A3_D4"
+    },
+    {
+      "id": "perturbations/p07/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.0073002920253202,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p07/A3_D4"
+    },
+    {
+      "id": "perturbations/p08/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.0411529580596834,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p08/A3_D4"
+    },
+    {
+      "id": "perturbations/p09/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.028509375057183,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p09/A3_D4"
+    },
+    {
+      "id": "perturbations/p10/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.070380082936026,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p10/A3_D4"
+    },
+    {
+      "id": "perturbations/p11/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.073377500055358,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p11/A3_D4"
+    },
+    {
+      "id": "perturbations/p12/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.190836958005093,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p12/A3_D4"
+    },
+    {
+      "id": "perturbations/p13/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.1811381250154227,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p13/A3_D4"
+    },
+    {
+      "id": "perturbations/p14/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.2811369160190225,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p14/A3_D4"
+    },
+    {
+      "id": "perturbations/p15/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.265653707901947,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p15/A3_D4"
+    },
+    {
+      "id": "perturbations/p16/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.2542219159659,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p16/A3_D4"
+    },
+    {
+      "id": "perturbations/p17/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.2655077079543844,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p17/A3_D4"
+    },
+    {
+      "id": "perturbations/p18/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.2091434589819983,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p18/A3_D4"
+    },
+    {
+      "id": "perturbations/p19/A3_D4",
+      "exit_code": 0,
+      "wall_s": 3.195832541096024,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_C4_D4_perturb/perturbations/p19/A3_D4"
+    }
+  ],
+  "wall_s": 61.495732708019204
+}

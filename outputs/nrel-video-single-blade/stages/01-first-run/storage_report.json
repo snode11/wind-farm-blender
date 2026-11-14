@@ -1,0 +1,31 @@
+{
+  "unit": "decimal bytes; allocated blocks separately reported",
+  "directories_logical_bytes": {
+    "rgb-scout-next-b1": 67498521,
+    "isolated-blender": 0,
+    "rgb-scout.log": 496,
+    "formal": 12242561,
+    "trial": 5805550,
+    "truth-export-verified.log": 321,
+    "internal-capture-formal": 714229207,
+    "rgb-scout": 66570686,
+    "truth-export-run": 300,
+    "implementation_manifest.json": 1860,
+    "formal-capture.log": 4314,
+    "rgb-scout-retry.log": 1604,
+    "trial-capture.log": 1181,
+    "trial-capture-next-b1.log": 2517,
+    "rgb-scout-next-b1.log": 1633,
+    "internal-capture": 291169213,
+    "truth-export.log": 321
+  },
+  "total_logical_regular_file_bytes": 1157530285,
+  "allocated_kib_du": 1132940,
+  "formal_selected_label_png_bytes": 78903,
+  "formal_selected_rgb_jpg_bytes": 250997,
+  "formal_three_model_ply_bytes": 51522,
+  "full_float_video_cache_bytes": 0,
+  "feature_cache_bytes": 0,
+  "temporary_encoding_bytes": 0,
+  "new_installed_environment_in_experiment": false
+}

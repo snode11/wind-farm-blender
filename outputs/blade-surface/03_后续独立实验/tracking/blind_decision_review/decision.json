@@ -1,0 +1,13 @@
+{
+  "synthetic_cases_v1": 12,
+  "synthetic_cases_v2": 30,
+  "v2_all_pass": true,
+  "v2_audit_events": 3639,
+  "v2_prohibited_reads": 0,
+  "actual_score_reads": false,
+  "cli_valid_fixture_exit": 0,
+  "cli_missing_required_common_freeze_exit": 2,
+  "subject_sha256": "c2201a0d4eec1d7a2ca819e712aa29322e34d26fb3e94528a6cb2f64174b092b",
+  "formal_protocol_status_as_reviewed": "STAGED_NOT_FORMALLY_FROZEN",
+  "code_changes_before_formal_capture_or_scoring": "root assignment statement; not inferred from mtime"
+}

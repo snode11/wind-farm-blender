@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-03T02:17:06.436064+00:00",
+  "exit_code": 0,
+  "stdout": "{\"probes\": [{\"path\": \"/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/evaluation-only/isolation_sentinel.txt\", \"denied\": true}, {\"path\": \"/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py\", \"denied\": true}, {\"path\": \"/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/scores.json\", \"denied\": true}], \"all_denied\": true}\n",
+  "stderr": "",
+  "result": {
+    "probes": [
+      {
+        "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/evaluation-only/isolation_sentinel.txt",
+        "denied": true
+      },
+      {
+        "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py",
+        "denied": true
+      },
+      {
+        "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/scores.json",
+        "denied": true
+      }
+    ],
+    "all_denied": true
+  }
+}

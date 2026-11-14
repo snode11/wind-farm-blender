@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "inventory": {
+    "status": "PASS",
+    "package_path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender",
+    "verified_files": 188,
+    "mismatches": [],
+    "unexpected_files": [],
+    "ignored": [
+      "__pycache__",
+      "*.pyc"
+    ]
+  },
+  "command_returncode": 0,
+  "log": "outputs/local-install-0.3.36-qo69g52o/logs/daily-install.log"
+}

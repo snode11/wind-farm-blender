@@ -1,0 +1,6006 @@
+{
+  "method": "Actual signed MP4 RGB; yellow dots are frozen v2 z=9.225 ring under declared rigid motion.",
+  "limits": "Model-conditioned frustum test only; no occlusion, identity or usable-contour certification. Static v2 shape outside t_ref is not exact flexible geometry. Other blades may be visible. No annotations or fitting frames changed.",
+  "frames": [
+    {
+      "camera_id": "C1",
+      "frame_id": 0,
+      "sim_time_s": 120.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 1,
+      "sim_time_s": 120.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 2,
+      "sim_time_s": 120.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 3,
+      "sim_time_s": 120.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 4,
+      "sim_time_s": 120.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 5,
+      "sim_time_s": 120.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 6,
+      "sim_time_s": 120.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 7,
+      "sim_time_s": 120.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 8,
+      "sim_time_s": 120.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 9,
+      "sim_time_s": 120.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 10,
+      "sim_time_s": 120.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 11,
+      "sim_time_s": 120.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 12,
+      "sim_time_s": 120.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 13,
+      "sim_time_s": 120.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 14,
+      "sim_time_s": 120.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 15,
+      "sim_time_s": 120.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 16,
+      "sim_time_s": 120.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 17,
+      "sim_time_s": 120.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 18,
+      "sim_time_s": 120.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 19,
+      "sim_time_s": 120.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 20,
+      "sim_time_s": 121.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 21,
+      "sim_time_s": 121.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 22,
+      "sim_time_s": 121.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 23,
+      "sim_time_s": 121.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 24,
+      "sim_time_s": 121.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 25,
+      "sim_time_s": 121.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 26,
+      "sim_time_s": 121.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 27,
+      "sim_time_s": 121.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 28,
+      "sim_time_s": 121.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 29,
+      "sim_time_s": 121.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 30,
+      "sim_time_s": 121.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 31,
+      "sim_time_s": 121.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 32,
+      "sim_time_s": 121.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 33,
+      "sim_time_s": 121.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 34,
+      "sim_time_s": 121.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 35,
+      "sim_time_s": 121.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 4,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 36,
+      "sim_time_s": 121.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 5,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 37,
+      "sim_time_s": 121.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 7,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 38,
+      "sim_time_s": 121.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 7,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 39,
+      "sim_time_s": 121.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 9,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 40,
+      "sim_time_s": 122.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 11,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 41,
+      "sim_time_s": 122.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "role": "fit",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "role": "fit",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "role": "nonblind_temporal",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "role": "nonblind_temporal",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 46,
+      "sim_time_s": 122.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 47,
+      "sim_time_s": 122.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 5,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 48,
+      "sim_time_s": 122.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 10,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 7,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 49,
+      "sim_time_s": 122.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 8,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 6,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 50,
+      "sim_time_s": 122.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 8,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 51,
+      "sim_time_s": 122.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 6,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 52,
+      "sim_time_s": 122.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 6,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 53,
+      "sim_time_s": 122.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 4,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 54,
+      "sim_time_s": 122.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 4,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 55,
+      "sim_time_s": 122.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 2,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 56,
+      "sim_time_s": 122.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 57,
+      "sim_time_s": 122.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 58,
+      "sim_time_s": 122.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 59,
+      "sim_time_s": 122.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 60,
+      "sim_time_s": 123.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 61,
+      "sim_time_s": 123.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 62,
+      "sim_time_s": 123.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 63,
+      "sim_time_s": 123.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 64,
+      "sim_time_s": 123.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 65,
+      "sim_time_s": 123.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 66,
+      "sim_time_s": 123.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 67,
+      "sim_time_s": 123.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 68,
+      "sim_time_s": 123.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 69,
+      "sim_time_s": 123.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 70,
+      "sim_time_s": 123.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 71,
+      "sim_time_s": 123.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 72,
+      "sim_time_s": 123.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 73,
+      "sim_time_s": 123.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 74,
+      "sim_time_s": 123.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 75,
+      "sim_time_s": 123.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 76,
+      "sim_time_s": 123.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 77,
+      "sim_time_s": 123.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 78,
+      "sim_time_s": 123.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 79,
+      "sim_time_s": 123.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 80,
+      "sim_time_s": 124.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 81,
+      "sim_time_s": 124.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 82,
+      "sim_time_s": 124.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 83,
+      "sim_time_s": 124.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 84,
+      "sim_time_s": 124.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 85,
+      "sim_time_s": 124.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 86,
+      "sim_time_s": 124.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 87,
+      "sim_time_s": 124.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 88,
+      "sim_time_s": 124.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 89,
+      "sim_time_s": 124.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 90,
+      "sim_time_s": 124.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 91,
+      "sim_time_s": 124.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 92,
+      "sim_time_s": 124.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 93,
+      "sim_time_s": 124.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 94,
+      "sim_time_s": 124.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 95,
+      "sim_time_s": 124.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 96,
+      "sim_time_s": 124.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 97,
+      "sim_time_s": 124.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 98,
+      "sim_time_s": 124.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 99,
+      "sim_time_s": 124.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 0,
+      "sim_time_s": 120.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 1,
+      "sim_time_s": 120.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 2,
+      "sim_time_s": 120.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 3,
+      "sim_time_s": 120.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 4,
+      "sim_time_s": 120.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 5,
+      "sim_time_s": 120.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 6,
+      "sim_time_s": 120.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 7,
+      "sim_time_s": 120.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 8,
+      "sim_time_s": 120.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 9,
+      "sim_time_s": 120.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 10,
+      "sim_time_s": 120.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 11,
+      "sim_time_s": 120.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 12,
+      "sim_time_s": 120.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 13,
+      "sim_time_s": 120.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 14,
+      "sim_time_s": 120.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 15,
+      "sim_time_s": 120.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 16,
+      "sim_time_s": 120.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 17,
+      "sim_time_s": 120.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 18,
+      "sim_time_s": 120.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 19,
+      "sim_time_s": 120.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 20,
+      "sim_time_s": 121.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 21,
+      "sim_time_s": 121.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 22,
+      "sim_time_s": 121.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 23,
+      "sim_time_s": 121.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 24,
+      "sim_time_s": 121.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 25,
+      "sim_time_s": 121.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 26,
+      "sim_time_s": 121.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 27,
+      "sim_time_s": 121.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 28,
+      "sim_time_s": 121.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 29,
+      "sim_time_s": 121.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 30,
+      "sim_time_s": 121.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 31,
+      "sim_time_s": 121.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 32,
+      "sim_time_s": 121.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 33,
+      "sim_time_s": 121.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 34,
+      "sim_time_s": 121.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 35,
+      "sim_time_s": 121.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 36,
+      "sim_time_s": 121.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 37,
+      "sim_time_s": 121.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 2,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 38,
+      "sim_time_s": 121.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 2,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 39,
+      "sim_time_s": 121.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 40,
+      "sim_time_s": 122.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 2,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 41,
+      "sim_time_s": 122.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 7,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 9,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "role": "fit",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 4,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "role": "fit",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "role": "nonblind_temporal",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "role": "nonblind_temporal",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 46,
+      "sim_time_s": 122.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 2,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 6,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 5,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 47,
+      "sim_time_s": 122.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 2,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 48,
+      "sim_time_s": 122.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 1,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 49,
+      "sim_time_s": 122.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 50,
+      "sim_time_s": 122.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 51,
+      "sim_time_s": 122.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 52,
+      "sim_time_s": 122.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 53,
+      "sim_time_s": 122.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 54,
+      "sim_time_s": 122.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 55,
+      "sim_time_s": 122.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 56,
+      "sim_time_s": 122.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 57,
+      "sim_time_s": 122.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 58,
+      "sim_time_s": 122.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 59,
+      "sim_time_s": 122.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 60,
+      "sim_time_s": 123.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 61,
+      "sim_time_s": 123.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 62,
+      "sim_time_s": 123.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 63,
+      "sim_time_s": 123.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 64,
+      "sim_time_s": 123.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 65,
+      "sim_time_s": 123.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 66,
+      "sim_time_s": 123.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 67,
+      "sim_time_s": 123.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 68,
+      "sim_time_s": 123.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 69,
+      "sim_time_s": 123.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 70,
+      "sim_time_s": 123.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 71,
+      "sim_time_s": 123.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 72,
+      "sim_time_s": 123.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 73,
+      "sim_time_s": 123.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 74,
+      "sim_time_s": 123.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 75,
+      "sim_time_s": 123.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 76,
+      "sim_time_s": 123.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 77,
+      "sim_time_s": 123.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 78,
+      "sim_time_s": 123.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 79,
+      "sim_time_s": 123.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 80,
+      "sim_time_s": 124.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 81,
+      "sim_time_s": 124.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 82,
+      "sim_time_s": 124.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 83,
+      "sim_time_s": 124.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 84,
+      "sim_time_s": 124.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 85,
+      "sim_time_s": 124.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 86,
+      "sim_time_s": 124.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 87,
+      "sim_time_s": 124.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 88,
+      "sim_time_s": 124.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 89,
+      "sim_time_s": 124.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 90,
+      "sim_time_s": 124.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 91,
+      "sim_time_s": 124.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 92,
+      "sim_time_s": 124.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 93,
+      "sim_time_s": 124.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 94,
+      "sim_time_s": 124.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 95,
+      "sim_time_s": 124.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 96,
+      "sim_time_s": 124.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 97,
+      "sim_time_s": 124.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 98,
+      "sim_time_s": 124.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 99,
+      "sim_time_s": 124.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 0,
+      "sim_time_s": 120.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 1,
+      "sim_time_s": 120.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 2,
+      "sim_time_s": 120.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 3,
+      "sim_time_s": 120.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 4,
+      "sim_time_s": 120.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 5,
+      "sim_time_s": 120.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 6,
+      "sim_time_s": 120.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 7,
+      "sim_time_s": 120.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 8,
+      "sim_time_s": 120.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 9,
+      "sim_time_s": 120.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 10,
+      "sim_time_s": 120.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 11,
+      "sim_time_s": 120.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 12,
+      "sim_time_s": 120.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 13,
+      "sim_time_s": 120.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 14,
+      "sim_time_s": 120.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 15,
+      "sim_time_s": 120.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 16,
+      "sim_time_s": 120.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 17,
+      "sim_time_s": 120.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 18,
+      "sim_time_s": 120.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 19,
+      "sim_time_s": 120.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 20,
+      "sim_time_s": 121.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 21,
+      "sim_time_s": 121.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 22,
+      "sim_time_s": 121.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 23,
+      "sim_time_s": 121.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 24,
+      "sim_time_s": 121.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 25,
+      "sim_time_s": 121.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 26,
+      "sim_time_s": 121.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 27,
+      "sim_time_s": 121.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 28,
+      "sim_time_s": 121.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 29,
+      "sim_time_s": 121.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 30,
+      "sim_time_s": 121.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 31,
+      "sim_time_s": 121.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 32,
+      "sim_time_s": 121.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 33,
+      "sim_time_s": 121.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 34,
+      "sim_time_s": 121.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 35,
+      "sim_time_s": 121.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 36,
+      "sim_time_s": 121.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 37,
+      "sim_time_s": 121.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 38,
+      "sim_time_s": 121.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 39,
+      "sim_time_s": 121.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 40,
+      "sim_time_s": 122.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 41,
+      "sim_time_s": 122.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "role": "fit",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "role": "fit",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 7,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 12,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "role": "nonblind_temporal",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 6,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 11,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "role": "nonblind_temporal",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 3,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 46,
+      "sim_time_s": 122.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 47,
+      "sim_time_s": 122.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 48,
+      "sim_time_s": 122.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 49,
+      "sim_time_s": 122.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 50,
+      "sim_time_s": 122.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 51,
+      "sim_time_s": 122.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 52,
+      "sim_time_s": 122.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 53,
+      "sim_time_s": 122.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 54,
+      "sim_time_s": 122.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 55,
+      "sim_time_s": 122.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 56,
+      "sim_time_s": 122.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 57,
+      "sim_time_s": 122.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 58,
+      "sim_time_s": 122.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 59,
+      "sim_time_s": 122.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 60,
+      "sim_time_s": 123.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 61,
+      "sim_time_s": 123.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 62,
+      "sim_time_s": 123.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 63,
+      "sim_time_s": 123.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 64,
+      "sim_time_s": 123.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 65,
+      "sim_time_s": 123.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 66,
+      "sim_time_s": 123.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 67,
+      "sim_time_s": 123.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 68,
+      "sim_time_s": 123.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 69,
+      "sim_time_s": 123.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 70,
+      "sim_time_s": 123.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 71,
+      "sim_time_s": 123.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 72,
+      "sim_time_s": 123.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 73,
+      "sim_time_s": 123.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 74,
+      "sim_time_s": 123.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 75,
+      "sim_time_s": 123.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 76,
+      "sim_time_s": 123.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 77,
+      "sim_time_s": 123.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 78,
+      "sim_time_s": 123.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 79,
+      "sim_time_s": 123.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 80,
+      "sim_time_s": 124.025,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 81,
+      "sim_time_s": 124.075,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 82,
+      "sim_time_s": 124.125,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 83,
+      "sim_time_s": 124.175,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 84,
+      "sim_time_s": 124.225,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 85,
+      "sim_time_s": 124.275,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 86,
+      "sim_time_s": 124.325,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 87,
+      "sim_time_s": 124.375,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 88,
+      "sim_time_s": 124.425,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 89,
+      "sim_time_s": 124.475,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 90,
+      "sim_time_s": 124.525,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 91,
+      "sim_time_s": 124.575,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 92,
+      "sim_time_s": 124.625,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 93,
+      "sim_time_s": 124.675,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 94,
+      "sim_time_s": 124.725,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 95,
+      "sim_time_s": 124.775,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 96,
+      "sim_time_s": 124.825,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 97,
+      "sim_time_s": 124.875,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 98,
+      "sim_time_s": 124.925,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 99,
+      "sim_time_s": 124.975,
+      "role": "new_diagnostic",
+      "sections": {
+        "9.225": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "30.75": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        },
+        "52.275": {
+          "in_frame_vertices": 0,
+          "total_vertices": 12
+        }
+      }
+    }
+  ]
+}

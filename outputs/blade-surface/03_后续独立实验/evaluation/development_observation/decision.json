@@ -1,0 +1,24 @@
+{
+  "status": "COMPLETED",
+  "annotation_freeze": {
+    "status": "CODEX_RGB_REVIEWED",
+    "reviewer": "root Codex",
+    "user_human_annotation": false,
+    "learned_backend_track": false,
+    "scope": "all96 junction crops viewed; no evident centroid substitution or interpoint jump",
+    "candidate_sha256": "fcca3282313d877389f59aedd93a8fceb694f2ace6c07c5194092f50b06d3fea",
+    "review_sheet_sha256": "b0aeb6c585bfce5d12838bdc829099efc5eadeabdeced1e0cad68d0b933c84eb",
+    "observations": 96
+  },
+  "source_truth_permission": "independent development evaluator only; no uv/xyz returned to solver",
+  "count": 96,
+  "retained_visible": 96,
+  "all12x8_visible": true,
+  "raw_error_median_px": 0.3018653861125783,
+  "raw_error_p95_px": 0.9311912028825686,
+  "subsequent7_error_median_px": 0.31388209218353946,
+  "subsequent7_error_p95_px": 0.9769120936751403,
+  "observation_gate_p95_max_px": 1.0,
+  "gate_passed": true,
+  "scope": "Identity/localization at known synthetic four-color material vertices; not camera/geometry accuracy"
+}

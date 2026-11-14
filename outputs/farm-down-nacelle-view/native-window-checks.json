@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "archive_sha256": "054bc6a4bfd28270dfb605402aebb9e3a2b2bb8be9615785585a5571c2e59750",
+  "fresh_process_after_install": true,
+  "scene_file": "PROJECT_ROOT/outputs/farm-down-nacelle-view/Farm_Down.blend",
+  "observed_frame": 52,
+  "observed_simulation_time_s": 117.85,
+  "paused": true,
+  "down_clicked": [
+    "T2",
+    "T3",
+    "T1"
+  ],
+  "camera_reset_clicked": [
+    "T2",
+    "T3",
+    "T1"
+  ],
+  "complete_camera_gate_each": true,
+  "screen_gate_bounds_px": [
+    18,
+    413,
+    2260,
+    1676
+  ],
+  "native_window_size_px": [
+    3456,
+    2168
+  ],
+  "observations": [
+    {
+      "turbine": "T1",
+      "pan": 140.4,
+      "tilt": -80.3,
+      "roll": 178.9,
+      "mount_label": "T1 Down / 机舱侧下方外伸安装",
+      "screenshot": "PROJECT_ROOT/outputs/farm-down-nacelle-view/native-T1.png"
+    },
+    {
+      "turbine": "T2",
+      "pan": 139.8,
+      "tilt": -80.3,
+      "roll": 179.5,
+      "mount_label": "T2 Down / 机舱侧下方外伸安装",
+      "screenshot": "PROJECT_ROOT/outputs/farm-down-nacelle-view/native-T2.png"
+    },
+    {
+      "turbine": "T3",
+      "pan": 139.7,
+      "tilt": -80.4,
+      "roll": 179.6,
+      "mount_label": "T3 Down / 机舱侧下方外伸安装",
+      "screenshot": "PROJECT_ROOT/outputs/farm-down-nacelle-view/native-T3.png"
+    }
+  ],
+  "continuous_playback_checked": false,
+  "scope": "Native clicks and reset at a shared paused frame; complete camera gates, corresponding turbine camera labels and retained replay time. No all-azimuth visibility or full-clip performance claim."
+}

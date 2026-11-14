@@ -1,0 +1,11 @@
+00:10.600  blend            | Read blend: "PROJECT_ROOT/outputs/down-reference-view/validation/native-tests/t1-down/t1-down.blend"
+00:11.823  blend            | Read blend: "PROJECT_ROOT/outputs/down-reference-view/validation/native-tests/t1-down/t1-down-revision-1.blend"
+00:13.083  blend            | Read blend: "PROJECT_ROOT/outputs/down-reference-view/validation/native-tests/t1-down/t1-down-revision-2.blend"
+Info: Saved as "t1-down.blend"
+Info: Saved as "t1-down-revision-1.blend"
+Info: Saved as "t1-down-revision-2.blend"
+T1_DOWN_MOUNT_PASS {"status": "PASS", "module": "bl_ext.wfrl_frontend.wfrl_blender", "addon_file": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "mount": {"location": [-3.799999952316284, 2.931682674400804e-16, 0.06255921721458435], "rotation": [0.0, 0.0, -1.5707964897155762], "lens": 12.60373592376709, "sensor_width": 36.0, "sensor_height": 24.0, "shift_x": 0.10000000149011612, "shift_y": -0.07000000029802322, "yaw": 180.0, "pitch": -90, "roll": 180.0, "fov": 110.0}, "exterior_mount": {"anchor": [-3.799999952316284, 2.931682674400804e-16, 0.46255922317504883], "offset": [0.0, 0.0, -0.4000000059604645], "bracket_length_m": 0.40000001415610287, "surface_anchor_error_m": 0.0}, "parent_motion_error_m": 7.62939453125e-06, "rotor_spin_independent": true, "optical_axis_matches_parent_negative_z": true, "repeated_ensure_preserves_ptz": true, "reset_restores_mount": true, "selection_preserves_replay": true, "save_reopen_preserves_ptz": true, "saved_scene_mount_migrations": [1, 2], "independent_nacelle_unchanged": true, "other_down_presets_unchanged": true, "visible_window": "NOT_RUN"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

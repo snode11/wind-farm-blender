@@ -99,3 +99,46 @@ def test_simulation_recording_stops_with_reason_when_timeline_moves_backward(tmp
     assert recorder.state == 'FAILED' and recorder.rows == 2
     assert '仿真时间在记录期间回退' in recorder.error
     assert (tmp_path / 'record/INCOMPLETE').exists()
+
+
+@pytest.mark.parametrize('outcome', ['complete', 'failure'])
+def test_scene_shows_finalizing_until_the_writer_exits(tmp_path, outcome):
+    scene = Scene()
+    sink = recording.Recorder(tmp_path / 'record')
+    sink.append(schema.RadarFrame('X100', 'local', 0, 'TEST', 'NEAR', np.zeros(1, dtype=schema.POINT_DTYPE)), 0.)
+    entered, release = threading.Event(), threading.Event()
+    manifest = sink._manifest
+    def held_manifest(state=None):
+        if state == 'COMPLETE':
+            entered.set()
+            assert release.wait(15)
+            if outcome == 'failure':
+                raise OSError('injected manifest failure')
+        return manifest(state)
+    sink._manifest = held_manifest
+    fanout = acquisition.Fanout(sink)
+    s = runtime.Session.__new__(runtime.Session)
+    s.scene, s.mode, s.fanout, s.recording_stopping = scene, 'REPLAY', fanout, False
+    s.recording_health()
+    assert scene['wfrl_x100_record_state'] == 'RECORDING' == s.recording_state()
+    try:
+        assert s.stop_recording() is False
+        assert scene['wfrl_x100_record_state'] == 'FINALIZING'
+        assert entered.wait(5)
+        s.recording_health()
+        assert scene['wfrl_x100_record_state'] == 'FINALIZING' == s.recording_state()
+    finally:
+        release.set()
+        fanout.worker.join(5)
+    assert not fanout.worker.is_alive()
+    if outcome == 'complete':
+        assert s.stop_recording() is True
+        assert scene['wfrl_x100_record_state'] == 'COMPLETE'
+        assert recording.Replay(sink.path).frame(0).sequence == 0
+    else:
+        with pytest.raises(RuntimeError, match='injected'):
+            s.stop_recording()
+        assert scene['wfrl_x100_record_state'] == 'FAILED'
+        assert 'injected' in scene['wfrl_x100_record_error']
+        assert (sink.path / 'INCOMPLETE').exists()
+    assert s.fanout is None and not s.recording_stopping

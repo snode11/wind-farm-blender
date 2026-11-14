@@ -1,0 +1,29 @@
+{
+  "status": "FROZEN_BEFORE_EXTRACTION",
+  "atlas_shape_hw": [
+    256,
+    128
+  ],
+  "frame_ids": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49
+  ],
+  "blade_ids": [
+    0,
+    1,
+    2
+  ],
+  "geometry_unchanged": true,
+  "rgb_resize": false,
+  "mask_rule": "explicit RGB-derived nonzero mask intersect full-frame polygon",
+  "conflict_distance_rgb": 60.0,
+  "visibility_tolerance_m": 1e-05,
+  "scope": "captured RGB appearance; not geometry accuracy",
+  "code_adapter": "only local explicit mask intersection added; no product edits"
+}

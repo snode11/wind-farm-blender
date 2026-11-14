@@ -1,0 +1,156 @@
+{
+  "scope": "Independent visible Blender process; scripted product operators",
+  "blender": "5.2.1 LTS",
+  "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+  "rows": [
+    {
+      "label": "comparison_ready",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "comparison_exited",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_1",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_2",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_3",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_4",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_5",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_6",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_7",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_8",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_9",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_10",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_11",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_12",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_13",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_14",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_15",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_16",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_17",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_18",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_19",
+      "model": "rootkink",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "switch_20",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "shared_binding_failure_recovered",
+      "model": "nrel5mw",
+      "meshes": 288,
+      "owned_orphans": []
+    },
+    {
+      "label": "saved_reopened",
+      "model": "nrel5mw",
+      "meshes": 273,
+      "owned_orphans": []
+    }
+  ],
+  "sha256": {
+    "farm_flex.py": "0c118a73fb5f47b90392c8a317e4a190deaf6c35886140527c96604474f7e137",
+    "split_turbine_context.py": "c1abd4f0297065ffc54f5a9079d9f6be6629bc450d5e0c8a6dc97f9c0a325602"
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,24 @@
+{
+  "new_performance_contract_tests": {
+    "run": 8,
+    "passed": 8,
+    "failures": 0,
+    "errors": 0,
+    "source": "source-final"
+  },
+  "existing_texture_correctness": {
+    "run": 11,
+    "passed": 11,
+    "failures": 0,
+    "errors": 0,
+    "evidence": "texture-correctness.json"
+  },
+  "existing_input_numerical": {
+    "run": 16,
+    "passed": 16,
+    "failures": 0,
+    "errors": 0
+  },
+  "scope": "existing suites passed against benchmark optimized source; final new-contract 8/8 and final full best all arrays/PNG/identity exact",
+  "first_failed_test": "test fixture used sample_view atlas arg index 7 instead of blade index 6; corrected test assertion, all pass"
+}

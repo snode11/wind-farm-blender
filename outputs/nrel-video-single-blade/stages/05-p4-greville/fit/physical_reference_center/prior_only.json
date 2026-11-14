@@ -1,0 +1,116 @@
+{
+  "t_ref_sim_time_s": 122.175,
+  "frame_id": 43,
+  "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+  "fit_frame_ids": [
+    42,
+    43
+  ],
+  "heldout_frame_ids": [
+    44,
+    45
+  ],
+  "target": "T1/B1",
+  "coordinate_frame": "blade_root_local",
+  "units": "m",
+  "surface_scope": "entire_evaluated_blade_surface",
+  "reference_shape": "static_near_t_ref",
+  "deformation_assistance": "none",
+  "template_kind": "independent_coarse_rounded_section_prior",
+  "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+  "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+  "excluded_sources": [
+    "scene_reference_mesh",
+    "SourceLoft",
+    "exact_airfoil_coordinates",
+    "replay_deformation"
+  ],
+  "axes": {
+    "x": "downstream/thickness",
+    "y": "chordwise",
+    "z": "radial/span"
+  },
+  "span_m": 61.5,
+  "control_z_m": [
+    0.0,
+    5.125,
+    15.375,
+    30.75,
+    46.125,
+    56.375,
+    61.5
+  ],
+  "center_offsets_m": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "control_chord_log_scale": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "fixed_priors": [
+    "section_thickness",
+    "section_twist",
+    "hidden_surface",
+    "61.5_m_span"
+  ],
+  "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+  "span_samples": 25,
+  "ring_samples": 12,
+  "interpolation": "bspline",
+  "interpolation_degree": 3,
+  "basis_knots_m": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    15.375,
+    30.75,
+    46.125,
+    61.5,
+    61.5,
+    61.5,
+    61.5
+  ],
+  "control_parameter_role": "B-spline control-polygon coefficients; control_z reports Greville abscissae",
+  "interpolation_scope": "optimized centreline offsets and chord log-ratios; fixed template dimensions unchanged",
+  "field_continuity": "C2 at simple interior knots",
+  "initial_template_policy": "identical public coarse initial template; smooth only optimized offsets and chord log-ratios",
+  "regularization_policy": "unchanged v1 control-polygon relative-change and second-difference penalties",
+  "optimization_coordinates": {
+    "center_raw": "Cfree / 5; no center tanh",
+    "chord_raw": "ell=.35*tanh(chord_raw)"
+  },
+  "model_name": "prior_only"
+}

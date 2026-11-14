@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--background",
+    "--python-exit-code",
+    "1",
+    "--python-expr",
+    "import bpy; bpy.context.preferences.filepaths.temporary_directory = 'SYSTEM_TMP/wfrl-daily-probe-7uvg7nk0'",
+    "--python",
+    "SYSTEM_TMP/wfrl-daily-probe-7uvg7nk0/probe.py"
+  ],
+  "returncode": 0,
+  "scope": "Fresh default-profile Blender process"
+}

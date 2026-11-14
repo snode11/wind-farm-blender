@@ -1,0 +1,8 @@
+{
+  "status": "FROZEN_BEFORE_ANY_TEST_SOLVE_OR_GEOMETRY_EVALUATION",
+  "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/experiment_protocol.json",
+  "sha256": "b295e6437e9abfd89ffcc938eb1931ebedd6c18857f1292c45283358f7e84926",
+  "freeze_utc": "2026-10-06T04:35:25.556087+00:00",
+  "formal_capture_present_before_freeze": false,
+  "test_solve_or_geometry_evaluation_present_before_freeze": false
+}

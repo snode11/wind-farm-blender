@@ -1,0 +1,37 @@
+{
+  "status": "COMPLETED",
+  "planned": 4,
+  "completed": 4,
+  "failed": 0,
+  "jobs": [
+    {
+      "id": "dense/A1_new",
+      "exit_code": 0,
+      "wall_s": 6.4944573329994455,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/long32_geometry/dense/A1_new"
+    },
+    {
+      "id": "dense/A3_D12",
+      "exit_code": 0,
+      "wall_s": 6.472161540994421,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/long32_geometry/dense/A3_D12"
+    },
+    {
+      "id": "sparse/A1_new",
+      "exit_code": 0,
+      "wall_s": 6.366942540975288,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/long32_geometry/sparse/A1_new"
+    },
+    {
+      "id": "sparse/A3_D12",
+      "exit_code": 0,
+      "wall_s": 6.3688962910091504,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/long32_geometry/sparse/A3_D12"
+    }
+  ],
+  "wall_s": 12.865744333015755
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "source_scene": "PROJECT_ROOT/outputs/rootkink-model-validation/window-verified/rootkink-preview.blend",
+  "camera_count": 16,
+  "saved_camera_parameters_unchanged": true,
+  "model": "rootkink"
+}

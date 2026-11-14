@@ -1,0 +1,93 @@
+{
+  "schema": "wfrl.evaluation-surface.v1",
+  "target": "T1/B1",
+  "t_ref_sim_time_s": 122.175,
+  "coordinate_frame": "blade_root_local",
+  "units": "m",
+  "span_axis": "z",
+  "span_bounds_m": [
+    0.0,
+    61.5
+  ],
+  "coordinates": "x axial/thickness, y chordwise, z radial/span; origin hub-local z=1.5m",
+  "T_world_from_blade_root": [
+    [
+      0.9674860239028931,
+      0.23306715488433838,
+      -0.09823743253946304,
+      -5.070126533508301
+    ],
+    [
+      0.06927108019590378,
+      -0.6177264451980591,
+      -0.7833362817764282,
+      -1.2479958534240723
+    ],
+    [
+      -0.24325378239154816,
+      0.7510616779327393,
+      -0.6137865781784058,
+      89.08633422851562
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "mesh_source": "actual evaluated mesh of video scene",
+  "vertices": 4417,
+  "triangles": 8830,
+  "surface_scope": "entire_evaluated_blade_surface",
+  "includes": "full SourceLoft surface excluding loose diagnostic vertex",
+  "source_package": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+  "source_manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "module_sources": {
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py": "bde07ea92d0b1ffb75b78c021d9be240f4cce09087aeb0c1f76d8fff2d2e601a",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/custom_camera_capture.py": "bd4aa555329cc528a3a28cc53ccd48d492cace52c7343830cbf07efb073d1bfa",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/custom_cameras.py": "60a57935c205ea81c3f85c585446b67e6c80c1a1dc10c536f5e708bbfca1bbaa",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/camera_projection.py": "8b74e83a51ce30f204b67435d7ba8a0d7ae1273ad1f1fff7899a8bcc3f93622a",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py": "ebf11bf71b2a8306b812e1b5ac7408c97c31f7cdb84ff7c6b0de0eff48ce5519"
+  },
+  "blender": "5.2.1 LTS",
+  "camera_layout_hash": "538c874543ff19932e3f228a59a7a311e6363d57cc0569b0da238384e8a5a7cf",
+  "render_profile": {
+    "shading": "MATERIAL",
+    "studio_light": "forest.exr",
+    "scene_lights": false,
+    "scene_world": false,
+    "studio_rotation": 0.0,
+    "studio_intensity": 1.0,
+    "studio_background_alpha": 1.0,
+    "studio_background_blur": 0.5,
+    "studio_view_rotation": false,
+    "color_management": {
+      "view_transform": "AgX",
+      "look": "AgX - Medium High Contrast",
+      "exposure": 0.3499999940395355,
+      "gamma": 1.0,
+      "use_curve_mapping": false
+    },
+    "display_device": "sRGB",
+    "curve_mapping": null,
+    "excluded_annotations": [
+      "WFRL.Label.*",
+      "WFRL.Grid.*",
+      "WFRL.Inflow.*",
+      "WFRL.Deflection.*",
+      "WFRL.Wake*",
+      "*.TipTrail.*",
+      "*.ClearanceRadar.Beam*",
+      "*.SensorFrustum",
+      "WFRL.Fixture.T1.LidarRay*"
+    ],
+    "image_encoding": "RGBA8 display-transformed once; top-left rows; PNG sRGB"
+  },
+  "simulation_state_hash": "26f6d59891a12f1b0ad4bd31dfddc8890a5184f1a320f79306dd8216db0e406a",
+  "reference_capture": "outputs/nrel-video-single-blade/20261002-first/internal-capture-formal/capture_20261002_213817_baf6978517",
+  "reference_capture_state_verified": true,
+  "algorithm_input": false,
+  "file_sha256": "c91a4be2e478d107ffd67935831efc99714a549e1e18a4634992c76b7e22fa37"
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "returncode": 0,
+  "log": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/logs/manual-control.log",
+  "expected_guard_diagnostics": [
+    "Error: 控制对象与其他场景共享，请使用独立副本"
+  ],
+  "result": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/manual-control/checks.json",
+  "scope": "Installed extension in background factory scene; expected rejection diagnostics checked against the exercised guard cases."
+}

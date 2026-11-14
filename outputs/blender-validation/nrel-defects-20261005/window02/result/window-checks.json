@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "module_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+  "operator_edit_preview_cancel": true,
+  "modal_scan_records": 36,
+  "render_failure_restoration": true,
+  "images_rendered": 0,
+  "scope": "Actual-window operators and modal lifecycle; no A image acceptance or performance measurement",
+  "post_check_process_exit": "SIGSEGV after CUA switch to Python Console",
+  "crash_stack": "console_textview_main__internal > console_char_pick > console_modal_select_apply",
+  "process_status": "FAILED_POST_CHECK_UI_ACTION"
+}

@@ -1,0 +1,21 @@
+{
+  "version": "artifact RGB observation v3",
+  "frozen_UTC": "2026-10-07T05:31:09.351050+00:00",
+  "source_sha256": "a4ad2e72fb5bc879073a0b782c5c6c44c69c113da1e7c9000bfb2a33cd3d2058",
+  "unchanged_gates": {
+    "boundary_P95_px_max": 1.0,
+    "coverage_min": 0.9,
+    "planned_success_fraction_min": 0.9
+  },
+  "development_data": "Old synthetic12 RGB and source-pose metric-control diagnostic. Old Check development data cannot be claimed as unseen final holdout. New controlled128sample MAPPO fit/heldout will be evaluated with this frozen version.",
+  "source_truth_into_observation": false,
+  "parameters": {
+    "background_ring_expand_px": 40,
+    "feature_exclusion_dilate_px": 15,
+    "background_polynomial_degree": 2,
+    "relative_component_contrast_level": 0.5,
+    "minimum_feature_relative_contrast": 0.04,
+    "subpixel_boundary": "linear iso crossings, exact mesh ray binding"
+  },
+  "no_geometry_objective_change": true
+}

@@ -1,0 +1,610 @@
+{
+  "timestampUTC": "2026-10-07T05:58:33.112535+00:00",
+  "source_identity": {
+    "classification": "FINAL_TRF_BOUND_ORIGIN_SOURCE_FROZEN",
+    "core_recon_parent": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-release",
+    "head": "e504ed66548c4b774664233341b70c87512561ef",
+    "modules": {
+      "atlas.py": "3c5a944fe26ea56b7a02d358baf642119655883fc77f0b62cf1724eb15568b63",
+      "blender_export_cameras.py": "aafa7bd1eb94f7c3c56578af317c2833002463509cd4301804f65714ddb7ea16",
+      "blender_view.py": "f3aed291e145183fd71213b038f686149e327c62765df02d6f2123beeeafb76e",
+      "camera.py": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+      "check_alignment.py": "df8350a6f0bb26c719d0ee80e624ba1bab7bbc2b44286b7dbc4504149254b5bc",
+      "contour_support.py": "9e7658c2fd081665be16298860d88ec370f9841c4ff00539808f9713089b790c",
+      "coverage.py": "f05e2d467dd45893291cb1f71ee3260590fff8768c1b06c9804ac049cf8978d4",
+      "eval_texture.py": "89ff2acc4829ea0ec64814fab48ad4324d1b90fa9d319df8426bf9b0e9ed5365",
+      "evaluate.py": "02b70c14077f609ec60d16b18d49fcea3061c71843d8d4f3e0f74dc6f40ef8f2",
+      "input_adapter.py": "fa931be7fcab6d34c87735245653a3cd8d6314100b83b102fad897f2cfc36e6d",
+      "model.py": "3b0bb519fa6543783165523631945b8564adc0387fe62e0be787a013a64a1bfe",
+      "preview.py": "aadf90942c642f268bc25255df714a1968cd5beb3411c35417ccfd1f2b6d5002",
+      "raster.py": "329fa72599cc19ccaef1b44ead6feed2cca481f6278737ad725ed25d65329f38",
+      "recon.py": "e6266871f6669d96d94a5701e9693b799c211449ad55e8c0b591431ea6d91156",
+      "rgb_masks.py": "a58e25215f0b5567fe8d15650da5cd25178ee5f53b2af5d693ccdfb5c88d1100",
+      "run.py": "fbe47a92200caece029b911009d4696110c3b9eb7c57862ae6f81104c6b70126",
+      "surface_observations.py": "f869359c0ef99c18e98d07506cb9f5b01fc770e62e91d8c1fab2e6f0bc1273f1",
+      "surface_observations_subpixel.py": "95d0f1d8e279cd6e1f17e664b95bd73ca2b7331aab2f23a4773a1c188400a367",
+      "synth.py": "83d2f506a3022abd7efcdffda0371310954d430ddf86f589b4b571bc05cf5f9c",
+      "test_texture_correctness.py": "b3fe1019898bf6ce2e1d9d0bbce8f1b5a09aab52bb967144535af750846673fc",
+      "texture.py": "e82e46f83b729086d079782b7c1a60523e5496678343ff335abafb68a50c7a1a"
+    },
+    "tests": {
+      "blade_recon0.2/tests/test_full_model_state.py": "09e986b390ac7722f5f7b29c998d8ed2a8f121725193d41af607bedab45d4a7c",
+      "blade_recon0.2/tests/test_input_recon.py": "86accf152ef7dff66f0ecd1f26d4013acf885fe117e4b46862378c30fa0754a7",
+      "blade_recon0.2/tests/test_numerical_contours.py": "339c2316d964ad981a05ec67f96674db9358b845e01c99ef035219b076cfcaa3",
+      "blade_recon0.2/tests/test_recon_mesh_reuse.py": "5a3ccebf0a4a93923c6a870d9ba907c10bb6bc78077bc4a717084cbb3c275465",
+      "blade_recon0.2/tests/test_rgb_masks.py": "6e3ff547feae738dec600803b6c39e6d60b3c2ad5deb9b42979be30ee4b34b41",
+      "blade_recon0.2/tests/test_solver_budgets.py": "85e0c2c3299dd739350e8922d0ab316ece68f22e71513eaf3645a40717f0895e",
+      "blade_recon0.2/tests/test_startup_recon.py": "21267926b36c76f79b1eb5090a35edd54adf87fe62c698684284d20307236a37",
+      "blade_recon0.2/tests/test_surface_observations.py": "755462324f581fe0b743914bce3ec8da477c0ce6da3d310ae9a347aa0c87163a",
+      "blade_recon0.2/tests/test_surface_observations_subpixel.py": "8f70fe87cd946d6aec80207c05562214c493da7b9c0bf0fecba0190071772ac7",
+      "blade_recon0.2/tests/test_texture_performance_contract.py": "a90513b38c9a723a242eb50fc28c6b269571fa55af819fa188e3e68dc508e890",
+      "blade_recon0.2/tests/test_unknown_contours.py": "2c68a4b9da872425623f22dd939c89c3d6c1c0a676489d3728c6028c48a64181"
+    },
+    "strict_dependencies": {
+      "camera.py": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+      "input_bundle.py": "f0f40a0a5417b8844ca1fa3f5cb40de6cbe735d5e6443e5d341dbeb214555f41",
+      "model.py": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+    },
+    "versions": {
+      "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "opencv": "5.0.0"
+    },
+    "scope": "13 existing global state directions, stable contour solver, explicitly unknown RGB contours, shared triangle inverse, RGB-only subpixel observation; no feature residual in geometry.",
+    "parent": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-production",
+    "new_fix": "Constant normalized origin makes TRF initial radius 1 at bounded zero increments; same physical bounds/residuals/start and budgets. Preceding false ftol result retained."
+  },
+  "source_identity_sha256": "086d2b0dcc414445fcd52eef9de2af5158e5edd28f1b6c49a02250273ac5e8c0",
+  "source_identity_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-final-v2/identity.json",
+  "detector_parameters_unchanged": true,
+  "truth_or_texture_used_for_RGB_correspondence": false,
+  "scope": "Four real final reconstructions separately rescored with preexisting frozen v3 original pixels. Synthetic Check is development regression, actual new RGB is fixed-parameter independent evaluation.",
+  "results": [
+    {
+      "case": "main",
+      "recon_sha256": "ecb0b49876b6cc24a278631ac50150af02cfee7e25a373c5dc1c00ded7658c99",
+      "RGB_observations_sha256": "a299766d3661db58e9b4b99e29e541584a813169a9f7250d7c16bae8ba99169a",
+      "overall": "FAILED_CORRESPONDENCE_GATE",
+      "tracks": [
+        {
+          "track_id": "D1",
+          "anchor_frame": 2,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.4433794634092764,
+            0.9973904254121903
+          ],
+          "centroid_diagnostic_range_px": [
+            0.30353832726366853,
+            0.9400323927998704
+          ]
+        },
+        {
+          "track_id": "D2",
+          "anchor_frame": 4,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.32621456348698596,
+            0.5419312780322104
+          ],
+          "centroid_diagnostic_range_px": [
+            0.22222949688110955,
+            0.3992239189015009
+          ]
+        },
+        {
+          "track_id": "D3",
+          "anchor_frame": 6,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.27087945686011805,
+            0.6805864886795228
+          ],
+          "centroid_diagnostic_range_px": [
+            0.14936243843139071,
+            1.2208475295479753
+          ]
+        },
+        {
+          "track_id": "D6",
+          "anchor_frame": 8,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 2,
+          "accepted_fraction": 0.4,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.5091074753454979,
+            1.9612723932554132
+          ],
+          "centroid_diagnostic_range_px": [
+            0.3291377014580517,
+            1.4068702693302089
+          ]
+        }
+      ]
+    },
+    {
+      "case": "capture2",
+      "recon_sha256": "c322a2b430f478b83a16fc67f99288ecf6f442ea478d269148804036a21b0598",
+      "RGB_observations_sha256": "044ac93a9125b55523dbd201a2faba5d9926496691ae4ad435bdc455c8db4f31",
+      "overall": "FAILED_CORRESPONDENCE_GATE",
+      "tracks": [
+        {
+          "track_id": "D1",
+          "anchor_frame": 2,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 1,
+          "accepted_observations": 1,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": false,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.481501550630988,
+            0.481501550630988
+          ],
+          "centroid_diagnostic_range_px": [
+            1.0560625403555115,
+            1.0560625403555115
+          ]
+        },
+        {
+          "track_id": "D2",
+          "anchor_frame": 4,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 1,
+          "accepted_observations": 1,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": false,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.6298174188633401,
+            0.6298174188633401
+          ],
+          "centroid_diagnostic_range_px": [
+            0.5412430340257632,
+            0.5412430340257632
+          ]
+        },
+        {
+          "track_id": "D3",
+          "anchor_frame": 6,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 1,
+          "accepted_observations": 1,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": false,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.3925207652642421,
+            0.3925207652642421
+          ],
+          "centroid_diagnostic_range_px": [
+            0.44438306490043666,
+            0.44438306490043666
+          ]
+        },
+        {
+          "track_id": "D6",
+          "anchor_frame": 8,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 1,
+          "accepted_observations": 0,
+          "accepted_fraction": 0.0,
+          "cross_frame_validation_available": false,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            5.071419857873582,
+            5.071419857873582
+          ],
+          "centroid_diagnostic_range_px": [
+            4.288909341641909,
+            4.288909341641909
+          ]
+        }
+      ]
+    },
+    {
+      "case": "actual",
+      "recon_sha256": "6af2fb0dc0aa189ef22debcc8f82fe6b902b2abb1cdd589429f8bb171f02d771",
+      "RGB_observations_sha256": "b8cbe518079673d1515f235b15c34bf3e20957c1bc128118726275f252d9b9b3",
+      "overall": "FAILED_CORRESPONDENCE_GATE",
+      "tracks": [
+        {
+          "track_id": "Patch",
+          "anchor_frame": 42,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 7,
+          "accepted_observations": 0,
+          "accepted_fraction": 0.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            1.843629993759111,
+            12.553627347499695
+          ],
+          "centroid_diagnostic_range_px": [
+            2.074124917099993,
+            11.961327217915734
+          ]
+        },
+        {
+          "track_id": "Crack",
+          "anchor_frame": 42,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 7,
+          "accepted_observations": 0,
+          "accepted_fraction": 0.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "FAILED_CORRESPONDENCE_GATE",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            4.4618337286209275,
+            14.8880713198218
+          ],
+          "centroid_diagnostic_range_px": [
+            4.4457984604506215,
+            14.829466009246952
+          ]
+        }
+      ]
+    },
+    {
+      "case": "third",
+      "recon_sha256": "1167fccdc623d96dbdc544012ee6e4927fa4800bb6f7fb0acab19bdc6181b0b2",
+      "RGB_observations_sha256": "a299766d3661db58e9b4b99e29e541584a813169a9f7250d7c16bae8ba99169a",
+      "overall": "PASS",
+      "tracks": [
+        {
+          "track_id": "D1",
+          "anchor_frame": 2,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.1898068290902734,
+            0.633845804280592
+          ],
+          "centroid_diagnostic_range_px": [
+            0.2982681930725709,
+            0.6129092212734689
+          ]
+        },
+        {
+          "track_id": "D2",
+          "anchor_frame": 4,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.24244831447917678,
+            0.5263023207554536
+          ],
+          "centroid_diagnostic_range_px": [
+            0.1945853970113045,
+            0.3643312946184233
+          ]
+        },
+        {
+          "track_id": "D3",
+          "anchor_frame": 6,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.22116065337654933,
+            0.4941844917561085
+          ],
+          "centroid_diagnostic_range_px": [
+            0.1423898776705542,
+            1.2922134995730936
+          ]
+        },
+        {
+          "track_id": "D6",
+          "anchor_frame": 8,
+          "anchor_binding_coverage": 1.0,
+          "planned_independent_observations": 5,
+          "accepted_observations": 5,
+          "accepted_fraction": 1.0,
+          "cross_frame_validation_available": true,
+          "same_track_heldout_available": true,
+          "status": "PASS",
+          "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator",
+          "P95_range_px": [
+            0.27210095399162776,
+            0.6330907667315915
+          ],
+          "centroid_diagnostic_range_px": [
+            0.3798521510231687,
+            0.9912451890138932
+          ]
+        }
+      ]
+    }
+  ],
+  "actual_parent_comparison": [
+    {
+      "frame": 42,
+      "state_equal": false,
+      "state_new_minus_parent": [
+        3.662282921368387e-08,
+        2.1868411137406646e-06,
+        2.9298486936763807e-19,
+        0.0,
+        -1.5744381931526163e-07,
+        0.0,
+        4.787177942944254e-08,
+        -1.4456701277754114e-07,
+        -3.6084565699232316e-25,
+        -4.2303105907137706e-08,
+        -5.06390128718337e-08,
+        0.0,
+        -4.7882238007890265e-08
+      ],
+      "new_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 0.02130996683327739,
+        "gradient_inf_norm": 0.13475124246695375,
+        "parameterization": "frame_local_increments_with_constant_origin",
+        "coordinate_reference": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "jacobian_absolute_step": 1e-06
+      },
+      "parent_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 0.021305270088530028,
+        "gradient_inf_norm": 0.13475056293858048,
+        "parameterization": "frame_local_increments",
+        "jacobian_absolute_step": 1e-06
+      },
+      "new_cost": 197.52259729238023,
+      "parent_cost": 197.52259729116085,
+      "new_nfev": 22,
+      "parent_nfev": 22
+    },
+    {
+      "frame": 43,
+      "state_equal": false,
+      "state_new_minus_parent": [
+        0.001064124138466127,
+        -1.706165762371294,
+        0.29146484076739004,
+        -1.0028777808201994e-10,
+        -0.25448476413950205,
+        -2.7940764449154507,
+        -0.02829927860414072,
+        0.0026053435816271175,
+        -1.0152173693629436,
+        0.0644993497250147,
+        -0.04382505885119031,
+        0.023650990698230918,
+        -0.04108037952401966
+      ],
+      "new_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 0.009282810645185473,
+        "gradient_inf_norm": 0.42426223898481824,
+        "parameterization": "frame_local_increments_with_constant_origin",
+        "coordinate_reference": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "jacobian_absolute_step": 1e-06
+      },
+      "parent_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 24378.779006847355,
+        "gradient_inf_norm": 9935.95381909697,
+        "parameterization": "frame_local_increments",
+        "jacobian_absolute_step": 1e-06
+      },
+      "new_cost": 191.94280409722109,
+      "parent_cost": 2361.2106305556836,
+      "new_nfev": 17,
+      "parent_nfev": 2
+    },
+    {
+      "frame": 45,
+      "state_equal": false,
+      "state_new_minus_parent": [
+        0.022126558328878332,
+        -1.030406684700224,
+        0.952527377236523,
+        0.0,
+        0.031179569575917387,
+        -0.3787396282501988,
+        0.03913869790839586,
+        0.00413833637449873,
+        -0.03464639142436621,
+        -0.022367457444274708,
+        -0.0466929530295514,
+        0.08124084382741194,
+        -0.03691459584404766
+      ],
+      "new_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 0.1935361351443389,
+        "gradient_inf_norm": 0.41669181521507875,
+        "parameterization": "frame_local_increments_with_constant_origin",
+        "coordinate_reference": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "jacobian_absolute_step": 1e-06
+      },
+      "parent_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 2.882927635243163,
+        "gradient_inf_norm": 0.37806718326378413,
+        "parameterization": "frame_local_increments",
+        "jacobian_absolute_step": 1e-06
+      },
+      "new_cost": 186.5259062371478,
+      "parent_cost": 204.94516721919928,
+      "new_nfev": 20,
+      "parent_nfev": 26
+    },
+    {
+      "frame": 47,
+      "state_equal": false,
+      "state_new_minus_parent": [
+        -0.0009285745759370911,
+        -0.8371131900620478,
+        0.862122449989992,
+        0.0,
+        0.018760537263593058,
+        -0.14676279843992213,
+        0.009463467980314277,
+        0.020235275262963204,
+        -0.010998744098227098,
+        0.001987456428459433,
+        -0.01144826783758951,
+        0.11065744336244338,
+        -0.010554334689028666
+      ],
+      "new_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 0.061874840832318555,
+        "gradient_inf_norm": 0.4389691191601338,
+        "parameterization": "frame_local_increments_with_constant_origin",
+        "coordinate_reference": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "jacobian_absolute_step": 1e-06
+      },
+      "parent_solver": {
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "optimality": 0.05131271550935541,
+        "gradient_inf_norm": 0.44195071178134093,
+        "parameterization": "frame_local_increments",
+        "jacobian_absolute_step": 1e-06
+      },
+      "new_cost": 207.4806135711389,
+      "parent_cost": 206.99941015142036,
+      "new_nfev": 18,
+      "parent_nfev": 28
+    }
+  ],
+  "same_position_native_final_evidence": {
+    "status": "PASS_DISPLAY_COORDINATE_CONTRACT_ONLY",
+    "out": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-final-same-position-evidence",
+    "native_audit_sha256": "7960f97902d6f30f20429b1d0af88eba0d51e517ae5038255b0fdf312a09508c",
+    "evidence_manifest_sha256": "2172aca1c29c54a700f17de0774357667618ec64eaa2d8a5addc5565030773c7",
+    "actual_correspondence_acceptance": "FAILED_CORRESPONDENCE_GATE"
+  }
+}

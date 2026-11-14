@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "source_scene": "PROJECT_ROOT/outputs/farm-down-nacelle-view/Farm_Down.blend",
+  "camera_count": 15,
+  "saved_camera_parameters_unchanged": true,
+  "model": "nrel5mw"
+}

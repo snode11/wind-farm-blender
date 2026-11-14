@@ -1,0 +1,319 @@
+{
+  "schema_version": "wfrl.frontend-isolated-package.v1",
+  "status": "PASS",
+  "output": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "commands": [
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "repo-add",
+        "wfrl_frontend",
+        "--name",
+        "WFRL Frontend Isolated Validation",
+        "--directory",
+        "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions",
+        "--clear-all"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/logs/repo-add.log",
+      "required_markers": [],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 1.043933083070442,
+      "status": "EXIT_ZERO_REQUIRES_PROBE"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "repo",
+        "--repository",
+        "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions",
+        "--output",
+        "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/repo-probe.json"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/logs/repo-probe.log",
+      "required_markers": [
+        "FRONTEND_REPOSITORY_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5262749169487506,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "install-file",
+        "-r",
+        "wfrl_frontend",
+        "--enable",
+        "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/package/wfrl_blender-0.3.17.zip"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/logs/install-file.log",
+      "required_markers": [
+        "Installed \"wfrl_blender\""
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.9639038750901818,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "module",
+        "--repository",
+        "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions",
+        "--output",
+        "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/module-probe.json"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/logs/module-probe.log",
+      "required_markers": [
+        "FRONTEND_INSTALLED_MODULE_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.522743915906176,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/three_camera_default_regression.py"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/logs/three-camera-default.log",
+      "required_markers": [
+        "THREE_CAMERA_DEFAULT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 28.0139047910925,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/native_camera_projection_regression.py"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/logs/native-projection.log",
+      "required_markers": [
+        "NATIVE_PROJECTION_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5981587078422308,
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "archive_inventory": "PASS",
+    "repository_probe": {
+      "status": "PASS",
+      "repository": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true
+    },
+    "installed_inventory": {
+      "status": "PASS",
+      "package_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender",
+      "verified_files": 157,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    },
+    "module_probe": {
+      "status": "PASS",
+      "repository": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/__init__.py",
+      "imported_modules": {
+        "bl_ext.wfrl_frontend.wfrl_blender.cameras": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.materials": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/materials.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_model": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/scene_model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_builder": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/scene_builder.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.workspace": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/workspace.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.atmosphere": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/atmosphere.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.wake": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/wake.py",
+        "bl_ext.wfrl_frontend.wfrl_blender": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.state": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/state.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.animation": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/animation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.training": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.live_scene": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/live_scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.performance": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/performance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.runtime": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/runtime.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.deflection": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/deflection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.demo": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/demo.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.preferences": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/preferences.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.diagnostics": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.diagnostics": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.status": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/status.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/operators/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.connection": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/operators/connection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.run": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/operators/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.history": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.charts": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/charts.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.history_export": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/operators/history_export.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.telemetry": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/telemetry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.workflow": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/operators/workflow.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.scene": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.channels": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/channels.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.run": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.safety": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/safety.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.presentation": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.presentation": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.training": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.gimbal": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/gimbal.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.clearance_replay": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/clearance_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.clearance": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/clearance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.farm_flex": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/farm_flex.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.farm_replay": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/farm_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.video_output": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.video_output": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.camera_projection": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/camera_projection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_cameras": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_history": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/custom_camera_history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_diagnostics": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/custom_camera_diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_preview": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/custom_camera_preview.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_capture": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/custom_camera_capture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_camera_output": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/custom_camera_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.installation_schematic": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/installation_schematic.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.native_camera_views": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/native_camera_views.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.stacked_camera_rig": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.stacked_camera_rig": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_cameras": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/_vendor/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/_vendor/blade_recon/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon.model": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/_vendor/blade_recon/model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_data": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/blade_recon_data.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_review": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/blade_recon_review.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.blade_recon": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/panels/blade_recon.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_shapes": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/defect_shapes.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.reference_surface": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/reference_surface.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_schema": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/defect_schema.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_store": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/defect_store.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_geometry": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/defect_geometry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.editor": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/nrel_defects/editor.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.tip_tracking": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/tip_tracking.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/split_reconstruction.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_timing": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/split_reconstruction_timing.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_ui": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/split_reconstruction_ui.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.repair_marks": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/repair_marks.py"
+      },
+      "installed_operator_registered": true
+    },
+    "three-camera-default": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "preset_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/assets/cameras/t1-three-camera-default.json",
+      "checks": [
+        "ordinary load and reload use bundled supported pose and exact optics",
+        "geometry-only load has no rig",
+        "initial history empty",
+        "legacy C4 rejected",
+        "tilted housing rigid move",
+        "per-camera edit persists over frames",
+        "undo restores supported default",
+        "invalid move unchanged",
+        "atomic publish rollback",
+        "explicit reload resets user edits to bundled default",
+        "tip trails and deflection aids disabled"
+      ]
+    },
+    "native-projection": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "checks": [
+        "24 aspect/FOV combinations against Blender camera projection"
+      ]
+    },
+    "installed_inventory_after_regressions": {
+      "status": "PASS",
+      "package_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender",
+      "verified_files": 157,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    }
+  },
+  "build_only": false,
+  "scope": "isolated ZIP integrity and background regression; visible UI and presentation unverified",
+  "package": {
+    "archive": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/package/wfrl_blender-0.3.17.zip",
+    "sha256": "1a43e2949f14fbc7e79c2933fc84d74eedaff71dd61c7ddd5afbd90effb7f174",
+    "checksum": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/package/wfrl_blender-0.3.17.zip.sha256",
+    "inventory": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/package/wfrl_blender-0.3.17.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.17",
+    "file_count": 157
+  },
+  "environment": {
+    "BLENDER_USER_CONFIG": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/config",
+    "BLENDER_USER_SCRIPTS": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/scripts",
+    "BLENDER_USER_DATAFILES": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/datafiles",
+    "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+  },
+  "repository": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions",
+  "addon_path": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/__init__.py",
+  "installation": "PASS",
+  "background_regressions": "PASS",
+  "visible_ui": "NOT_RUN",
+  "actual_presentation": "NOT_RUN"
+}

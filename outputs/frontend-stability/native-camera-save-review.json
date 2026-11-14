@@ -1,0 +1,50 @@
+{
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "original_quality": [
+    "AUTO",
+    16,
+    true,
+    true
+  ],
+  "during_quality": [
+    "2",
+    8,
+    false,
+    false
+  ],
+  "after_close_quality": [
+    "AUTO",
+    16,
+    true,
+    true
+  ],
+  "after_reload_quality": [
+    "2",
+    8,
+    true,
+    true
+  ],
+  "loaded_proxy_objects": [
+    "T1.Native.C1",
+    "T1.Native.C2",
+    "T1.Native.C3"
+  ],
+  "native_session_present": false,
+  "method": "独立可见进程的脚本操作及 RNA 状态断言；不宣称真实鼠标交互或完整性能验收",
+  "reproduction_steps": [
+    "在独立 Blender 5.2.1 LTS 可见进程，以 --factory-startup 加载实际日常安装扩展。",
+    "在一次性基础场景创建 T1 YawRoot、机舱占位网格及三路合规相机参数；不加载仿真、不开启播放。",
+    "打开 native_camera_view(mode=TRIPLE, layout=STRIP)，等待就绪；保存到专用临时 .blend。",
+    "正常 shutdown(preserve_playback=False)，确认内存画质恢复；随后 open_mainfile(load_ui=False) 重开同一文件。",
+    "记录无活动 NativeSession 时的代理对象和场景预览参数。"
+  ],
+  "source_files": {
+    "native_camera_views.py": {
+      "installed_sha256": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19",
+      "workspace_sha256": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19"
+    }
+  },
+  "finding_status": "CONFIRMED",
+  "temporary_blend_retained": false
+}

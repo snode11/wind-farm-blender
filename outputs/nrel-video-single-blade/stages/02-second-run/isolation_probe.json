@@ -1,0 +1,7 @@
+{
+  "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref/T1_B1_truth.ply": "DENIED",
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/isolation-marker.txt": "DENIED",
+  "blender_frontend/wfrl_blender/assets/mappo/manifest.json": "DENIED",
+  "allowed_algorithm_input_read": true,
+  "passed": true
+}

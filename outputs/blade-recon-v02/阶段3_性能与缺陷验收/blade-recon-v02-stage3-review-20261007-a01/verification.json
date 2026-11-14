@@ -1,0 +1,107 @@
+{
+  "synthetic_baseline": {
+    "recon_hash_matches_delivery": true,
+    "frames": 12,
+    "solver_successful_frames": [
+      2,
+      11,
+      14
+    ],
+    "reconstruction_valid_frames": [
+      2,
+      11,
+      14
+    ],
+    "budget_exhausted_frames": [
+      4,
+      6,
+      8,
+      17,
+      20,
+      23,
+      26,
+      29,
+      32
+    ],
+    "independently_confirmed_failed_numeric_criteria": [
+      {
+        "id": "D2",
+        "coverage": 1.0,
+        "contrast_keep": 0.3482987537131523,
+        "failures": [
+          "contrast_below_threshold"
+        ]
+      },
+      {
+        "id": "D3",
+        "coverage": 0.8660994178235557,
+        "contrast_keep": 0.5602819423383076,
+        "failures": [
+          "coverage_below_threshold"
+        ]
+      }
+    ]
+  },
+  "synthetic_capture2": {
+    "recon_hash_matches_delivery": true,
+    "frames": 4,
+    "solver_successful_frames": [
+      2
+    ],
+    "reconstruction_valid_frames": [
+      2
+    ],
+    "budget_exhausted_frames": [
+      4,
+      6,
+      8
+    ],
+    "independently_confirmed_failed_numeric_criteria": [
+      {
+        "id": "D2",
+        "coverage": 1.0,
+        "contrast_keep": 0.028911833747015465,
+        "failures": [
+          "contrast_below_threshold"
+        ]
+      },
+      {
+        "id": "D3",
+        "coverage": 0.8419167039856695,
+        "contrast_keep": 0.6246707130797655,
+        "failures": [
+          "coverage_below_threshold"
+        ]
+      }
+    ]
+  },
+  "recorded_MAPPO": {
+    "recon_hash_matches_delivery": true,
+    "frames": 4,
+    "solver_successful_frames": [
+      42,
+      43
+    ],
+    "reconstruction_valid_frames": [
+      42,
+      43
+    ],
+    "budget_exhausted_frames": [
+      45,
+      47
+    ],
+    "ROI_image_centroid_shift_px": {
+      "Patch": 29.68846709920445,
+      "Crack": 51.662661106935786
+    }
+  },
+  "decision": "STAGE4_NOT_STARTED: full defect, instance input and correspondence prerequisites failed",
+  "independent_tests": {
+    "algorithm": {
+      "passed": 32
+    },
+    "texture_correctness": {
+      "passed": 11
+    }
+  }
+}

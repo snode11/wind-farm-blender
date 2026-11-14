@@ -1,0 +1,11 @@
+{
+  "wall_s": 74.5407430420164,
+  "prior_only_wall_s": 0.18854091595858335,
+  "video_fit_wall_s": 64.68087529204786,
+  "peak_process_rss_bytes": 985284608,
+  "device": "cpu",
+  "threads": 4,
+  "torch_version": "2.13.0",
+  "cached_frames": 12,
+  "cache_policy": "selected_uint8_labels_only; no video float tensor or feature cache"
+}

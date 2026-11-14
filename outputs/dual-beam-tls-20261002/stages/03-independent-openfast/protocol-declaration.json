@@ -1,0 +1,6 @@
+{
+  "protocol_sha256": "54f2d07f53a39fc9d6274fa67d8869b9138b67d37124868b9636d71669944b6f",
+  "frozen_implementation_check": "PASS",
+  "reference_inventory_sha256": "a454e4c22692404c479325cd4e7d5650acdf6ef07b96b1a1f9ed9bc50f59ad0a",
+  "before_solver_execution": true
+}

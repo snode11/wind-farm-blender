@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "phase": "save",
+  "module_file": "PROJECT_ROOT/outputs/blender-validation/nrel-defects-release-0.3.16-20261005/profile/extensions/wfrl_blender/__init__.py",
+  "types": 6,
+  "turbines": 3,
+  "blades": 9,
+  "seeking_boolean_calls": 0,
+  "draft_clock_frozen": true,
+  "close_and_restore": true,
+  "scope": "background edit transactions and flexible geometry; no viewport or appearance acceptance"
+}

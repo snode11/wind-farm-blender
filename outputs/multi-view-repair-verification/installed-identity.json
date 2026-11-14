@@ -1,0 +1,9 @@
+{
+  "source_root": "PROJECT_ROOT/blender_frontend/wfrl_blender",
+  "installed_root": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "installed_hashes": {
+    "native_camera_views.py": "1ec983c8da04663b686419451b2b029129dee7ae2adaa0c4e2aad6a038e338bf",
+    "custom_cameras.py": "e17259898fe7260f226f63e29810457b9715bd320a1157f2157f78273a342d01",
+    "playback.py": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93"
+  }
+}

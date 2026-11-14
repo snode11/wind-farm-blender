@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "mode": "reopen",
+  "blender": "5.2.1 LTS",
+  "scope": "native background replay and file persistence; synthetic geometry display only",
+  "checks": {
+    "fresh_process_restore_embedded_data_without_external_paths": true,
+    "three_rgba_images_packed_hashes_and_atlas_uv": true,
+    "native_shader_circumference_periodic_span_pixel_center_clamp": true,
+    "all_saved_samples_three_blades_model_geometry_evidence_and_dynamic_cameras": true,
+    "timer_commit_recomputes_visibility_after_seek_and_step": true,
+    "backward_seek_single_step_and_texture_evidence_toggle": true
+  },
+  "frames": [
+    {
+      "frame": 1,
+      "max_geometry_error_m": 7.624755312463094e-06
+    },
+    {
+      "frame": 17,
+      "max_geometry_error_m": 7.597501280542929e-06
+    },
+    {
+      "frame": 18,
+      "max_geometry_error_m": 7.620718207590471e-06
+    },
+    {
+      "frame": 61,
+      "max_geometry_error_m": 7.581242044807368e-06
+    },
+    {
+      "frame": 120,
+      "max_geometry_error_m": 7.612811657509155e-06
+    }
+  ],
+  "addon_file": "PROJECT_ROOT/outputs/release-0.3.17-20261007/validation/profile/extensions/wfrl_blender/__init__.py"
+}

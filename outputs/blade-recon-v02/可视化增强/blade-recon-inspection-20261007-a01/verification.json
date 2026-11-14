@@ -1,0 +1,41 @@
+{
+  "preserved_inputs": {
+    "scripts/blender/打开纹理重建样例.command": true,
+    "blade_recon0.2/out/synth_tex/recon.json": true,
+    "blade_recon0.2/out/synth_tex/texture/texture.json": true,
+    "blade_recon0.2/out/synth_tex/texture/blade1_tex.png": true,
+    "blade_recon0.2/out/synth_tex/texture/blade2_tex.png": true,
+    "blade_recon0.2/out/synth_tex/texture/blade3_tex.png": true
+  },
+  "installed_sources_match": {
+    "blender_frontend/wfrl_blender/blade_recon_inspection.py": true,
+    "blender_frontend/wfrl_blender/blade_recon_review.py": true,
+    "blender_frontend/wfrl_blender/panels/blade_recon.py": true
+  },
+  "regressions": {
+    "source-inspection/create": "PASS",
+    "source-inspection/reopen": "PASS",
+    "source-inspection/legacy-reopen": "PASS",
+    "daily-inspection/create": "PASS",
+    "daily-inspection/reopen": "PASS",
+    "daily-inspection/legacy-reopen": "PASS",
+    "source-existing/create": "PASS",
+    "source-existing/reopen": "PASS"
+  },
+  "original_inputs_unchanged": true,
+  "local_unreleased_build": true,
+  "prefs_unchanged": true,
+  "actual_window": {
+    "saved_blend": "REPOSITORY_ROOT/outputs/blade-recon-v02/可视化增强/blade-recon-inspection-20261007-a01/纹理细节检查.blend",
+    "observed_frame": 17,
+    "appearance_mode": "FALSE_COLOR",
+    "manual_point_buttons": [
+      "亮斑",
+      "横细线",
+      "纵细线"
+    ],
+    "checked": "all three buttons visibly focused the corresponding texture region; original and false-color switching visible; sidebar and saved scene visible",
+    "user_adjusted_zoom_preserved": true,
+    "no_solver_run": true
+  }
+}

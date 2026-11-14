@@ -1,0 +1,24 @@
+{
+  "module": "wfrl_blender",
+  "source_root": "PROJECT_ROOT/blender_frontend/wfrl_blender",
+  "modules": {
+    "wfrl_blender": {
+      "path": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+      "sha256": "c16307c2ce907dddbe8bf51c67450c529c3d8d67f4e3c6697df1f08edeb1efff"
+    },
+    "wfrl_blender.native_camera_views": {
+      "path": "PROJECT_ROOT/blender_frontend/wfrl_blender/native_camera_views.py",
+      "sha256": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19"
+    },
+    "wfrl_blender.custom_cameras": {
+      "path": "PROJECT_ROOT/blender_frontend/wfrl_blender/custom_cameras.py",
+      "sha256": "8e775849b80ac16b618e8bf7179c5cda4fde5d6b8d7bc163398940b8352114f7"
+    },
+    "wfrl_blender.playback": {
+      "path": "PROJECT_ROOT/blender_frontend/wfrl_blender/playback.py",
+      "sha256": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93"
+    }
+  },
+  "blender": "5.2.1 LTS",
+  "background": true
+}

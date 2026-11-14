@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "version": "0.3.16",
+  "results": [
+    {
+      "phase": "save",
+      "returncode": 0,
+      "marker": "NREL_DEFECT_EDITOR_SAVE_PASS",
+      "marker_seen": true
+    },
+    {
+      "phase": "reopen",
+      "returncode": 0,
+      "marker": "NREL_DEFECT_EDITOR_REOPEN_PASS",
+      "marker_seen": true
+    }
+  ],
+  "scope": "Fresh isolated ZIP installation; NREL editor save and new-process reopen; historical actual-window limits retained."
+}

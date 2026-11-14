@@ -1,0 +1,33 @@
+{
+  "schema": "blade-stage4-experiment.v1",
+  "start_recon_sha256": "e6266871f6669d96d94a5701e9693b799c211449ad55e8c0b591431ea6d91156",
+  "ablations": [
+    "A contour analytic",
+    "B contour healthy template",
+    "C texture analytic",
+    "D texture healthy template",
+    "C0 weight zero analytic"
+  ],
+  "data": "same frozen 16 RGB/derived mask at source frames42/43/45/47 with same K/T/t and unknown masks",
+  "solver_budgets": {
+    "initial": 150,
+    "tracking": 60
+  },
+  "parameter_ranges": "existing13D Fitter bounds unchanged",
+  "texture_weight": 1.0,
+  "atlas": {
+    "dr_m": 0.01,
+    "cols": 768,
+    "fusion": "best"
+  },
+  "scores": {
+    "boundary_P95_original_px_max": 1,
+    "binding_coverage_min": 0.9,
+    "visibility_fraction_min": 0.9,
+    "acceptance_fraction_min": 0.9
+  },
+  "evaluation_policy": "freeze candidates and outputs before reading heldout RGB; one final fixed-protocol evaluation, no retuning from heldout outcomes; historical 7 validations include 3 fit training views, final independent denominator is4 old+4 locked views per target",
+  "actual_material_geometry_m": "null until fixed same-material point contract is independently established",
+  "unknown": "preserve existing unknown polygons and no filling",
+  "performance": "serial independent processes with identical input and configuration; elapsed_s and macOS child max RSS"
+}

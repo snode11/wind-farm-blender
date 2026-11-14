@@ -1,0 +1,22 @@
+{
+  "resolutions": [
+    [
+      160,
+      90
+    ],
+    [
+      320,
+      180
+    ]
+  ],
+  "iterations_per_stage": [
+    20,
+    6
+  ],
+  "batch_size": 1,
+  "learning_rate": 0.035,
+  "image_weight": 1.0,
+  "seed": 20261002,
+  "threads": 4,
+  "model_interpolation": "bspline"
+}

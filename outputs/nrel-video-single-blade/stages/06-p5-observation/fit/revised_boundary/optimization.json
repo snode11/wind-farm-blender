@@ -1,0 +1,2477 @@
+{
+  "config": {
+    "model_interpolation": "bspline",
+    "image_objective": "projected_contour",
+    "resolutions": [
+      [
+        160,
+        90
+      ],
+      [
+        320,
+        180
+      ],
+      [
+        640,
+        360
+      ]
+    ],
+    "iterations_per_stage": [
+      40,
+      40,
+      20
+    ],
+    "learning_rate": 0.012,
+    "image_weight": 1.0,
+    "foreground_distance_weight": 0.15,
+    "relative_change_weight": 0.03,
+    "smoothness_weight": 0.1,
+    "sigma_px": 0.65,
+    "span_samples": 25,
+    "ring_samples": 12,
+    "control_stations": 7,
+    "face_chunk": 48,
+    "batch_size": 1,
+    "device": "cpu",
+    "seed": 20261002,
+    "threads": 4
+  },
+  "coordinate_branch": "original_raw",
+  "prior_only_history": [
+    {
+      "stage": 0,
+      "iteration": 0,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.026586082996800542
+    },
+    {
+      "stage": 0,
+      "iteration": 1,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0005748330149799585
+    },
+    {
+      "stage": 0,
+      "iteration": 2,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00029820797499269247
+    },
+    {
+      "stage": 0,
+      "iteration": 3,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.000339584075845778
+    },
+    {
+      "stage": 0,
+      "iteration": 4,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0003006660845130682
+    },
+    {
+      "stage": 0,
+      "iteration": 5,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002340830396860838
+    },
+    {
+      "stage": 0,
+      "iteration": 6,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.000254875048995018
+    },
+    {
+      "stage": 0,
+      "iteration": 7,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002549579367041588
+    },
+    {
+      "stage": 0,
+      "iteration": 8,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022379192523658276
+    },
+    {
+      "stage": 0,
+      "iteration": 9,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022087502293288708
+    },
+    {
+      "stage": 0,
+      "iteration": 10,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020829204004257917
+    },
+    {
+      "stage": 0,
+      "iteration": 11,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00021162501070648432
+    },
+    {
+      "stage": 0,
+      "iteration": 12,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002043750137090683
+    },
+    {
+      "stage": 0,
+      "iteration": 13,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002018751110881567
+    },
+    {
+      "stage": 0,
+      "iteration": 14,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019983400125056505
+    },
+    {
+      "stage": 0,
+      "iteration": 15,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020170898642390966
+    },
+    {
+      "stage": 0,
+      "iteration": 16,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020070804748684168
+    },
+    {
+      "stage": 0,
+      "iteration": 17,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020274997223168612
+    },
+    {
+      "stage": 0,
+      "iteration": 18,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020049989689141512
+    },
+    {
+      "stage": 0,
+      "iteration": 19,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020241702441126108
+    },
+    {
+      "stage": 0,
+      "iteration": 20,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019774993415921926
+    },
+    {
+      "stage": 0,
+      "iteration": 21,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001972500467672944
+    },
+    {
+      "stage": 0,
+      "iteration": 22,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.000193290994502604
+    },
+    {
+      "stage": 0,
+      "iteration": 23,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002019589301198721
+    },
+    {
+      "stage": 0,
+      "iteration": 24,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019933399744331837
+    },
+    {
+      "stage": 0,
+      "iteration": 25,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020179199054837227
+    },
+    {
+      "stage": 0,
+      "iteration": 26,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019649998284876347
+    },
+    {
+      "stage": 0,
+      "iteration": 27,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020204205065965652
+    },
+    {
+      "stage": 0,
+      "iteration": 28,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019737507682293653
+    },
+    {
+      "stage": 0,
+      "iteration": 29,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001989580923691392
+    },
+    {
+      "stage": 0,
+      "iteration": 30,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019512500148266554
+    },
+    {
+      "stage": 0,
+      "iteration": 31,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001990000018849969
+    },
+    {
+      "stage": 0,
+      "iteration": 32,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020224996842443943
+    },
+    {
+      "stage": 0,
+      "iteration": 33,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019870896358042955
+    },
+    {
+      "stage": 0,
+      "iteration": 34,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002038750099018216
+    },
+    {
+      "stage": 0,
+      "iteration": 35,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020483299158513546
+    },
+    {
+      "stage": 0,
+      "iteration": 36,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019683397840708494
+    },
+    {
+      "stage": 0,
+      "iteration": 37,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001973749604076147
+    },
+    {
+      "stage": 0,
+      "iteration": 38,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0003365409793332219
+    },
+    {
+      "stage": 0,
+      "iteration": 39,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00026787491515278816
+    },
+    {
+      "stage": 1,
+      "iteration": 0,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0005277919117361307
+    },
+    {
+      "stage": 1,
+      "iteration": 1,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022333301603794098
+    },
+    {
+      "stage": 1,
+      "iteration": 2,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020370795391499996
+    },
+    {
+      "stage": 1,
+      "iteration": 3,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00021174992434680462
+    },
+    {
+      "stage": 1,
+      "iteration": 4,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018579198513180017
+    },
+    {
+      "stage": 1,
+      "iteration": 5,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020000000949949026
+    },
+    {
+      "stage": 1,
+      "iteration": 6,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018362491391599178
+    },
+    {
+      "stage": 1,
+      "iteration": 7,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018324994016438723
+    },
+    {
+      "stage": 1,
+      "iteration": 8,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018408300820738077
+    },
+    {
+      "stage": 1,
+      "iteration": 9,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018720794469118118
+    },
+    {
+      "stage": 1,
+      "iteration": 10,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002072090283036232
+    },
+    {
+      "stage": 1,
+      "iteration": 11,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019533291924744844
+    },
+    {
+      "stage": 1,
+      "iteration": 12,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019625003915280104
+    },
+    {
+      "stage": 1,
+      "iteration": 13,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018974998965859413
+    },
+    {
+      "stage": 1,
+      "iteration": 14,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00017833395395427942
+    },
+    {
+      "stage": 1,
+      "iteration": 15,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018087506759911776
+    },
+    {
+      "stage": 1,
+      "iteration": 16,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001830830005928874
+    },
+    {
+      "stage": 1,
+      "iteration": 17,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019791594240814447
+    },
+    {
+      "stage": 1,
+      "iteration": 18,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001832909183576703
+    },
+    {
+      "stage": 1,
+      "iteration": 19,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019100005738437176
+    },
+    {
+      "stage": 1,
+      "iteration": 20,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019491708371788263
+    },
+    {
+      "stage": 1,
+      "iteration": 21,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018462503794580698
+    },
+    {
+      "stage": 1,
+      "iteration": 22,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00017812498845160007
+    },
+    {
+      "stage": 1,
+      "iteration": 23,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001913339365273714
+    },
+    {
+      "stage": 1,
+      "iteration": 24,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019166700076311827
+    },
+    {
+      "stage": 1,
+      "iteration": 25,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018812506459653378
+    },
+    {
+      "stage": 1,
+      "iteration": 26,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018920889124274254
+    },
+    {
+      "stage": 1,
+      "iteration": 27,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019229203462600708
+    },
+    {
+      "stage": 1,
+      "iteration": 28,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018341594841331244
+    },
+    {
+      "stage": 1,
+      "iteration": 29,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00018541596364229918
+    },
+    {
+      "stage": 1,
+      "iteration": 30,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020083400886505842
+    },
+    {
+      "stage": 1,
+      "iteration": 31,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019079097546637058
+    },
+    {
+      "stage": 1,
+      "iteration": 32,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00032287498470395803
+    },
+    {
+      "stage": 1,
+      "iteration": 33,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00027637509629130363
+    },
+    {
+      "stage": 1,
+      "iteration": 34,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00035741692408919334
+    },
+    {
+      "stage": 1,
+      "iteration": 35,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00026174995582550764
+    },
+    {
+      "stage": 1,
+      "iteration": 36,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00023241702001541853
+    },
+    {
+      "stage": 1,
+      "iteration": 37,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020691705867648125
+    },
+    {
+      "stage": 1,
+      "iteration": 38,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002068749163299799
+    },
+    {
+      "stage": 1,
+      "iteration": 39,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002000840613618493
+    },
+    {
+      "stage": 2,
+      "iteration": 0,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0005274160066619515
+    },
+    {
+      "stage": 2,
+      "iteration": 1,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00024862494319677353
+    },
+    {
+      "stage": 2,
+      "iteration": 2,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022295897360891104
+    },
+    {
+      "stage": 2,
+      "iteration": 3,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001997080398723483
+    },
+    {
+      "stage": 2,
+      "iteration": 4,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020420795772224665
+    },
+    {
+      "stage": 2,
+      "iteration": 5,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022024998906999826
+    },
+    {
+      "stage": 2,
+      "iteration": 6,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0001938749337568879
+    },
+    {
+      "stage": 2,
+      "iteration": 7,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019429204985499382
+    },
+    {
+      "stage": 2,
+      "iteration": 8,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019170809537172318
+    },
+    {
+      "stage": 2,
+      "iteration": 9,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020750006660819054
+    },
+    {
+      "stage": 2,
+      "iteration": 10,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019525003153830767
+    },
+    {
+      "stage": 2,
+      "iteration": 11,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019545794930309057
+    },
+    {
+      "stage": 2,
+      "iteration": 12,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002025839639827609
+    },
+    {
+      "stage": 2,
+      "iteration": 13,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00031762500293552876
+    },
+    {
+      "stage": 2,
+      "iteration": 14,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00027383293490856886
+    },
+    {
+      "stage": 2,
+      "iteration": 15,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00024104199837893248
+    },
+    {
+      "stage": 2,
+      "iteration": 16,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00021683401428163052
+    },
+    {
+      "stage": 2,
+      "iteration": 17,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022695795632898808
+    },
+    {
+      "stage": 2,
+      "iteration": 18,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00023116590455174446
+    },
+    {
+      "stage": 2,
+      "iteration": 19,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022862502373754978
+    }
+  ],
+  "video_history": [
+    {
+      "stage": 0,
+      "iteration": 0,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.9473844543099403,
+      "regularization_loss": 0.0,
+      "total_loss": 0.9473844543099403,
+      "elapsed_s": 0.21170162491034716
+    },
+    {
+      "stage": 0,
+      "iteration": 1,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.8342783376574516,
+      "regularization_loss": 1.569269625179004e-05,
+      "total_loss": 0.8342940303537034,
+      "elapsed_s": 0.2111029999796301
+    },
+    {
+      "stage": 0,
+      "iteration": 2,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.7179001197218895,
+      "regularization_loss": 5.382743984228e-05,
+      "total_loss": 0.7179539471617318,
+      "elapsed_s": 0.21318708290345967
+    },
+    {
+      "stage": 0,
+      "iteration": 3,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.6121875662356615,
+      "regularization_loss": 0.00011897337390109897,
+      "total_loss": 0.6123065396095626,
+      "elapsed_s": 0.1945893339579925
+    },
+    {
+      "stage": 0,
+      "iteration": 4,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.521581789245829,
+      "regularization_loss": 0.00020840700017288327,
+      "total_loss": 0.5217901962460019,
+      "elapsed_s": 0.18731329101137817
+    },
+    {
+      "stage": 0,
+      "iteration": 5,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.49402088788338006,
+      "regularization_loss": 0.00030636051087640226,
+      "total_loss": 0.49432724839425646,
+      "elapsed_s": 0.18978350004181266
+    },
+    {
+      "stage": 0,
+      "iteration": 6,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.5108320266008377,
+      "regularization_loss": 0.0004017031751573086,
+      "total_loss": 0.511233729775995,
+      "elapsed_s": 0.1955896670697257
+    },
+    {
+      "stage": 0,
+      "iteration": 7,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.4962648916989565,
+      "regularization_loss": 0.0004952970193699002,
+      "total_loss": 0.4967601887183264,
+      "elapsed_s": 0.22004720801487565
+    },
+    {
+      "stage": 0,
+      "iteration": 8,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.4967399910092354,
+      "regularization_loss": 0.0005924008437432349,
+      "total_loss": 0.4973323918529786,
+      "elapsed_s": 0.19222391594666988
+    },
+    {
+      "stage": 0,
+      "iteration": 9,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.490448160097003,
+      "regularization_loss": 0.0006961002363823354,
+      "total_loss": 0.4911442603333853,
+      "elapsed_s": 0.18602720799390227
+    },
+    {
+      "stage": 0,
+      "iteration": 10,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.47231583669781685,
+      "regularization_loss": 0.0008052887860685587,
+      "total_loss": 0.4731211254838854,
+      "elapsed_s": 0.18390537495724857
+    },
+    {
+      "stage": 0,
+      "iteration": 11,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.4484832398593426,
+      "regularization_loss": 0.0009186506504192948,
+      "total_loss": 0.44940189050976187,
+      "elapsed_s": 0.18916674994397908
+    },
+    {
+      "stage": 0,
+      "iteration": 12,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.4175040489062667,
+      "regularization_loss": 0.0010339299915358424,
+      "total_loss": 0.41853797889780253,
+      "elapsed_s": 0.18487491691485047
+    },
+    {
+      "stage": 0,
+      "iteration": 13,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3911594613455236,
+      "regularization_loss": 0.0011492413468658924,
+      "total_loss": 0.3923087026923895,
+      "elapsed_s": 0.1869486249051988
+    },
+    {
+      "stage": 0,
+      "iteration": 14,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3660226274514571,
+      "regularization_loss": 0.0012636451283469796,
+      "total_loss": 0.36728627257980406,
+      "elapsed_s": 0.19409770891070366
+    },
+    {
+      "stage": 0,
+      "iteration": 15,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3591696220682934,
+      "regularization_loss": 0.001372376922518015,
+      "total_loss": 0.3605419989908114,
+      "elapsed_s": 0.21992199996020645
+    },
+    {
+      "stage": 0,
+      "iteration": 16,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3580298665910959,
+      "regularization_loss": 0.0014733078423887491,
+      "total_loss": 0.3595031744334847,
+      "elapsed_s": 0.18830495805013925
+    },
+    {
+      "stage": 0,
+      "iteration": 17,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3410280952230096,
+      "regularization_loss": 0.00156507664360106,
+      "total_loss": 0.34259317186661065,
+      "elapsed_s": 0.19021133403293788
+    },
+    {
+      "stage": 0,
+      "iteration": 18,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3278130041435361,
+      "regularization_loss": 0.0016458635218441486,
+      "total_loss": 0.32945886766538024,
+      "elapsed_s": 0.20602220797445625
+    },
+    {
+      "stage": 0,
+      "iteration": 19,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3182366145774722,
+      "regularization_loss": 0.0017189724603667855,
+      "total_loss": 0.319955587037839,
+      "elapsed_s": 0.20169074996374547
+    },
+    {
+      "stage": 0,
+      "iteration": 20,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3069790876470506,
+      "regularization_loss": 0.0017868757713586092,
+      "total_loss": 0.30876596341840923,
+      "elapsed_s": 0.2032432910054922
+    },
+    {
+      "stage": 0,
+      "iteration": 21,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.29072211030870676,
+      "regularization_loss": 0.0018526131752878428,
+      "total_loss": 0.2925747234839946,
+      "elapsed_s": 0.19761666597332805
+    },
+    {
+      "stage": 0,
+      "iteration": 22,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.270080981310457,
+      "regularization_loss": 0.0019187189172953367,
+      "total_loss": 0.27199970022775233,
+      "elapsed_s": 0.19571445789188147
+    },
+    {
+      "stage": 0,
+      "iteration": 23,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.255328225903213,
+      "regularization_loss": 0.0019885653164237738,
+      "total_loss": 0.2573167912196368,
+      "elapsed_s": 0.1916272910311818
+    },
+    {
+      "stage": 0,
+      "iteration": 24,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.2437629113701405,
+      "regularization_loss": 0.002064836909994483,
+      "total_loss": 0.24582774828013498,
+      "elapsed_s": 0.18889587500598282
+    },
+    {
+      "stage": 0,
+      "iteration": 25,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.23689751661731862,
+      "regularization_loss": 0.0021493970416486263,
+      "total_loss": 0.23904691365896724,
+      "elapsed_s": 0.18907916697207838
+    },
+    {
+      "stage": 0,
+      "iteration": 26,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.21539690112695098,
+      "regularization_loss": 0.002243347931653261,
+      "total_loss": 0.21764024905860424,
+      "elapsed_s": 0.19256454100832343
+    },
+    {
+      "stage": 0,
+      "iteration": 27,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.20969640230759978,
+      "regularization_loss": 0.0023472444154322147,
+      "total_loss": 0.212043646723032,
+      "elapsed_s": 0.1893115829443559
+    },
+    {
+      "stage": 0,
+      "iteration": 28,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.20111269829794765,
+      "regularization_loss": 0.0024609779939055443,
+      "total_loss": 0.2035736762918532,
+      "elapsed_s": 0.19371600006707013
+    },
+    {
+      "stage": 0,
+      "iteration": 29,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.19538236677180976,
+      "regularization_loss": 0.0025834953412413597,
+      "total_loss": 0.19796586211305112,
+      "elapsed_s": 0.2018219999736175
+    },
+    {
+      "stage": 0,
+      "iteration": 30,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.18843311944510788,
+      "regularization_loss": 0.002713940106332302,
+      "total_loss": 0.19114705955144018,
+      "elapsed_s": 0.19183070794679224
+    },
+    {
+      "stage": 0,
+      "iteration": 31,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.17949013388715684,
+      "regularization_loss": 0.0028512096032500267,
+      "total_loss": 0.18234134349040687,
+      "elapsed_s": 0.1985607499955222
+    },
+    {
+      "stage": 0,
+      "iteration": 32,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.17250758246518672,
+      "regularization_loss": 0.0029944293200969696,
+      "total_loss": 0.17550201178528368,
+      "elapsed_s": 0.1933483750326559
+    },
+    {
+      "stage": 0,
+      "iteration": 33,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.159010326693533,
+      "regularization_loss": 0.0031427592039108276,
+      "total_loss": 0.16215308589744382,
+      "elapsed_s": 0.19360491703264415
+    },
+    {
+      "stage": 0,
+      "iteration": 34,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.15686296204512473,
+      "regularization_loss": 0.003296002745628357,
+      "total_loss": 0.1601589647907531,
+      "elapsed_s": 0.19000545796006918
+    },
+    {
+      "stage": 0,
+      "iteration": 35,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.1545004419167526,
+      "regularization_loss": 0.003451842814683914,
+      "total_loss": 0.15795228473143652,
+      "elapsed_s": 0.20047062495723367
+    },
+    {
+      "stage": 0,
+      "iteration": 36,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.15133062889799476,
+      "regularization_loss": 0.003608142724260688,
+      "total_loss": 0.15493877162225544,
+      "elapsed_s": 0.1954055840615183
+    },
+    {
+      "stage": 0,
+      "iteration": 37,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.15032090235035866,
+      "regularization_loss": 0.0037626575212925673,
+      "total_loss": 0.15408355987165123,
+      "elapsed_s": 0.19481133308727294
+    },
+    {
+      "stage": 0,
+      "iteration": 38,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.14781013783067465,
+      "regularization_loss": 0.003913667052984238,
+      "total_loss": 0.15172380488365889,
+      "elapsed_s": 0.19176433293614537
+    },
+    {
+      "stage": 0,
+      "iteration": 39,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.14741720736492425,
+      "regularization_loss": 0.0040597934275865555,
+      "total_loss": 0.1514770007925108,
+      "elapsed_s": 0.19309850002173334
+    },
+    {
+      "stage": 1,
+      "iteration": 0,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.3333523189648986,
+      "regularization_loss": 0.004199182614684105,
+      "total_loss": 0.3375515015795827,
+      "elapsed_s": 0.2630928329890594
+    },
+    {
+      "stage": 1,
+      "iteration": 1,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.3111220917198807,
+      "regularization_loss": 0.004322278779000044,
+      "total_loss": 0.31544437049888074,
+      "elapsed_s": 0.2611250840127468
+    },
+    {
+      "stage": 1,
+      "iteration": 2,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2957127233967185,
+      "regularization_loss": 0.004423648118972778,
+      "total_loss": 0.3001363715156913,
+      "elapsed_s": 0.2746737089473754
+    },
+    {
+      "stage": 1,
+      "iteration": 3,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.29370964015834033,
+      "regularization_loss": 0.004506001248955727,
+      "total_loss": 0.29821564140729606,
+      "elapsed_s": 0.2652482920093462
+    },
+    {
+      "stage": 1,
+      "iteration": 4,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.29817713773809373,
+      "regularization_loss": 0.004574992693960667,
+      "total_loss": 0.3027521304320544,
+      "elapsed_s": 0.2583364159800112
+    },
+    {
+      "stage": 1,
+      "iteration": 5,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2950728733558208,
+      "regularization_loss": 0.004641230683773756,
+      "total_loss": 0.29971410403959453,
+      "elapsed_s": 0.2555896670091897
+    },
+    {
+      "stage": 1,
+      "iteration": 6,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.29490914929192513,
+      "regularization_loss": 0.004715978633612394,
+      "total_loss": 0.2996251279255375,
+      "elapsed_s": 0.26206462492700666
+    },
+    {
+      "stage": 1,
+      "iteration": 7,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2947582633350976,
+      "regularization_loss": 0.0048070685006678104,
+      "total_loss": 0.2995653318357654,
+      "elapsed_s": 0.2611469170078635
+    },
+    {
+      "stage": 1,
+      "iteration": 8,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2884725737385452,
+      "regularization_loss": 0.004914633929729462,
+      "total_loss": 0.29338720766827464,
+      "elapsed_s": 0.2552494580158964
+    },
+    {
+      "stage": 1,
+      "iteration": 9,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2749831990804523,
+      "regularization_loss": 0.005034732166677713,
+      "total_loss": 0.28001793124713004,
+      "elapsed_s": 0.25796058296691626
+    },
+    {
+      "stage": 1,
+      "iteration": 10,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.25980124989291653,
+      "regularization_loss": 0.005159704480320215,
+      "total_loss": 0.26496095437323675,
+      "elapsed_s": 0.2550514580216259
+    },
+    {
+      "stage": 1,
+      "iteration": 11,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.24869086092803627,
+      "regularization_loss": 0.005277181509882212,
+      "total_loss": 0.2539680424379185,
+      "elapsed_s": 0.2598084999481216
+    },
+    {
+      "stage": 1,
+      "iteration": 12,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.24547889763198327,
+      "regularization_loss": 0.005379862617701292,
+      "total_loss": 0.25085876024968456,
+      "elapsed_s": 0.27038379199802876
+    },
+    {
+      "stage": 1,
+      "iteration": 13,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.24326114117866382,
+      "regularization_loss": 0.005466653499752283,
+      "total_loss": 0.2487277946784161,
+      "elapsed_s": 0.2566547089954838
+    },
+    {
+      "stage": 1,
+      "iteration": 14,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.24377198290312663,
+      "regularization_loss": 0.0055436789989471436,
+      "total_loss": 0.24931566190207377,
+      "elapsed_s": 0.259838082944043
+    },
+    {
+      "stage": 1,
+      "iteration": 15,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2504564862465486,
+      "regularization_loss": 0.00562127772718668,
+      "total_loss": 0.2560777639737353,
+      "elapsed_s": 0.25650408305227757
+    },
+    {
+      "stage": 1,
+      "iteration": 16,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.25500432719127275,
+      "regularization_loss": 0.0057067605666816235,
+      "total_loss": 0.2607110877579544,
+      "elapsed_s": 0.2572039170190692
+    },
+    {
+      "stage": 1,
+      "iteration": 17,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2570452597574331,
+      "regularization_loss": 0.005807359702885151,
+      "total_loss": 0.26285261946031824,
+      "elapsed_s": 0.25773679197300225
+    },
+    {
+      "stage": 1,
+      "iteration": 18,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2562817212601658,
+      "regularization_loss": 0.005923062562942505,
+      "total_loss": 0.2622047838231083,
+      "elapsed_s": 0.2558108330704272
+    },
+    {
+      "stage": 1,
+      "iteration": 19,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2450700238114223,
+      "regularization_loss": 0.006048824638128281,
+      "total_loss": 0.25111884844955057,
+      "elapsed_s": 0.2627698330907151
+    },
+    {
+      "stage": 1,
+      "iteration": 20,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.23384066481958143,
+      "regularization_loss": 0.0061778235249221325,
+      "total_loss": 0.24001848834450357,
+      "elapsed_s": 0.26231508306227624
+    },
+    {
+      "stage": 1,
+      "iteration": 21,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.22662463726010174,
+      "regularization_loss": 0.006302753463387489,
+      "total_loss": 0.23292739072348922,
+      "elapsed_s": 0.26417620899155736
+    },
+    {
+      "stage": 1,
+      "iteration": 22,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.22205419681267813,
+      "regularization_loss": 0.006416917312890291,
+      "total_loss": 0.22847111412556842,
+      "elapsed_s": 0.2603114160010591
+    },
+    {
+      "stage": 1,
+      "iteration": 23,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.23534922001999803,
+      "regularization_loss": 0.006514384411275387,
+      "total_loss": 0.24186360443127342,
+      "elapsed_s": 0.2879152500536293
+    },
+    {
+      "stage": 1,
+      "iteration": 24,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.22676537503139116,
+      "regularization_loss": 0.006595859304070473,
+      "total_loss": 0.23336123433546163,
+      "elapsed_s": 0.2563474999042228
+    },
+    {
+      "stage": 1,
+      "iteration": 25,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.22708309759036638,
+      "regularization_loss": 0.006664177402853966,
+      "total_loss": 0.23374727499322034,
+      "elapsed_s": 0.2610308750299737
+    },
+    {
+      "stage": 1,
+      "iteration": 26,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.22384703112766147,
+      "regularization_loss": 0.0067222281359136105,
+      "total_loss": 0.23056925926357508,
+      "elapsed_s": 0.2603067079326138
+    },
+    {
+      "stage": 1,
+      "iteration": 27,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.22038353799143806,
+      "regularization_loss": 0.0067747123539447784,
+      "total_loss": 0.22715825034538284,
+      "elapsed_s": 0.259263249929063
+    },
+    {
+      "stage": 1,
+      "iteration": 28,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.21985277504427359,
+      "regularization_loss": 0.006822903174906969,
+      "total_loss": 0.22667567821918055,
+      "elapsed_s": 0.25779845798388124
+    },
+    {
+      "stage": 1,
+      "iteration": 29,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.21586938918335363,
+      "regularization_loss": 0.00686772633343935,
+      "total_loss": 0.22273711551679298,
+      "elapsed_s": 0.2580148749984801
+    },
+    {
+      "stage": 1,
+      "iteration": 30,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.21278785457252525,
+      "regularization_loss": 0.006909976713359356,
+      "total_loss": 0.2196978312858846,
+      "elapsed_s": 0.2667681250022724
+    },
+    {
+      "stage": 1,
+      "iteration": 31,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.2062034922419116,
+      "regularization_loss": 0.006948866881430149,
+      "total_loss": 0.21315235912334174,
+      "elapsed_s": 0.26058295904658735
+    },
+    {
+      "stage": 1,
+      "iteration": 32,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19981709533021785,
+      "regularization_loss": 0.006984204985201359,
+      "total_loss": 0.2068013003154192,
+      "elapsed_s": 0.25791379204019904
+    },
+    {
+      "stage": 1,
+      "iteration": 33,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19537578790914267,
+      "regularization_loss": 0.007014301139861345,
+      "total_loss": 0.20239008904900402,
+      "elapsed_s": 0.26305524993222207
+    },
+    {
+      "stage": 1,
+      "iteration": 34,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19621719348651823,
+      "regularization_loss": 0.007037240546196699,
+      "total_loss": 0.20325443403271493,
+      "elapsed_s": 0.26554929092526436
+    },
+    {
+      "stage": 1,
+      "iteration": 35,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19398710814130027,
+      "regularization_loss": 0.007052929140627384,
+      "total_loss": 0.20104003728192765,
+      "elapsed_s": 0.2581057089846581
+    },
+    {
+      "stage": 1,
+      "iteration": 36,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19449039475875907,
+      "regularization_loss": 0.007062103133648634,
+      "total_loss": 0.2015524978924077,
+      "elapsed_s": 0.25810550001915544
+    },
+    {
+      "stage": 1,
+      "iteration": 37,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19493857857014518,
+      "regularization_loss": 0.007065335288643837,
+      "total_loss": 0.20200391385878902,
+      "elapsed_s": 0.2592405410250649
+    },
+    {
+      "stage": 1,
+      "iteration": 38,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.19444092451885808,
+      "regularization_loss": 0.007065652869641781,
+      "total_loss": 0.20150657738849986,
+      "elapsed_s": 0.25563412497285753
+    },
+    {
+      "stage": 1,
+      "iteration": 39,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.1781399540923303,
+      "regularization_loss": 0.007066066842526197,
+      "total_loss": 0.1852060209348565,
+      "elapsed_s": 0.256968708941713
+    },
+    {
+      "stage": 2,
+      "iteration": 0,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.4239866940770298,
+      "regularization_loss": 0.007067542988806963,
+      "total_loss": 0.4310542370658368,
+      "elapsed_s": 0.3941275830147788
+    },
+    {
+      "stage": 2,
+      "iteration": 1,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.43561291688820347,
+      "regularization_loss": 0.007057191804051399,
+      "total_loss": 0.44267010869225487,
+      "elapsed_s": 0.3972794170258567
+    },
+    {
+      "stage": 2,
+      "iteration": 2,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.41803901066305116,
+      "regularization_loss": 0.00704900873824954,
+      "total_loss": 0.4250880194013007,
+      "elapsed_s": 0.3820271670119837
+    },
+    {
+      "stage": 2,
+      "iteration": 3,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.4101787050603889,
+      "regularization_loss": 0.007048699073493481,
+      "total_loss": 0.4172274041338824,
+      "elapsed_s": 0.38272029196377844
+    },
+    {
+      "stage": 2,
+      "iteration": 4,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.4042007082607597,
+      "regularization_loss": 0.007062120363116264,
+      "total_loss": 0.411262828623876,
+      "elapsed_s": 0.381781917065382
+    },
+    {
+      "stage": 2,
+      "iteration": 5,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3962643403210677,
+      "regularization_loss": 0.007089064456522465,
+      "total_loss": 0.4033534047775902,
+      "elapsed_s": 0.38119745801668614
+    },
+    {
+      "stage": 2,
+      "iteration": 6,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.39219334383960813,
+      "regularization_loss": 0.007124685682356358,
+      "total_loss": 0.3993180295219645,
+      "elapsed_s": 0.382792416960001
+    },
+    {
+      "stage": 2,
+      "iteration": 7,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.38342018803814426,
+      "regularization_loss": 0.007165264338254929,
+      "total_loss": 0.3905854523763992,
+      "elapsed_s": 0.39645241701509804
+    },
+    {
+      "stage": 2,
+      "iteration": 8,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3820274138706736,
+      "regularization_loss": 0.007211558986455202,
+      "total_loss": 0.38923897285712883,
+      "elapsed_s": 0.38214537501335144
+    },
+    {
+      "stage": 2,
+      "iteration": 9,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3644476913032122,
+      "regularization_loss": 0.007271420210599899,
+      "total_loss": 0.3717191115138121,
+      "elapsed_s": 0.38110475009307265
+    },
+    {
+      "stage": 2,
+      "iteration": 10,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.353922551847063,
+      "regularization_loss": 0.0073565226048231125,
+      "total_loss": 0.3612790744518861,
+      "elapsed_s": 0.38406183396000415
+    },
+    {
+      "stage": 2,
+      "iteration": 11,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.34709850104991347,
+      "regularization_loss": 0.007465091533958912,
+      "total_loss": 0.3545635925838724,
+      "elapsed_s": 0.38197729201056063
+    },
+    {
+      "stage": 2,
+      "iteration": 12,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3337983946839813,
+      "regularization_loss": 0.007593411020934582,
+      "total_loss": 0.3413918057049159,
+      "elapsed_s": 0.38320487493183464
+    },
+    {
+      "stage": 2,
+      "iteration": 13,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3285652513150126,
+      "regularization_loss": 0.007738066837191582,
+      "total_loss": 0.33630331815220416,
+      "elapsed_s": 0.38728808297310024
+    },
+    {
+      "stage": 2,
+      "iteration": 14,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3216599253646564,
+      "regularization_loss": 0.007889769040048122,
+      "total_loss": 0.3295496944047045,
+      "elapsed_s": 0.374625249998644
+    },
+    {
+      "stage": 2,
+      "iteration": 15,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3143844390870072,
+      "regularization_loss": 0.008041849359869957,
+      "total_loss": 0.32242628844687715,
+      "elapsed_s": 0.3823924590833485
+    },
+    {
+      "stage": 2,
+      "iteration": 16,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.30351493434864096,
+      "regularization_loss": 0.008189904503524303,
+      "total_loss": 0.31170483885216527,
+      "elapsed_s": 0.3725631250999868
+    },
+    {
+      "stage": 2,
+      "iteration": 17,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.3063286141259596,
+      "regularization_loss": 0.00833178497850895,
+      "total_loss": 0.3146603991044685,
+      "elapsed_s": 0.37528791604563594
+    },
+    {
+      "stage": 2,
+      "iteration": 18,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.30540616932557896,
+      "regularization_loss": 0.008465133607387543,
+      "total_loss": 0.3138713029329665,
+      "elapsed_s": 0.3727500420063734
+    },
+    {
+      "stage": 2,
+      "iteration": 19,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss": 0.29916222920292057,
+      "regularization_loss": 0.008589386940002441,
+      "total_loss": 0.307751616142923,
+      "elapsed_s": 0.3743037920212373
+    }
+  ],
+  "comparison_provenance": {
+    "observation_version": "revised_boundary",
+    "coordinate_branch": "original_raw",
+    "optimizer_implementation": "wfrl.nrel_reconstruction.optimize._fit",
+    "only_between_arm_change": {
+      "camera_id": "C1",
+      "frame_id": 42,
+      "fields": [
+        "contour_points_path",
+        "contour_valid_path"
+      ]
+    },
+    "same_zero_initial_parameters": true,
+    "same_model_loss_weights_optimizer_budget": true,
+    "shared_prior_only": true,
+    "shared_prior_computed_with": "original_raw; image_weight=0; no image gradients",
+    "same_initial_parameters": true,
+    "same_optimizer": true,
+    "same_stage_schedule": true,
+    "same_regularization": true,
+    "same_budget": true,
+    "only_image_weights_differ": true,
+    "provenance_scope": "Within this arm video versus shared prior only; between image arms only C1#42 contour/domain paths differ.",
+    "prior_only_image_weight": 0.0,
+    "final_image_weight": 1.0
+  },
+  "final_objective_under_training_observation_version": {
+    "image_loss_mean": 0.3016775579502185,
+    "regularization": 0.00870573054999113,
+    "total_objective": 0.31038328850020963
+  },
+  "fit_residual_comparison": "../cross_observation_residuals.json",
+  "nonblind_status": "NOT_EVALUATED_BEFORE_ALL_MODEL_FREEZE"
+}

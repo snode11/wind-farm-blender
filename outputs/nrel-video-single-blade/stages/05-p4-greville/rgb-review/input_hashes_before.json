@@ -1,0 +1,8 @@
+{
+  "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/C1_000042_native_rgb.png": "484a49de3df5745e373a41a08bafb2f4cdd712686b1d8e8315d4df5b45c17bd4",
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174",
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4",
+  "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/README.md": "031a15257c4df0813033afe6e988ab9555b9cbb62291ee67c42e53df7a1666dd",
+  "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/root_rgb_audit.json": "37340d34fc1106ba3c88c7f1e850badd540b1ca87c13e891da2f2cdb77dcb55c"
+}

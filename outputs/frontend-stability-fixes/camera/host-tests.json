@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "passed": 41,
+  "python": "PYTHON_ENV_ROOT/bin/python",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. PYTHON_ENV_ROOT/bin/python -m pytest blender_frontend/tests/test_native_camera_lifecycle.py blender_frontend/tests/test_native_camera_playback.py blender_frontend/tests/test_presentation_controls.py -q -p no:cacheprovider",
+  "scope": "Host adapters: lifecycle, save isolation and failure cleanup, scene identity, playback ownership, presentation contracts. Native UI evidence is separate.",
+  "sha256": {
+    "blender_frontend/tests/test_native_camera_lifecycle.py": "f7f04123a110b9611faa7cf07e5ccbf4fe3b52574e7b849ecfc45dc5fe8a7d36",
+    "blender_frontend/tests/test_native_camera_playback.py": "b1a97c98604859fbf1a5cf494d7a91fd7b02eef08929e97ca23c00b5883cb15c",
+    "blender_frontend/tests/test_presentation_controls.py": "368fbf0bb3e510d5b873495dc7ba9e671142a859e0462770048c2dfc5118a5bd",
+    "blender_frontend/wfrl_blender/native_camera_views.py": "8e4d8b3f05bbd2bbe441822b99d356399b0290469513fd4d5ae7d84b97cc28d4",
+    "blender_frontend/wfrl_blender/cameras.py": "24980abe377a19508642eb1fc06224792e1aed7d686810adc2762cec13eb1ad2"
+  }
+}

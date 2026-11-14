@@ -1,0 +1,2392 @@
+{
+  "status": "PASS",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "build_info": {
+    "payload_files": 180,
+    "payload_sha256": "9530950090d0acda93a3fcbcec3be567f2b27de9ee67776add1693b60a7b4c59",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.26"
+  },
+  "model": "rootkink",
+  "geometry_sha256": "aa4a6cb0f74f01d1a810ff61228e5ed4800535bad50409b93758072cca92407c",
+  "camera": "WFRL.Camera.T1.Gimbal",
+  "parent": "WFRL.Turbine.T1.YawRoot",
+  "local_location": [
+    -3.799999952316284,
+    2.931682674400804e-16,
+    0.06255921721458435
+  ],
+  "shell_anchor": [
+    -3.799999952316284,
+    2.931682674400804e-16,
+    0.46255922317504883
+  ],
+  "mount_offset": [
+    0.0,
+    0.0,
+    -0.4000000059604645
+  ],
+  "mount_length_m": 0.40000001415610287,
+  "local_optical_axis": [
+    0.0,
+    0.0,
+    -1.0
+  ],
+  "world_nadir_error_deg": 0.2726810019041844,
+  "optical": {
+    "yaw": 180.0,
+    "pitch": -90,
+    "roll": 180.0,
+    "hfov": 110.0,
+    "shift": [
+      0.10000000149011612,
+      -0.07000000029802322
+    ]
+  },
+  "resolution": [
+    1920,
+    1080
+  ],
+  "rows": [
+    {
+      "delta_from_down_deg": -20.0,
+      "time_s": 117.46155865489423,
+      "frame": 28,
+      "subframe": 0.6935195922851562,
+      "shoulder_uv_top_left": [
+        0.8963142037391663,
+        0.8036107420921326
+      ],
+      "shoulder_visible_face_samples": 12,
+      "shoulder_samples": [
+        {
+          "face": [
+            576,
+            577,
+            529
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9088112711906433,
+            0.8157637566328049,
+            4.012666702270508
+          ]
+        },
+        {
+          "face": [
+            576,
+            529,
+            528
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9251198172569275,
+            0.8338080793619156,
+            3.813080310821533
+          ]
+        },
+        {
+          "face": [
+            577,
+            578,
+            530
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9030242562294006,
+            0.809840053319931,
+            4.0307440757751465
+          ]
+        },
+        {
+          "face": [
+            577,
+            530,
+            529
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9207998514175415,
+            0.8283248245716095,
+            3.8262548446655273
+          ]
+        },
+        {
+          "face": [
+            578,
+            579,
+            531
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8924229145050049,
+            0.8003931790590286,
+            4.06354284286499
+          ]
+        },
+        {
+          "face": [
+            578,
+            531,
+            530
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9112676978111267,
+            0.8197619616985321,
+            3.8538811206817627
+          ]
+        },
+        {
+          "face": [
+            579,
+            580,
+            532
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8774488568305969,
+            0.7871893346309662,
+            4.110705852508545
+          ]
+        },
+        {
+          "face": [
+            579,
+            532,
+            531
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.896979570388794,
+            0.8070131093263626,
+            3.895998239517212
+          ]
+        },
+        {
+          "face": [
+            580,
+            581,
+            533
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8586496114730835,
+            0.7707127630710602,
+            4.171435832977295
+          ]
+        },
+        {
+          "face": [
+            580,
+            533,
+            532
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8784732222557068,
+            0.7906475067138672,
+            3.95186448097229
+          ]
+        },
+        {
+          "face": [
+            581,
+            582,
+            534
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8366814851760864,
+            0.7514304369688034,
+            4.244734287261963
+          ]
+        },
+        {
+          "face": [
+            581,
+            534,
+            533
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8564241528511047,
+            0.7711586952209473,
+            4.020535469055176
+          ]
+        },
+        {
+          "face": [
+            582,
+            583,
+            535
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8122528195381165,
+            0.7299360036849976,
+            4.3293633460998535
+          ]
+        },
+        {
+          "face": [
+            582,
+            535,
+            534
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8315725326538086,
+            0.7491229474544525,
+            4.100908279418945
+          ]
+        },
+        {
+          "face": [
+            617,
+            618,
+            570
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8176403045654297,
+            0.7802526354789734,
+            4.283418655395508
+          ]
+        },
+        {
+          "face": [
+            618,
+            619,
+            571
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8424280881881714,
+            0.7856389582157135,
+            4.208672523498535
+          ]
+        },
+        {
+          "face": [
+            618,
+            571,
+            570
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.846124529838562,
+            0.7979268282651901,
+            4.033864974975586
+          ]
+        },
+        {
+          "face": [
+            619,
+            620,
+            572
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8641781806945801,
+            0.7929147034883499,
+            4.1438069343566895
+          ]
+        },
+        {
+          "face": [
+            619,
+            572,
+            571
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8700869679450989,
+            0.805156484246254,
+            3.966155767440796
+          ]
+        },
+        {
+          "face": [
+            620,
+            621,
+            573
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8822459578514099,
+            0.8012811094522476,
+            4.090175628662109
+          ]
+        },
+        {
+          "face": [
+            620,
+            573,
+            572
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8904351592063904,
+            0.813804879784584,
+            3.9091379642486572
+          ]
+        },
+        {
+          "face": [
+            621,
+            622,
+            574
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.896063506603241,
+            0.8097333908081055,
+            4.049005031585693
+          ]
+        },
+        {
+          "face": [
+            621,
+            574,
+            573
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9065248370170593,
+            0.8228962272405624,
+            3.8640782833099365
+          ]
+        },
+        {
+          "face": [
+            622,
+            623,
+            575
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9052109718322754,
+            0.8166214823722839,
+            4.021534442901611
+          ]
+        },
+        {
+          "face": [
+            622,
+            575,
+            574
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9178409576416016,
+            0.8309869021177292,
+            3.8321704864501953
+          ]
+        },
+        {
+          "face": [
+            623,
+            576,
+            528
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.909514307975769,
+            0.8186955749988556,
+            4.00933837890625
+          ]
+        },
+        {
+          "face": [
+            623,
+            528,
+            575
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.9240841269493103,
+            0.8353435546159744,
+            3.8148486614227295
+          ]
+        },
+        {
+          "face": [
+            624,
+            625,
+            577
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.850561797618866,
+            0.7622671872377396,
+            4.75111198425293
+          ]
+        },
+        {
+          "face": [
+            624,
+            577,
+            576
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8720355033874512,
+            0.7816611230373383,
+            4.477462291717529
+          ]
+        },
+        {
+          "face": [
+            625,
+            626,
+            578
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8458600640296936,
+            0.7575038820505142,
+            4.769244194030762
+          ]
+        },
+        {
+          "face": [
+            625,
+            578,
+            577
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8684432506561279,
+            0.7771483957767487,
+            4.490805625915527
+          ]
+        },
+        {
+          "face": [
+            626,
+            627,
+            579
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8372321128845215,
+            0.7499280273914337,
+            4.802122116088867
+          ]
+        },
+        {
+          "face": [
+            626,
+            579,
+            578
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8604968190193176,
+            0.770137146115303,
+            4.518829345703125
+          ]
+        },
+        {
+          "face": [
+            627,
+            628,
+            580
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8250134587287903,
+            0.73931884765625,
+            4.849388122558594
+          ]
+        },
+        {
+          "face": [
+            627,
+            580,
+            579
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8485639095306396,
+            0.7596875429153442,
+            4.561528205871582
+          ]
+        },
+        {
+          "face": [
+            628,
+            629,
+            581
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8096195459365845,
+            0.7260372638702393,
+            4.910199165344238
+          ]
+        },
+        {
+          "face": [
+            628,
+            581,
+            580
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8330619931221008,
+            0.746244877576828,
+            4.618129253387451
+          ]
+        },
+        {
+          "face": [
+            629,
+            630,
+            582
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7915457487106323,
+            0.7104197144508362,
+            4.9836106300354
+          ]
+        },
+        {
+          "face": [
+            629,
+            582,
+            581
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8145169019699097,
+            0.7301788330078125,
+            4.687704086303711
+          ]
+        },
+        {
+          "face": [
+            630,
+            583,
+            582
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7935187220573425,
+            0.7119356989860535,
+            4.7690958976745605
+          ]
+        },
+        {
+          "face": [
+            665,
+            666,
+            618
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7756677865982056,
+            0.7348729372024536,
+            5.022653102874756
+          ]
+        },
+        {
+          "face": [
+            665,
+            618,
+            617
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7829731106758118,
+            0.749241441488266,
+            4.779558181762695
+          ]
+        },
+        {
+          "face": [
+            666,
+            667,
+            619
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7962203621864319,
+            0.7388137876987457,
+            4.947556495666504
+          ]
+        },
+        {
+          "face": [
+            666,
+            619,
+            618
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8057937622070312,
+            0.7529559582471848,
+            4.701313495635986
+          ]
+        },
+        {
+          "face": [
+            667,
+            668,
+            620
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8141481876373291,
+            0.7443754076957703,
+            4.882438659667969
+          ]
+        },
+        {
+          "face": [
+            667,
+            620,
+            619
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8260325193405151,
+            0.758596882224083,
+            4.632558822631836
+          ]
+        },
+        {
+          "face": [
+            668,
+            669,
+            621
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8289574980735779,
+            0.7509074658155441,
+            4.828645706176758
+          ]
+        },
+        {
+          "face": [
+            668,
+            621,
+            620
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8431304097175598,
+            0.7654935121536255,
+            4.57470178604126
+          ]
+        },
+        {
+          "face": [
+            669,
+            670,
+            622
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8402215242385864,
+            0.7575918138027191,
+            4.787412643432617
+          ]
+        },
+        {
+          "face": [
+            669,
+            622,
+            621
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8565825819969177,
+            0.7728396505117416,
+            4.529031753540039
+          ]
+        },
+        {
+          "face": [
+            670,
+            671,
+            623
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.847642183303833,
+            0.7630724310874939,
+            4.759948253631592
+          ]
+        },
+        {
+          "face": [
+            670,
+            623,
+            622
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8659990429878235,
+            0.7794283777475357,
+            4.496742248535156
+          ]
+        },
+        {
+          "face": [
+            671,
+            624,
+            576
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8511278033256531,
+            0.7646758854389191,
+            4.747775077819824
+          ]
+        },
+        {
+          "face": [
+            671,
+            576,
+            623
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8711786270141602,
+            0.7829671949148178,
+            4.479222297668457
+          ]
+        }
+      ],
+      "exact_trailing_edge_visible": false,
+      "exact_trailing_edge_first_hit_gap_m": 0.2568726948445557,
+      "exact_trailing_edge_blocker": "WFRL.Turbine.T1.Blade1",
+      "tip_uv_top_left": [
+        0.5296149253845215,
+        0.44342952966690063
+      ],
+      "tip_lateral_yawroot_m": -21.029342651367188,
+      "image": "motion-20.png"
+    },
+    {
+      "delta_from_down_deg": -15.0,
+      "time_s": 117.53753187140113,
+      "frame": 33,
+      "subframe": 0.2519111633300781,
+      "shoulder_uv_top_left": [
+        0.799380898475647,
+        0.7644204795360565
+      ],
+      "shoulder_visible_face_samples": 23,
+      "shoulder_samples": [
+        {
+          "face": [
+            576,
+            577,
+            529
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8086934685707092,
+            0.7743706107139587,
+            4.49403190612793
+          ]
+        },
+        {
+          "face": [
+            576,
+            529,
+            528
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.820863664150238,
+            0.7892156839370728,
+            4.285484790802002
+          ]
+        },
+        {
+          "face": [
+            577,
+            578,
+            530
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8041481971740723,
+            0.7695136666297913,
+            4.508553981781006
+          ]
+        },
+        {
+          "face": [
+            577,
+            530,
+            529
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8175042867660522,
+            0.7846736907958984,
+            4.296226501464844
+          ]
+        },
+        {
+          "face": [
+            578,
+            579,
+            531
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7957854270935059,
+            0.7618447840213776,
+            4.534649848937988
+          ]
+        },
+        {
+          "face": [
+            578,
+            531,
+            530
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8100467920303345,
+            0.7777753472328186,
+            4.318227291107178
+          ]
+        },
+        {
+          "face": [
+            579,
+            580,
+            532
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7839040756225586,
+            0.7510750442743301,
+            4.57216739654541
+          ]
+        },
+        {
+          "face": [
+            579,
+            532,
+            531
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7988101243972778,
+            0.7674588710069656,
+            4.351746082305908
+          ]
+        },
+        {
+          "face": [
+            580,
+            581,
+            533
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7688745856285095,
+            0.7375429570674896,
+            4.620469570159912
+          ]
+        },
+        {
+          "face": [
+            580,
+            533,
+            532
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7841498255729675,
+            0.7541320323944092,
+            4.396186351776123
+          ]
+        },
+        {
+          "face": [
+            581,
+            582,
+            534
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7511543035507202,
+            0.7215621471405029,
+            4.678750038146973
+          ]
+        },
+        {
+          "face": [
+            581,
+            534,
+            533
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.766523540019989,
+            0.7381177544593811,
+            4.450832366943359
+          ]
+        },
+        {
+          "face": [
+            582,
+            583,
+            535
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7312450408935547,
+            0.7035594284534454,
+            4.746044635772705
+          ]
+        },
+        {
+          "face": [
+            582,
+            535,
+            534
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7464532852172852,
+            0.7198191285133362,
+            4.514764785766602
+          ]
+        },
+        {
+          "face": [
+            617,
+            618,
+            570
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7354059815406799,
+            0.749085545539856,
+            4.701145648956299
+          ]
+        },
+        {
+          "face": [
+            618,
+            619,
+            571
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7556490302085876,
+            0.752192422747612,
+            4.644812107086182
+          ]
+        },
+        {
+          "face": [
+            618,
+            571,
+            570
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7580360770225525,
+            0.7630747556686401,
+            4.455225467681885
+          ]
+        },
+        {
+          "face": [
+            619,
+            620,
+            572
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7732157111167908,
+            0.7571914941072464,
+            4.595400333404541
+          ]
+        },
+        {
+          "face": [
+            619,
+            572,
+            571
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7773473262786865,
+            0.7678092569112778,
+            4.403831481933594
+          ]
+        },
+        {
+          "face": [
+            620,
+            621,
+            573
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7876662611961365,
+            0.7633930593729019,
+            4.554110527038574
+          ]
+        },
+        {
+          "face": [
+            620,
+            573,
+            572
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7935712337493896,
+            0.7740402519702911,
+            4.360093593597412
+          ]
+        },
+        {
+          "face": [
+            621,
+            622,
+            574
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7986295819282532,
+            0.7699429094791412,
+            4.522022724151611
+          ]
+        },
+        {
+          "face": [
+            621,
+            574,
+            573
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8062850832939148,
+            0.7809412628412247,
+            4.3251237869262695
+          ]
+        },
+        {
+          "face": [
+            622,
+            623,
+            575
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8058432340621948,
+            0.7754117697477341,
+            4.500389575958252
+          ]
+        },
+        {
+          "face": [
+            622,
+            575,
+            574
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8151636123657227,
+            0.7872778922319412,
+            4.300069808959961
+          ]
+        },
+        {
+          "face": [
+            623,
+            576,
+            528
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.8092328906059265,
+            0.7769353240728378,
+            4.4909892082214355
+          ]
+        },
+        {
+          "face": [
+            623,
+            528,
+            575
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.820044219493866,
+            0.7906655818223953,
+            4.2864837646484375
+          ]
+        },
+        {
+          "face": [
+            624,
+            625,
+            577
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7640125155448914,
+            0.7304047048091888,
+            5.254098415374756
+          ]
+        },
+        {
+          "face": [
+            624,
+            577,
+            576
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7807008624076843,
+            0.74644535779953,
+            4.974784851074219
+          ]
+        },
+        {
+          "face": [
+            625,
+            626,
+            578
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7602205872535706,
+            0.7264088988304138,
+            5.268637657165527
+          ]
+        },
+        {
+          "face": [
+            625,
+            578,
+            577
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7778360843658447,
+            0.7426319718360901,
+            4.985665321350098
+          ]
+        },
+        {
+          "face": [
+            626,
+            627,
+            579
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7532346248626709,
+            0.720110297203064,
+            5.2947821617126465
+          ]
+        },
+        {
+          "face": [
+            626,
+            579,
+            578
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7714696526527405,
+            0.7368585765361786,
+            5.007956504821777
+          ]
+        },
+        {
+          "face": [
+            627,
+            628,
+            580
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7432963252067566,
+            0.7112591564655304,
+            5.3323187828063965
+          ]
+        },
+        {
+          "face": [
+            627,
+            580,
+            579
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7618674039840698,
+            0.7282229661941528,
+            5.041896343231201
+          ]
+        },
+        {
+          "face": [
+            628,
+            629,
+            581
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7306946516036987,
+            0.7001137733459473,
+            5.380626201629639
+          ]
+        },
+        {
+          "face": [
+            628,
+            581,
+            580
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7493155598640442,
+            0.7170553207397461,
+            5.086865425109863
+          ]
+        },
+        {
+          "face": [
+            629,
+            630,
+            582
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.715789258480072,
+            0.6869086623191833,
+            5.438935279846191
+          ]
+        },
+        {
+          "face": [
+            629,
+            582,
+            581
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7341843843460083,
+            0.7036069929599762,
+            5.142148017883301
+          ]
+        },
+        {
+          "face": [
+            630,
+            583,
+            582
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.716900646686554,
+            0.6881977319717407,
+            5.206817150115967
+          ]
+        },
+        {
+          "face": [
+            665,
+            666,
+            618
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7023919820785522,
+            0.7103326320648193,
+            5.46174955368042
+          ]
+        },
+        {
+          "face": [
+            665,
+            618,
+            617
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7079084515571594,
+            0.7230789661407471,
+            5.205638408660889
+          ]
+        },
+        {
+          "face": [
+            666,
+            667,
+            619
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.719528317451477,
+            0.7126337289810181,
+            5.405141830444336
+          ]
+        },
+        {
+          "face": [
+            666,
+            619,
+            618
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7268620133399963,
+            0.7249587178230286,
+            5.1468586921691895
+          ]
+        },
+        {
+          "face": [
+            667,
+            668,
+            620
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7343356013298035,
+            0.716560423374176,
+            5.355562210083008
+          ]
+        },
+        {
+          "face": [
+            667,
+            620,
+            619
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7434976100921631,
+            0.7287451326847076,
+            5.094671726226807
+          ]
+        },
+        {
+          "face": [
+            668,
+            669,
+            621
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7464666962623596,
+            0.7215408384799957,
+            5.31417179107666
+          ]
+        },
+        {
+          "face": [
+            668,
+            621,
+            620
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7574225068092346,
+            0.7338475286960602,
+            5.050300121307373
+          ]
+        },
+        {
+          "face": [
+            669,
+            670,
+            622
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7556322813034058,
+            0.7268639504909515,
+            5.282052040100098
+          ]
+        },
+        {
+          "face": [
+            669,
+            622,
+            621
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7682937979698181,
+            0.7395694553852081,
+            5.014873027801514
+          ]
+        },
+        {
+          "face": [
+            670,
+            671,
+            623
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7616395950317383,
+            0.7313308119773865,
+            5.260432720184326
+          ]
+        },
+        {
+          "face": [
+            670,
+            623,
+            622
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7758583426475525,
+            0.7448590993881226,
+            4.989521503448486
+          ]
+        },
+        {
+          "face": [
+            671,
+            624,
+            576
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7644587755203247,
+            0.732545018196106,
+            5.251062393188477
+          ]
+        },
+        {
+          "face": [
+            671,
+            576,
+            623
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7800048589706421,
+            0.7476812303066254,
+            4.975798606872559
+          ]
+        }
+      ],
+      "exact_trailing_edge_visible": false,
+      "exact_trailing_edge_first_hit_gap_m": 0.20600270908367427,
+      "exact_trailing_edge_blocker": "WFRL.Turbine.T1.Blade1",
+      "tip_uv_top_left": [
+        0.49471795558929443,
+        0.4424470067024231
+      ],
+      "tip_lateral_yawroot_m": -15.799163818359375,
+      "image": "reference.png"
+    },
+    {
+      "delta_from_down_deg": -10.0,
+      "time_s": 117.61346543860783,
+      "frame": 37,
+      "subframe": 0.8079261779785156,
+      "shoulder_uv_top_left": [
+        0.7214242815971375,
+        0.7358214855194092
+      ],
+      "shoulder_visible_face_samples": 23,
+      "shoulder_samples": [
+        {
+          "face": [
+            576,
+            577,
+            529
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7286098003387451,
+            0.7442797720432281,
+            4.922914028167725
+          ]
+        },
+        {
+          "face": [
+            576,
+            529,
+            528
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7380470037460327,
+            0.7569542825222015,
+            4.706987380981445
+          ]
+        },
+        {
+          "face": [
+            577,
+            578,
+            530
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7248716950416565,
+            0.7401654124259949,
+            4.933766841888428
+          ]
+        },
+        {
+          "face": [
+            577,
+            530,
+            529
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7353054881095886,
+            0.7530633211135864,
+            4.715236186981201
+          ]
+        },
+        {
+          "face": [
+            578,
+            579,
+            531
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7179633378982544,
+            0.7337300479412079,
+            4.953014850616455
+          ]
+        },
+        {
+          "face": [
+            578,
+            531,
+            530
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7291863560676575,
+            0.7473112940788269,
+            4.73145866394043
+          ]
+        },
+        {
+          "face": [
+            579,
+            580,
+            532
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7081051468849182,
+            0.7246632277965546,
+            4.980627536773682
+          ]
+        },
+        {
+          "face": [
+            579,
+            532,
+            531
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7199261784553528,
+            0.7386780083179474,
+            4.756165504455566
+          ]
+        },
+        {
+          "face": [
+            580,
+            581,
+            533
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.695559024810791,
+            0.713208943605423,
+            5.016143321990967
+          ]
+        },
+        {
+          "face": [
+            580,
+            533,
+            532
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7077739238739014,
+            0.7274714410305023,
+            4.788881301879883
+          ]
+        },
+        {
+          "face": [
+            581,
+            582,
+            534
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6806544661521912,
+            0.6995770931243896,
+            5.0590314865112305
+          ]
+        },
+        {
+          "face": [
+            581,
+            534,
+            533
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6930564045906067,
+            0.7139074802398682,
+            4.829105854034424
+          ]
+        },
+        {
+          "face": [
+            582,
+            583,
+            535
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6637659668922424,
+            0.6840860843658447,
+            5.10854959487915
+          ]
+        },
+        {
+          "face": [
+            582,
+            535,
+            534
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6761536598205566,
+            0.698269784450531,
+            4.876194000244141
+          ]
+        },
+        {
+          "face": [
+            617,
+            618,
+            570
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6670702695846558,
+            0.7261090278625488,
+            5.0648579597473145
+          ]
+        },
+        {
+          "face": [
+            618,
+            619,
+            571
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6842960119247437,
+            0.727605789899826,
+            5.027356147766113
+          ]
+        },
+        {
+          "face": [
+            618,
+            571,
+            570
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6857398748397827,
+            0.7375128865242004,
+            4.824441909790039
+          ]
+        },
+        {
+          "face": [
+            619,
+            620,
+            572
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6991027593612671,
+            0.7310130894184113,
+            4.99377965927124
+          ]
+        },
+        {
+          "face": [
+            619,
+            572,
+            571
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7019947171211243,
+            0.7405121028423309,
+            4.789760112762451
+          ]
+        },
+        {
+          "face": [
+            620,
+            621,
+            573
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7111831307411194,
+            0.7357126176357269,
+            4.965128421783447
+          ]
+        },
+        {
+          "face": [
+            620,
+            573,
+            572
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7155286073684692,
+            0.7450765669345856,
+            4.759621620178223
+          ]
+        },
+        {
+          "face": [
+            621,
+            622,
+            574
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7202845215797424,
+            0.7409451007843018,
+            4.942367076873779
+          ]
+        },
+        {
+          "face": [
+            621,
+            574,
+            573
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7260543704032898,
+            0.7504745274782181,
+            4.734986305236816
+          ]
+        },
+        {
+          "face": [
+            622,
+            623,
+            575
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7262430787086487,
+            0.7454341948032379,
+            4.926709175109863
+          ]
+        },
+        {
+          "face": [
+            622,
+            575,
+            574
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7333595752716064,
+            0.7556083351373672,
+            4.716968536376953
+          ]
+        },
+        {
+          "face": [
+            623,
+            576,
+            528
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7290418148040771,
+            0.7465828955173492,
+            4.920172214508057
+          ]
+        },
+        {
+          "face": [
+            623,
+            528,
+            575
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7373643517494202,
+            0.7583356201648712,
+            4.707210063934326
+          ]
+        },
+        {
+          "face": [
+            624,
+            625,
+            577
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.693027913570404,
+            0.7068894803524017,
+            5.698820114135742
+          ]
+        },
+        {
+          "face": [
+            624,
+            577,
+            576
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7064821124076843,
+            0.7205888628959656,
+            5.415973663330078
+          ]
+        },
+        {
+          "face": [
+            625,
+            626,
+            578
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6898423433303833,
+            0.7034416198730469,
+            5.709682464599609
+          ]
+        },
+        {
+          "face": [
+            625,
+            578,
+            577
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7040994763374329,
+            0.7172730267047882,
+            5.424306869506836
+          ]
+        },
+        {
+          "face": [
+            626,
+            627,
+            579
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6839544177055359,
+            0.6980579197406769,
+            5.728902339935303
+          ]
+        },
+        {
+          "face": [
+            626,
+            579,
+            578
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6987780332565308,
+            0.7123754620552063,
+            5.440713405609131
+          ]
+        },
+        {
+          "face": [
+            627,
+            628,
+            580
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6755436658859253,
+            0.6904692947864532,
+            5.75648832321167
+          ]
+        },
+        {
+          "face": [
+            627,
+            580,
+            579
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6907219886779785,
+            0.7050280570983887,
+            5.465681076049805
+          ]
+        },
+        {
+          "face": [
+            628,
+            629,
+            581
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6648246049880981,
+            0.6808707118034363,
+            5.7919487953186035
+          ]
+        },
+        {
+          "face": [
+            628,
+            581,
+            580
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6801379919052124,
+            0.6954873502254486,
+            5.498719692230225
+          ]
+        },
+        {
+          "face": [
+            629,
+            630,
+            582
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6520662903785706,
+            0.6694251298904419,
+            5.83475923538208
+          ]
+        },
+        {
+          "face": [
+            629,
+            582,
+            581
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6672991514205933,
+            0.6839272379875183,
+            5.539321422576904
+          ]
+        },
+        {
+          "face": [
+            630,
+            583,
+            582
+          ],
+          "visible": true,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6525245904922485,
+            0.6705795228481293,
+            5.5868330001831055
+          ]
+        },
+        {
+          "face": [
+            665,
+            666,
+            618
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6403299570083618,
+            0.6920790672302246,
+            5.8410420417785645
+          ]
+        },
+        {
+          "face": [
+            665,
+            618,
+            617
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6445523500442505,
+            0.7036665081977844,
+            5.5738396644592285
+          ]
+        },
+        {
+          "face": [
+            666,
+            667,
+            619
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6551526784896851,
+            0.6931832730770111,
+            5.803365230560303
+          ]
+        },
+        {
+          "face": [
+            666,
+            619,
+            618
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6608996391296387,
+            0.7042160630226135,
+            5.534989833831787
+          ]
+        },
+        {
+          "face": [
+            667,
+            668,
+            620
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6678563952445984,
+            0.6959300339221954,
+            5.7696967124938965
+          ]
+        },
+        {
+          "face": [
+            667,
+            620,
+            619
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.675119161605835,
+            0.7066744565963745,
+            5.499781608581543
+          ]
+        },
+        {
+          "face": [
+            668,
+            669,
+            621
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6781907677650452,
+            0.6997995376586914,
+            5.740998268127441
+          ]
+        },
+        {
+          "face": [
+            668,
+            621,
+            620
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6869282722473145,
+            0.7105034589767456,
+            5.469223976135254
+          ]
+        },
+        {
+          "face": [
+            669,
+            670,
+            622
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6859519481658936,
+            0.7041498422622681,
+            5.718235969543457
+          ]
+        },
+        {
+          "face": [
+            669,
+            622,
+            621
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.696087121963501,
+            0.7150782942771912,
+            5.444283485412598
+          ]
+        },
+        {
+          "face": [
+            670,
+            671,
+            623
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6910163164138794,
+            0.7078938186168671,
+            5.7026143074035645
+          ]
+        },
+        {
+          "face": [
+            670,
+            623,
+            622
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7024253010749817,
+            0.7194506824016571,
+            5.42606782913208
+          ]
+        },
+        {
+          "face": [
+            671,
+            624,
+            576
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.6933940649032593,
+            0.7088352143764496,
+            5.696084976196289
+          ]
+        },
+        {
+          "face": [
+            671,
+            576,
+            623
+          ],
+          "visible": false,
+          "blocker": "WFRL.Turbine.T1.Blade1",
+          "point": [
+            0.7058916091918945,
+            0.7217705547809601,
+            5.416218280792236
+          ]
+        }
+      ],
+      "exact_trailing_edge_visible": false,
+      "exact_trailing_edge_first_hit_gap_m": 0.17222000034728402,
+      "exact_trailing_edge_blocker": "WFRL.Turbine.T1.Blade1",
+      "tip_uv_top_left": [
+        0.46142715215682983,
+        0.4419829249382019
+      ],
+      "tip_lateral_yawroot_m": -10.445673942565918,
+      "image": "motion-10.png"
+    }
+  ],
+  "scene": "Rootkink_Down.blend",
+  "physics_rerun": false,
+  "geometry_modified": false,
+  "native_window": "NOT_RUN",
+  "scope": "Installed payload; three saved-motion poses; finite samples on the outer 15 percent chord near the maximum-chord shoulder. The exact trailing-edge midpoint can be self-occluded. Not complete motion or physical installation acceptance."
+}

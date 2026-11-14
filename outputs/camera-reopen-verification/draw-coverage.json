@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "source_result": "final-native/result.json",
+  "window": "Scripted native operators, separate Blender 5.2.1 process",
+  "range": [
+    1,
+    3601
+  ],
+  "checks": {
+    "single:C1": {
+      "distinct_frames": 2146,
+      "first_frame": 1,
+      "last_frame": 3601,
+      "wall_seconds": 60.07874374999665
+    },
+    "triple:C1": {
+      "distinct_frames": 1289,
+      "first_frame": 1,
+      "last_frame": 3601,
+      "wall_seconds": 60.2805073329946
+    },
+    "triple:C2": {
+      "distinct_frames": 1289,
+      "first_frame": 1,
+      "last_frame": 3601,
+      "wall_seconds": 60.2805362920044
+    },
+    "triple:C3": {
+      "distinct_frames": 1289,
+      "first_frame": 1,
+      "last_frame": 3601,
+      "wall_seconds": 60.28078354103491
+    }
+  }
+}

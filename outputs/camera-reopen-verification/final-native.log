@@ -1,0 +1,15 @@
+2026-10-24 00:00:49.735 Blender[15111:18994084] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+Warning: 1 × Draw window and swap: 1.7080 ms, average: 1.70800020 ms
+Warning: 1 × Draw window and swap: 8.8547 ms, average: 8.85470887 ms
+Warning: 1 × Draw window and swap: 1.8807 ms, average: 1.88070792 ms
+Warning: 1 × Draw window and swap: 25.6493 ms, average: 25.64933314 ms
+Warning: 1 × Draw window and swap: 9.8190 ms, average: 9.81895789 ms
+Warning: 1 × Draw window and swap: 1.7452 ms, average: 1.74516696 ms
+Warning: 1 × Draw window and swap: 19.0087 ms, average: 19.00870819 ms
+Warning: 1 × Draw window and swap: 15.4741 ms, average: 15.47412504 ms
+Warning: 1 × Draw window and swap: 7.4640 ms, average: 7.46400002 ms
+NATIVE_CAMERA_REOPEN_PASS
+02:35.829  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

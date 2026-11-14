@@ -1,0 +1,23 @@
+{
+  "status": "COMPLETED_CAPTURE_AND_PUBLIC_FREEZE_WITH_FAILED_OBSERVATION_GATES",
+  "acceptance": "REVIEW_ONLY",
+  "actual_raw_RGB": 161,
+  "canonical_formal_RGB": 64,
+  "formal_test_RGB": 48,
+  "formal_public_delivery_sha256": "3d761599b8ea2db1740f9bd475f22e6c0d28543fc6fe29f8f39b68e7131aef72",
+  "global_protocol_sha256": "b295e6437e9abfd89ffcc938eb1931ebedd6c18857f1292c45283358f7e84926",
+  "planned_formal_query_slots": 288,
+  "observed_RGB_query_slots": 288,
+  "root_visual_review_completed": true,
+  "localization_gate_per_window": {
+    "test01": false,
+    "test02": false,
+    "test03": false
+  },
+  "observation_gates_artifact": "../evaluation/test_observation_gates.json",
+  "post_gate_input_changes": false,
+  "test_reselection": false,
+  "source_uv_xyz_sent_to_solver": false,
+  "geometric_gain_or_field_acceptance": false,
+  "root_append_note": "Final gate summary assembled by root after capture agent stopped; no new render or source-coordinate correction."
+}

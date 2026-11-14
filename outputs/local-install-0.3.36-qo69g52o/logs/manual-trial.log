@@ -1,0 +1,18 @@
+00:01.602  blend            | Read blend: "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/manual-trial/pitch-trial.blend"
+Error: T1 机舱 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 机舱 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 叶轮 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 叶轮 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B1 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B1 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B2 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B2 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B3 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B3 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Error: T1 B2 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认
+Info: Saved as "pitch-trial.blend"
+MANUAL_PITCH_TRIAL_PASS {"status": "PASS", "addon_module": "bl_ext.user_default.wfrl_blender", "addon_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py", "blade_model": "rootkink", "nine_blade_geometry_matches_asset": true, "blender_version": "5.2.1 LTS", "selection_cases": 7, "pending_targets": true, "effective_start_pitch": true, "constant_rpm": true, "native_axis_and_rotation_mode_edits_rejected": true, "rejected_confirmation_atomic_while_running": true, "periodic_angles_accepted": true, "continuous_phase": true, "shared_clock_pause_resume_reset": true, "unselected_blades_preserved": true, "saved_trial_restored_paused": true, "independent_down_without_demo": true, "down_same_geometry": true, "shared_camera_data_rejected": true, "optical_definition": true, "occlusion_objects_retained": true, "demo_isolation_and_return": true, "other_turbines_preserved": true, "boundary": "Source background software checks; no output or physical validation"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

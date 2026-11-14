@@ -1,0 +1,131 @@
+{
+  "status": "CORRECTION01_GEOMETRY_MEAN_STABLE",
+  "threshold_m": 0.0016666666666666668,
+  "threshold_exceeding_comparisons": [],
+  "comparisons": {
+    "sparse_vs_dense_A1": {
+      "mean_m": 0.0,
+      "median_m": 0.0,
+      "p95_m": 0.0,
+      "max_m": 0.0,
+      "per_frame_mean_m": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "target_blade0_mean_m": 0.0,
+      "target_blade0_p95_m": 0.0,
+      "target_blade0_max_m": 0.0,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "sparse_lsmr_A1",
+      "right": "dense_exact_A1",
+      "objective_cost_difference_with_known_shift_prior_caveat": 0.0,
+      "threshold_exceeded_by_target_blade_mean": false
+    },
+    "sparse_vs_dense_A3": {
+      "mean_m": 0.0,
+      "median_m": 0.0,
+      "p95_m": 0.0,
+      "max_m": 0.0,
+      "per_frame_mean_m": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "target_blade0_mean_m": 0.0,
+      "target_blade0_p95_m": 0.0,
+      "target_blade0_max_m": 0.0,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "sparse_lsmr_A3",
+      "right": "dense_exact_A3",
+      "objective_cost_difference_with_known_shift_prior_caveat": 0.0,
+      "threshold_exceeded_by_target_blade_mean": false
+    },
+    "sparse_shift_equivalence_A3": {
+      "mean_m": 1.9037561622624986e-14,
+      "median_m": 1.4915051970151673e-14,
+      "p95_m": 5.187844343338944e-14,
+      "max_m": 1.2248667783530858e-13,
+      "per_frame_mean_m": [
+        9.163066605888923e-15,
+        1.86944605684637e-14,
+        4.151830889940624e-14,
+        9.600254035242328e-15,
+        2.104902494509739e-14,
+        2.1503339633406434e-14,
+        1.9700761032217787e-15,
+        2.8801962190273094e-14
+      ],
+      "target_blade0_mean_m": 1.8817860042908034e-14,
+      "target_blade0_p95_m": 4.810891756104541e-14,
+      "target_blade0_max_m": 7.884303351052377e-14,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "sparse_lsmr_A3",
+      "right": "sparse_lsmr_A3_shift360",
+      "objective_cost_difference_with_known_shift_prior_caveat": -1.8189894035458565e-11,
+      "threshold_exceeded_by_target_blade_mean": false
+    },
+    "dense_shift_equivalence_A3": {
+      "mean_m": 1.9037561622624986e-14,
+      "median_m": 1.4915051970151673e-14,
+      "p95_m": 5.187844343338944e-14,
+      "max_m": 1.2248667783530858e-13,
+      "per_frame_mean_m": [
+        9.163066605888923e-15,
+        1.86944605684637e-14,
+        4.151830889940624e-14,
+        9.600254035242328e-15,
+        2.104902494509739e-14,
+        2.1503339633406434e-14,
+        1.9700761032217787e-15,
+        2.8801962190273094e-14
+      ],
+      "target_blade0_mean_m": 1.8817860042908034e-14,
+      "target_blade0_p95_m": 4.810891756104541e-14,
+      "target_blade0_max_m": 7.884303351052377e-14,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "dense_exact_A3",
+      "right": "dense_exact_A3_shift360",
+      "objective_cost_difference_with_known_shift_prior_caveat": -1.8189894035458565e-11,
+      "threshold_exceeded_by_target_blade_mean": false
+    }
+  },
+  "remaining_gate": "root must review boundary/gradient/domain/observation evidence before P2b",
+  "all_original_results_preserved": true,
+  "no_further_parameter_scan": true,
+  "causal_limitation": "changes parameter centering, optimizer scale coordinates and finite-difference policy together; does not isolate FD alone"
+}

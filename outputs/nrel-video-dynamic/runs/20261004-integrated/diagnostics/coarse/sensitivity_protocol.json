@@ -1,0 +1,77 @@
+{
+  "schema": "nrel-dynamic-dy1-sensitivity.v1",
+  "status": "FROZEN_BEFORE_COMPUTATION",
+  "created_utc": "2026-10-04T03:12:56.203228+00:00",
+  "target": "T1/B1",
+  "input_route": "A / ideal camera + ideal root + separately registered ideal hub-axis plane",
+  "reference_source": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/model_state.json",
+  "reference_role": "historical image-derived loaded shape; held fixed, not truth",
+  "candidate_structural_point": {
+    "s_m": 61.5,
+    "reference": "model quarter-chord reference axis",
+    "mapping_status": "DECLARED_SECTION_PRIOR_NOT_VERIFIED_AGAINST_BEAMDYN",
+    "centroid_is_not_structural_tip": true,
+    "d_scope": "candidate model-axis to ideal axis-normal plane; not yet accepted structural measurement"
+  },
+  "frames": [
+    42,
+    43,
+    44,
+    45
+  ],
+  "use_history": "all development/previously inspected; no blind test",
+  "observations": "previously reviewed second-run RGB FBU/contours; reverify actual decoded RGB hashes before use, source fields/calibration checked against bundle",
+  "candidate_model": {
+    "q_units": "m",
+    "q_directions": [
+      "blade_root_x",
+      "blade_root_y"
+    ],
+    "phi": "(s/61.5)^2",
+    "q_grid_per_axis_m": [
+      -0.5,
+      -0.25,
+      0,
+      0.25,
+      0.5
+    ],
+    "state_count": 25,
+    "section": "fixed chord/thickness/twist from static v2, minimal rotation transport from reference tangent to current tangent",
+    "time_parameterization": "none: independent diagnostic states, no trajectory fitting",
+    "maximum_tip_q_component_m": 0.5
+  },
+  "budget": {
+    "image_size": [
+      320,
+      180
+    ],
+    "total_candidate_image_evaluations": 300,
+    "optimizer_iterations": 0,
+    "restarts": 0,
+    "threads": 4,
+    "time_limit_s": 600
+  },
+  "loss": "existing bidirectional projected_contour_loss; per-frame equal camera weights; empty terms invalid, not zero residual",
+  "ambiguity_rule": {
+    "comparison": "native-pixel average bidirectional mean-distance <= best+3 px; report finite-grid d span",
+    "tolerance_source": "exploratory historical boundary uncertainty, not calibrated noise or engineering tolerance",
+    "minimum_loss_is_not_3d_accuracy": true
+  },
+  "future_data_use": "none for this diagnostic",
+  "elastic_delta": null,
+  "elastic_delta_reason": "no independent unloaded reference input permitted to estimator",
+  "stop_conditions": [
+    "missing rigid plane",
+    "missing or inconsistent RGB provenance",
+    "nonfinite or degenerate geometry",
+    "unmapped structural reference blocks structural metric acceptance; candidate d may be diagnostic only"
+  ],
+  "forbidden": [
+    "source flexible states",
+    "truth coordinates",
+    "truth masks",
+    "source meshes",
+    "independent scoring before estimate freeze"
+  ],
+  "calibration_uncertainty": "ideal input conditional; finite grid excludes calibration/time errors and does not establish global identifiability"
+}

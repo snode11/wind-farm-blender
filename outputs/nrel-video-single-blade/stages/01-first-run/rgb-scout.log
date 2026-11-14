@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/capture_nrel_three_camera.py", line 179, in tick
+    manifest_path = Path(farm.path)/'manifest.json'
+                         ^^^^^^^^^
+AttributeError: 'FarmFlex' object has no attribute 'path'
+
+00:09.777  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

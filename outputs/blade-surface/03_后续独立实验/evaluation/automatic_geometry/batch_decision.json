@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "planned": 1,
+  "completed": 1,
+  "failed": 0,
+  "jobs": [
+    {
+      "id": "automatic8",
+      "exit_code": 0,
+      "wall_s": 3.1804949580691755,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/automatic_geometry/automatic8"
+    }
+  ],
+  "wall_s": 3.182879958068952
+}

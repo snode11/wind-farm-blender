@@ -1,0 +1,151 @@
+{
+  "checks": [
+    {
+      "path": "wfrl/nrel_reconstruction/pack.py",
+      "expected_sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+      "actual_sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/optimize.py",
+      "expected_sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+      "actual_sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/preview.py",
+      "expected_sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+      "actual_sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/compare_rgb.py",
+      "expected_sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+      "actual_sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/renderer.py",
+      "expected_sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+      "actual_sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/diagnostics.py",
+      "expected_sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+      "actual_sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/observations.py",
+      "expected_sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+      "actual_sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/__init__.py",
+      "expected_sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+      "actual_sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/model.py",
+      "expected_sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+      "actual_sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/dataset.py",
+      "expected_sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+      "actual_sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/evaluate.py",
+      "expected_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+      "actual_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/contour.py",
+      "expected_sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+      "actual_sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/boundary_metrics.py",
+      "expected_sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e",
+      "actual_sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e",
+      "matches": true
+    },
+    {
+      "path": "wfrl/nrel_reconstruction/README.md",
+      "expected_sha256": "3f272f97b5e4c53ddcb1b058231b10267beab2a83a965e0ba47ca88c6733a728",
+      "actual_sha256": "3f272f97b5e4c53ddcb1b058231b10267beab2a83a965e0ba47ca88c6733a728",
+      "matches": true
+    },
+    {
+      "path": "scripts/nrel_single_blade.py",
+      "expected_sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+      "actual_sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_optimizer.py",
+      "expected_sha256": "c0007e1f8911bd08dff428bcc8244b430ec3c265a4511843fdde777d2ee1221e",
+      "actual_sha256": "c0007e1f8911bd08dff428bcc8244b430ec3c265a4511843fdde777d2ee1221e",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_optimize_v2.py",
+      "expected_sha256": "3f101896a2613d2413656737d0c688373b2561776f0ab7314b6b8d825b979090",
+      "actual_sha256": "3f101896a2613d2413656737d0c688373b2561776f0ab7314b6b8d825b979090",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_observations_v2.py",
+      "expected_sha256": "645da8d2c79dd3e7d7cecad532000ec1d40c417fb2a5a6adefcd7c27aca49e59",
+      "actual_sha256": "645da8d2c79dd3e7d7cecad532000ec1d40c417fb2a5a6adefcd7c27aca49e59",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_renderer_audit.py",
+      "expected_sha256": "a698e74ae780f5b44a3676bf113faed8a0cc85c7416378ff7e915deff7f679e2",
+      "actual_sha256": "a698e74ae780f5b44a3676bf113faed8a0cc85c7416378ff7e915deff7f679e2",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_dataset.py",
+      "expected_sha256": "ca7aff3afea7383fb6b4fef365113f3ab839ee775c959f60ce7a34f60ebc9600",
+      "actual_sha256": "ca7aff3afea7383fb6b4fef365113f3ab839ee775c959f60ce7a34f60ebc9600",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_model_v2.py",
+      "expected_sha256": "85e78b976e9ba98809013b8303edf3515b1d441b6fbd76af54e944102bd30bc4",
+      "actual_sha256": "85e78b976e9ba98809013b8303edf3515b1d441b6fbd76af54e944102bd30bc4",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_boundary_metrics.py",
+      "expected_sha256": "6af72efd7d7129f9e0f659f5b8d5dc2a37f28a6d0ecaa5595f9813d2d02d4a34",
+      "actual_sha256": "6af72efd7d7129f9e0f659f5b8d5dc2a37f28a6d0ecaa5595f9813d2d02d4a34",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_contour.py",
+      "expected_sha256": "0482245433daaa0d66f11cc051b6cf7ea5b5714b278c4cbe48ac720ef50716c6",
+      "actual_sha256": "0482245433daaa0d66f11cc051b6cf7ea5b5714b278c4cbe48ac720ef50716c6",
+      "matches": true
+    },
+    {
+      "path": "tests/test_nrel_evaluate.py",
+      "expected_sha256": "60a925bc1cb05ed711e2015cd2f3cfe7cbf19840297e0bba7b530a0060d37419",
+      "actual_sha256": "60a925bc1cb05ed711e2015cd2f3cfe7cbf19840297e0bba7b530a0060d37419",
+      "matches": true
+    }
+  ],
+  "matches": 24,
+  "count": 24,
+  "interpretation": "Launch and final delivery snapshots differ: boundary_metrics.py matches final manifest and web-review snapshot; not fit-launch snapshot. No current edits to historical implementation."
+}

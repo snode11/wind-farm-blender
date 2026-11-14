@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "package_path": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender",
+  "verified_files": 181,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ],
+  "profile_files_unchanged": {
+    "startup.blend": true,
+    "userpref.blend": true
+  },
+  "archive_sha256": "ee2e6b1bbf9efb33e8106d76459b39c2fbb362e5a6c0dcf6ad59f5a36039aa3e",
+  "archive": "outputs/down-reference-view/validation/package/wfrl_blender-0.3.26.zip"
+}

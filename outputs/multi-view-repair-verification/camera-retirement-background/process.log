@@ -1,0 +1,4 @@
+CUSTOM_CAMERA_RETIREMENT {"status": "PASS", "module": "wfrl_blender", "addon_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py", "custom_cameras_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/custom_cameras.py", "custom_cameras_sha256": "8e775849b80ac16b618e8bf7179c5cda4fde5d6b8d7bc163398940b8352114f7", "blender": "5.2.1 LTS", "method": "Background Blender datablocks with explicit release-failure injection.", "natural_release_failure_observed": false, "checks": {"partial_release_retries_camera_datablock": true, "pending_shared_data_waits_for_last_user": true, "externally_removed_object": true, "externally_removed_data": true, "externally_removed_both": true, "normal_removal_preserves_shared_data_ownership": true}}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

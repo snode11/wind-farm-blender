@@ -1,0 +1,7 @@
+{
+  "before_tests_sha256": "08008d90dad523f3ef418f0efdecb9fad38997c5fcfc2c5a20a037bba2b2e393",
+  "after_native_tests_sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+  "reason": "Native validation rewrote preferences; restore the pre-task preferences after retaining the test-written copy.",
+  "restored_sha256": "08008d90dad523f3ef418f0efdecb9fad38997c5fcfc2c5a20a037bba2b2e393",
+  "status": "PASS"
+}

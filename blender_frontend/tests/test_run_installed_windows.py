@@ -205,6 +205,33 @@ def test_profile_preserves_explicit_resource_and_extension_paths(profile_dir):
     assert profile.addon_root == extensions / runner.ADDON_ID
 
 
+@pytest.mark.parametrize('recorded', ['installed', 'wrong', 'escape'])
+def test_validator_profile_records_the_installed_root(profile_dir, tmp_path, recorded):
+    environment = runner.read_object(profile_dir / 'environment.json')
+    addon = profile_dir / 'profile/extensions' / runner.ADDON_ID
+    if recorded == 'installed':
+        value = addon
+    elif recorded == 'wrong':
+        value = tmp_path / 'source/wfrl_blender'
+    else:
+        value = profile_dir / 'profile/extensions/link'
+        symlink_or_skip(value, tmp_path, target_is_directory=True)
+    environment['WFRL_EXPECTED_ADDON_ROOT'] = str(value)
+    runner.write_json(profile_dir / 'environment.json', environment)
+    if recorded != 'installed':
+        with pytest.raises(ValueError, match='is not the installed extension'):
+            runner.load_profile(profile_dir)
+        return
+    profile = runner.load_profile(profile_dir)
+    assert profile.addon_root == addon.resolve()
+    assert 'WFRL_EXPECTED_ADDON_ROOT' not in profile.environment
+    check = runner.select_tests(['mappo_full_view_default_window'])[0]
+    case = tmp_path / 'case'
+    case.mkdir()
+    _command, env, _report = runner.prepare_case(check, Path(sys.executable), profile, case, None)
+    assert env['WFRL_EXPECTED_ADDON_ROOT'] == str(profile.addon_root)
+
+
 def test_zip_install_saves_and_passes_the_same_isolated_environment(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(runner, 'setup_command', lambda command, env, *args, **kwargs: calls.append(dict(env)))

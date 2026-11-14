@@ -1,0 +1,4 @@
+00:15.947  blend            | Read blend: "PROJECT_ROOT/outputs/camera-reopen-verification/save-temp/wfrl-camera-save-j8z5y9_m/saved.blend"
+Info: Saved as "saved.blend"
+Error: Cannot save blend file, path "PROJECT_ROOT/outputs/camera-reopen-verification/save-temp/wfrl-camera-save-j8z5y9_m/fail.blend" is a directory
+NATIVE_CAMERA_SAVE_PASS

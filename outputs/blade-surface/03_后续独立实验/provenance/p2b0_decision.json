@@ -1,0 +1,179 @@
+{
+  "schema": "p2b-review-decision.v3",
+  "decision": "NUMERICAL_INCONCLUSIVE",
+  "result_status": "REVIEW_ONLY",
+  "date_local": "2026-10-06",
+  "timezone": "Asia/Shanghai",
+  "p2b0_status": "COMPLETED_DIAGNOSTIC_WITH_FAILED_NUMERICAL_GATE",
+  "p2b_status": "NOT_RUN_NUMERICAL_GATE_FAILED",
+  "old_attempt02_status": "COMPLETED_REVIEW_ONLY_UNCHANGED",
+  "application_accuracy_accepted": false,
+  "evidence_missing": false,
+  "formal_evidence_audit": "PASS",
+  "numerical_threshold_m": 0.0016666666666666668,
+  "baseline_comparisons": {
+    "sparse_vs_dense_A1": {
+      "mean_m": 2.5016696583994075e-05,
+      "median_m": 5.243940287092217e-06,
+      "p95_m": 0.00012292087304575488,
+      "max_m": 0.0006432040356340335,
+      "per_frame_mean_m": [
+        7.526152722632348e-06,
+        2.6048553447354818e-05,
+        3.35221901766413e-05,
+        2.236171068162076e-05,
+        5.4240095028425725e-06,
+        1.3799877484744472e-05,
+        2.893269345995499e-05,
+        6.251838519616137e-05
+      ],
+      "target_blade0_mean_m": 6.705767312805763e-05,
+      "target_blade0_p95_m": 0.0002401121952988927,
+      "target_blade0_max_m": 0.0006432040356340335,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "sparse_lsmr_A1",
+      "right": "dense_exact_A1",
+      "same_objective_cost_difference": 0.004187439765701129,
+      "threshold_exceeded_by_target_blade_mean": false
+    },
+    "sparse_vs_dense_A3": {
+      "mean_m": 0.0002325385550191386,
+      "median_m": 4.882868293589166e-05,
+      "p95_m": 0.0008431921363101042,
+      "max_m": 0.009110927726488301,
+      "per_frame_mean_m": [
+        1.724244093058035e-05,
+        5.1833867480941663e-05,
+        0.00011373892520200446,
+        8.123681950275509e-05,
+        4.9416423426047306e-05,
+        0.00025408716850254515,
+        0.0004419175582827541,
+        0.0008508352368254805
+      ],
+      "target_blade0_mean_m": 0.0005833385988125686,
+      "target_blade0_p95_m": 0.0034209998811593383,
+      "target_blade0_max_m": 0.009110927726488301,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "sparse_lsmr_A3",
+      "right": "dense_exact_A3",
+      "same_objective_cost_difference": 0.017903524758366984,
+      "threshold_exceeded_by_target_blade_mean": false
+    },
+    "sparse_shift_equivalence_A3": {
+      "mean_m": 0.011523010814192746,
+      "median_m": 0.010059483521294047,
+      "p95_m": 0.027210128627394352,
+      "max_m": 0.06228131964879334,
+      "per_frame_mean_m": [
+        0.012365081302497208,
+        0.011625380806218952,
+        0.014906602535675429,
+        0.017349601683366668,
+        0.006615586782449426,
+        0.007067573602851554,
+        0.010442716760663781,
+        0.01181154303981896
+      ],
+      "target_blade0_mean_m": 0.011185244903961689,
+      "target_blade0_p95_m": 0.02555059237673194,
+      "target_blade0_max_m": 0.06228131964879334,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "sparse_lsmr_A3",
+      "right": "sparse_lsmr_A3_shift360",
+      "same_objective_cost_difference": -30.826161220045833,
+      "threshold_exceeded_by_target_blade_mean": true
+    },
+    "dense_shift_equivalence_A3": {
+      "mean_m": 0.011398830930648588,
+      "median_m": 0.010079160300713258,
+      "p95_m": 0.02665765432738477,
+      "max_m": 0.05340561997900523,
+      "per_frame_mean_m": [
+        0.012365185164309863,
+        0.011623840496266047,
+        0.014834157387828908,
+        0.01730910847856618,
+        0.006639047535381369,
+        0.007163945332698791,
+        0.010205403812622759,
+        0.01104995923751479
+      ],
+      "target_blade0_mean_m": 0.010812764696759252,
+      "target_blade0_p95_m": 0.024430210060729367,
+      "target_blade0_max_m": 0.05340561997900523,
+      "grid": {
+        "span_bins": 81,
+        "perimeter_bins": 64,
+        "midpoint_samples": true,
+        "q_sha256": "bdce757e3eed8c6eede514bdf5e0e513c2decf06106391653e792a02872c90c0",
+        "weighting": "equal material q samples; not area-weighted truth accuracy"
+      },
+      "left": "dense_exact_A3",
+      "right": "dense_exact_A3_shift360",
+      "same_objective_cost_difference": -30.818438630221863,
+      "threshold_exceeded_by_target_blade_mean": true
+    }
+  },
+  "baseline_failures": [
+    "sparse_shift_equivalence_A3",
+    "dense_shift_equivalence_A3"
+  ],
+  "corrective_validation": {
+    "driver_mean_status": "CORRECTION01_GEOMETRY_MEAN_STABLE",
+    "root_gate_passed": false,
+    "reason": "All six runs nearly remain at A0 due to centered bounded TRF initialization: tiny nonzero strict-feasible z bypasses zero-radius fallback. Stable geometry is degenerate consistency. Large optimality and unexplained old FD/termination sensitivity remain.",
+    "trust_region_evidence": "diagnostics_old_attempt02/numerics/correction01/trust_region_degeneracy.json"
+  },
+  "executed_counts": {
+    "geometry_q_combinations": 4,
+    "original_finite_optimizations": 6,
+    "single_corrective_finite_optimizations": 6,
+    "new_rgb_captures": 0,
+    "p2b_input_observations": 0,
+    "p2b_development_perturbation_optimizations": 0,
+    "p2b_test_reconstructions": 0
+  },
+  "not_claimed": [
+    "surface observations are useless",
+    "meaningful geometric gain",
+    "physical defect recovery",
+    "engineering accuracy",
+    "P2b observation gate passed"
+  ],
+  "unexecuted_due_to_gate": [
+    "RGB marker source copy",
+    "development observation gate",
+    "20 paired perturbations",
+    "three blind windows",
+    "A1_new/C4/D4/D12 reconstructions",
+    "q-independent primary metrics",
+    "new texture/display regression"
+  ],
+  "minimal_next_step": "Use a new, predeclared development run to repair/audit initial TRF radius under bounded centered coordinates, record actual branch/step and same-point FD consistency, then repeat a finite common baseline gate. Only after this passes begin P2b RGB development; do not tune against old or future test scores.",
+  "evidence_paths": [
+    "diagnostics_old_attempt02/geometry/REPORT.md",
+    "diagnostics_old_attempt02/numerics/REPORT_original_matrix.md",
+    "diagnostics_old_attempt02/numerics/correction01/trust_region_degeneracy.json",
+    "validation/residual_smoothness_review.md",
+    "provenance/old_evidence_audit.json"
+  ]
+}

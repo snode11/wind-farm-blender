@@ -1,0 +1,598 @@
+{
+  "status": "PASS",
+  "module": "wfrl_blender",
+  "addon_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "build_hash": "9e2066aef7ef",
+  "method": "Scripted visible-window operators and a stale-execute guard check; optional external Space events recorded separately.",
+  "source_sha256": {
+    "native_camera_views.py": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19",
+    "playback.py": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93"
+  },
+  "checks": {
+    "isolated_visible_factory_startup": {
+      "status": "PASS"
+    },
+    "demo_starts_paused": {
+      "status": "PASS"
+    },
+    "independent_scene_fixture": {
+      "status": "PASS"
+    },
+    "A_button_starts_A": {
+      "status": "PASS"
+    },
+    "A_advances": {
+      "status": "PASS",
+      "before": 121,
+      "after": 156
+    },
+    "A_button_pauses_A": {
+      "status": "PASS"
+    },
+    "A_pause_holds_frame": {
+      "status": "PASS",
+      "expected": 156,
+      "actual": 156
+    },
+    "B_advances_independently": {
+      "status": "PASS",
+      "before": 1,
+      "after": 15
+    },
+    "manual_space_observer_released": {
+      "status": "PASS"
+    },
+    "external_space_press_delivered_to_A": {
+      "status": "PASS",
+      "events": [
+        {
+          "type": "SPACE",
+          "value": "PRESS",
+          "window": 515295416728,
+          "scene": "Scene",
+          "wall_s": 336774.753034875,
+          "A_frame": 156,
+          "B_frame": 489
+        },
+        {
+          "type": "SPACE",
+          "value": "RELEASE",
+          "window": 515295416728,
+          "scene": "Scene",
+          "wall_s": 336774.909680666,
+          "A_frame": 156,
+          "B_frame": 493
+        }
+      ]
+    },
+    "B_preserved_after_external_space_acknowledgement": {
+      "status": "PASS",
+      "before": 15,
+      "after": 762,
+      "input_evidence": "manual-space-events.json records a SPACE PRESS delivered to A; before/after PNGs show A"
+    },
+    "A_operator_handles_shortcut_for_B_owner": {
+      "status": "PASS"
+    },
+    "A_operator_rejects_B_owner": {
+      "status": "PASS",
+      "response": [
+        "CANCELLED"
+      ]
+    },
+    "A_stale_execute_rejects_B_owner": {
+      "status": "PASS",
+      "response": [
+        "CANCELLED"
+      ],
+      "reports": [
+        {
+          "level": [
+            "WARNING"
+          ],
+          "text": "播放器由场景“NativeCamera.IndependentPlayerB”占用，请先在对应窗口暂停"
+        }
+      ]
+    },
+    "A_button_keeps_B_owner": {
+      "status": "PASS"
+    },
+    "B_advances_after_A_button": {
+      "status": "PASS",
+      "before": 762,
+      "after": 777
+    },
+    "closing_A_keeps_B_owner": {
+      "status": "PASS"
+    },
+    "B_advances_after_A_close": {
+      "status": "PASS",
+      "before": 777,
+      "after": 792
+    },
+    "A_reopen_keeps_B_owner": {
+      "status": "PASS"
+    },
+    "A_child_window_owns_player": {
+      "status": "PASS"
+    },
+    "A_advances_before_resume_race": {
+      "status": "PASS"
+    },
+    "A_close_schedules_restore": {
+      "status": "PASS"
+    },
+    "deferred_A_resume_keeps_B_owner": {
+      "status": "PASS",
+      "lifecycle": [
+        {
+          "event": "close_before",
+          "wall_s": 336788.078639291,
+          "frame": 185,
+          "windows": [
+            [
+              515215651360,
+              true,
+              185
+            ],
+            [
+              515258831576,
+              true,
+              797
+            ],
+            [
+              515372349528,
+              true,
+              185
+            ]
+          ],
+          "preserve_playback": true,
+          "playing": true
+        },
+        {
+          "event": "cancel_before_close",
+          "wall_s": 336788.078681583,
+          "frame": 185,
+          "windows": [
+            [
+              515215651360,
+              false,
+              185
+            ],
+            [
+              515258831576,
+              false,
+              797
+            ],
+            [
+              515372349528,
+              false,
+              185
+            ]
+          ],
+          "result": [
+            "PASS_THROUGH"
+          ]
+        },
+        {
+          "event": "window_closed",
+          "wall_s": 336788.170526625,
+          "frame": 185,
+          "windows": [
+            [
+              515215651360,
+              false,
+              185
+            ],
+            [
+              515258831576,
+              false,
+              797
+            ]
+          ]
+        },
+        {
+          "event": "resume_event",
+          "wall_s": 336788.223030375,
+          "frame": 185,
+          "windows": [
+            [
+              515215651360,
+              true,
+              185
+            ],
+            [
+              515258831576,
+              true,
+              798
+            ]
+          ]
+        },
+        {
+          "event": "resume_skipped",
+          "wall_s": 336788.223034125,
+          "frame": 185,
+          "windows": [
+            [
+              515215651360,
+              true,
+              185
+            ],
+            [
+              515258831576,
+              true,
+              798
+            ]
+          ],
+          "reason": "another_or_live_player"
+        }
+      ]
+    },
+    "B_advances_after_deferred_A_resume": {
+      "status": "PASS",
+      "before": 797,
+      "after": 811
+    }
+  },
+  "observations": {
+    "independent_window_groups": {
+      "owner_scene": null,
+      "owner_window": null,
+      "any_playing": false,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 121,
+          "global_animation_flag": false
+        },
+        {
+          "pointer": 515295416728,
+          "parent": 515215651360,
+          "scene": "Scene",
+          "frame": 121,
+          "global_animation_flag": false
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 1,
+          "global_animation_flag": false
+        }
+      ]
+    },
+    "A_playing": {
+      "owner_scene": "Scene",
+      "owner_window": 515215651360,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515295416728,
+          "parent": 515215651360,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 1,
+          "global_animation_flag": true
+        }
+      ]
+    },
+    "B_playing_before_A_button": {
+      "owner_scene": "NativeCamera.IndependentPlayerB",
+      "owner_window": 515258831576,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515295416728,
+          "parent": 515215651360,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 15,
+          "global_animation_flag": true
+        }
+      ]
+    },
+    "after_acknowledged_external_space_input": {
+      "owner_scene": "NativeCamera.IndependentPlayerB",
+      "owner_window": 515258831576,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515295416728,
+          "parent": 515215651360,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 762,
+          "global_animation_flag": true
+        }
+      ]
+    },
+    "B_after_A_button": {
+      "owner_scene": "NativeCamera.IndependentPlayerB",
+      "owner_window": 515258831576,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515295416728,
+          "parent": 515215651360,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 777,
+          "global_animation_flag": true
+        }
+      ]
+    },
+    "B_after_A_close": {
+      "owner_scene": "NativeCamera.IndependentPlayerB",
+      "owner_window": 515258831576,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 792,
+          "global_animation_flag": true
+        }
+      ]
+    },
+    "A_reopened_while_B_plays": {
+      "owner_scene": "NativeCamera.IndependentPlayerB",
+      "owner_window": 515258831576,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 797,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515372349528,
+          "parent": 515215651360,
+          "scene": "Scene",
+          "frame": 156,
+          "global_animation_flag": true
+        }
+      ]
+    },
+    "raw_stop_NativeCamera.IndependentPlayerB": {
+      "owner_scene": null,
+      "owner_window": null,
+      "any_playing": false,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 185,
+          "global_animation_flag": false
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 811,
+          "global_animation_flag": false
+        }
+      ],
+      "operator_result": [
+        "PASS_THROUGH"
+      ]
+    },
+    "B_after_deferred_A_resume": {
+      "owner_scene": "NativeCamera.IndependentPlayerB",
+      "owner_window": 515258831576,
+      "any_playing": true,
+      "windows": [
+        {
+          "pointer": 515215651360,
+          "parent": null,
+          "scene": "Scene",
+          "frame": 185,
+          "global_animation_flag": true
+        },
+        {
+          "pointer": 515258831576,
+          "parent": null,
+          "scene": "NativeCamera.IndependentPlayerB",
+          "frame": 811,
+          "global_animation_flag": true
+        }
+      ]
+    }
+  },
+  "saved_result_source": "PROJECT_ROOT/blender_frontend/wfrl_blender/assets/mappo",
+  "manual_space_events": [
+    {
+      "type": "SPACE",
+      "value": "PRESS",
+      "window": 515295416728,
+      "scene": "Scene",
+      "wall_s": 336774.753034875,
+      "A_frame": 156,
+      "B_frame": 489
+    },
+    {
+      "type": "SPACE",
+      "value": "RELEASE",
+      "window": 515295416728,
+      "scene": "Scene",
+      "wall_s": 336774.909680666,
+      "A_frame": 156,
+      "B_frame": 493
+    }
+  ],
+  "closed_session_lifecycle": [
+    {
+      "event": "close_before",
+      "wall_s": 336788.078639291,
+      "frame": 185,
+      "windows": [
+        [
+          515215651360,
+          true,
+          185
+        ],
+        [
+          515258831576,
+          true,
+          797
+        ],
+        [
+          515372349528,
+          true,
+          185
+        ]
+      ],
+      "preserve_playback": true,
+      "playing": true
+    },
+    {
+      "event": "cancel_before_close",
+      "wall_s": 336788.078681583,
+      "frame": 185,
+      "windows": [
+        [
+          515215651360,
+          false,
+          185
+        ],
+        [
+          515258831576,
+          false,
+          797
+        ],
+        [
+          515372349528,
+          false,
+          185
+        ]
+      ],
+      "result": [
+        "PASS_THROUGH"
+      ]
+    },
+    {
+      "event": "window_closed",
+      "wall_s": 336788.170526625,
+      "frame": 185,
+      "windows": [
+        [
+          515215651360,
+          false,
+          185
+        ],
+        [
+          515258831576,
+          false,
+          797
+        ]
+      ]
+    },
+    {
+      "event": "resume_event",
+      "wall_s": 336788.223030375,
+      "frame": 185,
+      "windows": [
+        [
+          515215651360,
+          true,
+          185
+        ],
+        [
+          515258831576,
+          true,
+          798
+        ]
+      ]
+    },
+    {
+      "event": "resume_skipped",
+      "wall_s": 336788.223034125,
+      "frame": 185,
+      "windows": [
+        [
+          515215651360,
+          true,
+          185
+        ],
+        [
+          515258831576,
+          true,
+          798
+        ]
+      ],
+      "reason": "another_or_live_player"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "package_retained": true,
+  "package_path": "outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.zip",
+  "json_evidence_retained": true,
+  "validation_logs_retained": true,
+  "isolated_profile_retained": false,
+  "generated_test_scenes_retained": false,
+  "recovery_manifest": "RECOVERY_ROOT/wfrl-0.3.28-validation-intermediates/manifest.json",
+  "moved": [
+    {
+      "source": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile",
+      "destination": "RECOVERY_ROOT/wfrl-0.3.28-validation-intermediates/profile",
+      "file_count": 282,
+      "bytes": 153744765
+    },
+    {
+      "source": "PROJECT_ROOT/outputs/frontend-stability-fixes/blade-model-installed/rootkink.blend",
+      "destination": "RECOVERY_ROOT/wfrl-0.3.28-validation-intermediates/rootkink.blend",
+      "file_count": 1,
+      "bytes": 12124777
+    },
+    {
+      "source": "PROJECT_ROOT/outputs/frontend-stability-fixes/shared-context-installed/shared-context.blend",
+      "destination": "RECOVERY_ROOT/wfrl-0.3.28-validation-intermediates/shared-context.blend",
+      "file_count": 1,
+      "bytes": 50582667
+    },
+    {
+      "source": "SYSTEM_TMP/wfrl-daily-probe-7uvg7nk0",
+      "destination": "RECOVERY_ROOT/wfrl-0.3.28-validation-intermediates/daily-probe-temporary",
+      "file_count": 2,
+      "bytes": 3072
+    }
+  ],
+  "scope": "Only disposable isolated profile, generated regression scenes and probe temporary files; ZIP, payload inventory and validation evidence retained. Stored validation paths identify the original execution locations."
+}

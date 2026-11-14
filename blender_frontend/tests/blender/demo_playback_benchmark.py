@@ -18,11 +18,28 @@ import bpy
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[3]
-sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')), str(ROOT)]
 MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
+EXPECTED_ROOT = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
+if MODULE.startswith('bl_ext.'):
+    # An installed extension must not fall back to workspace packages.
+    workspace = {ROOT.resolve(), (ROOT/'blender_frontend').resolve()}
+    sys.path[:] = [entry for entry in sys.path if not entry or Path(entry).resolve() not in workspace]
+else:
+    sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')), str(ROOT)]
 addon = importlib.import_module(MODULE)
 core = importlib.import_module(MODULE+'.custom_cameras')
 native = importlib.import_module(MODULE+'.native_camera_views')
+if EXPECTED_ROOT:
+    expected_root = Path(EXPECTED_ROOT).resolve()
+    if Path(addon.__file__).resolve().parent != expected_root:
+        raise RuntimeError(f'{MODULE} was imported from {addon.__file__}, not {expected_root}')
+    foreign = sorted(name for name, module in list(sys.modules.items())
+                     if (name == MODULE or name.startswith(MODULE+'.')) and getattr(module, '__file__', None)
+                     and not Path(module.__file__).resolve().is_relative_to(expected_root))
+    if MODULE.startswith('bl_ext.') and 'wfrl' in sys.modules:
+        foreign.append('wfrl')
+    if foreign:
+        raise RuntimeError(f'Modules outside {expected_root} were loaded for {MODULE}: {foreign}')
 # The evaluator is test infrastructure, independent of the addon under test.
 spec = importlib.util.spec_from_file_location('_wfrl_benchmark_evaluator', ROOT/'blender_frontend/wfrl_blender/playback_benchmark.py')
 evaluator = importlib.util.module_from_spec(spec)

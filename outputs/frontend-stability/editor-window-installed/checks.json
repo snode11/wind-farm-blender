@@ -1,0 +1,108 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "addon_file": "PROJECT_ROOT/outputs/frontend-stability/validation/profile/extensions/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "method": "Scripted operators in independent native windows",
+  "checks": {
+    "isolated_visible_startup": {
+      "status": "PASS"
+    },
+    "editor_bound_to_own_runtime": {
+      "status": "PASS"
+    },
+    "independent_main_window": {
+      "status": "PASS"
+    },
+    "foreign_player_survives_begin": {
+      "status": "PASS"
+    },
+    "foreign_player_survives_cancel": {
+      "status": "PASS"
+    },
+    "own_player_paused": {
+      "status": "PASS"
+    },
+    "own_player_resumes_original_window": {
+      "status": "PASS"
+    },
+    "finish_does_not_steal_new_player": {
+      "status": "PASS"
+    },
+    "switched_owner_window_does_not_resume": {
+      "status": "PASS"
+    },
+    "closed_owner_window_does_not_resume": {
+      "status": "PASS"
+    }
+  },
+  "observations": {
+    "foreign_player_after_cancel": {
+      "owner_scene": "NrelEditor.ForeignPlayer",
+      "owner_window": 504173813272,
+      "playing": true,
+      "windows": [
+        {
+          "pointer": 504079128224,
+          "scene": "Scene",
+          "frame": 1
+        },
+        {
+          "pointer": 504173813272,
+          "scene": "NrelEditor.ForeignPlayer",
+          "frame": 29
+        }
+      ]
+    },
+    "own_player_resumed_from_foreign_context": {
+      "owner_scene": "Scene",
+      "owner_window": 504079128224,
+      "playing": true,
+      "windows": [
+        {
+          "pointer": 504079128224,
+          "scene": "Scene",
+          "frame": 42
+        },
+        {
+          "pointer": 504173813272,
+          "scene": "NrelEditor.ForeignPlayer",
+          "frame": 29
+        }
+      ]
+    },
+    "foreign_player_started_during_edit": {
+      "owner_scene": "NrelEditor.ForeignPlayer",
+      "owner_window": 504173813272,
+      "playing": true,
+      "windows": [
+        {
+          "pointer": 504079128224,
+          "scene": "Scene",
+          "frame": 58
+        },
+        {
+          "pointer": 504173813272,
+          "scene": "NrelEditor.ForeignPlayer",
+          "frame": 38
+        }
+      ]
+    },
+    "original_window_closed": {
+      "owner_scene": null,
+      "owner_window": null,
+      "playing": false,
+      "windows": [
+        {
+          "pointer": 504173813272,
+          "scene": "NrelEditor.ForeignPlayer",
+          "frame": 38
+        }
+      ]
+    }
+  },
+  "source_sha256": {
+    "editor.py": "f15db8e3fe3ee898e544125020dd414921a87778df104f83d7b98c143b69ce8b",
+    "playback.py": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93"
+  }
+}

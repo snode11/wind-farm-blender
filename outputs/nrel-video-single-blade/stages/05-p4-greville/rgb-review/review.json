@@ -1,0 +1,349 @@
+{
+  "schema": "nrel.rgb_boundary_visual_review.v1",
+  "status": "REVIEW_ONLY_NO_OBSERVATION_CHANGE",
+  "date": "2026-10-03",
+  "camera": "C1",
+  "frame": 42,
+  "frame_role": "fit",
+  "native_size": [
+    1920,
+    1080
+  ],
+  "coordinate_convention": "top-left origin; x right; y down; integer pixel centers",
+  "scope": "P3-identified lower excluded RGB region and contextual false boundaries; no 3-D root-band membership inferred from RGB",
+  "selection_basis": "complete native RGB and unaltered RGB crops, target surface/background continuity and visible foreign structures",
+  "location_method": "visual selection followed by sparse vertical RGB intensity-drop checks; rounded approximate anchors; no dense edge extraction",
+  "not_blind_to_previous_diagnostics": true,
+  "prohibited_for_selection": [
+    "distance to fitted mesh",
+    "frozen mesh projection",
+    "truth geometry",
+    "optimization loss"
+  ],
+  "model_or_truth_loaded_for_this_review": false,
+  "fitting": false,
+  "observations_modified": false,
+  "masks_modified": false,
+  "coordinate_only_p4_fit_inputs_unchanged": true,
+  "approximate_review_tolerance_px": 3,
+  "tolerance_is_calibrated": false,
+  "review_locations_are_fit_observations": false,
+  "curve_interpolation_is_observation": false,
+  "segments": [
+    {
+      "id": "R1",
+      "kind": "target_outer_boundary",
+      "decision": "retain_future_candidate",
+      "anchors": [
+        [
+          1050,
+          912
+        ],
+        [
+          1100,
+          913
+        ],
+        [
+          1150,
+          916
+        ],
+        [
+          1200,
+          920
+        ]
+      ],
+      "region": [
+        1050,
+        907,
+        1201,
+        925
+      ],
+      "reason": "目标白色表面下缘与深色背景连续分开；背景纹理止于边界，未见杆件切过。"
+    },
+    {
+      "id": "R2",
+      "kind": "target_outer_boundary",
+      "decision": "retain_future_candidate",
+      "anchors": [
+        [
+          1200,
+          920
+        ],
+        [
+          1250,
+          922
+        ],
+        [
+          1300,
+          923
+        ],
+        [
+          1350,
+          924
+        ],
+        [
+          1400,
+          925
+        ]
+      ],
+      "region": [
+        1200,
+        915,
+        1401,
+        930
+      ],
+      "reason": "下缘缓慢向下弯，白色叶片上侧和深色背景下侧可连续追踪；不是叶片内部阴影边。"
+    },
+    {
+      "id": "R3",
+      "kind": "target_outer_boundary",
+      "decision": "retain_future_candidate",
+      "anchors": [
+        [
+          1400,
+          925
+        ],
+        [
+          1450,
+          925
+        ],
+        [
+          1500,
+          924
+        ],
+        [
+          1550,
+          922
+        ],
+        [
+          1600,
+          921
+        ],
+        [
+          1650,
+          919
+        ],
+        [
+          1700,
+          914
+        ]
+      ],
+      "region": [
+        1400,
+        909,
+        1701,
+        930
+      ],
+      "reason": "下缘继续连续，内部灰色弯曲阴影位于白色表面内，并未替代或截断外边界。"
+    },
+    {
+      "id": "R4",
+      "kind": "target_outer_boundary",
+      "decision": "retain_future_candidate",
+      "anchors": [
+        [
+          1700,
+          914
+        ],
+        [
+          1725,
+          910
+        ],
+        [
+          1750,
+          904
+        ],
+        [
+          1775,
+          896
+        ]
+      ],
+      "region": [
+        1700,
+        891,
+        1776,
+        919
+      ],
+      "reason": "右端外边界上弯，仍为白色叶片对深色背景；此段所有锚点及±3 px邻域均被旧域排除。"
+    },
+    {
+      "id": "J1",
+      "kind": "target_outer_boundary_domain_join",
+      "decision": "defer_domain_join",
+      "anchors": [
+        [
+          1775,
+          896
+        ],
+        [
+          1780,
+          895
+        ],
+        [
+          1790,
+          891
+        ],
+        [
+          1800,
+          888
+        ],
+        [
+          1810,
+          884
+        ]
+      ],
+      "region": [
+        1775,
+        879,
+        1811,
+        901
+      ],
+      "reason": "RGB归属清楚，但跨越既有valid域下边界；未来局部域需处理容差与旧观测去重，本轮不作为整段新增候选。"
+    },
+    {
+      "id": "E1",
+      "kind": "external_occluder_edges",
+      "decision": "exclude",
+      "anchors": [],
+      "region": [
+        75,
+        510,
+        246,
+        1075
+      ],
+      "reason": "左侧灰色与黑色竖向杆件覆盖白色叶片；其侧缘和圆钝末端属于遮挡物，不是B1自由外轮廓。"
+    },
+    {
+      "id": "U1",
+      "kind": "occluded_target_boundary",
+      "decision": "uncertain_do_not_infer",
+      "anchors": [],
+      "region": [
+        120,
+        995,
+        195,
+        1055
+      ],
+      "reason": "下缘接近杆件末端时出现相交与遮挡；RGB无法直接给出杆件后目标边界位置，禁止连接或外推补点。"
+    },
+    {
+      "id": "E2",
+      "kind": "detached_external_structure",
+      "decision": "exclude",
+      "anchors": [
+        [
+          365,
+          61
+        ],
+        [
+          650,
+          119
+        ],
+        [
+          875,
+          166
+        ],
+        [
+          897,
+          132
+        ]
+      ],
+      "region": [
+        360,
+        48,
+        907,
+        179
+      ],
+      "reason": "上方白色细杆与目标白色叶片之间有可见深色背景间隔，不能因同为白色而并入B1轮廓。"
+    },
+    {
+      "id": "E3",
+      "kind": "internal_surface_shading",
+      "decision": "exclude",
+      "anchors": [],
+      "region": [
+        1430,
+        480,
+        1560,
+        880
+      ],
+      "reason": "白色叶片内部的灰色弯曲过渡两侧仍是目标表面，非前景/背景分界，不应作为外轮廓。"
+    }
+  ],
+  "retained_segment_count": 4,
+  "retained_unique_sparse_location_count": 17,
+  "retained_locations_and_3px_neighborhoods_all_currently_invalid": true,
+  "rgb_sha256": "65a6724bdce4a56da579b2f51e752c81f478e1ef427bfec8e5602d3667e2ad8f",
+  "matches_p3_pixel_sha256": true,
+  "matches_p3_historical_observation_file_sha256": true,
+  "input_sha256_before": {
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/C1_000042_native_rgb.png": "484a49de3df5745e373a41a08bafb2f4cdd712686b1d8e8315d4df5b45c17bd4",
+    "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174",
+    "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/README.md": "031a15257c4df0813033afe6e988ab9555b9cbb62291ee67c42e53df7a1666dd",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/root_rgb_audit.json": "37340d34fc1106ba3c88c7f1e850badd540b1ca87c13e891da2f2cdb77dcb55c"
+  },
+  "input_sha256_after": {
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/C1_000042_native_rgb.png": "484a49de3df5745e373a41a08bafb2f4cdd712686b1d8e8315d4df5b45c17bd4",
+    "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174",
+    "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/README.md": "031a15257c4df0813033afe6e988ab9555b9cbb62291ee67c42e53df7a1666dd",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/root_rgb_audit.json": "37340d34fc1106ba3c88c7f1e850badd540b1ca87c13e891da2f2cdb77dcb55c"
+  },
+  "inputs_unchanged": true,
+  "crops_native_xyxy_half_open": {
+    "lower_context": [
+      0,
+      760,
+      1920,
+      1080
+    ],
+    "root_lower": [
+      950,
+      850,
+      1850,
+      1020
+    ],
+    "left_structure": [
+      0,
+      450,
+      600,
+      1080
+    ],
+    "upper_context": [
+      220,
+      0,
+      1150,
+      350
+    ]
+  },
+  "future_branch_recommendation": {
+    "may_enter_separate_observation_version_review": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "pending_join_decision": [
+      "J1"
+    ],
+    "never_infer_hidden_target_from_occluder": [
+      "E1",
+      "U1"
+    ],
+    "exclude_false_outline": [
+      "E2",
+      "E3"
+    ],
+    "next_step": "independent dense RGB annotation/local valid-domain version with uncertainty, provenance and deduplication; freeze it before model response or fit; original coordinate-only P4 comparison uses unchanged observations",
+    "does_not_establish": [
+      "new observation count or independent information",
+      "3-D root-band span",
+      "root error reduction",
+      "complete surface recovery",
+      "geometric acceptance"
+    ]
+  }
+}

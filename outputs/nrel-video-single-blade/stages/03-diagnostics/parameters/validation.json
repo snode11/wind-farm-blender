@@ -1,0 +1,39 @@
+{
+  "status": "PASSED_LOCAL_DIAGNOSTIC_CHECKS",
+  "test_command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_parameter_audit.py tests/test_nrel_contour.py tests/test_nrel_model_v2.py",
+  "test_result": "26 passed in 0.81s",
+  "parameter_audit_test_count": 13,
+  "single_variable_forward_record_count": 360,
+  "combination_forward_record_count": 48,
+  "single_variable_csv_data_rows": 1080,
+  "combination_csv_data_rows": 144,
+  "frozen_mesh_check": {
+    "max_abs_coordinate_error_m": 4.949340715043604e-09,
+    "rms_coordinate_error_m": 1.3742109196441055e-09,
+    "vertex_count": 300,
+    "face_count": 596,
+    "faces_exact": true
+  },
+  "input_hashes_still_equal": true,
+  "prior_360_artifacts_preserved_during_combination": {
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/parameter_audit.json": true,
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/observed_response_vectors.json": true,
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/per_observation.csv": true
+  },
+  "no_optimizer_executed": true,
+  "no_scoring_truth_read": true,
+  "evidence_sha256": {
+    "observed_response_vectors.json": "f4e6142a0b506f23fab86f758b54713bb69ec53a5f5e07bb3493714db8b195a8",
+    "combination_per_observation.csv": "e32384963b37533429582642b87c6bbca6a53197a2f1d02a6f63401ab37dd36f",
+    "README.md": "b35d7c7ab1c74996d8f6de81f6ab8261d425f1bee60c6bea10850389508e0bf7",
+    "parameter_semantics.json": "6da3de19b5bc69a64a1b1f8a4a06887394d57f1187db9d3897543c48c03f8e62",
+    "combination_audit.json": "bcab6e2150481ca32f3c31c97e6e45b0f10b4a029996b79fdbf46877f124daa7",
+    "parameter_audit.json": "4e06d87ea85becf30bd1393237057b08338272f309f7e67fc3678579e23ae68d",
+    "combination_response_vectors.json": "56e36ae697be26110ef7f47e070afca6aad62ab5d08e2cf3fd6230e28f460bb2",
+    "per_observation.csv": "f1065fe225cf464135089a60487d2c987b54657dbaec7b7ce0551b7642ff72da"
+  },
+  "code_sha256": {
+    "wfrl/nrel_reconstruction/parameter_audit.py": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1",
+    "tests/test_nrel_parameter_audit.py": "6dc90eb454b5065d1c4810fe7b0b8035a99831a67c233136b1b5d7b31ba2c720"
+  }
+}

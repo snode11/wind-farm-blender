@@ -1,0 +1,9 @@
+{
+  "profile_hashes": {
+    "startup.blend": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+    "userpref.blend": "22a63d06df94fba086205915878792be9ca2e934d8c7107dd3af47e1ca04610c"
+  },
+  "restore_archive": "outputs/down-reference-view/validation/package/wfrl_blender-0.3.26.zip",
+  "restore_archive_sha256": "ee2e6b1bbf9efb33e8106d76459b39c2fbb362e5a6c0dcf6ad59f5a36039aa3e",
+  "installed_package": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender"
+}

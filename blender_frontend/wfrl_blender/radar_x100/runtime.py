@@ -186,6 +186,9 @@ class Session:
     def start_recording(self, path):
         return session_recording.start_recording(self, path)
 
+    def recording_state(self):
+        return session_recording.recording_state(self)
+
     def recording_health(self):
         return session_recording.recording_health(self)
 

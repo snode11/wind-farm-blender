@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "addon_file": "PROJECT_ROOT/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/__init__.py",
+  "checks": [
+    "repeat register",
+    "unregister",
+    "register again"
+  ]
+}

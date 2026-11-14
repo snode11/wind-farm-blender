@@ -1,0 +1,15 @@
+{
+  "classification": "PARTIAL_CONTOUR_RECORDED_MAPPO_BLENDER_SCENE",
+  "planned_observations": 16,
+  "gates": {
+    "known_iou_min": 0.9,
+    "known_precision_min": 0.95,
+    "known_recall_min": 0.95,
+    "known_boundary_symmetric_mean_px_max": 1.5,
+    "known_boundary_symmetric_p95_px_max": 3.0
+  },
+  "edge_policy": "exclude 1px neighbourhood around unknown polygons and 3px image crop border; same censor contract as explicit snapshot",
+  "no_interior_contour_policy": "boundary N/A only if source and candidate both have zero interior contour; geometry remains unavailable",
+  "full_instance_gate": "FAILED_INPUT_INSTANCE_GATE",
+  "unknown_true_blade_area": "evaluation-only diagnostic after freeze; never used to choose polygon or generate masks"
+}

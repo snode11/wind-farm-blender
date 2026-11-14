@@ -1,0 +1,75 @@
+{
+  "schema": "nrel-layout-migration-verification.v2",
+  "checked_at": "2026-10-03T03:03:33.160991+00:00",
+  "status": "PASSED",
+  "original_file_count": 1350,
+  "unchanged_primary_files": 1322,
+  "path_adapted_texts_with_verified_originals": 28,
+  "protected_data_files_unchanged": 1218,
+  "repository_document_originals_verified": 2,
+  "legacy_entries_removed": 16,
+  "visible_physical_stage_directories": 6,
+  "visible_physical_review_material_directories": 1,
+  "frame_symlinks": [
+    {
+      "current_relative": "stages/01-first-run/formal/encoding-adapter/C1/master_frames",
+      "target": "../../../internal-capture-formal/capture_20261002_213817_baf6978517/C1"
+    },
+    {
+      "current_relative": "stages/01-first-run/formal/encoding-adapter/C2/master_frames",
+      "target": "../../../internal-capture-formal/capture_20261002_213817_baf6978517/C2"
+    },
+    {
+      "current_relative": "stages/01-first-run/formal/encoding-adapter/C3/master_frames",
+      "target": "../../../internal-capture-formal/capture_20261002_213817_baf6978517/C3"
+    },
+    {
+      "current_relative": "stages/01-first-run/trial/encoding-adapter/C1/master_frames",
+      "target": "../../../internal-capture/capture_20261002_213522_5d6e3ad3af/C1"
+    },
+    {
+      "current_relative": "stages/01-first-run/trial/encoding-adapter/C2/master_frames",
+      "target": "../../../internal-capture/capture_20261002_213522_5d6e3ad3af/C2"
+    },
+    {
+      "current_relative": "stages/01-first-run/trial/encoding-adapter/C3/master_frames",
+      "target": "../../../internal-capture/capture_20261002_213522_5d6e3ad3af/C3"
+    }
+  ],
+  "markdown_documents_checked": 34,
+  "local_markdown_links_checked": 262,
+  "missing_local_links": [],
+  "helpers_statically_parsed": 12,
+  "manifest_sha256": "87fff5355a7acf88e7719ac54055898c507826a485156da465bd012914df9145",
+  "historical_signature_checks": {
+    "P3": 365,
+    "P5": 554,
+    "P4_freeze_gate": 135,
+    "P5_freeze_gate": 149,
+    "P4_review": 6,
+    "P5_annotation": 19,
+    "failures": 0,
+    "verified_source_identity": "Returned original/current matching path distinguished; 18 P5 signatures used preserved original or implementation snapshots."
+  },
+  "scope": "Physical relocation, path adaptation, read-only signatures/import checks and regression tests. No historical collection, rendering, fitting or scoring rerun.",
+  "errors": [],
+  "regression_test_runs": [
+    {
+      "scope": "Artifact paths, observations v2, P5 annotation, center-scale family and observation/Greville interfaces",
+      "passed": 63,
+      "duration_s": 3.09
+    },
+    {
+      "scope": "Final artifact-path helper and P5 observation interface after final provenance fix",
+      "passed": 20,
+      "duration_s": 1.02
+    }
+  ],
+  "current_python_ast_files_checked": 45,
+  "real_P5_read_only_protocol_check": {
+    "status": "PASSED",
+    "original_observation_rows": 12,
+    "revised_observation_rows": 12,
+    "historical_build_script_verified_at": "review/layout-migration-20261003/originals/20261003-p5-observation/annotation/build_annotation.py"
+  }
+}

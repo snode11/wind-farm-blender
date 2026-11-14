@@ -1,0 +1,357 @@
+{
+  "overall": "FAILED_PRECONDITIONS",
+  "stage4": "DEFERRED",
+  "field_data": "NOT_AVAILABLE",
+  "primary_texture_geometry_gain": null,
+  "depth": null,
+  "source": {
+    "classification": "FINAL_TRF_BOUND_ORIGIN_SOURCE_FROZEN",
+    "core_recon_parent": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-release",
+    "head": "e504ed66548c4b774664233341b70c87512561ef",
+    "modules": {
+      "atlas.py": "3c5a944fe26ea56b7a02d358baf642119655883fc77f0b62cf1724eb15568b63",
+      "blender_export_cameras.py": "aafa7bd1eb94f7c3c56578af317c2833002463509cd4301804f65714ddb7ea16",
+      "blender_view.py": "f3aed291e145183fd71213b038f686149e327c62765df02d6f2123beeeafb76e",
+      "camera.py": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+      "check_alignment.py": "df8350a6f0bb26c719d0ee80e624ba1bab7bbc2b44286b7dbc4504149254b5bc",
+      "contour_support.py": "9e7658c2fd081665be16298860d88ec370f9841c4ff00539808f9713089b790c",
+      "coverage.py": "f05e2d467dd45893291cb1f71ee3260590fff8768c1b06c9804ac049cf8978d4",
+      "eval_texture.py": "89ff2acc4829ea0ec64814fab48ad4324d1b90fa9d319df8426bf9b0e9ed5365",
+      "evaluate.py": "02b70c14077f609ec60d16b18d49fcea3061c71843d8d4f3e0f74dc6f40ef8f2",
+      "input_adapter.py": "fa931be7fcab6d34c87735245653a3cd8d6314100b83b102fad897f2cfc36e6d",
+      "model.py": "3b0bb519fa6543783165523631945b8564adc0387fe62e0be787a013a64a1bfe",
+      "preview.py": "aadf90942c642f268bc25255df714a1968cd5beb3411c35417ccfd1f2b6d5002",
+      "raster.py": "329fa72599cc19ccaef1b44ead6feed2cca481f6278737ad725ed25d65329f38",
+      "recon.py": "e6266871f6669d96d94a5701e9693b799c211449ad55e8c0b591431ea6d91156",
+      "rgb_masks.py": "a58e25215f0b5567fe8d15650da5cd25178ee5f53b2af5d693ccdfb5c88d1100",
+      "run.py": "fbe47a92200caece029b911009d4696110c3b9eb7c57862ae6f81104c6b70126",
+      "surface_observations.py": "f869359c0ef99c18e98d07506cb9f5b01fc770e62e91d8c1fab2e6f0bc1273f1",
+      "surface_observations_subpixel.py": "95d0f1d8e279cd6e1f17e664b95bd73ca2b7331aab2f23a4773a1c188400a367",
+      "synth.py": "83d2f506a3022abd7efcdffda0371310954d430ddf86f589b4b571bc05cf5f9c",
+      "test_texture_correctness.py": "b3fe1019898bf6ce2e1d9d0bbce8f1b5a09aab52bb967144535af750846673fc",
+      "texture.py": "e82e46f83b729086d079782b7c1a60523e5496678343ff335abafb68a50c7a1a"
+    },
+    "tests": {
+      "blade_recon0.2/tests/test_full_model_state.py": "09e986b390ac7722f5f7b29c998d8ed2a8f121725193d41af607bedab45d4a7c",
+      "blade_recon0.2/tests/test_input_recon.py": "86accf152ef7dff66f0ecd1f26d4013acf885fe117e4b46862378c30fa0754a7",
+      "blade_recon0.2/tests/test_numerical_contours.py": "339c2316d964ad981a05ec67f96674db9358b845e01c99ef035219b076cfcaa3",
+      "blade_recon0.2/tests/test_recon_mesh_reuse.py": "5a3ccebf0a4a93923c6a870d9ba907c10bb6bc78077bc4a717084cbb3c275465",
+      "blade_recon0.2/tests/test_rgb_masks.py": "6e3ff547feae738dec600803b6c39e6d60b3c2ad5deb9b42979be30ee4b34b41",
+      "blade_recon0.2/tests/test_solver_budgets.py": "85e0c2c3299dd739350e8922d0ab316ece68f22e71513eaf3645a40717f0895e",
+      "blade_recon0.2/tests/test_startup_recon.py": "21267926b36c76f79b1eb5090a35edd54adf87fe62c698684284d20307236a37",
+      "blade_recon0.2/tests/test_surface_observations.py": "755462324f581fe0b743914bce3ec8da477c0ce6da3d310ae9a347aa0c87163a",
+      "blade_recon0.2/tests/test_surface_observations_subpixel.py": "8f70fe87cd946d6aec80207c05562214c493da7b9c0bf0fecba0190071772ac7",
+      "blade_recon0.2/tests/test_texture_performance_contract.py": "a90513b38c9a723a242eb50fc28c6b269571fa55af819fa188e3e68dc508e890",
+      "blade_recon0.2/tests/test_unknown_contours.py": "2c68a4b9da872425623f22dd939c89c3d6c1c0a676489d3728c6028c48a64181"
+    },
+    "strict_dependencies": {
+      "camera.py": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+      "input_bundle.py": "f0f40a0a5417b8844ca1fa3f5cb40de6cbe735d5e6443e5d341dbeb214555f41",
+      "model.py": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+    },
+    "versions": {
+      "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "opencv": "5.0.0"
+    },
+    "scope": "13 existing global state directions, stable contour solver, explicitly unknown RGB contours, shared triangle inverse, RGB-only subpixel observation; no feature residual in geometry.",
+    "parent": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-production",
+    "new_fix": "Constant normalized origin makes TRF initial radius 1 at bounded zero increments; same physical bounds/residuals/start and budgets. Preceding false ftol result retained."
+  },
+  "source_identity_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-final-v2/identity.json",
+  "source_identity_sha256": "086d2b0dcc414445fcd52eef9de2af5158e5edd28f1b6c49a02250273ac5e8c0",
+  "production_equals_frozen": true,
+  "cases": {
+    "main": {
+      "source": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-final-v2",
+      "reconstruction": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/final/main-reconstruction/recon.json",
+      "source_unchanged": true,
+      "solver_success": 12,
+      "frames": 12,
+      "nfev": [
+        19,
+        6,
+        9,
+        10,
+        8,
+        7,
+        9,
+        10,
+        11,
+        10,
+        12,
+        8
+      ],
+      "pixel_correspondence": "FAILED_CORRESPONDENCE_GATE",
+      "appearance": "PASS",
+      "Blender_native_display": "PASS",
+      "geometry_acceptance": "NOT_GENERALIZED_FROM_TERMINATION_OR_DISPLAY"
+    },
+    "capture2": {
+      "source": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-final-v2",
+      "reconstruction": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/final/capture2-reconstruction/recon.json",
+      "source_unchanged": true,
+      "solver_success": 4,
+      "frames": 4,
+      "nfev": [
+        35,
+        9,
+        11,
+        14
+      ],
+      "pixel_correspondence": "FAILED_CORRESPONDENCE_GATE",
+      "appearance": "PASS",
+      "Blender_native_display": "PASS",
+      "geometry_acceptance": "NOT_GENERALIZED_FROM_TERMINATION_OR_DISPLAY"
+    },
+    "actual": {
+      "source": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-final-v2",
+      "reconstruction": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/final/actual-reconstruction/recon.json",
+      "source_unchanged": true,
+      "solver_success": 4,
+      "frames": 4,
+      "nfev": [
+        22,
+        17,
+        20,
+        18
+      ],
+      "pixel_correspondence": "FAILED_CORRESPONDENCE_GATE",
+      "appearance": "NOT_ACCEPTED_NO_NEAREST_SOURCE_CANDIDATE",
+      "Blender_native_display": "PASS",
+      "geometry_acceptance": "NOT_GENERALIZED_FROM_TERMINATION_OR_DISPLAY"
+    },
+    "third": {
+      "source": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/source-final-v2",
+      "reconstruction": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/final/third-reconstruction/recon.json",
+      "source_unchanged": true,
+      "solver_success": 12,
+      "frames": 12,
+      "nfev": [
+        14,
+        24,
+        11,
+        8,
+        8,
+        9,
+        8,
+        9,
+        11,
+        10,
+        13,
+        9
+      ],
+      "pixel_correspondence": "PASS",
+      "appearance": "PASS",
+      "Blender_native_display": "PASS",
+      "geometry_acceptance": "NOT_GENERALIZED_FROM_TERMINATION_OR_DISPLAY"
+    }
+  },
+  "geometry_diagnostic": {
+    "main": {
+      "denominator": 48,
+      "median_m": 0.016625746890169994,
+      "p95_m": 0.17434994820688265,
+      "max_m": 0.23103792944078422,
+      "per_id": {
+        "D1": {
+          "denominator": 12,
+          "median_m": 0.011571327145873141,
+          "p95_m": 0.09483793288036582,
+          "max_m": 0.14015244175579147
+        },
+        "D2": {
+          "denominator": 12,
+          "median_m": 0.012690770194509125,
+          "p95_m": 0.0753139975995358,
+          "max_m": 0.11287421132804007
+        },
+        "D3": {
+          "denominator": 12,
+          "median_m": 0.015406282321510157,
+          "p95_m": 0.1018275402920622,
+          "max_m": 0.1500134901160658
+        },
+        "D6": {
+          "denominator": 12,
+          "median_m": 0.14086293469103917,
+          "p95_m": 0.21298704770468796,
+          "max_m": 0.23103792944078422
+        }
+      }
+    },
+    "capture2": {
+      "denominator": 16,
+      "median_m": 0.023651487365380502,
+      "p95_m": 0.20673256149655653,
+      "max_m": 0.23138006303178144,
+      "per_id": {
+        "D1": {
+          "denominator": 4,
+          "median_m": 0.015547052566963435,
+          "p95_m": 0.042414570255831396,
+          "max_m": 0.04530899792391511
+        },
+        "D2": {
+          "denominator": 4,
+          "median_m": 0.018439879802436027,
+          "p95_m": 0.04515979430921907,
+          "max_m": 0.04937208249424529
+        },
+        "D3": {
+          "denominator": 4,
+          "median_m": 0.01526445360336009,
+          "p95_m": 0.05124269763920713,
+          "max_m": 0.05730155743874979
+        },
+        "D6": {
+          "denominator": 4,
+          "median_m": 0.18670620910921912,
+          "p95_m": 0.22645056272473643,
+          "max_m": 0.23138006303178144
+        }
+      }
+    },
+    "third": {
+      "denominator": 48,
+      "median_m": 0.011452957502318183,
+      "p95_m": 0.04761008550373915,
+      "max_m": 0.05290525023043572,
+      "per_id": {
+        "D1": {
+          "denominator": 12,
+          "median_m": 0.011452957502318183,
+          "p95_m": 0.035449074794470646,
+          "max_m": 0.05172692737753053
+        },
+        "D2": {
+          "denominator": 12,
+          "median_m": 0.009573657685641477,
+          "p95_m": 0.03016881827819055,
+          "max_m": 0.04879625818585547
+        },
+        "D3": {
+          "denominator": 12,
+          "median_m": 0.013994148086702178,
+          "p95_m": 0.037991403016204885,
+          "max_m": 0.05290525023043572
+        },
+        "D6": {
+          "denominator": 12,
+          "median_m": 0.011078218149647929,
+          "p95_m": 0.04368904200334135,
+          "max_m": 0.04540719337980886
+        }
+      }
+    }
+  },
+  "performance": {
+    "before": {
+      "elapsed_s": [
+        17.78518983302638,
+        18.251347000012174,
+        18.23083095799666
+      ],
+      "median_elapsed_s": 18.23083095799666,
+      "peak_RSS_bytes": [
+        2893676544,
+        2947661824,
+        2951823360
+      ],
+      "median_peak_RSS_bytes": 2947661824
+    },
+    "after": {
+      "elapsed_s": [
+        19.688335000071675,
+        20.15496900002472,
+        20.18034704204183
+      ],
+      "median_elapsed_s": 20.15496900002472,
+      "peak_RSS_bytes": [
+        3066986496,
+        3039150080,
+        3067871232
+      ],
+      "median_peak_RSS_bytes": 3066986496
+    },
+    "boundary": "Same original 12-frame manifest, all 24 declared RGB files read by both versions, same frozen reconstruction and three gate-eligible fusion identities [2,11,14], best/.01m/768 columns. Triangle correction changes samples; this measures runtime and RSS, not byte equivalence or whole-sequence throughput.",
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before",
+      "before",
+      "after"
+    ],
+    "median_ratio_after_over_before": 1.105543079548114,
+    "eligible_frames": [
+      2,
+      11,
+      14
+    ],
+    "observed_RGB_read_counts": {
+      "before": [
+        24,
+        24,
+        24
+      ],
+      "after": [
+        24,
+        24,
+        24
+      ]
+    }
+  },
+  "native_blends": {
+    "main": {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/synthetic/final-blender/独立纹理重建.blend",
+      "sha256": "3f51a99cac0e035e5b9bc72bfa1089c978f0fa015cf15c0f84fa961f36c54c6b",
+      "display_max_error_m": 7.629257851249349e-06,
+      "no_addon_import": true,
+      "external_paths_forced_unavailable": true,
+      "samples": 12,
+      "installed_runtime": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py"
+    },
+    "capture2": {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/synthetic/final-capture2-blender/独立纹理重建.blend",
+      "sha256": "a22d90bd6cd09af1d25c306bed11f94417ed9e479f22cd6fb7818775e1f921d6",
+      "display_max_error_m": 7.619090808930196e-06,
+      "no_addon_import": true,
+      "external_paths_forced_unavailable": true,
+      "samples": 4,
+      "installed_runtime": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py"
+    },
+    "actual": {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/actual/final-blender/独立纹理重建.blend",
+      "sha256": "493c67be9c3471f0165d51218f08b1d5805815816c233412fdd80732a6948a47",
+      "display_max_error_m": 7.6190024458355765e-06,
+      "no_addon_import": true,
+      "external_paths_forced_unavailable": true,
+      "samples": 4,
+      "installed_runtime": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py"
+    },
+    "third": {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/synthetic/final-third-blender/独立纹理重建.blend",
+      "sha256": "12698b6cbe2289a90e092581f3e3af1e136d2e4e76ce42cc2e287e5161599f85",
+      "display_max_error_m": 7.627789699427012e-06,
+      "no_addon_import": true,
+      "external_paths_forced_unavailable": true,
+      "samples": 12,
+      "installed_runtime": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py"
+    }
+  },
+  "preservation_audit": {
+    "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/audit-final.json",
+    "sha256": "1f195295bb4b5a687a2b287b0a024defc0bcd15d6068484ef4c8cc83c63cec11",
+    "status": "PASS"
+  },
+  "report_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/根因与重新验收报告.md",
+  "report_sha256": "3af53ebd3140ba39ba1d6f8d1c40104f15683fa123cdef53aba70a70c1068400",
+  "commands_sha256": "d0664c54a28cbae852772714b1225ab6da8c984dba397ec8dc09bbce8e5f37e0",
+  "git_actions": {
+    "commit": false,
+    "push": false,
+    "publish": false
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "version": "0.3.37",
+  "archive": "dist/wfrl_blender-0.3.37.zip",
+  "sha256": "eee74b83d16165de480ab3957abd8ad8ab800bf1af58cfbf87d136ac0ea831d8",
+  "host_tests": {
+    "passed": 1104,
+    "skipped": 4,
+    "manual_video_supervision_passed": 35
+  },
+  "checks": {
+    "package_validation": "PASS",
+    "installed_window": "PASS",
+    "installed_background_render": "PASS",
+    "compositor_output_guard": true,
+    "original_camera_quality_snapshot": true,
+    "daily_identity": "PASS",
+    "profile_protection": "PASS",
+    "independent_code_review": "NO_REMAINING_CRITICAL_OR_IMPORTANT"
+  },
+  "evidence": {
+    "runtime": "outputs/frontend-session-validation-_3_0mtpb/daily-probe.json",
+    "protected_files": "outputs/frontend-session-validation-_3_0mtpb/daily-protection.json",
+    "package_validation": "outputs/frontend-session-validation-_3_0mtpb/package-validation-037/package-validation.json",
+    "window_behavior": "outputs/frontend-session-validation-_3_0mtpb/installed-session-controls/result.json",
+    "background_render": "outputs/frontend-session-validation-_3_0mtpb/installed-png-render/result.json",
+    "backup": "/path/to/user/.Trash/WFRL-frontend-intermediates-20bfa6d8dc/project/outputs/frontend-session-validation-_3_0mtpb/daily-backup"
+  },
+  "scope": "Scripted native interaction and short PNG output only. No full-clip FPS, long-running, physical input, real backend training, other-platform or scientific-accuracy acceptance; existing scene files were not byte-audited.",
+  "artifact_availability": {
+    "final_archive": true,
+    "result_records": true,
+    "raw_validation_logs": true,
+    "intermediate_capture_media": false,
+    "render_scene_copies": false,
+    "isolated_runtime_profiles": false,
+    "duplicate_validation_archives": false,
+    "installation_backup": "recoverable_trash"
+  }
+}

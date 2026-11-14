@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py",
+  "build": {
+    "version": "0.3.36",
+    "build": "b2a08b68170585e3f575dd1d7dcd7db1c403456f7aa294c3c89abb90622ed6d7",
+    "packaged": true,
+    "module": "bl_ext.user_default.wfrl_blender",
+    "addon_root": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender"
+  },
+  "model_sampling": {
+    "nrel5mw": {
+      "OVERVIEW": 4417,
+      "BALANCED": 8065,
+      "CLOSEUP": 15361
+    },
+    "rootkink": {
+      "OVERVIEW": 4417,
+      "BALANCED": 8065,
+      "CLOSEUP": 15361
+    }
+  },
+  "down_parent": true,
+  "poses_preserved": true,
+  "scene_reentry": true,
+  "saved_scene_links": true,
+  "save_reopen": true
+}

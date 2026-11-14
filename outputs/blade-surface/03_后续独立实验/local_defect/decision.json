@@ -1,0 +1,18 @@
+{
+  "schema": "local-defect-controlled-decision.v1",
+  "status": "FAILED_GATE",
+  "decision": "OBSERVATION_GATE_FAILED",
+  "result_status": "REVIEW_ONLY",
+  "controlled_conditions_status": "COMPLETED",
+  "heldout_time_and_view_validation": "COMPLETED",
+  "dent_max_depth_capture_m": 0.05,
+  "dent_input_and_holdout_decoded_rgb_equal_to_healthy": true,
+  "paint_rgb_signal_all_views": true,
+  "fixed_healthy_template_local_expression": "NOT_EXPRESSED_BY_EXISTING_MODEL",
+  "finite_local_shape_fit": "NOT_RUN_OBSERVATION_GATE_FAILED",
+  "valid_recovered_depth_m": null,
+  "paint_false_positive_depth_m": null,
+  "null_reason": "No admissible depth estimator ran; null is not a measured zero. Exact image-equivalent healthy/dent counterexamples prevent selecting their depth from these RGB inputs.",
+  "unknown_and_failure": "All local shape recovery trials fail the image-identification gate; none removed from the denominator.",
+  "scope": "Interior compact dent, known Wide cameras, controlled Workbench FLAT MATERIAL at 4K; not cracks, internal damage, natural light or field diagnosis."
+}

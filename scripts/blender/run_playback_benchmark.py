@@ -52,17 +52,25 @@ def run(args):
         profile_env = json.loads(profile_file.read_text(encoding='utf-8'))
         required = {'BLENDER_USER_CONFIG', 'BLENDER_USER_SCRIPTS', 'BLENDER_USER_DATAFILES', 'WFRL_ADDON_MODULE'}
         roots = {'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS'}
-        if (not isinstance(profile_env, dict) or not required <= profile_env.keys() <= required | roots
+        optional = roots | {'WFRL_EXPECTED_ADDON_ROOT'}
+        if (not isinstance(profile_env, dict) or not required <= profile_env.keys() <= required | optional
                 or any(not isinstance(value, str) or not value for value in profile_env.values())
                 or not profile_env['WFRL_ADDON_MODULE'].startswith('bl_ext.')):
             raise ValueError('Invalid isolated installation environment.json')
+        recorded_root = profile_env.pop('WFRL_EXPECTED_ADDON_ROOT', None)
         set_profile_roots(profile_env)
         for key in (required | roots)-{'WFRL_ADDON_MODULE'}:
             if not Path(profile_env[key]).is_dir():
                 raise ValueError(f'Installed profile directory is missing: {key}')
+        repository = Path(profile_env['BLENDER_USER_EXTENSIONS']).expanduser().resolve()
+        addon_root = (repository/profile_env['WFRL_ADDON_MODULE'].rsplit('.', 1)[-1]).resolve()
+        if not addon_root.is_relative_to(repository) or not (addon_root/'__init__.py').is_file():
+            raise ValueError(f'Installed extension is missing from the profile repository: {addon_root}')
+        if recorded_root is not None and Path(recorded_root).expanduser().resolve() != addon_root:
+            raise ValueError(f'Recorded WFRL_EXPECTED_ADDON_ROOT {recorded_root} is not the installed extension {addon_root}')
         for key in ('WFRL_ADDON_ROOT', 'WFRL_ADDON_PATH', 'PYTHONPATH'):
             env.pop(key, None)
-        env.update(profile_env)
+        env.update(profile_env, WFRL_EXPECTED_ADDON_ROOT=str(addon_root))
     elif getattr(args, 'no_factory_startup', False) and env.get('BLENDER_USER_CONFIG'):
         set_profile_roots(env)
     if args.addon_root:

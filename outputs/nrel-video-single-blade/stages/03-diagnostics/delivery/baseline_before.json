@@ -1,0 +1,1258 @@
+{
+  "docs/proposal/NREL5MW_三摄离线视频与单叶片三维重建验证方案_v1.0.md": {
+    "bytes": 30491,
+    "sha256": "0200d79ca1122124e05cb7670074c6dab6bdfa42594a3f0fba448b1f00e3a4d0"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/README.md": {
+    "bytes": 9639,
+    "sha256": "14175010c9b4ac10477568ca85e81f2f3dea2123dab54a8dd0a60562ffc39513"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/C1.mp4": {
+    "bytes": 2566261,
+    "sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/C2.mp4": {
+    "bytes": 2819999,
+    "sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/C3.mp4": {
+    "bytes": 2679521,
+    "sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/camera_calibration.jsonl": {
+    "bytes": 174062,
+    "sha256": "641f610d8ee58dfd79158800dcfd9abe52c16bece58f3dc549a90d5c115ae489"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/dataset.json": {
+    "bytes": 2230,
+    "sha256": "8379786db91c8ac2cabb41ba15f59dc94325fa8f3ebafd75ff76b7c417b2e6b3"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/frame_map.csv": {
+    "bytes": 6469,
+    "sha256": "d079ce0a9e2f3313b1bf296ae466365fa0f22fc5bd1bf0f61939356fc0bd2629"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/motion_observations.csv": {
+    "bytes": 35190,
+    "sha256": "313074d9388eadd34abe31f5e84dd6b310ea5e8799b80e735e258940bf64c550"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/comparison.png": {
+    "bytes": 81139,
+    "sha256": "dad46b27271a9826d1b5b97e99d4edf919b4bb7f19ce907335355facfa9fcfef"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/isolation_sentinel.txt": {
+    "bytes": 52,
+    "sha256": "3cbe5e16d9f38620a6b93d8438a5178dd505d105fa8d72c4ddef58732e6bdc31"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/scores.json": {
+    "bytes": 35747,
+    "sha256": "f7a9c5ddb62af83c102c198e0505826afc4dbb5c71fafb474bad36d2a70423c4"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref/T1_B1_truth.ply": {
+    "bytes": 301395,
+    "sha256": "c91a4be2e478d107ffd67935831efc99714a549e1e18a4634992c76b7e22fa37"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref/truth_manifest.json": {
+    "bytes": 3533,
+    "sha256": "349bb95e8ce48a59047cd0d02861132a0c3713c9ff3f12fd8773960aaacb51f5"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/manifest.json": {
+    "bytes": 2476,
+    "sha256": "31734f9b839b40d97673a94ccd80c57ff1e173b082a6d2a32b7c0a9e22dcc407"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/T1_B1.json": {
+    "bytes": 2024,
+    "sha256": "605ea9e7359fdb090e8be294458e790b80457cdd220774d2a26137bebdbf3f43"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/T1_B1.ply": {
+    "bytes": 17198,
+    "sha256": "d8d060bcdcf6eed4d15f98ae30c7a0a9c7051da2e4aa91f22a028c873ec38679"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/fit-preflight-failed.log": {
+    "bytes": 1015,
+    "sha256": "3fb775a4fb569e8be4747ef6e21eca8fd6e68fc6adf7c9f390ed9014458a28aa"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/fit.log": {
+    "bytes": 1478,
+    "sha256": "6f25eafed16e3e160bb5f9b813fd53849d44805dd233e872506145a69c5dc1bc"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/fit_decode_verification.json": {
+    "bytes": 493,
+    "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/frozen_config.json": {
+    "bytes": 244,
+    "sha256": "638143aeedd0fe7f66995c6542745ff0276956be5e44e7403075eaa975f32080"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/initial_template.json": {
+    "bytes": 1728,
+    "sha256": "82423a1530906ffe87a48b0bfb71effef8f2a21478d883d52ada055eca134b0d"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/initial_template.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000039.jpg": {
+    "bytes": 15168,
+    "sha256": "a9f700e8bd7af912f87cb806dcd1bce9f33896d74462970b6e53445c94a52273"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000040.jpg": {
+    "bytes": 15473,
+    "sha256": "c5eabf84444838c7267466cffc3547a49c4b2bd425b9e7dd733532d31c3708b9"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000041.jpg": {
+    "bytes": 15886,
+    "sha256": "5a155542630a8550979e17df5b1f0e784726f8986d853e1708f542db323da630"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000042.jpg": {
+    "bytes": 15598,
+    "sha256": "7558b30c1f1c17d579a055493d9c2759628c235787af8abd2147b3a6a8b1631f"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000043.jpg": {
+    "bytes": 15257,
+    "sha256": "0d5e1a83e451c9751912af6aeedc723390e8a3ca9c611790af5e4bd83f0d065d"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000044.jpg": {
+    "bytes": 15036,
+    "sha256": "6e31936469cdd4238d37ca17b973dca0811c59312e76c98172653ec99c2471b6"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000045.jpg": {
+    "bytes": 14809,
+    "sha256": "968168fd652ec75fac3f549037da67f3190d5518f71f546f2309047a13baafed"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000046.jpg": {
+    "bytes": 14907,
+    "sha256": "8a811dd86ea5bbc6f875ce7310db6974cfa3c4c8980596efe27e673dc9177cb8"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000047.jpg": {
+    "bytes": 14536,
+    "sha256": "3f684dea561c4d1fa821d90caeab768d6b5c8958bc79ba7c76d86c8457b173e6"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_000048.jpg": {
+    "bytes": 14278,
+    "sha256": "045f65551a75174028c0134f2226643e5f10832c87d1261fcf3d5a4055597083"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C1_contact.jpg": {
+    "bytes": 156030,
+    "sha256": "56ccb98d42f69a9c9de48e6cdfe8f40383a2bde7991bff4eba7faf6e0a55233f"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000039.jpg": {
+    "bytes": 17672,
+    "sha256": "5b85511a2a22646f5a0c44410ec9600560193c398663441ed0ec9ff0ddda0ce9"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000040.jpg": {
+    "bytes": 17091,
+    "sha256": "28eca196b543fa12c4cece5443ee7629176f9e3b8287920e1ce48acda5ad0165"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000041.jpg": {
+    "bytes": 16066,
+    "sha256": "0dd316d44630b4204b50ed84bfb4e7a1cd27df8cc270f94483edcc13615e632e"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000042.jpg": {
+    "bytes": 14973,
+    "sha256": "f2e243e7da1910e715582357a0add280efaf72d2fc58cc48b416b14476878c83"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000043.jpg": {
+    "bytes": 14333,
+    "sha256": "716c283bc272bcb0107d3e6d2324c93c9ed25fbe858d526ea4e642e1daaff7a4"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000044.jpg": {
+    "bytes": 14387,
+    "sha256": "632fb0bda1838388d23f738ed5cafac6cbe90e6a5739122571b1ef1555abe0a0"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000045.jpg": {
+    "bytes": 14551,
+    "sha256": "2d41e04c6102dd36d2d3adb82dd33c228fb4ada556cb38c30656b37c0205d451"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000046.jpg": {
+    "bytes": 15598,
+    "sha256": "8607e8884549c82bf9feebeb769ea1f32630053f962fba0908f40aabf97b574c"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000047.jpg": {
+    "bytes": 16721,
+    "sha256": "fd8e8fdacd45caf58f871335dbbe71c155569cef6bade9a7e50b3a66344043dd"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_000048.jpg": {
+    "bytes": 17290,
+    "sha256": "b3128d6d327ed22550ad96a07b2f544f148b35454d09e73bcfff675dbad90be5"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C2_contact.jpg": {
+    "bytes": 160489,
+    "sha256": "082fd471bf6b90f13da50105f38b50ac5217b504819eb12f971ffdfdd4b9e5d4"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000039.jpg": {
+    "bytes": 22801,
+    "sha256": "5a85c737bfb8159d7105bbfa4a9f6a542dc0028a4fa868fd8418557b174b1848"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000040.jpg": {
+    "bytes": 22847,
+    "sha256": "5348600c7ffbcb31b0be0b3e7723d414bf4cb28f502bcb5cdc66148f9f2fe962"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000041.jpg": {
+    "bytes": 22807,
+    "sha256": "40aafd1a476f8e62bc6dc78d9b9657f2fa033de5a1c4befe75e2497b2bc9f99d"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000042.jpg": {
+    "bytes": 22962,
+    "sha256": "b3a067c09f8a60791f29de9e28cf07f0fba3653f5cb206c4e5cad9a810500057"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000043.jpg": {
+    "bytes": 20006,
+    "sha256": "2a5288b777840e9c40f30f391bd259725da4aceb150a763e5641b54737a74e35"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000044.jpg": {
+    "bytes": 19432,
+    "sha256": "359724e7b84819b6ba99adf5e102df58e4edb589cb4e44e3f831c451ceba2e87"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000045.jpg": {
+    "bytes": 22792,
+    "sha256": "d328fb1d511d0b742d94c4ff2ff64ba8e3c1ae657281f3e17611760a3022e0b9"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000046.jpg": {
+    "bytes": 22764,
+    "sha256": "632868c9d4ff399a6140c729baff347027d29c559c243f9d0e415d6a16e96113"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000047.jpg": {
+    "bytes": 22758,
+    "sha256": "bb183b4db67004ce2fb55b0bd6e7738b43529109f2a692fb6c83e39993641b11"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_000048.jpg": {
+    "bytes": 22731,
+    "sha256": "5406d259b2a24e559687162fef3426f38fc39371b6889becbec8eaee1418b154"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/C3_contact.jpg": {
+    "bytes": 217213,
+    "sha256": "e0e67a52d27e6084a349a4e54a486657aaac72769277ea6230490cdaf6018a54"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/inspection/decode_manifest.json": {
+    "bytes": 5140,
+    "sha256": "9f0d0970ce9feb80eb38d4007e5ab9397cb1a64dd726f55f9ec4f5fb2ee9b1cb"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/isolation.sb": {
+    "bytes": 1109,
+    "sha256": "45f872142c112243279bc714a5578c3495f5c6b424b7918c37ca83728ba4b0fd"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/isolation_probe.json": {
+    "bytes": 189,
+    "sha256": "41bd3e0c8139079ba0b7087198069ceb0ef27bc8ac01d101b34ed4729ea5fb25"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/model_preview.html": {
+    "bytes": 62774,
+    "sha256": "b0d2bb1a8f9b9fd04ab531d8010e091710744cd13a0ea32c4cd6a906dce9ad35"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/model_preview.png": {
+    "bytes": 140683,
+    "sha256": "7cab904f17ae99ff13ac5a3198fec4dfecf8623a77399fbce035493b9b85cfe6"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/model_state.json": {
+    "bytes": 5492,
+    "sha256": "803cb59d266f5df8356fe5baec5ec457aab43c7bad9a702635e8403a12502aff"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000042_FBU.png": {
+    "bytes": 5711,
+    "sha256": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000042_overlay.jpg": {
+    "bytes": 17958,
+    "sha256": "cddaf3d346f40515272cf4552a1703a97f3934160c58a806046dd7d784162975"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000042_rgb.jpg": {
+    "bytes": 18988,
+    "sha256": "76e7866f94a864d4ae45573eedbc23218fc5150d284d3176be61f3bc662bb773"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000043_FBU.png": {
+    "bytes": 5872,
+    "sha256": "3857c63017c0179014562cbf0997a1c80a634db3e72a488d762e370dd3696c8b"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000043_overlay.jpg": {
+    "bytes": 17912,
+    "sha256": "0ff6c28aaa3e54f59e324a4ae77b1164b757972fe8ca33b1e03cf7e9c088ce05"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000043_rgb.jpg": {
+    "bytes": 18641,
+    "sha256": "9f648081340d4a17b9fc94e026b011b86d99d089c27f6b29190bd3323cfdff7a"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000044_FBU.png": {
+    "bytes": 5839,
+    "sha256": "25142a78498b685ee7d6b498b81b3f05a83b04315c81d749093a153b034f001f"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000044_overlay.jpg": {
+    "bytes": 17736,
+    "sha256": "0ae7be5908f272804d3228c6432fc55d4335a95a3d0fd10a4a9ee2610e6fdbfe"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000044_rgb.jpg": {
+    "bytes": 18390,
+    "sha256": "c26c8415ab60fb50b9b38f2721df377d5c8ca81f5a163f45508b669bbfd2d270"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000045_FBU.png": {
+    "bytes": 5626,
+    "sha256": "14e3b4c8e2271c1f2f8170c1e5b4182b436a4837bad55e1f6504f09da1aab662"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000045_overlay.jpg": {
+    "bytes": 17340,
+    "sha256": "6c9b656e98dd92d689cfc9bc2e54b429def5815eca5d0f179bddcb0ef4157fd2"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C1_000045_rgb.jpg": {
+    "bytes": 18162,
+    "sha256": "850e4ef74708452e222d514df60e06c42876a79475a915a329f4100d7319fe39"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000042_FBU.png": {
+    "bytes": 8502,
+    "sha256": "cfedf938d7a291f620d06a970572f2fba9d33185103d066532b109b341d30984"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000042_overlay.jpg": {
+    "bytes": 18753,
+    "sha256": "940e9c2cccdffb2ff79b46562dd9370c6eda90b0a52b28a304eee625dd9a167a"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000042_rgb.jpg": {
+    "bytes": 18572,
+    "sha256": "294a88ee91d69781a6f9c6fbd48dfd98dc0864b8123541fc140f544c3f4c5f09"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000043_FBU.png": {
+    "bytes": 8184,
+    "sha256": "d860932286b68c7f729bc475bb2268f616ffc2a167df9d636b53476d9222de62"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000043_overlay.jpg": {
+    "bytes": 18294,
+    "sha256": "fe57c8ec3d9f564b3c3b3da17cd9af0a7751f8e8e4f57046bbd187e8ccd3e2fb"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000043_rgb.jpg": {
+    "bytes": 17750,
+    "sha256": "38eee6b918024d0be32c0ebfdaad69e91541c6f1e21606387a84061eddd05df1"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000044_FBU.png": {
+    "bytes": 7817,
+    "sha256": "ebf2bef045aa40b2558d0c2bb5b8aef3be79706fad3f5826c4cd4cd4fb206695"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000044_overlay.jpg": {
+    "bytes": 18447,
+    "sha256": "3ceed232747fb5db1ab29c56472a272e9df5a4db0b780b10fd92c5c2ae697963"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000044_rgb.jpg": {
+    "bytes": 17825,
+    "sha256": "ee4099854cd8a9d870af7bd0bbb9cfed0a58dceedaae54208f21c14df9bdfe31"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000045_FBU.png": {
+    "bytes": 6996,
+    "sha256": "05c79571400bd553def9da832b6ab54a5c61679d84607f05ce61ad214d1a4e48"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000045_overlay.jpg": {
+    "bytes": 18260,
+    "sha256": "5b9fcc590e061fafc7bf232c428cc3d3d0142e45f2120193f0b2b54656a7a02c"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C2_000045_rgb.jpg": {
+    "bytes": 18190,
+    "sha256": "79f8d32b6a98645aea02515b5551dccb34222114ca8601c2171ea3e5a7ed9871"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000042_FBU.png": {
+    "bytes": 5498,
+    "sha256": "a100c87c632c7a5486ec7f9a4999c4e89b5a8d786465e42d3da2406c113659d7"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000042_overlay.jpg": {
+    "bytes": 24654,
+    "sha256": "7b270fadc2cd101d8d40bde67cd707aebbc3da722fb6550849da0c1ffc23064a"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000042_rgb.jpg": {
+    "bytes": 28240,
+    "sha256": "df4d62547dcce0c588c4058b1f59a83b0eb7b7cf93c517204bc825d8315c34fe"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000043_FBU.png": {
+    "bytes": 7087,
+    "sha256": "660b21c6fe911e06f3a86b015c14883bf0c905fc9d08dee0468e1cb3e9f635d7"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000043_overlay.jpg": {
+    "bytes": 22562,
+    "sha256": "6b922a84088b4eff548c32b0fb9bf997bdad44a62676ef91da5f9876ed75ebd0"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000043_rgb.jpg": {
+    "bytes": 24399,
+    "sha256": "f29df6ae8367ab228fac5959d6ace29b65443810483ec0738f55f748e8b9ab9e"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000044_FBU.png": {
+    "bytes": 6678,
+    "sha256": "18ad3559a4153f19128bba6deba8962994252f1d86c613f44bb3b33604e655cf"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000044_overlay.jpg": {
+    "bytes": 22339,
+    "sha256": "89c3c3a30e9c9e08dad86479911466b3b869d44479787c79ca3ead56adaabf7b"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000044_rgb.jpg": {
+    "bytes": 23768,
+    "sha256": "ecc70c733143dc39d02812457ecc738795278d769e14cd648ffa7382ed175d58"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000045_FBU.png": {
+    "bytes": 5093,
+    "sha256": "ab282447a927d8f9c9921d6de0dd7111efade23e44c8e39a239645b5d9c70222"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000045_overlay.jpg": {
+    "bytes": 24634,
+    "sha256": "09801b57a418ac1f1d47beca1e6eafd9bed43063fd77e0521be9008ee1c72ef3"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/C3_000045_rgb.jpg": {
+    "bytes": 28072,
+    "sha256": "ebf4bc43228d830c51126c5f3674fe934f125e51889cfa11153704ed6a9fc076"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/FBU_review.jpg": {
+    "bytes": 262848,
+    "sha256": "2a2792dbfb292d0f4d36925fed5d32fa6e093da94b7b4a7e1f3ebf10114b6c60"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/annotations.json": {
+    "bytes": 13498,
+    "sha256": "6e8ec85ad681f1ffc677475ebac3a89af8cddeed007e396942456c4b909328c1"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/observations/observations.json": {
+    "bytes": 17715,
+    "sha256": "605244e8fc31af1ab21aea884ad32ab91fd57ee94f83f810772bf46a5d200ea5"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/optimization.json": {
+    "bytes": 43503,
+    "sha256": "4b202928cb52f1a7442c4535ff397d7a8c979685077eecdef179a7493cfb229a"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/prior_only.json": {
+    "bytes": 1722,
+    "sha256": "349088c8f2902b6e5914f70d928dbb273e98156913faad36bbf3a56cff75b43b"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/prior_only.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C1_000043_projection.jpg": {
+    "bytes": 61202,
+    "sha256": "73235a1ef583725eeb0957ba55ba4ad9d564ec5f521ac39d5b5a387c289115fb"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C1_000044_projection.jpg": {
+    "bytes": 62088,
+    "sha256": "d27ba476cea3f6000575573324405c85d1fc1601f14975ee049feffc703b12ad"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C1_000045_projection.jpg": {
+    "bytes": 62756,
+    "sha256": "399a38cea102f65870b66fc23ab8a37f852be2f56765f302cc898490444f77be"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C2_000043_projection.jpg": {
+    "bytes": 58217,
+    "sha256": "3f79705be2b6306c06d100b3d29957571829c9a8a71b1a0dc621327034dbc804"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C2_000044_projection.jpg": {
+    "bytes": 59971,
+    "sha256": "92e5bb5a0328b33b8bd0cc0cf1f7ae39cbd37bdaf0694449d53001137eb6546f"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C2_000045_projection.jpg": {
+    "bytes": 61197,
+    "sha256": "1aef80a4d4e2085e563c3523522a613774e2da595147113ed9053cb53f939435"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C3_000043_projection.jpg": {
+    "bytes": 72970,
+    "sha256": "fe8a837ffc0f42ceff5e782490cfe1dd394b5c73c44df4a8c5ee82afb92b7873"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C3_000044_projection.jpg": {
+    "bytes": 74443,
+    "sha256": "b292f2cf35e639fb41e52f6e6afd2195049039c7c4816edc5e274d5cd1b4f796"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/C3_000045_projection.jpg": {
+    "bytes": 82714,
+    "sha256": "243dbdb3867cfaeef165224618f638e0eae8b21f335ee64ef3992cdf933eae1a"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/projection_checks.jpg": {
+    "bytes": 603882,
+    "sha256": "e731d4a98b4ec97925ddaf82e73db685876a63e8d251321e3a2341fc36021f80"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/projection-checks/projection_checks.json": {
+    "bytes": 9264,
+    "sha256": "abc55b422b0a153727901a7ceccb7e4fb8bb12ccfbe27c04fa4091b3f15d87a9"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/reference_state.json": {
+    "bytes": 316,
+    "sha256": "918daca09bee7e4b7cce9d2f2dfeeab121c7d36a105292414807ad2e092dcd77"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/runtime_metrics.json": {
+    "bytes": 331,
+    "sha256": "501d46b0c618d3cf99052a33df7824109ed8b52d64a8aaeed76498afc5dd69d7"
+  },
+  "outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/surface_evidence.json": {
+    "bytes": 2413,
+    "sha256": "18b6d81bfc8296713618e82d6898dc907c1032febc5e8e3d0fe1174496a3b0a3"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/.DS_Store": {
+    "bytes": 6148,
+    "sha256": "96fd57dd42a4eedf76b78b26278245116364290fe7e84d4394c08ee56d3c539a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/README.md": {
+    "bytes": 8196,
+    "sha256": "3874be3b11ad955966732886285c5bcb974b280a67d77fa05b0a24e9074195a5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/manifest.json": {
+    "bytes": 1623,
+    "sha256": "0fe20372b08cae75be6ced7e867cf382e5debe79a5d6530b73b0818c3d6fb886"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/scripts/blender/capture_nrel_three_camera.py": {
+    "bytes": 15383,
+    "sha256": "baab885e308bf31c7ce9751268688a622b7aa002f1d2804820337015b21acdfa"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/scripts/nrel_single_blade.py": {
+    "bytes": 5923,
+    "sha256": "427ac9cb17b4125708f90fac80f80c3f580a2a4388e58b8494f976d8b21711bb"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/tests/test_nrel_dataset.py": {
+    "bytes": 12330,
+    "sha256": "ca7aff3afea7383fb6b4fef365113f3ab839ee775c959f60ce7a34f60ebc9600"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/tests/test_nrel_evaluate.py": {
+    "bytes": 8109,
+    "sha256": "60a925bc1cb05ed711e2015cd2f3cfe7cbf19840297e0bba7b530a0060d37419"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/tests/test_nrel_optimizer.py": {
+    "bytes": 6350,
+    "sha256": "c0007e1f8911bd08dff428bcc8244b430ec3c265a4511843fdde777d2ee1221e"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/__init__.py": {
+    "bytes": 224,
+    "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/dataset.py": {
+    "bytes": 13292,
+    "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/diagnostics.py": {
+    "bytes": 11037,
+    "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/evaluate.py": {
+    "bytes": 37881,
+    "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/model.py": {
+    "bytes": 7717,
+    "sha256": "e10e2de562719391d1733148d017eb5968044695885aa66d8d9bf2aa33e613a5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/observations.py": {
+    "bytes": 6351,
+    "sha256": "e363c7d99577e68998d45d6e3e55786645c3fda3bef30a92c59ad6830aa635e5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/optimize.py": {
+    "bytes": 16975,
+    "sha256": "dc7751991c23e8ae0004c4d5dd1372ca37f3985faf2068d28787c6eabd2cd5f6"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/pack.py": {
+    "bytes": 8627,
+    "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/preview.py": {
+    "bytes": 14516,
+    "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/baseline-code/wfrl/nrel_reconstruction/renderer.py": {
+    "bytes": 7061,
+    "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/T1_B1.json": {
+    "bytes": 2736,
+    "sha256": "8196a03e87f2480c0707a32e8ad442bfcedfe060af461a1546d5091e18ae1e4d"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/T1_B1.ply": {
+    "bytes": 17186,
+    "sha256": "176ee00f19a1768d189ce615f681fcbbff51ea71d89cd07e4f8b17fed2ad26ef"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/C1_000042_projection.jpg": {
+    "bytes": 60824,
+    "sha256": "778fc9ba46570e9975efab68dbf6efa121d47e600a4748657b2738010a0437b2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/C1_000043_projection.jpg": {
+    "bytes": 60902,
+    "sha256": "7bbb6618cc9d3e3d250f0e6b35c98761a13d73702dd715e79bfb836737b582e6"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/C2_000042_projection.jpg": {
+    "bytes": 57629,
+    "sha256": "a3b072486608bac62012c2957c0b7e058f901b4002208c2720cbfa09e0250b5a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/C2_000043_projection.jpg": {
+    "bytes": 57382,
+    "sha256": "210997567dceaafedf058ff1aa15a534873cc3d3be6406de2c4410e11a2ed9be"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/C3_000042_projection.jpg": {
+    "bytes": 79897,
+    "sha256": "7042f79f1e8536c68a7c3fc595b2b1459ea650fb05fb54282e6fbeb2cd1a9b89"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/C3_000043_projection.jpg": {
+    "bytes": 71684,
+    "sha256": "e1b5cb59a7a0ef16936dcd100391f4c6b53289992e93f8fde3f3fab3c7e6f0d8"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/projection_checks.jpg": {
+    "bytes": 394203,
+    "sha256": "9f4568d61eb7e57a0117fae9e6bc7da5ee912282039401a047f1fb33368a8c4f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit-projections/projection_checks.json": {
+    "bytes": 6329,
+    "sha256": "ebb31602c68bf710b9ccd7a9285ca9af859c51deffa90dab8808135466591927"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit.log": {
+    "bytes": 1684,
+    "sha256": "17ba95d0139e997eaf872475d0f41b7409fa8e7c4faf7644b1000e1fe66ba00b"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit_decode_verification.json": {
+    "bytes": 493,
+    "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/frozen_config.json": {
+    "bytes": 321,
+    "sha256": "2b4c45fe259dae808901eea370310d250247810feb02acfaed7138ee6f18ff8f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/implementation_at_launch.json": {
+    "bytes": 1633,
+    "sha256": "5ced17154a24f5e7a1c1c63fec8770a56f3dbc010c63c7576658fb8dd6b877d9"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/initial_template.json": {
+    "bytes": 2435,
+    "sha256": "b4c6f2d968e50efae56f0d986de8825a769b2b04d20200eac5852e92a475f144"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/initial_template.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/model_state.json": {
+    "bytes": 7858,
+    "sha256": "be9f532c300c0c6c76ff7aa6df7cef2f9ebd40fb1a885fb3126ddde278ad04d8"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/optimization.json": {
+    "bytes": 80102,
+    "sha256": "dd1db472a8c3ba35468d81ff60a19e6d10522022b5ffbf0fa1bb00aca4f7fa71"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/prior_only.json": {
+    "bytes": 2429,
+    "sha256": "81418f2a740d9110c1eeb007f81e60db8413a180a5932b9dab8a5197dec414a9"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/prior_only.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/runtime_metrics.json": {
+    "bytes": 361,
+    "sha256": "c18e18693cef2c3b1170d90a81766635d725412c5fd66f168901db3c1c65cdb7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-ablation/surface_evidence.json": {
+    "bytes": 2433,
+    "sha256": "870408e51469391013eb87e9cc9773f0ed51f70f0e4f487cb1fdeb0eb212c0a0"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/contour-backend-check.json": {
+    "bytes": 473,
+    "sha256": "0286193e4110a222c38e96a9a2940782a96d690e7d90fa0ce37a42af9691a4e3"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/contour-ablation/comparison.png": {
+    "bytes": 88652,
+    "sha256": "79b362be9d83ba9af7a205db48499dd74723a6256ed4799132c943c87fea3ba0"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/contour-ablation/scores.json": {
+    "bytes": 38385,
+    "sha256": "d2b0bc593271eef84d09dfde57ff18a9abdf0368184ef6774134eb7cfda53ba9"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/geometry_comparison.json": {
+    "bytes": 85524,
+    "sha256": "01fbd0fe15550ea06972bbc3f8f885bad6419c03f2b5fe26192b9e79b907adea"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/geometry_comparison.png": {
+    "bytes": 167835,
+    "sha256": "a74f7a1b34c355b5cf911911dbf6cb48e4bbd5b2849dc216c870b8ffc818c7de"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/isolation-marker.txt": {
+    "bytes": 42,
+    "sha256": "69919a87062323ef0ae5d234b8a4ef6a707b36040d0a586a289eddf5715eaaf2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/comparison.png": {
+    "bytes": 83457,
+    "sha256": "4a78b1e1c2b1cd51856e6b3910d211f75f7bdc8dd486188aaf1ef08c056600d2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/scores.json": {
+    "bytes": 38375,
+    "sha256": "735f5cf8fb789c4a7d265a0124c62b12c308025d4abb2e9b3ee4b7a34ec9e1ef"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/scoring-audit.json": {
+    "bytes": 7215,
+    "sha256": "cd0d741be7b9ff1935dbfafcb68c0a1f167cab55c532ef0ec43eac1c2314098a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/smooth-ablation/comparison.png": {
+    "bytes": 84968,
+    "sha256": "354d5d2857b0d40b4a278ce44cf2c6e17bd59c629e33b94bf10fdf298f2e25a3"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/evaluation-only/smooth-ablation/scores.json": {
+    "bytes": 38368,
+    "sha256": "7f26c5ed7e0aa78343849c96a129b617be1171182e8ce963c5ad0bda4f43d9a8"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/experiment_policy.json": {
+    "bytes": 1175,
+    "sha256": "97589627d769002cc7cb1cb359ac1413e1828d35725f64dbd88071f59d168b44"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/fit_contours_review.jpg": {
+    "bytes": 69288,
+    "sha256": "23c9ef1510bbc999084dfd58e9546d1987c98a7721fc789b2f753a6ebbf1d81f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/isolation.sb": {
+    "bytes": 1248,
+    "sha256": "5f14dcd9a274bdd87d48f3b3914ffabb45821204c27304a39b2ba13acb420173"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/isolation_probe.json": {
+    "bytes": 347,
+    "sha256": "6aa9adf93dd50754831294f031ebaef9a961d299c56d0f87d2c58ebc38945ea2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/manifest.json": {
+    "bytes": 4121,
+    "sha256": "3cd466fa519d22a5fd03a4db5049367ef9e2fab39a4a31f7d5874bb30fe3b3f7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/model_freeze.json": {
+    "bytes": 2842,
+    "sha256": "50edebaec4822a312f965e99f55ad33759f31e4f5b185e08a2bd3c28560f66e7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png": {
+    "bytes": 5711,
+    "sha256": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy": {
+    "bytes": 8960,
+    "sha256": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png": {
+    "bytes": 3382,
+    "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_overlay.jpg": {
+    "bytes": 17958,
+    "sha256": "cddaf3d346f40515272cf4552a1703a97f3934160c58a806046dd7d784162975"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_rgb.jpg": {
+    "bytes": 18988,
+    "sha256": "76e7866f94a864d4ae45573eedbc23218fc5150d284d3176be61f3bc662bb773"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_FBU.png": {
+    "bytes": 5872,
+    "sha256": "3857c63017c0179014562cbf0997a1c80a634db3e72a488d762e370dd3696c8b"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_contour.npy": {
+    "bytes": 15416,
+    "sha256": "1d47a0b0ecd777f32ef45cd9602f187ceec9ac395fbfb10c667b8ec78d233fdc"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_contour_valid.png": {
+    "bytes": 3382,
+    "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_overlay.jpg": {
+    "bytes": 17912,
+    "sha256": "0ff6c28aaa3e54f59e324a4ae77b1164b757972fe8ca33b1e03cf7e9c088ce05"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_rgb.jpg": {
+    "bytes": 18641,
+    "sha256": "9f648081340d4a17b9fc94e026b011b86d99d089c27f6b29190bd3323cfdff7a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_FBU.png": {
+    "bytes": 5839,
+    "sha256": "25142a78498b685ee7d6b498b81b3f05a83b04315c81d749093a153b034f001f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_contour.npy": {
+    "bytes": 15528,
+    "sha256": "6e2882f017b1dfbc61ad0edb124332df16508ea106788887559ad374a7561bba"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_contour_valid.png": {
+    "bytes": 3382,
+    "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_overlay.jpg": {
+    "bytes": 17736,
+    "sha256": "0ae7be5908f272804d3228c6432fc55d4335a95a3d0fd10a4a9ee2610e6fdbfe"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_rgb.jpg": {
+    "bytes": 18390,
+    "sha256": "c26c8415ab60fb50b9b38f2721df377d5c8ca81f5a163f45508b669bbfd2d270"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_FBU.png": {
+    "bytes": 5626,
+    "sha256": "14e3b4c8e2271c1f2f8170c1e5b4182b436a4837bad55e1f6504f09da1aab662"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_contour.npy": {
+    "bytes": 12688,
+    "sha256": "44fc2ef3a21b695f9e7a99b73d9386989d0009b1c87ebc2574e7af274a393ad5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_contour_valid.png": {
+    "bytes": 3382,
+    "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_overlay.jpg": {
+    "bytes": 17340,
+    "sha256": "6c9b656e98dd92d689cfc9bc2e54b429def5815eca5d0f179bddcb0ef4157fd2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_rgb.jpg": {
+    "bytes": 18162,
+    "sha256": "850e4ef74708452e222d514df60e06c42876a79475a915a329f4100d7319fe39"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_FBU.png": {
+    "bytes": 8502,
+    "sha256": "cfedf938d7a291f620d06a970572f2fba9d33185103d066532b109b341d30984"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_contour.npy": {
+    "bytes": 16952,
+    "sha256": "5bd7e4fc5be873fb197369884f7032736a243af04de8b4215938bb000143e87e"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_overlay.jpg": {
+    "bytes": 18753,
+    "sha256": "940e9c2cccdffb2ff79b46562dd9370c6eda90b0a52b28a304eee625dd9a167a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_rgb.jpg": {
+    "bytes": 18572,
+    "sha256": "294a88ee91d69781a6f9c6fbd48dfd98dc0864b8123541fc140f544c3f4c5f09"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_FBU.png": {
+    "bytes": 8184,
+    "sha256": "d860932286b68c7f729bc475bb2268f616ffc2a167df9d636b53476d9222de62"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_contour.npy": {
+    "bytes": 18112,
+    "sha256": "9b77383968363dd580343ff59732fb535c702fa7a1dbd759d772787e3b4b22c8"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_overlay.jpg": {
+    "bytes": 18294,
+    "sha256": "fe57c8ec3d9f564b3c3b3da17cd9af0a7751f8e8e4f57046bbd187e8ccd3e2fb"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_rgb.jpg": {
+    "bytes": 17750,
+    "sha256": "38eee6b918024d0be32c0ebfdaad69e91541c6f1e21606387a84061eddd05df1"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_FBU.png": {
+    "bytes": 7817,
+    "sha256": "ebf2bef045aa40b2558d0c2bb5b8aef3be79706fad3f5826c4cd4cd4fb206695"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_contour.npy": {
+    "bytes": 20712,
+    "sha256": "5a49729b74a7106930ba9a6999181986364def7e31702fc3d80c2b37cd897be6"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_overlay.jpg": {
+    "bytes": 18447,
+    "sha256": "3ceed232747fb5db1ab29c56472a272e9df5a4db0b780b10fd92c5c2ae697963"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_rgb.jpg": {
+    "bytes": 17825,
+    "sha256": "ee4099854cd8a9d870af7bd0bbb9cfed0a58dceedaae54208f21c14df9bdfe31"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_FBU.png": {
+    "bytes": 6996,
+    "sha256": "05c79571400bd553def9da832b6ab54a5c61679d84607f05ce61ad214d1a4e48"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_contour.npy": {
+    "bytes": 16144,
+    "sha256": "5bb8b17cb0d39d707e96f369e0ed1bcd63973ca72e4e6162bf3dc60a5f50b01b"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_overlay.jpg": {
+    "bytes": 18260,
+    "sha256": "5b9fcc590e061fafc7bf232c428cc3d3d0142e45f2120193f0b2b54656a7a02c"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_rgb.jpg": {
+    "bytes": 18190,
+    "sha256": "79f8d32b6a98645aea02515b5551dccb34222114ca8601c2171ea3e5a7ed9871"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_FBU.png": {
+    "bytes": 5498,
+    "sha256": "a100c87c632c7a5486ec7f9a4999c4e89b5a8d786465e42d3da2406c113659d7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_contour.npy": {
+    "bytes": 5104,
+    "sha256": "2786ca07c57b697aa57e4f5ac2c339bf88a464d811667f862f4d2430ec08158d"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_overlay.jpg": {
+    "bytes": 24654,
+    "sha256": "7b270fadc2cd101d8d40bde67cd707aebbc3da722fb6550849da0c1ffc23064a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_rgb.jpg": {
+    "bytes": 28240,
+    "sha256": "df4d62547dcce0c588c4058b1f59a83b0eb7b7cf93c517204bc825d8315c34fe"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_FBU.png": {
+    "bytes": 7087,
+    "sha256": "660b21c6fe911e06f3a86b015c14883bf0c905fc9d08dee0468e1cb3e9f635d7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_contour.npy": {
+    "bytes": 12192,
+    "sha256": "f9b2fd0245939293436e43602b8d931b56f77c23fd6deae78564594a507f1c2c"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_overlay.jpg": {
+    "bytes": 22562,
+    "sha256": "6b922a84088b4eff548c32b0fb9bf997bdad44a62676ef91da5f9876ed75ebd0"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_rgb.jpg": {
+    "bytes": 24399,
+    "sha256": "f29df6ae8367ab228fac5959d6ace29b65443810483ec0738f55f748e8b9ab9e"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_FBU.png": {
+    "bytes": 6678,
+    "sha256": "18ad3559a4153f19128bba6deba8962994252f1d86c613f44bb3b33604e655cf"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_contour.npy": {
+    "bytes": 11824,
+    "sha256": "c2d413fbaab4010fefc66186b1cb0cbedc869cf57bf759dcaab0cd1509346387"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_overlay.jpg": {
+    "bytes": 22339,
+    "sha256": "89c3c3a30e9c9e08dad86479911466b3b869d44479787c79ca3ead56adaabf7b"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_rgb.jpg": {
+    "bytes": 23768,
+    "sha256": "ecc70c733143dc39d02812457ecc738795278d769e14cd648ffa7382ed175d58"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_FBU.png": {
+    "bytes": 5093,
+    "sha256": "ab282447a927d8f9c9921d6de0dd7111efade23e44c8e39a239645b5d9c70222"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_contour.npy": {
+    "bytes": 4184,
+    "sha256": "88e660f8c3011e0cf81d3d2c45aa946665cb65dd3371ded228842ebc1109577e"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_contour_valid.png": {
+    "bytes": 4247,
+    "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_overlay.jpg": {
+    "bytes": 24634,
+    "sha256": "09801b57a418ac1f1d47beca1e6eafd9bed43063fd77e0521be9008ee1c72ef3"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_rgb.jpg": {
+    "bytes": 28072,
+    "sha256": "ebf4bc43228d830c51126c5f3674fe934f125e51889cfa11153704ed6a9fc076"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/FBU_review.jpg": {
+    "bytes": 262848,
+    "sha256": "2a2792dbfb292d0f4d36925fed5d32fa6e093da94b7b4a7e1f3ebf10114b6c60"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/annotations.json": {
+    "bytes": 17024,
+    "sha256": "553253d6c19e1e59db7c0fded2bc87c956e07613e86502f5e2db41b7a897e281"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/observations/observations.json": {
+    "bytes": 21615,
+    "sha256": "fdcb8d4845b99adcf3f2ddb6a998c9f3c26dfcaa89bd8951d6f8284efa3c0310"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.json": {
+    "bytes": 2736,
+    "sha256": "855850cfc0c74c01a6f8fa1097017513d8ac7be5f76ad8e6f16c3a9030ab50bc"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.ply": {
+    "bytes": 17196,
+    "sha256": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/fit.log": {
+    "bytes": 1682,
+    "sha256": "dbc162475671686c7c0d4aeec194045079f9ea6ee16ac92d513886f78b754034"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/fit_decode_verification.json": {
+    "bytes": 493,
+    "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/frozen_config.json": {
+    "bytes": 364,
+    "sha256": "69c95db4cbfd3fd613e29a4d0cc1a6a24b3e38cdfdf0d1923ef4c4568cd23fed"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/implementation_at_launch.json": {
+    "bytes": 1633,
+    "sha256": "1a7c54871f2f752d19586564be545180aa9281bbc9f90f2cecaa1d6bc6d46418"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/initial_template.json": {
+    "bytes": 2435,
+    "sha256": "b4c6f2d968e50efae56f0d986de8825a769b2b04d20200eac5852e92a475f144"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/initial_template.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/model_preview.html": {
+    "bytes": 62772,
+    "sha256": "ce540e45710e696f57545352430c91891e52f05d10b2c19987f5bb596e9b1692"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/model_preview.png": {
+    "bytes": 139591,
+    "sha256": "63c36fd4d82bea29087459aafa2cd8140c077cf2ef355496a19ec0a34ae47aa2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/model_state.json": {
+    "bytes": 7858,
+    "sha256": "777f37387c6cfa098b1af3aec3e4e0de5a892f491a7716daeea20141c1f4d8d5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/optimization.json": {
+    "bytes": 118378,
+    "sha256": "7343cb32806e2b3658a3d6a88d357b609fc9973877aa67fa512adff0ca948786"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/prior_only.json": {
+    "bytes": 2429,
+    "sha256": "81418f2a740d9110c1eeb007f81e60db8413a180a5932b9dab8a5197dec414a9"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/prior_only.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C1_000042_projection.jpg": {
+    "bytes": 60861,
+    "sha256": "bbd16b3cff17ead1286589cb3edcde7497c16e8a52f7a1bd705962adcda01660"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C1_000043_projection.jpg": {
+    "bytes": 60946,
+    "sha256": "9e1b6dec3a8777c16e6a78d1b72ffe8b59ef1750a0819eb7082308040b3c3799"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C1_000044_projection.jpg": {
+    "bytes": 62290,
+    "sha256": "fc040b8261bc12c810f555ea05f1d0513d83210bfb8bcb33e9042b56e01e796f"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C1_000045_projection.jpg": {
+    "bytes": 62701,
+    "sha256": "181bf5ab07df85509276b021da57dad7ea4447e61020983f903ef25e1d03b365"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C2_000042_projection.jpg": {
+    "bytes": 57741,
+    "sha256": "cd59efdcf02bff0e6082e599cbc1fb16af26025c01e8b82b1eeab501821ead28"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C2_000043_projection.jpg": {
+    "bytes": 57311,
+    "sha256": "a58892c1dd0cfa2bc2d36a95f9ceb3381c8ad90a15f254eae6d6da66fbbb4cd0"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C2_000044_projection.jpg": {
+    "bytes": 59202,
+    "sha256": "32cb53cdc92b14f732800d92776181340adcd875eaa2b40d3b3bbfb542e26fce"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C2_000045_projection.jpg": {
+    "bytes": 60670,
+    "sha256": "04b76333ad87f99814c0f1bda4a87c48fbb2ca338b46367cff3993bb476e0324"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C3_000042_projection.jpg": {
+    "bytes": 80040,
+    "sha256": "e7667c34f2a8e77c6e6cf056cce70ee9346b19229cf6bfe6977c467947556a40"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C3_000043_projection.jpg": {
+    "bytes": 71810,
+    "sha256": "0a9c593c8cccbdd5735defa1ab006258a2c04963e1e8bc921abf785cfc04608c"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C3_000044_projection.jpg": {
+    "bytes": 73006,
+    "sha256": "dc3592fa453cc5ae393d3cdeadbd99e0209fbfa391d51d169e8ae58776834f2e"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/C3_000045_projection.jpg": {
+    "bytes": 81847,
+    "sha256": "4b6dd07e2a307e347552ddd0ed24399556ff713077813b61f9756886a9ceb3e7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/projection_checks.jpg": {
+    "bytes": 799190,
+    "sha256": "b4d8abd564074d85bd39584ae36ece67dfb124741bee18e02184361309094ff5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/projection_checks.json": {
+    "bytes": 12181,
+    "sha256": "48030cd56d5ce3e7a8b2692565bb705871802d65a44574811b7128ad7c9796aa"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/runtime_metrics.json": {
+    "bytes": 361,
+    "sha256": "89c0d2491e8bdeb2d6ce5e4973bde64d64b402178488ebb8f00ebb42cc6f0c3c"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reconstruction/surface_evidence.json": {
+    "bytes": 2433,
+    "sha256": "870408e51469391013eb87e9cc9773f0ed51f70f0e4f487cb1fdeb0eb212c0a0"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/reference_state.json": {
+    "bytes": 315,
+    "sha256": "7bb47bfdd151e8be45a526452f45062c0636dca6f2e809812071d0e57212854c"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/renderer-audit.json": {
+    "bytes": 7943,
+    "sha256": "6499eb6d51c59ea4b85b359eaf8a1c5e2f90fd97cfe3f176583c63ebd650da37"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/rgb-comparison/rgb_comparison.json": {
+    "bytes": 211905,
+    "sha256": "c859193bddf10d2c96596e70fd293a4cddf6fddc546a7b91c8c8af26d4006055"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/rgb-diagnosis.json": {
+    "bytes": 32042,
+    "sha256": "31bf99d8a1f626fd0d91ec81f4f53b0b99edab6f610cab72d189e51a6afff7bf"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/scoring_config.json": {
+    "bytes": 187,
+    "sha256": "fceb4a1ac3af23006d8cb3296864c69b17b17c83da0de2bdc9c3321014586510"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/shape_comparison.json": {
+    "bytes": 713184,
+    "sha256": "0acca61d90985c745209b6c4ca6f55cf8bd7df9c47103c8745d5d6099305a501"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/shape_comparison.png": {
+    "bytes": 344570,
+    "sha256": "0fec0d4c2df39187f8ad9610b70799f4198fcfce3c3382577a9c67d6f0d6d438"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/shape_comparison_builder.py": {
+    "bytes": 10906,
+    "sha256": "3b1bd78525f86b7c19c0d43c420090d4c5d332fefd6d95db6f11322751ce3f7b"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/T1_B1.json": {
+    "bytes": 2730,
+    "sha256": "c0f4043c2c572b2a17598319f779661a09450f19a6943d852c93fa596a4573ac"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/T1_B1.ply": {
+    "bytes": 17189,
+    "sha256": "65b7774fd5885acf88c32518aa54a17e2d554e5b989368efcf7445b6a107019a"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/C1_000042_projection.jpg": {
+    "bytes": 60617,
+    "sha256": "5723464a17cfc17d91095fe8890cb781c6d637c53fe13fb4a4ed77910e3e757b"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/C1_000043_projection.jpg": {
+    "bytes": 60851,
+    "sha256": "406ca3d3a3d4a5a3d9061c16c147e044716559c218ef9bff1e34be3cb5dd9d77"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/C2_000042_projection.jpg": {
+    "bytes": 57874,
+    "sha256": "465f3a10c690619d96b8d8f667ff846340e4bd03c78930170618474fd76fb867"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/C2_000043_projection.jpg": {
+    "bytes": 57788,
+    "sha256": "217f4e3d3a7f87e9a39eba404cee964b61241bf7b55e8ac116cac863de0e4c3c"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/C3_000042_projection.jpg": {
+    "bytes": 80643,
+    "sha256": "83a0da710f29c204a9d1d2b05e57fcd002cbfc136b48bd8c3f2cf33e775666b2"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/C3_000043_projection.jpg": {
+    "bytes": 72500,
+    "sha256": "5d5b3c435fe11b73f9f3bfb8ff2a37945253853b4f53a0b6a4587ffcc4c45f76"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/projection_checks.jpg": {
+    "bytes": 395998,
+    "sha256": "de2f40d694d4c3d0b49ee08052a3925c58f21701312c7f83e227b80dac1ebac7"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit-projections/projection_checks.json": {
+    "bytes": 6309,
+    "sha256": "ee997f4450c0f6243a0acf0258347c785389e99b334176fab1189ac3a7a2f3df"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit.log": {
+    "bytes": 1474,
+    "sha256": "7a113563c27355544070add764253d1f5af7b6084448428ab4cf1bcb1e5f0fcd"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit_decode_verification.json": {
+    "bytes": 493,
+    "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/frozen_config.json": {
+    "bytes": 279,
+    "sha256": "769bc1ecfeb533811cf20b8522676d744ceaf934bcf5d405f6e41a838d351953"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/initial_template.json": {
+    "bytes": 2435,
+    "sha256": "b4c6f2d968e50efae56f0d986de8825a769b2b04d20200eac5852e92a475f144"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/initial_template.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/model_state.json": {
+    "bytes": 7852,
+    "sha256": "7c1556cf3b03eef7cce1794c040899b49ee78d6841b5698a29a9bbd4c9a23430"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/optimization.json": {
+    "bytes": 43535,
+    "sha256": "82fb188ee6596fab1c7e05d06f406a16abd0d1d082805bd319d335554892f1c5"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/prior_only.json": {
+    "bytes": 2429,
+    "sha256": "81418f2a740d9110c1eeb007f81e60db8413a180a5932b9dab8a5197dec414a9"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/prior_only.ply": {
+    "bytes": 17162,
+    "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/runtime_metrics.json": {
+    "bytes": 332,
+    "sha256": "66a1fc58514976f688d0740ee40f94aac4d61eb28823966913327738936446d0"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/smooth-ablation/surface_evidence.json": {
+    "bytes": 2413,
+    "sha256": "18b6d81bfc8296713618e82d6898dc907c1032febc5e8e3d0fe1174496a3b0a3"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/storage_report.json": {
+    "bytes": 864,
+    "sha256": "f83845089ceadc7df261a613d872d9fb69d6bd3c9d90b934328e60a685d5db42"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/tests.txt": {
+    "bytes": 180,
+    "sha256": "26cbb48c568d45616c6649f8b238079bd200c627148d4fa4e26a86d707a147a1"
+  },
+  "outputs/nrel-video-single-blade/20261002-second/validation.json": {
+    "bytes": 505,
+    "sha256": "b093f9e7c90bbed2a9d420bf72f63bc673948d397880f38b03aeea73b2818848"
+  },
+  "scripts/nrel_single_blade.py": {
+    "bytes": 10319,
+    "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed"
+  },
+  "wfrl/nrel_reconstruction/__init__.py": {
+    "bytes": 224,
+    "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef"
+  },
+  "wfrl/nrel_reconstruction/boundary_metrics.py": {
+    "bytes": 8162,
+    "sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e"
+  },
+  "wfrl/nrel_reconstruction/compare_rgb.py": {
+    "bytes": 13368,
+    "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4"
+  },
+  "wfrl/nrel_reconstruction/contour.py": {
+    "bytes": 15348,
+    "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80"
+  },
+  "wfrl/nrel_reconstruction/dataset.py": {
+    "bytes": 13292,
+    "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe"
+  },
+  "wfrl/nrel_reconstruction/diagnostics.py": {
+    "bytes": 11037,
+    "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789"
+  },
+  "wfrl/nrel_reconstruction/evaluate.py": {
+    "bytes": 37881,
+    "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70"
+  },
+  "wfrl/nrel_reconstruction/model.py": {
+    "bytes": 12048,
+    "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad"
+  },
+  "wfrl/nrel_reconstruction/observations.py": {
+    "bytes": 7979,
+    "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69"
+  },
+  "wfrl/nrel_reconstruction/optimize.py": {
+    "bytes": 21182,
+    "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58"
+  },
+  "wfrl/nrel_reconstruction/pack.py": {
+    "bytes": 8627,
+    "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1"
+  },
+  "wfrl/nrel_reconstruction/preview.py": {
+    "bytes": 14516,
+    "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19"
+  },
+  "wfrl/nrel_reconstruction/renderer.py": {
+    "bytes": 7061,
+    "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "status": "PUBLISHED",
+  "repository": "snode11/wind-farm-blender",
+  "release": "v0.3.19",
+  "url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.19",
+  "target": "8e49b84db1b28de49b61b12924d540ae37f11b8b",
+  "upload_command": "gh release create v0.3.19 dist/wfrl_blender-0.3.19.zip --repo snode11/wind-farm-blender --target 8e49b84db1b28de49b61b12924d540ae37f11b8b --title NREL / WFRL 0.3.19 · 完整风机几何与同源纹理切换 --notes-file outputs/release-0.3.19-20261009/docs-draft/release-notes.md --latest",
+  "returncode": 0,
+  "uploaded_assets": [
+    "wfrl_blender-0.3.19.zip"
+  ],
+  "postupload_download": false,
+  "postupload_asset_recheck": false,
+  "implementation_source_pushed": false,
+  "documentation_pushed": false,
+  "remote_release_notes_updated": true,
+  "local_verification": "local-verification.json",
+  "sha256_local_pre_upload": "15e75fde95828df58fe6394ff1522bc4444d5e78a848ccf88ced4e3d9ad0f27b"
+}

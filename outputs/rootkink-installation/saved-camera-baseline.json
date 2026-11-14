@@ -1,0 +1,1120 @@
+{
+  "Camera": {
+    "location": [
+      7.358891487121582,
+      -6.925790786743164,
+      4.958309173583984
+    ],
+    "optics": {
+      "clip_end": 100.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 50.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": true,
+      "type": "PERSP"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {},
+    "rotation": [
+      1.1093189716339111,
+      0.0,
+      0.8149281740188599
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.FarmFlexOverview": {
+    "location": [
+      -450.0,
+      -1250.0,
+      520.0
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 50.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "ORTHO"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {},
+    "rotation": [
+      1.289132833480835,
+      3.6824321369977042e-09,
+      -0.6518958806991577
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.Side": {
+    "location": [
+      504.0,
+      -1500.0,
+      228.0
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 48.0,
+      "passepartout_alpha": 0.0,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "ORTHO"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "fidelity": "SYNTH"
+    },
+    "rotation": [
+      1.464531421661377,
+      -0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.Closeup": {
+    "location": [
+      -150.0,
+      -205.0,
+      126.0
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 48.0,
+      "passepartout_alpha": 0.0,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "PERSP"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "fidelity": "SYNTH"
+    },
+    "rotation": [
+      1.452426552772522,
+      -1.92806304255555e-09,
+      -0.6220929026603699
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.Custom.1": {
+    "location": [
+      0.9514378905296326,
+      -2.006845474243164,
+      2.1252524852752686
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.004999999888241291,
+      "lens": 23.450214385986328,
+      "passepartout_alpha": 0.6000000238418579,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": true,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "custom_clip_far": 30000.0,
+      "custom_clip_near": 0.005,
+      "custom_coordinate_version": "T1.YawRoot.local / v1",
+      "custom_enabled": true,
+      "custom_label": "C1 \u00b7 \u53f6\u6839",
+      "custom_location": [
+        0.9514378905296326,
+        -2.006845474243164,
+        2.1252524852752686
+      ],
+      "custom_long_edge": 1920,
+      "custom_model_signature": "sha256:d491dc9bee9476f426b3",
+      "custom_mount_mode": "RESEARCH",
+      "custom_mount_validation": "research_outside",
+      "custom_mount_warning": "\u7814\u53d1\u5750\u6807\uff1a\u652f\u67b6\u4e0e\u5b89\u88c5\u672a\u8ba4\u8bc1",
+      "custom_nearest_distance": 0.35698947310447693,
+      "custom_research_confirmed": true,
+      "custom_schema_version": 2,
+      "custom_vfov": 46.70606820408862,
+      "gimbal_fov": 75.01850604764957,
+      "gimbal_pitch": -25.41219506756278,
+      "gimbal_roll": -150.71209493640782,
+      "gimbal_yaw": 201.26373889942798,
+      "stacked_rig_id": "WFRL.T1.StackedRig",
+      "wfrl_custom_camera": true,
+      "wfrl_custom_draft": false,
+      "wfrl_custom_slot": 1
+    },
+    "rotation": [
+      -1.0720106363296509,
+      0.45767709612846375,
+      -0.9634711146354675
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.Custom.2": {
+    "location": [
+      0.9520048499107361,
+      -2.0058634281158447,
+      2.205244541168213
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.004999999888241291,
+      "lens": 63.342437744140625,
+      "passepartout_alpha": 0.6000000238418579,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": true,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "custom_clip_far": 30000.0,
+      "custom_clip_near": 0.005,
+      "custom_coordinate_version": "T1.YawRoot.local / v1",
+      "custom_enabled": true,
+      "custom_label": "C2 \u00b7 \u4e2d\u6bb5",
+      "custom_location": [
+        0.9520048499107361,
+        -2.0058634281158447,
+        2.205244541168213
+      ],
+      "custom_long_edge": 1920,
+      "custom_model_signature": "sha256:d491dc9bee9476f426b3",
+      "custom_mount_mode": "RESEARCH",
+      "custom_mount_validation": "research_outside",
+      "custom_mount_warning": "\u7814\u53d1\u5750\u6807\uff1a\u652f\u67b6\u4e0e\u5b89\u88c5\u672a\u8ba4\u8bc1",
+      "custom_nearest_distance": 0.3571414053440094,
+      "custom_research_confirmed": true,
+      "custom_schema_version": 2,
+      "custom_vfov": 18.163284287455227,
+      "gimbal_fov": 31.727083869688006,
+      "gimbal_pitch": -37.33743247283004,
+      "gimbal_roll": -166.05588308120852,
+      "gimbal_yaw": 241.00991638490532,
+      "stacked_rig_id": "WFRL.T1.StackedRig",
+      "wfrl_custom_camera": true,
+      "wfrl_custom_draft": false,
+      "wfrl_custom_slot": 2
+    },
+    "rotation": [
+      -0.9046559929847717,
+      0.1927860826253891,
+      -0.35650426149368286
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.Custom.3": {
+    "location": [
+      0.9525718092918396,
+      -2.0048813819885254,
+      2.285236358642578
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.004999999888241291,
+      "lens": 188.83740234375,
+      "passepartout_alpha": 0.6000000238418579,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": true,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "custom_clip_far": 30000.0,
+      "custom_clip_near": 0.005,
+      "custom_coordinate_version": "T1.YawRoot.local / v1",
+      "custom_enabled": true,
+      "custom_label": "C3 \u00b7 \u53f6\u5c16",
+      "custom_location": [
+        0.9525718092918396,
+        -2.0048813819885254,
+        2.285236358642578
+      ],
+      "custom_long_edge": 1920,
+      "custom_model_signature": "sha256:d491dc9bee9476f426b3",
+      "custom_mount_mode": "RESEARCH",
+      "custom_mount_validation": "research_outside",
+      "custom_mount_warning": "\u7814\u53d1\u5750\u6807\uff1a\u652f\u67b6\u4e0e\u5b89\u88c5\u672a\u8ba4\u8bc1",
+      "custom_nearest_distance": 0.35729336738586426,
+      "custom_research_confirmed": true,
+      "custom_schema_version": 2,
+      "custom_vfov": 6.13824158673221,
+      "gimbal_fov": 10.889976365785442,
+      "gimbal_pitch": -39.754031721777736,
+      "gimbal_roll": -173.57430988876632,
+      "gimbal_yaw": 253.93283103050499,
+      "stacked_rig_id": "WFRL.T1.StackedRig",
+      "wfrl_custom_camera": true,
+      "wfrl_custom_draft": false,
+      "wfrl_custom_slot": 3
+    },
+    "rotation": [
+      -0.8738575577735901,
+      0.0861460268497467,
+      -0.20852813124656677
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.FrontQuarter": {
+    "location": [
+      -245.0,
+      -140.0,
+      125.0
+    ],
+    "optics": {
+      "clip_end": 3000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 50.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "ORTHO"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {},
+    "rotation": [
+      1.4454885721206665,
+      -4.4695791956428366e-08,
+      -1.0427218675613403
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.Gimbal": {
+    "location": [
+      -2.5028650760650635,
+      -3.2013254165649414,
+      0.6125588417053223
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.05000000074505806,
+      "lens": 31.17691421508789,
+      "passepartout_alpha": 1.0,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": -0.024000000208616257,
+      "shift_y": -0.03999999910593033,
+      "show_passepartout": true,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "gimbal_fov": 60.0,
+      "gimbal_pitch": -80.55,
+      "gimbal_roll": 180.0,
+      "gimbal_yaw": 139.3,
+      "mount": "nacelle negative-Y side / fixed Down / 1.64 m lateral and 0.60 m downward extension",
+      "wfrl_gimbal_mount_revision": 3,
+      "wfrl_mount_anchor": [
+        -2.5028650760650635,
+        -1.5613255500793457,
+        1.2125588655471802
+      ],
+      "wfrl_mount_offset": [
+        0.0,
+        -1.6399999856948853,
+        -0.6000000238418579
+      ]
+    },
+    "rotation": [
+      -0.16493365168571472,
+      -1.2221240019982815e-08,
+      -2.2811455726623535
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.NacelleGimbal": {
+    "location": [
+      -3.5000009536743164,
+      0.0,
+      0.9000034332275391
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.004999999888241291,
+      "lens": 8.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 5.82352352142334,
+      "sensor_width": 9.052364349365234,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "gimbal_fov": 59.0,
+      "gimbal_pitch": -82.0,
+      "gimbal_roll": 180.0,
+      "gimbal_yaw": 180.0,
+      "mount": "nominal nacelle underside / hub-axis installation",
+      "mount_coordinate_frame": "YawRoot; +X downwind; +Z up; metres",
+      "mount_location_m": [
+        -3.5000009536743164,
+        0.0,
+        0.9000034332275391
+      ],
+      "mount_nominal_focal_length_mm": 8.0,
+      "mount_nominal_hfov_deg": 59.0,
+      "mount_nominal_vfov_deg": 40.0,
+      "mount_offset_from_hub_m": [
+        1.5,
+        0.0,
+        -1.5
+      ],
+      "mount_reference": "WFRL.Turbine.T1.Rotor mechanical origin; no visible Hub offset",
+      "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket",
+      "optical_roll_scope": "180 deg image orientation; optical axis unchanged",
+      "wfrl_nacelle_camera": true,
+      "wfrl_nacelle_intrinsics": "nrel.hub-axis.8mm.59x40.v1",
+      "wfrl_nacelle_view_revision": 3
+    },
+    "rotation": [
+      -0.13962635397911072,
+      -2.7526629864382812e-08,
+      -1.5707964897155762
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.Sensor": {
+    "location": [
+      -4.0,
+      -2.4000000953674316,
+      -0.43744009733200073
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 27.0,
+      "passepartout_alpha": 0.0,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "fidelity": "SYNTH",
+      "mount": "nacelle_down / geometric clearance view"
+    },
+    "rotation": [
+      0.07521326094865799,
+      -3.456949002611509e-07,
+      1.1232763528823853
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T1.TipComparison": {
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "optics": {
+      "clip_end": 3000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 50.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "ORTHO"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {},
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T2.NacelleGimbal": {
+    "location": [
+      -3.5000009536743164,
+      0.0,
+      0.9000034332275391
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.004999999888241291,
+      "lens": 8.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 5.82352352142334,
+      "sensor_width": 9.052364349365234,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T2.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "gimbal_fov": 59.0,
+      "gimbal_pitch": -82.0,
+      "gimbal_roll": 180.0,
+      "gimbal_yaw": 180.0,
+      "mount": "nominal nacelle underside / hub-axis installation",
+      "mount_coordinate_frame": "YawRoot; +X downwind; +Z up; metres",
+      "mount_location_m": [
+        -3.5000009536743164,
+        0.0,
+        0.9000034332275391
+      ],
+      "mount_nominal_focal_length_mm": 8.0,
+      "mount_nominal_hfov_deg": 59.0,
+      "mount_nominal_vfov_deg": 40.0,
+      "mount_offset_from_hub_m": [
+        1.5,
+        0.0,
+        -1.5
+      ],
+      "mount_reference": "WFRL.Turbine.T2.Rotor mechanical origin; no visible Hub offset",
+      "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket",
+      "optical_roll_scope": "180 deg image orientation; optical axis unchanged",
+      "wfrl_nacelle_camera": true,
+      "wfrl_nacelle_intrinsics": "nrel.hub-axis.8mm.59x40.v1",
+      "wfrl_nacelle_view_revision": 3
+    },
+    "rotation": [
+      -0.13962635397911072,
+      -2.7526629864382812e-08,
+      -1.5707964897155762
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.T3.NacelleGimbal": {
+    "location": [
+      -3.5000009536743164,
+      0.0,
+      0.9000034332275391
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.004999999888241291,
+      "lens": 8.0,
+      "passepartout_alpha": 0.5,
+      "sensor_fit": "HORIZONTAL",
+      "sensor_height": 5.82352352142334,
+      "sensor_width": 9.052364349365234,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "PERSP"
+    },
+    "parent": "WFRL.Turbine.T3.YawRoot",
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "gimbal_fov": 59.0,
+      "gimbal_pitch": -82.0,
+      "gimbal_roll": 180.0,
+      "gimbal_yaw": 180.0,
+      "mount": "nominal nacelle underside / hub-axis installation",
+      "mount_coordinate_frame": "YawRoot; +X downwind; +Z up; metres",
+      "mount_location_m": [
+        -3.5000009536743164,
+        0.0,
+        0.9000034332275391
+      ],
+      "mount_nominal_focal_length_mm": 8.0,
+      "mount_nominal_hfov_deg": 59.0,
+      "mount_nominal_vfov_deg": 40.0,
+      "mount_offset_from_hub_m": [
+        1.5,
+        0.0,
+        -1.5
+      ],
+      "mount_reference": "WFRL.Turbine.T3.Rotor mechanical origin; no visible Hub offset",
+      "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket",
+      "optical_roll_scope": "180 deg image orientation; optical axis unchanged",
+      "wfrl_nacelle_camera": true,
+      "wfrl_nacelle_intrinsics": "nrel.hub-axis.8mm.59x40.v1",
+      "wfrl_nacelle_view_revision": 3
+    },
+    "rotation": [
+      -0.13962635397911072,
+      -2.7526629864382812e-08,
+      -1.5707964897155762
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.Top": {
+    "location": [
+      504.0,
+      0.0,
+      1568.0
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 48.0,
+      "passepartout_alpha": 0.0,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "ORTHO"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "fidelity": "SYNTH"
+    },
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "WFRL.Camera.World": {
+    "location": [
+      -330.0,
+      -780.0,
+      245.0
+    ],
+    "optics": {
+      "clip_end": 30000.0,
+      "clip_start": 0.10000000149011612,
+      "lens": 28.5,
+      "passepartout_alpha": 0.0,
+      "sensor_fit": "AUTO",
+      "sensor_height": 24.0,
+      "sensor_width": 36.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "show_passepartout": false,
+      "type": "PERSP"
+    },
+    "parent": null,
+    "parent_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "properties": {
+      "fidelity": "SYNTH"
+    },
+    "rotation": [
+      1.4515490531921387,
+      1.5190479984994454e-08,
+      -0.8398897647857666
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  }
+}

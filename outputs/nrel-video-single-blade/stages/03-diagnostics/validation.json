@@ -1,0 +1,44 @@
+{
+  "status": "DIAGNOSTICS_EXECUTED_WITH_LIMITS",
+  "historical_files_checked": 314,
+  "historical_files_unchanged": true,
+  "changed_historical_files": [],
+  "new_tests": {
+    "command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_area_audit.py tests/test_nrel_surface_audit.py tests/test_nrel_parameter_audit.py",
+    "passed": 28,
+    "failed": 0,
+    "elapsed_s": 1.68,
+    "raw_log": "tests.txt"
+  },
+  "new_source_sha256": {
+    "scripts/nrel_existing_video_audit.py": "05af35645509a485152a8b8e7c15b1aedf70acd9f953043188d7447961062d9a",
+    "wfrl/nrel_reconstruction/area_audit.py": "03865d040121824de12143395fcaf9e1bb6f6320e1e594f35ec7e3aaa04c265b",
+    "wfrl/nrel_reconstruction/surface_audit.py": "67e227620cdaf876a5fc527a9e956fc81b93f7b086ebee5f1c5d182ffe7d257a",
+    "wfrl/nrel_reconstruction/parameter_audit.py": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1",
+    "tests/test_nrel_area_audit.py": "5c35cf2c6158d25bd6d0ed1e12f0bd8aa54cf83e4dc545aecadb841aa734489d",
+    "tests/test_nrel_surface_audit.py": "82f090b43e552c0b648190410ecfd3437efdba94dc2f6a2b4f945100da1deae4",
+    "tests/test_nrel_parameter_audit.py": "6dc90eb454b5065d1c4810fe7b0b8035a99831a67c233136b1b5d7b31ba2c720"
+  },
+  "scope": {
+    "new_capture": false,
+    "new_encoding": false,
+    "new_fitting": false,
+    "new_geometry_distance_scoring": false,
+    "independent_truth_area_audit": true,
+    "forward_evaluations": 408,
+    "prior_thresholds_changed": false
+  },
+  "stages": {
+    "P0": "DONE_WITH_SOURCE_SNAPSHOT_DIFFERENCE_DISCLOSED",
+    "P1": "SAMPLE_LEVEL_MODEL_CONDITIONAL_MAPPING_AND_AREA_ACCOUNTING_DONE",
+    "P2": "LOCAL_RESPONSE_AND_COMPENSATION_TESTED_CAUSE_NOT_UNIQUE",
+    "P3": "PLAN_ONLY_PENDING_USE_CASE_TARGETS"
+  },
+  "remaining_unknowns": [
+    "true recovered surface area",
+    "complete external-occlusion visibility",
+    "material pressure/suction/edge semantics",
+    "global identifiability and unique root-regression cause",
+    "engineering accuracy targets"
+  ]
+}

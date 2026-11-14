@@ -1,0 +1,19 @@
+{
+  "blender": "5.2.1 LTS",
+  "checks": {
+    "noop_confirmation": true,
+    "aggregated_full_restore": true,
+    "participation_clear_undo": true,
+    "research_surface_fields": true,
+    "atomic_stage_publish_reference_detach_commit_failures": true,
+    "undo_failure_retains_history": true,
+    "json_noop_stale_review_atomic_confirm": true,
+    "postcommit_cleanup_retry": true,
+    "draft_capture_guards": true,
+    "timeline_statistics_preserved": true,
+    "external_transform_inplace_mesh_invalidation": true,
+    "summary_external_participation_cache_invalidation": true,
+    "preflight_static_sequence_participation": true,
+    "scene_invalidation": true
+  }
+}

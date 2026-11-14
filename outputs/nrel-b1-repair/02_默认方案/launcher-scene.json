@@ -1,0 +1,58 @@
+{
+  "name": "turb3_row",
+  "backend": "fastfarm",
+  "turbine": "nrel5mw",
+  "dt": 3,
+  "layout": [
+    {
+      "id": "T1",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "T2",
+      "x": 504.0,
+      "y": 0.0
+    },
+    {
+      "id": "T3",
+      "x": 1008.0,
+      "y": 0.0
+    }
+  ],
+  "inflow": {
+    "speed": 8.0,
+    "direction": 270.0,
+    "turbulence": null
+  },
+  "controls": [
+    "yaw"
+  ],
+  "terrain": "mountains",
+  "sensors": [
+    {
+      "type": "power",
+      "turbines": "all"
+    },
+    {
+      "type": "actuator",
+      "turbines": "all"
+    },
+    {
+      "type": "bladeload",
+      "turbines": "all"
+    },
+    {
+      "type": "rotorspeed",
+      "turbines": "all"
+    },
+    {
+      "type": "vibration",
+      "turbines": "all"
+    },
+    {
+      "type": "lidar",
+      "turbines": "T1"
+    }
+  ]
+}

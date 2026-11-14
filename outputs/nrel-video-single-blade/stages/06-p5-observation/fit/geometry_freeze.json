@@ -1,0 +1,27 @@
+{
+  "utc": "2026-10-03T02:27:26.154075+00:00",
+  "status": "BOTH_ARM_MESHES_AND_CONTROLS_FROZEN_BEFORE_CROSS_RESIDUALS_NONBLIND_AND_TRUTH",
+  "sha256": {
+    "original_raw/initial_template_exact.npz": "f40cfd7a10b8ea7056627625393cd46b361c0a48deb55e2460c1ab85168a278e",
+    "original_raw/T1_B1.json": "73597f2937ddf55acf47231c53a7d712a41b450ae92a7a64c1719e8f8243f829",
+    "original_raw/T1_B1.ply": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a",
+    "original_raw/T1_B1_exact.npz": "d7e3d9a2ef612216c7d7a7142717db7e71da1291a15c1bf0c9805c23cd57a971",
+    "original_raw/initial_template.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "original_raw/prior_only.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "original_raw/prior_only.json": "ab971680fbe525f1de720dca5527e9878c02f5e5f6687f48723aefd0db5e3cd3",
+    "original_raw/prior_only_exact.npz": "f40cfd7a10b8ea7056627625393cd46b361c0a48deb55e2460c1ab85168a278e",
+    "original_raw/model_state.json": "b962da29331b7f403e13a5f2aabcacbe314d9fd18085151d846b798e0d4058f3",
+    "original_raw/initial_template.json": "672962b28d4802374c9a5125bcf28128ff0f1553a4b215dbba2c1d8de6751752",
+    "revised_boundary/initial_template_exact.npz": "f40cfd7a10b8ea7056627625393cd46b361c0a48deb55e2460c1ab85168a278e",
+    "revised_boundary/T1_B1.json": "de140bf745a11a5cc18e3ebca7efcb0a28f3269cf70ae6e54cf976dfebabe1b3",
+    "revised_boundary/T1_B1.ply": "e0362da9d3792129a870cdb3f960e0e748b39b78629a4c01ae4d6cfbe391ded2",
+    "revised_boundary/T1_B1_exact.npz": "3a22ad543a87574eb00fc6e0f9354943ffb6ff46d185ae85b1bf81a6cc7335ef",
+    "revised_boundary/initial_template.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "revised_boundary/prior_only.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "revised_boundary/prior_only.json": "ab971680fbe525f1de720dca5527e9878c02f5e5f6687f48723aefd0db5e3cd3",
+    "revised_boundary/prior_only_exact.npz": "f40cfd7a10b8ea7056627625393cd46b361c0a48deb55e2460c1ab85168a278e",
+    "revised_boundary/model_state.json": "0b26b822613d3283de7769e2de4f5e21e8fbf1eb605a25681e13e621822ce524",
+    "revised_boundary/initial_template.json": "672962b28d4802374c9a5125bcf28128ff0f1553a4b215dbba2c1d8de6751752"
+  },
+  "further_tuning": false
+}

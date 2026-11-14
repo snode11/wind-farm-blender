@@ -1,0 +1,42 @@
+{
+  "reference": "Codex reviewed RGB correspondences; not user-provided human truth and not source geometric truth",
+  "all_observation_denominator": 32,
+  "nonquery_reference_denominator": 28,
+  "nonquery_predicted_visible": 28,
+  "nonquery_visibility_fraction": 1.0,
+  "nonquery_error_median_px": 3.719579205707612,
+  "nonquery_error_p95_px": 7.630826836377556,
+  "nonquery_error_max_px": 9.540055994914376,
+  "per_point": {
+    "paint_corner_0": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 3.1778165388123836,
+      "max_error_px": 7.824296822351228,
+      "mismatch_over_8px": 0
+    },
+    "paint_corner_1": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 2.9638474195094493,
+      "max_error_px": 7.271525433855024,
+      "mismatch_over_8px": 0
+    },
+    "paint_corner_2": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 2.6142754709119775,
+      "max_error_px": 5.496874784271166,
+      "mismatch_over_8px": 0
+    },
+    "paint_corner_3": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 5.094953536684197,
+      "max_error_px": 9.540055994914376,
+      "mismatch_over_8px": 1
+    }
+  },
+  "nearest_other_reference_nonquery": 2,
+  "identity_inference": "No source-ID truth is read; close rounded-corner references make nearest-reference swaps diagnostic rather than confirmed physical identity errors."
+}

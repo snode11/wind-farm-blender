@@ -1,0 +1,34 @@
+{
+  "status": "DEVELOPMENT_COMPLETED_AWAITING_ROOT_GLOBAL_FREEZE",
+  "scope": "capture only; geometry claims not evaluated",
+  "review_only": true,
+  "completed": [
+    "source/camera/geometry protection",
+    "12\u00d78 anonymous RGB junctions root reviewed",
+    "blue/green mask negative and restricted linear-sRGB AA repair root approved",
+    "finite localization repeats",
+    "48-frame long RGB capture",
+    "32-frame RGB-only bundle 334 visible/50 missing planned observations",
+    "independent8-frame WideEval development capture",
+    "fixed v1/v2 input-only candidate selection and final capture configuration"
+  ],
+  "not_run": [
+    "formal48-RGB three-test capture, awaiting root final sensitivity/solver freeze"
+  ],
+  "gates": {
+    "development_source_truth_leak_to_input": false,
+    "geometry_topology_protection": true,
+    "development_input_observation_gate": "parent independently verified P95<1px; capture supplies RGB observations only",
+    "mask": "root approved same final palette-v2",
+    "numerical_gate": "parent completed; capture never read geometry scores",
+    "test_selection_v1_stratum2": "FAILED_OBSERVATION_GATE retained",
+    "test_selection_v2_stratum2": "first fixed half-grid candidate148.5 qualified"
+  },
+  "limitations": [
+    "three selected windows have similar RGB phase coverage",
+    "same synthetic saved replay, not field independence",
+    "largest RGB-connected ROI includes physical hub/tower",
+    "input-only repeated detector-setting sensitivity is not physical localization accuracy",
+    "early capture read logs have declared source identities, not full OS syscall trace"
+  ]
+}

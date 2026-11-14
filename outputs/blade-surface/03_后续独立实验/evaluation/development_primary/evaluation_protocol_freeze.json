@@ -1,0 +1,119 @@
+{
+  "status": "ALL_JOB_GEOMETRIES_AND_Q_FROZEN_BEFORE_ANY_BATCH_TRUTH_READ",
+  "job_file_sha256": "f6684e71540983519321340553495295b7aa64bcf85e08dfcb907215ba8e40c2",
+  "metric_protocol_sha256": "9211aef5bf13c02e6e614c33af4f90bfb985cbd77e1bf9a8a4050b71778b3b33",
+  "evaluation_code_sha256": "c10784e1c38c0278d5bc50f979a6a5ff4853f84643b5b8306d54b7d71be0e0b3",
+  "sampler_module_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+  "parallel_processes": 2,
+  "BLAS_threads": 1,
+  "jobs": [
+    {
+      "id": "primary/A1_new",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A1_new/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A1_new/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "primary/A3_C4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_C4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_C4/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "primary/A3_D4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_D4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_D4/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "primary/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "density1024/A1_new",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A1_new/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A1_new/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 1024
+    },
+    {
+      "id": "density1024/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/development/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 1024
+    }
+  ]
+}

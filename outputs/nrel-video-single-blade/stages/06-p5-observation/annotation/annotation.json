@@ -1,0 +1,129 @@
+{
+  "schema": "nrel-observation-boundary-review.v1",
+  "status": "FROZEN_RGB_OBSERVATION_REVIEW_ONLY",
+  "version": "C1-42-lower-R1-R4-rgb.v1",
+  "frozen_utc": "2026-10-03T02:21:08.105235+00:00",
+  "camera_id": "C1",
+  "frame_id": 42,
+  "split": "fit",
+  "override": {
+    "camera_id": "C1",
+    "frame_id": 42,
+    "contour_points_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_contour.npy",
+    "contour_valid_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_contour_valid.png",
+    "reviewed_boundary_mask_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_reviewed_boundary_mask.png",
+    "contour_uncertainty_px": 3.0
+  },
+  "sha256": {
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_contour.npy": "2d8c31fe5a535c09cbf215f2b0faf449060c8dee5ab5f1cfec299e630b42e964",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_contour_valid.png": "b1b0dde0351e327266b3f2e61850240e8d42cf9b2f72d7e2600f36c468262e16",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_reviewed_boundary_mask.png": "9ec87cfddcd6e19c0d0126f11e2f43c41e87f4e41b24dab69771db7ac55653ab",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_rgb_dense_edge.npy": "505cad6a8dde220b98922bf10cdb8710993afa1d53512969e1bfe2b8fbef526c",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/C1_000042_uncertainty_band.png": "2b6777d4f28175145fbe0f6704c16001354d3c5b5c19b97bd02c460b6d59f5e4",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/edge_measurements.csv": "b912856f65d95739a3eb72c384bbb5559b2d3540d6946636869e755b18fb1e99",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/root_lower_annotation.png": "f2db181365798fefa08a885410c530a63e8a2e5d778ddb8547fdfe66b8200b56",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/root_lower_validity.png": "37813c0dd6499520e255a0a4a615b68ff7d44b0fb9acfa0a6ef59888cb3a210d",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/native_annotation.png": "bfcf8f66a0f2c82d1f997d528706b72f4c91bac83f2f25d7fac5e72a9a641753"
+  },
+  "provenance": {
+    "native_rgb_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/C1_000042_native_rgb.png",
+    "native_rgb_sha256": "484a49de3df5745e373a41a08bafb2f4cdd712686b1d8e8315d4df5b45c17bd4",
+    "native_rgb_pixels_sha256": "65a6724bdce4a56da579b2f51e752c81f478e1ef427bfec8e5602d3667e2ad8f",
+    "decoded_rgb_pixel_sha256": "65a6724bdce4a56da579b2f51e752c81f478e1ef427bfec8e5602d3667e2ad8f",
+    "source_contour_points_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy",
+    "source_contour_points_sha256": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4",
+    "source_contour_valid_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png",
+    "source_contour_valid_sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "source_labels_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png",
+    "source_labels_sha256": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174",
+    "rgb_extraction_protocol_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/protocol.json",
+    "rgb_extraction_protocol_sha256": "beba7bc2b59631991a7b9236cd3df1172c2645efb92fc7b3be72b541c3e202e8",
+    "build_script_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/build_annotation.py",
+    "build_script_sha256": "b8513cb3bce5fa51359fe952e3334d06f0852ca17495a994acd62960b70a865a",
+    "schema_exposure_disclosure": "After RGB-only visual boundary selection, observations.json was accidentally displayed while checking observation metadata schema; this exposed calibration/pose entries. No transform value was used, no model/projection was loaded or computed, no mesh/truth/fit/loss/score was read for edge extraction or selection.",
+    "old_contour_read_purpose": "deduplication, preserving original observation prefix and values only",
+    "old_valid_read_purpose": "old-domain preservation and overlap exclusion only",
+    "all_other_camera_frames": "Reference original observations unchanged; only C1#42 contour paths override.",
+    "fbu_unchanged": true,
+    "boundary_selection_from_rgb_only": true,
+    "native_full_rgb_and_unaltered_crops_visually_inspected": true,
+    "native_generated_edge_and_local_validity_overlays_visually_inspected": true,
+    "projection_or_model_computed_or_used_for_boundary": false,
+    "new_annotation_frozen_before_model_forward": true
+  },
+  "uncertainty": {
+    "native_px": 3,
+    "calibrated": false,
+    "meaning": "Uncalibrated native-pixel review convention; saved band is vertical +/-3px about per-column subpixel crossing; solver uses unchanged scalar 3px deadband."
+  },
+  "local_domain": {
+    "reviewed_search_xyxy_half_open": [
+      1050,
+      885,
+      1776,
+      936
+    ],
+    "endpoint_guard_px": 8,
+    "accepted_x_inclusive": [
+      1058,
+      1767
+    ],
+    "vertical_ribbon_halfwidth_px": 8,
+    "crop_guard_px": 8,
+    "new_support_mask_includes_old_domain": false,
+    "old_trusted_domain_priority_guard_px": 3,
+    "old_trusted_point_dedup_chebyshev_radius_px": 6,
+    "joins_deferred": [
+      "J1 x>1775"
+    ],
+    "occluder_and_false_edge_exclusion": [
+      "E1",
+      "U1",
+      "E2",
+      "E3"
+    ],
+    "no_unreviewed_rectangle_released": true
+  },
+  "measurements": {
+    "old_point_count": 1104,
+    "new_dense_point_count": 710,
+    "combined_point_count": 1814,
+    "measured_column_count": 726,
+    "rgb_failed_column_count": 0,
+    "new_point_x_range_inclusive": [
+      1058,
+      1767
+    ],
+    "new_point_y_range_subpixel": [
+      898.1256103515625,
+      924.16015625
+    ],
+    "domain_native_dimensions_wh": [
+      1920,
+      1080
+    ],
+    "new_domain_bbox_xyxy_half_open": [
+      1058,
+      891,
+      1768,
+      933
+    ],
+    "old_valid_pixel_count": 899968,
+    "new_valid_pixel_count": 11360,
+    "combined_valid_pixel_count": 911328,
+    "uncertainty_pixel_count": 4260,
+    "new_domain_overlap_old_domain_pixels": 0,
+    "new_uncertainty_overlap_old_domain_pixels": 0,
+    "new_rounded_point_overlap_old_domain": 0,
+    "new_rounded_point_coordinate_duplicates": 0,
+    "new_rounded_point_coordinates_overlap_old_points": 0,
+    "old_points_preserved_exact_order_and_values": true
+  },
+  "evidence_limits": [
+    "Dense per-column samples are not independent new geometric information.",
+    "No RGB-to-3D root-band association is established.",
+    "Observation set revision changes downstream max600 sampling share.",
+    "No geometric accuracy, uniqueness, full surface or acceptance result is established.",
+    "No boundary selection or domain widening after any model result is allowed."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "archive": "PROJECT_ROOT/outputs/t1-down-shoulder-view/package/wfrl_blender-0.3.24.zip",
+  "sha256": "d82d4a72dcafe2e6d246ee18c856d5b43a79f713a3df0d76fc6121fe7ecfd883",
+  "changed_from_installed": [
+    "build-info.json",
+    "cameras.py",
+    "panels/farm_replay.py",
+    "panels/gimbal.py"
+  ],
+  "build_info": {
+    "payload_files": 179,
+    "payload_sha256": "4e87c11870cdaacdd6f28cd3eb3b9b109315d97be675d53958afe7c62240e79b",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.24"
+  }
+}

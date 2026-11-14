@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/capture_nrel_three_camera.py", line 175, in tick
+    state['job'] = ResearchCapture(bpy.context, args.output, times)
+                   ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/capture_nrel_three_camera.py", line 107, in __init__
+    super().__init__(context, directory, sample_times)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/custom_camera_capture.py", line 164, in __init__
+    require_preflight(context, times)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/custom_camera_capture.py", line 130, in require_preflight
+    raise ValueError('；'.join(result['errors']))
+ValueError: 序列时间必须位于 117.0–177.0 s；请重新设置范围
+
+00:09.381  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

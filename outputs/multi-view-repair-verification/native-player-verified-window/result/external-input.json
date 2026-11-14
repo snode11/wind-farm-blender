@@ -1,0 +1,20 @@
+{
+  "tool": "mcp__cua_repl",
+  "window": "3D Viewport",
+  "actions": [
+    {
+      "action": "focus viewport",
+      "x": 860,
+      "y": 450,
+      "duration_ms": 150
+    },
+    {
+      "action": "pressKey",
+      "key": "space",
+      "duration_ms": 150
+    }
+  ],
+  "delivery_verified": "manual-space-events.json",
+  "observed_header": "播放器占用中",
+  "observed_HUD": "共同119.58 s · 暂停"
+}

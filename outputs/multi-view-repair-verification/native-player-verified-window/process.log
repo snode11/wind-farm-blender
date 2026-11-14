@@ -1,0 +1,12 @@
+Warning: 1 × Draw window and swap: 14.5844 ms, average: 14.58437496 ms
+Warning: 1 × Draw window and swap: 3.0133 ms, average: 3.01333307 ms
+NATIVE_CAMERA_MANUAL_SPACE_READY
+2026-10-19 11:45:10.818 Blender[73721:11715086] Warning: Window move completed without beginning
+Warning: 1 × Draw window and swap: 1.8885 ms, average: 1.88849994 ms
+Warning: 播放器由场景“NativeCamera.IndependentPlayerB”占用，请先在对应窗口暂停
+Warning: 1 × Draw window and swap: 12.9670 ms, average: 12.96695799 ms
+NATIVE_CAMERA_PLAYBACK_PASS
+00:44.926  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

@@ -1,0 +1,13 @@
+phase,run,nfev,njev,actual_residual_calls_optimizer_including_FD,wall_s_optimizer_only,cost,optimality_in_each_phase_coordinates,termination
+original,sparse_lsmr_A1,11,6,101,4.530075832968578,6852.09523587929,6.493891225466486,`xtol` termination condition is satisfied.
+original,sparse_lsmr_A3,14,6,110,5.146762999938801,6862.24603519554,14.189089012717758,`xtol` termination condition is satisfied.
+original,dense_exact_A1,12,6,204,9.204669208964333,6852.0910484395245,7.042873278634697,`xtol` termination condition is satisfied.
+original,dense_exact_A3,12,8,332,15.664693959057331,6862.228131670781,12.11561978927931,`xtol` termination condition is satisfied.
+original,sparse_lsmr_A3_shift360,8,2,40,1.88886750000529,6893.0721964155855,1516.333309854108,`xtol` termination condition is satisfied.
+original,dense_exact_A3_shift360,8,2,88,4.178033125004731,6893.046570301003,1563.7986699312235,`xtol` termination condition is satisfied.
+correction01,sparse_lsmr_A1,2,2,124,5.63397616695147,6886.675164371183,2478.225325926116,`ftol` termination condition is satisfied.
+correction01,sparse_lsmr_A3,2,2,156,7.227876416989602,6903.238830370543,2464.003038188219,`ftol` termination condition is satisfied.
+correction01,dense_exact_A1,2,2,124,5.511060958029702,6886.675164371183,2478.225325926116,`ftol` termination condition is satisfied.
+correction01,dense_exact_A3,2,2,156,7.305131584056653,6903.238830370543,2464.003038188219,`ftol` termination condition is satisfied.
+correction01,sparse_lsmr_A3_shift360,2,2,156,7.340067040990107,6903.238830370561,2464.003037840611,`ftol` termination condition is satisfied.
+correction01,dense_exact_A3_shift360,2,2,156,7.398676084005274,6903.238830370561,2464.003037840611,`ftol` termination condition is satisfied.

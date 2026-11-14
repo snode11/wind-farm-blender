@@ -1,0 +1,177 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "down_presets": {
+    "T1": {
+      "location": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ],
+      "rotation": [
+        -0.16493365168571472,
+        -1.2221240019982815e-08,
+        -2.2811455726623535
+      ],
+      "lens": 31.17691421508789,
+      "shift_x": -0.024000000208616257,
+      "shift_y": -0.03999999910593033,
+      "yaw": 139.3,
+      "pitch": -80.55,
+      "fov": 60.0,
+      "roll": 180.0
+    },
+    "T2": {
+      "location": [
+        -2.502838134765625,
+        -3.2013254165649414,
+        0.6125626564025879
+      ],
+      "rotation": [
+        -0.16493365168571472,
+        -1.2221240019982815e-08,
+        -2.2811455726623535
+      ],
+      "lens": 31.17691421508789,
+      "shift_x": -0.024000000208616257,
+      "shift_y": -0.03999999910593033,
+      "yaw": 139.3,
+      "pitch": -80.55,
+      "fov": 60.0,
+      "roll": 180.0
+    },
+    "T3": {
+      "location": [
+        -2.502929449081421,
+        -3.2013254165649414,
+        0.6125603914260864
+      ],
+      "rotation": [
+        -0.16493365168571472,
+        -1.2221240019982815e-08,
+        -2.2811455726623535
+      ],
+      "lens": 31.17691421508789,
+      "shift_x": -0.024000000208616257,
+      "shift_y": -0.03999999910593033,
+      "yaw": 139.3,
+      "pitch": -80.55,
+      "fov": 60.0,
+      "roll": 180.0
+    }
+  },
+  "down_contracts": {
+    "T1": {
+      "parent": "WFRL.Turbine.T1.YawRoot",
+      "mount_revision": 3,
+      "horizontal_fov_deg": 60.000001669652114,
+      "sensor_fit": "HORIZONTAL",
+      "passepartout": true,
+      "passepartout_alpha": 1.0
+    },
+    "T2": {
+      "parent": "WFRL.Turbine.T2.YawRoot",
+      "mount_revision": 3,
+      "horizontal_fov_deg": 60.000001669652114,
+      "sensor_fit": "HORIZONTAL",
+      "passepartout": true,
+      "passepartout_alpha": 1.0
+    },
+    "T3": {
+      "parent": "WFRL.Turbine.T3.YawRoot",
+      "mount_revision": 3,
+      "horizontal_fov_deg": 60.000001669652114,
+      "sensor_fit": "HORIZONTAL",
+      "passepartout": true,
+      "passepartout_alpha": 1.0
+    }
+  },
+  "nacelle": {
+    "T1": {
+      "location": [
+        -3.5000009536743164,
+        0.0,
+        0.9000034332275391
+      ],
+      "rotation": [
+        -0.13962635397911072,
+        -2.7526629864382812e-08,
+        -1.5707964897155762
+      ],
+      "lens": 8.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "yaw": 180.0,
+      "pitch": -82.0,
+      "fov": 59.0,
+      "roll": 180.0,
+      "hub_offset_m": [
+        1.5,
+        0.0,
+        -1.5
+      ],
+      "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket"
+    },
+    "T2": {
+      "location": [
+        -3.5000009536743164,
+        0.0,
+        0.9000034332275391
+      ],
+      "rotation": [
+        -0.13962635397911072,
+        -2.7526629864382812e-08,
+        -1.5707964897155762
+      ],
+      "lens": 8.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "yaw": 180.0,
+      "pitch": -82.0,
+      "fov": 59.0,
+      "roll": 180.0,
+      "hub_offset_m": [
+        1.5,
+        0.0,
+        -1.5
+      ],
+      "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket"
+    },
+    "T3": {
+      "location": [
+        -3.5000009536743164,
+        0.0,
+        0.9000034332275391
+      ],
+      "rotation": [
+        -0.13962635397911072,
+        -2.7526629864382812e-08,
+        -1.5707964897155762
+      ],
+      "lens": 8.0,
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "yaw": 180.0,
+      "pitch": -82.0,
+      "fov": 59.0,
+      "roll": 180.0,
+      "hub_offset_m": [
+        1.5,
+        0.0,
+        -1.5
+      ],
+      "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket"
+    }
+  },
+  "independent_ptz": true,
+  "mount_reset": true,
+  "button_bindings": true,
+  "same_turbine_trails_retained": true,
+  "readings_and_alarm_unchanged": true,
+  "turbine_data_switch": true,
+  "parent_motion_once": true,
+  "seek_reset": true,
+  "save_reload": true
+}

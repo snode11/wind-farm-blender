@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "PROJECT_ROOT/blender_frontend/tests/blender/blade_model_window.py",
+    "--python-expr",
+    "import bpy,os,json,time\nfrom pathlib import Path\n_probe_out=Path(os.environ['WFRL_TEST_OUTPUT']);_probe_tmp=_probe_out/'scratch';_probe_tmp.mkdir(exist_ok=True)\nbpy.context.preferences.filepaths.temporary_directory=str(_probe_tmp)\n_probe_deadline=time.monotonic()+90\ndef _finish_validation():\n p=_probe_out/'window-checks.json'\n if p.exists() and json.loads(p.read_text()).get('status') in ('PASS','FAIL'):\n  bpy.ops.wm.quit_blender();return None\n if time.monotonic()>_probe_deadline:\n  p.write_text(json.dumps({'status':'FAIL','error':'Visible validation timed out'}));bpy.ops.wm.quit_blender();return None\n return .5\nbpy.app.timers.register(_finish_validation,first_interval=.5)\n"
+  ],
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "expected_addon_root": "PROJECT_ROOT/outputs/frontend-stability/validation/profile/extensions/wfrl_blender",
+  "elapsed_s": 16.622625291987788,
+  "returncode": 0,
+  "evidence": "outputs/frontend-stability/model-window-installed/window-checks.json"
+}

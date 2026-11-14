@@ -1,0 +1,14 @@
+{
+  "scope": "recorded MAPPO Blender scene with native cosmetic repair and new 0.6m x 0.015m appearance-only line; no field data",
+  "fit_frames": [
+    42,
+    43,
+    45,
+    47
+  ],
+  "heldout": "separate inspection view at each fit time, never in input bundle",
+  "input_gate": "line projected width >=2px and absolute local grayscale contrast >=10/255",
+  "quality_gate": "core coverage >=0.9, contrast retention >=0.5, location/boundary <=0.1m; all require identifiable material correspondence",
+  "source_geometry": "evaluation only; masks from RGB brightness and exterior contour fill",
+  "normal_control": "source s=40m pressure u=.4"
+}

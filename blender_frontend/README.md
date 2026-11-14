@@ -9,9 +9,9 @@
 | 对象 | 身份与范围 |
 | --- | --- |
 | 公开安装包 | [NREL 0.3.42.8](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.8)；载荷见[交付身份](../publication/blender-0.3.42.8.json)；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
-| 本地工作区 | manifest **0.3.42+8**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.8 扩展及配套源码提供，日常安装使用 0.3.42.7；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配和环境几何预算；手动场景含限速变桨、Down 单路／三路视频导出、示意性叶片摆动与塔架运动及现场视频分屏。公开附件与日常安装分别核对。 |
+| 本地工作区 | manifest **0.3.42+8**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.8 扩展及配套源码提供，日常安装为同一 0.3.42.8 公开载荷；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配和环境几何预算；手动场景含限速变桨、Down 单路／三路视频导出、示意性叶片摆动与塔架运动及现场视频分屏。公开附件与日常安装分别核对。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；包含当前实现、测试与研究工具。公开扩展的匹配源码使用 `v0.3.42.8` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.7 公开 ZIP 载荷（见安装记录）；文件核对、新进程模块来源、启用、X100 叶片面板与报告导入注册及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.8 公开 ZIP 载荷（见安装记录）；文件核对、新进程模块来源、持久启用及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
 公开 ZIP 完成一次本地构建，验证范围见[发布验证记录](../publication/blender-0.3.42.8/verification.json)。本版未运行回归、隔离安装或窗口／GPU 检查；已有源码与日常安装证据按原始载荷使用，不代表当前公开 ZIP 的验证结果。
@@ -42,7 +42,7 @@
 
 工作区源码通过 `radar_x100/core.py` 使用规范 `schema.PROFILE` 派生默认视场和点数上限；已应用视场 `wfrl_x100_field_of_view` 由 `SceneSampler.field_of_view` 传给 GEOMETRY／DETECTIONS，`view.install()`／`set_field_of_view()` 生成视场线，`display.frame_field_of_view()` 供点云窗口读取帧视场。`scene.down_camera_installation()` 由 T1 Down 相机位姿与视场给出 `DOWN_CAMERA` 预设；`scene.rear_hatch_installation()` 由静态机舱尾端、底面和横向偏移 `REAR_HATCH_LATERAL_M` 给出 `REAR_HATCH` 预设，视轴对准 6 点钟叶尖并保持方位轴水平；`schema.UNIT_ENVELOPE` 给出安装单元包络；`radar_x100/housing_model.py` 生成显示用雷达模型（外壳、支架、接头、线缆、安装板，多材质单网格，`wfrl_x100_role=physical`），`view.frame_unit()` 与 `wfrl.x100_frame_unit` 把 3D 视口对准安装中的雷达；`schema.DISPLAY_DEFAULTS` 单独定义示意长度和画布余量。`configuration.py` 比较会话应用时的来源配置与当前编辑值，显示未应用差异；显示设置、下一新样本预算与下一次记录目录不属于待应用配置。安装快捷按钮成功后同步实际应用配置，不自动热切换编辑值。
 
-`Session.recording_health()` 委托 `session_recording.recording_health()`，把记录状态、失败原因、目录与已写帧数保存在所属场景；结束失败记录后，常规刷新保留该终态，新记录启动才清除上次错误。所属场景已删除时不写入失效 RNA，写盘线程仍须完成关闭，随后释放会话归属。`Fanout` 的追加或关闭异常停止记录并置为 `FAILED`，保留 `INCOMPLETE`；正常关闭排空已接受工作，失败后释放待处理项，写盘前重新校验帧元数据。
+`Session.recording_health()` 委托 `session_recording.recording_health()`，把记录状态、失败原因、目录与已写帧数保存在所属场景；记录状态取自 `session_recording.recording_state()`，结束记录且写盘线程仍存活时为 `FINALIZING`，面板读取同一函数；结束失败记录后，常规刷新保留该终态，新记录启动才清除上次错误。所属场景已删除时不写入失效 RNA，写盘线程仍须完成关闭，随后释放会话归属。`Fanout` 的追加或关闭异常停止记录并置为 `FAILED`，保留 `INCOMPLETE`；正常关闭排空已接受工作，失败后释放待处理项，写盘前重新校验帧元数据。
 
 工作区源码的 `Session.stop_recording()`（委托 `session_recording.stop_recording()`）和 `runtime.stop()` 返回布尔完成状态；`False` 表示已停止接收记录、写盘线程仍在收尾，不等待线程或释放归属。`runtime.tick()` 自动确认终态；写盘未退出时拒绝新记录及会话替换。`Fanout.request_close()` 发出停止请求并释放待显示项，外部采集端的 `Fanout.close()` 则等待线程退出。加载／历史恢复按各自场景重绑；卸载时只保留必要的写盘收尾轮询，完成后停止计时器。
 
@@ -50,7 +50,7 @@
 
 工作区的 `radar_x100/output.py` 提供按场景绑定的独立点云窗口，使用 Image Editor 的专用 GPU 画布读取现有会话最新帧；`radar_x100/display.py` 与场景叠加共用只读属性着色，提供传感器角度投影及米制正交视图。窗口不创建相机或场景实体、不驱动观测或运动、不积累历史帧；导航状态与点云批次属于观察窗口。工作区与本机安装的窄窗通过控件换行保持字号，动静属性使用固定分类色，速度支持固定对称或逐帧色标；窗口色标选择只影响观察。关闭观察不关闭雷达会话，文件加载、撤销／重做与卸载释放窗口、绘制句柄和轮询资源。该窗口包含于 0.3.42.8 公开扩展；本机日常安装按其独立记录识别。
 
-工作区源码的 `display.CanvasCache` 为每个观察窗口保留背景／按钮、网格／边框、色带和机舱参考四个当前辅助层。`output.OutputWindow` 按实际尺寸、UI scale、视图、bounds、缩放／平移和色带依赖重建，GPU 引用限于所属绘制上下文；上下文归属改变或绘制异常清除缓存，关闭及加载／历史／卸载生命周期释放引用。动态点云、未知状态和文字独立更新；点云裁剪缓存也包含实际画布矩形和 UI scale。该缓存和配置提示包含于公开扩展，本机安装使用 0.3.42.7。
+工作区源码的 `display.CanvasCache` 为每个观察窗口保留背景／按钮、网格／边框、色带和机舱参考四个当前辅助层。`output.OutputWindow` 按实际尺寸、UI scale、视图、bounds、缩放／平移和色带依赖重建，GPU 引用限于所属绘制上下文；上下文归属改变或绘制异常清除缓存，关闭及加载／历史／卸载生命周期释放引用。动态点云、未知状态和文字独立更新；点云裁剪缓存也包含实际画布矩形和 UI scale。该缓存和配置提示包含于公开扩展，本机安装同为 0.3.42.8。
 
 几何采样、文件回放与本地通道基础能力包含于源码和本机日常安装，公开附件按其独立载荷核对。真实 PLY 对照、厂家 UDP／SDK 解码、实机标定、航迹与相机投影仍待外部资料及独立验证；不提供现场精度或安全保护结论。操作见 [X100 雷达](../docs/blender/X100雷达.md)，合同与采集入口见[规范数据核心](../wfrl/radar_x100/README.md)。
 
@@ -128,6 +128,7 @@
 | --- | --- |
 | 普通PNG动画 | worker只写 `RENDERED`（声明帧已写完）或 `FAILING`（已记录错误，进程尚待退出）。控制端等待其退出后写 `COMPLETE`／`FAILED`／`CANCELLED`；成功须正常退出、帧数齐全且进度有效。FAILING保留失败原因，不因随后取消改为成功或取消 |
 | 相机抓帧 | 请求结束后先恢复允许恢复的场景状态、释放GPU目标和UI计时器；PNG写入线程尚存活时保持 `FINALIZING` 与占用。线程实际退出后才释放写入器、写最终complete／incomplete清单及准确组数，按仍匹配的场景会话发布界面结果；done事件不能代替线程退出 |
+| X100 记录 | 结束记录后停止接收新帧；写盘线程关闭索引、原子写入含索引摘要的最终清单并删除 `INCOMPLETE` 后，记录器才进入 `COMPLETE`，此前为 `FINALIZING`。场景与面板在写盘线程退出前均显示 `FINALIZING`，退出后公布 `COMPLETE` 或 `FAILED`；清单或标记写盘失败进入 `FAILED`，保留原因和 `INCOMPLETE` |
 | 已有MP4导出／RTSP | MP4复制、私有暂存清理线程全部退出后，才公开 `SUCCEEDED`／`CANCELLED`／`FAILED` 和最终路径；提交期间为 `COMMITTING`。RTSP在 `STOPPING` 中等待自有FFmpeg／MediaMTX及停止线程收尾，再公开STOPPED或错误；若进程未退出，保留句柄与active占用，ERROR不构成清理完成证明 |
 
 普通动画恢复从场景保存的目录读取匹配job身份、帧数和状态。已有终态可恢复显示；残留RUNNING／FAILING／RENDERED若记录的进程仍存活或身份不可确认，进入 `RECOVERING` 并保留占用，只读轮询，不按保存PID认领控制或发送取消信号。进程确认退出后读取可信终态；若只剩中间状态则写FAILED，不能凭RENDERED或文件数补认成功。它不续渲染缺失帧。

@@ -1,0 +1,2443 @@
+{
+  "status": "FUNCTION_SPACE_DIAGNOSTIC_ONLY_NO_TRUTH_NO_IMAGE_FIT",
+  "source_model": "frozen 20261002-second reconstruction T1_B1 physical controls",
+  "precision": "float64 algebra over existing frozen float32 template/basis buffers; no float32 inverse-tanh round trip",
+  "numerical_exactness_atol_m": 1e-10,
+  "numerical_exactness_scope": "arithmetic check only; not metrology or acceptance tolerance",
+  "original_basis_storage_vs_exact_float64_max": 2.943439247893309e-08,
+  "baseline_greville_audit": {
+    "basis_rank": 7,
+    "basis_condition_number_2": 3.599085408648297,
+    "greville_basis": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.2962962962962963,
+        0.5648148148148149,
+        0.13271604938271603,
+        0.006172839506172839,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.25,
+        0.5833333333333333,
+        0.16666666666666666,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.16666666666666666,
+        0.6666666666666666,
+        0.16666666666666666,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.16666666666666666,
+        0.5833333333333333,
+        0.25,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.006172839506172839,
+        0.13271604938271603,
+        0.5648148148148149,
+        0.2962962962962963
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "geometric_centers_at_greville_m": [
+      [
+        -0.24640249431693922,
+        1.0417061762177595
+      ],
+      [
+        -0.35621376661616966,
+        -0.012859895989780101
+      ],
+      [
+        -0.49969327501521255,
+        0.41856863563323676
+      ],
+      [
+        -0.13783598509353334,
+        0.33449498015976553
+      ],
+      [
+        -0.02929418195108187,
+        0.16600773628352183
+      ],
+      [
+        -0.0128848875849654,
+        -0.06612458332789967
+      ],
+      [
+        -0.184214249253273,
+        -0.2831601653091129
+      ]
+    ],
+    "template_relative_centers_at_greville_m": [
+      [
+        -0.04257312269756916,
+        0.17998472368502105
+      ],
+      [
+        -0.1276573415438852,
+        -0.9791189441056035
+      ],
+      [
+        -0.27680869863515045,
+        -0.7100397933193876
+      ],
+      [
+        -0.031049669330242502,
+        -0.5964000939380912
+      ],
+      [
+        0.002165623805439887,
+        -0.5396663565445146
+      ],
+      [
+        -0.007326370081040645,
+        -0.5745009545105357
+      ],
+      [
+        -0.184214249253273,
+        -0.48316016828934516
+      ]
+    ],
+    "maximum_recovered_control_error_m": 2.220446049250313e-16,
+    "maximum_recovered_ring_center_error_m": 2.220446049250313e-16,
+    "naive_interpolated_geometric_center_error": {
+      "max_vector_norm_m": 0.3721617580116144,
+      "rms_vector_norm_m": 0.14427465272544057,
+      "rms_coordinate_m": 0.10201758529549322
+    },
+    "root_reference_axis_anchor_m": [
+      0.0,
+      0.0
+    ],
+    "root_geometric_center_m": [
+      -0.24640249431693922,
+      1.0417061762177595
+    ],
+    "root_template_relative_geometric_center_m": [
+      -0.04257312269756916,
+      0.17998472368502105
+    ],
+    "regularization": {
+      "original_control_coefficients": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "pullback_from_geometric_greville_coordinates": {
+        "relative_parameter_change": 0.02107909315009264,
+        "span_smoothness": 0.07483366514668262
+      },
+      "naive_absolute_geometric_samples_as_controls": {
+        "relative_parameter_change": 0.012880866574001261,
+        "span_smoothness": 0.018718523198229205
+      },
+      "naive_template_relative_geometric_samples_as_controls": {
+        "relative_parameter_change": 0.0153367924555573,
+        "span_smoothness": 0.01662556844656631
+      },
+      "naive_reference_axis_samples_as_controls": {
+        "relative_parameter_change": 0.015524870422941836,
+        "span_smoothness": 0.016208851823278282
+      }
+    },
+    "max_regularization_pullback_error": 5.551115123125783e-17
+  },
+  "cases": [
+    {
+      "halfwidth_amplitude_m": -0.05,
+      "control1_chord_log_increment": -0.038909703069770304,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.235581286212671
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.00998936690144369,
+          0.04140079762624565
+        ],
+        [
+          0.00028375521939809074,
+          0.0016526463087317667
+        ],
+        [
+          -4.060592772939513e-05,
+          -0.0009134515799418198
+        ],
+        [
+          1.1964770645008278e-05,
+          0.0006785072005800597
+        ],
+        [
+          -2.5488051838014256e-06,
+          -0.00036657807596848806
+        ],
+        [
+          1.4057598814441386e-07,
+          7.575430191380825e-05
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.09558967597536872,
+          -1.7644187137873286
+        ],
+        [
+          -0.44886779054361764,
+          -0.30176384424607783
+        ],
+        [
+          0.07643890354511759,
+          -0.6773179277457133
+        ],
+        [
+          -0.0626330756818353,
+          -0.39799705375065286
+        ],
+        [
+          0.09707404602437553,
+          -0.6259653663373821
+        ],
+        [
+          -0.18421410867728485,
+          -0.4711628588267483
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.02579815242919673,
+        "rms_vector_norm_m": 0.010045219406255973,
+        "rms_coordinate_m": 0.007103042760670302
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.001100415132951574,
+        "rms_vector_norm_m": 0.0004009736486276537,
+        "rms_coordinate_m": 0.0002835311860217259
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.0011004151735147661,
+        "rms_vector_norm_m": 0.0007094023899872477,
+        "rms_coordinate_m": 0.0005016232405499266
+      },
+      "target_residual_xy_m": [
+        0.0002761562950148828,
+        -0.0006947026665965229
+      ],
+      "target_residual_norm_m": 0.0007475788214313368,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.03991686317751654,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.020420020166918552,
+        "span_smoothness": 0.07943084591722058
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.35641189036966636,
+            -0.01211973330515237
+          ],
+          [
+            -0.4998147432400476,
+            0.418503941396146
+          ],
+          [
+            -0.13781376904701242,
+            0.33427453802468954
+          ],
+          [
+            -0.02929460735745646,
+            0.1661596457015444
+          ],
+          [
+            -0.012884948272531744,
+            -0.0662247761317683
+          ],
+          [
+            -0.18421410867728485,
+            -0.28308441100719905
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.1278554652973819,
+            -0.9783787814209758
+          ],
+          [
+            -0.2769301668599855,
+            -0.7101044875564784
+          ],
+          [
+            -0.031027453283721584,
+            -0.5966205360731672
+          ],
+          [
+            0.002165198399065295,
+            -0.539514447126492
+          ],
+          [
+            -0.007326430768606989,
+            -0.5746011473144044
+          ],
+          [
+            -0.18421410867728485,
+            -0.4830844139874313
+          ]
+        ],
+        "maximum_recovered_control_error_m": 2.220446049250313e-16,
+        "maximum_recovered_ring_center_error_m": 1.1102230246251565e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.37183277822081895,
+          "rms_vector_norm_m": 0.14434273414248888,
+          "rms_coordinate_m": 0.10206572612716089
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.020420020166918552,
+            "span_smoothness": 0.07943084591722058
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.020420020166918552,
+            "span_smoothness": 0.07943084591722058
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.01263961572194241,
+            "span_smoothness": 0.026052491243552266
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.015092236592750476,
+            "span_smoothness": 0.023962585680983826
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015102153502282504,
+            "span_smoothness": 0.02315608908867666
+          }
+        },
+        "max_regularization_pullback_error": 0.0
+      }
+    },
+    {
+      "halfwidth_amplitude_m": -0.02,
+      "control1_chord_log_increment": -0.015462654612110861,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.210743039742569
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.003995870363655871,
+          0.01656255115614366
+        ],
+        [
+          0.00011758449917006439,
+          0.0006392245835941888
+        ],
+        [
+          -1.7856277148558067e-05,
+          -0.0003571000267061969
+        ],
+        [
+          5.879048160157024e-06,
+          0.00026586318982286925
+        ],
+        [
+          -1.587289566786513e-06,
+          -0.0001437701046059836
+        ],
+        [
+          1.7130721396027968e-07,
+          2.972347104937276e-05
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.08959617943758089,
+          -1.7892569602574306
+        ],
+        [
+          -0.4490339612638457,
+          -0.3027772659712154
+        ],
+        [
+          0.07646165319569842,
+          -0.6767615761924777
+        ],
+        [
+          -0.06263916140432016,
+          -0.39840969776141005
+        ],
+        [
+          0.09707500753999254,
+          -0.6257425583660196
+        ],
+        [
+          -0.18421407794605904,
+          -0.47120888965761276
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.010323564265876215,
+        "rms_vector_norm_m": 0.0040152329483293375,
+        "rms_coordinate_m": 0.0028391984458073297
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.00044294967839334746,
+        "rms_vector_norm_m": 0.00016117707788108407,
+        "rms_coordinate_m": 0.00011396940474154686
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.00044294969565793137,
+        "rms_vector_norm_m": 0.00028529654733837876,
+        "rms_coordinate_m": 0.00020173512327207644
+      },
+      "target_residual_xy_m": [
+        0.00011173163157266646,
+        -0.00028380465734407535
+      ],
+      "target_residual_norm_m": 0.000305006624557694,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.040141401496554964,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.020763026894492664,
+        "span_smoothness": 0.07628068038916788
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.3562923821819442,
+            -0.012566143563387033
+          ],
+          [
+            -0.4997429655947651,
+            0.41854808635469953
+          ],
+          [
+            -0.13782731202041068,
+            0.3344077614375309
+          ],
+          [
+            -0.0292941253749049,
+            0.16606736394698263
+          ],
+          [
+            -0.01288506333182216,
+            -0.06616389986744647
+          ],
+          [
+            -0.18421407794605904,
+            -0.2831304418380636
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.12773595710965974,
+            -0.9788251916792104
+          ],
+          [
+            -0.276858389214703,
+            -0.7100603425979248
+          ],
+          [
+            -0.03104099625711984,
+            -0.5964873126603258
+          ],
+          [
+            0.002165680381616856,
+            -0.5396067288810538
+          ],
+          [
+            -0.007326545827897405,
+            -0.5745402710500824
+          ],
+          [
+            -0.18421407794605904,
+            -0.4831304448182958
+          ]
+        ],
+        "maximum_recovered_control_error_m": 5.551115123125783e-17,
+        "maximum_recovered_ring_center_error_m": 2.220446049250313e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.3720318650512931,
+          "rms_vector_norm_m": 0.1443009695876562,
+          "rms_coordinate_m": 0.10203619412722548
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.020763026894492664,
+            "span_smoothness": 0.07628068038916788
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.020763026894492664,
+            "span_smoothness": 0.07628068038916788
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.012733216632977155,
+            "span_smoothness": 0.021270595597380818
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.015187796179950938,
+            "span_smoothness": 0.019178815943704138
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015304176461584166,
+            "span_smoothness": 0.018604474909984504
+          }
+        },
+        "max_regularization_pullback_error": 0.0
+      }
+    },
+    {
+      "halfwidth_amplitude_m": -0.01,
+      "control1_chord_log_increment": -0.007714650573070761,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.2024621309041224
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.0019979552255439195,
+          0.008281642317696677
+        ],
+        [
+          5.9466344604131264e-05,
+          0.0003160073346129551
+        ],
+        [
+          -9.194764437550167e-06,
+          -0.00017718205359980378
+        ],
+        [
+          3.1201459063649076e-06,
+          0.0001320162659294525
+        ],
+        [
+          -8.874651241283155e-07,
+          -7.141226498598495e-05
+        ],
+        [
+          1.0467010421288273e-07,
+          1.4766178362249606e-05
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.08759826429946893,
+          -1.7975378690958776
+        ],
+        [
+          -0.4490920794184116,
+          -0.3031004832201966
+        ],
+        [
+          0.07647031470840944,
+          -0.6765816582193713
+        ],
+        [
+          -0.06264192030657395,
+          -0.39854354468530345
+        ],
+        [
+          0.0970757073644352,
+          -0.6256702005263995
+        ],
+        [
+          -0.1842141445831688,
+          -0.47122384695029984
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.005162495475910336,
+        "rms_vector_norm_m": 0.0020071454546850566,
+        "rms_coordinate_m": 0.00141926616183556
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.0002219331333357391,
+        "rms_vector_norm_m": 8.072690265114135e-05,
+        "rms_coordinate_m": 5.7082540288808335e-05
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.00022193314214010622,
+        "rms_vector_norm_m": 0.00014291346692676328,
+        "rms_coordinate_m": 0.00010105508158679369
+      },
+      "target_residual_xy_m": [
+        5.607557335832376e-05,
+        -0.00014288133676734066
+      ],
+      "target_residual_norm_m": 0.00015349119298476693,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.04021975709967082,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.020912468393104584,
+        "span_smoothness": 0.07549294230866371
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.3562529694143667,
+            -0.012713403066912932
+          ],
+          [
+            -0.49971830258486816,
+            0.4185592415282863
+          ],
+          [
+            -0.13783168385473996,
+            0.33445152939078937
+          ],
+          [
+            -0.029294116192990445,
+            0.16603736236346756
+          ],
+          [
+            -0.012885000489417904,
+            -0.06614411590827579
+          ],
+          [
+            -0.1842141445831688,
+            -0.28314539913075065
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.12769654434208222,
+            -0.9789724511827363
+          ],
+          [
+            -0.27683372620480606,
+            -0.7100491874243381
+          ],
+          [
+            -0.031045368091449116,
+            -0.5964435447070674
+          ],
+          [
+            0.0021656895635313103,
+            -0.5396367304645688
+          ],
+          [
+            -0.007326482985493149,
+            -0.5745204870909117
+          ],
+          [
+            -0.1842141445831688,
+            -0.4831454021109829
+          ]
+        ],
+        "maximum_recovered_control_error_m": 2.220446049250313e-16,
+        "maximum_recovered_ring_center_error_m": 2.220446049250313e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.3720970927846172,
+          "rms_vector_norm_m": 0.14428765916328487,
+          "rms_coordinate_m": 0.10202678223589202
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.020912468393104584,
+            "span_smoothness": 0.07549294230866371
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.02091246839310458,
+            "span_smoothness": 0.07549294230866371
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.012798664511544896,
+            "span_smoothness": 0.019932053621538583
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.01525391321032428,
+            "span_smoothness": 0.017839679048631832
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015406070159017519,
+            "span_smoothness": 0.017343865008928712
+          }
+        },
+        "max_regularization_pullback_error": 3.469446951953614e-18
+      }
+    },
+    {
+      "halfwidth_amplitude_m": -0.005,
+      "control1_chord_log_increment": -0.0038531740603566095,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.1983214009431706
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.000998982572470669,
+          0.004140912356744835
+        ],
+        [
+          2.9901112366361943e-05,
+          0.0001571055775068511
+        ],
+        [
+          -4.6638203133381335e-06,
+          -8.825016100283165e-05
+        ],
+        [
+          1.60508319212851e-06,
+          6.57800371918056e-05
+        ],
+        [
+          -4.671128572800232e-07,
+          -3.558831232226208e-05
+        ],
+        [
+          5.707408288260279e-08,
+          7.35927563250147e-06
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.08659929164639568,
+          -1.8016785990568294
+        ],
+        [
+          -0.4491216446506494,
+          -0.3032593849773027
+        ],
+        [
+          0.07647484565253365,
+          -0.6764927263267743
+        ],
+        [
+          -0.0626434353692882,
+          -0.3986097809140411
+        ],
+        [
+          0.09707612771670204,
+          -0.6256343765737359
+        ],
+        [
+          -0.18421419217919013,
+          -0.4712312538530296
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.0025814257140432543,
+        "rms_vector_norm_m": 0.0010034554150498973,
+        "rms_coordinate_m": 0.0007095501286001441
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.000111080618238027,
+        "rms_vector_norm_m": 4.039868981853065e-05,
+        "rms_coordinate_m": 2.856618752173496e-05
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.00011108062268341533,
+        "rms_vector_norm_m": 7.152387762783726e-05,
+        "rms_coordinate_m": 5.0575018887400524e-05
+      },
+      "target_residual_xy_m": [
+        2.8090062897895046e-05,
+        -7.168465550042502e-05
+      ],
+      "target_residual_norm_m": 7.699182727940879e-05,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.040259576272775204,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.02099364648135131,
+        "span_smoothness": 0.07514734548467362
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.35623334183143585,
+            -0.012786745150864087
+          ],
+          [
+            -0.4997058342216376,
+            0.4185641580161762
+          ],
+          [
+            -0.1378338432744825,
+            0.3344732943215468
+          ],
+          [
+            -0.029294139734153006,
+            0.16602250253363604
+          ],
+          [
+            -0.012884950275102103,
+            -0.06613431829523614
+          ],
+          [
+            -0.18421419217919013,
+            -0.28315280603348036
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.12767691675915138,
+            -0.9790457932666875
+          ],
+          [
+            -0.2768212578415755,
+            -0.7100442709364482
+          ],
+          [
+            -0.031047527511191664,
+            -0.59642177977631
+          ],
+          [
+            0.0021656660223687493,
+            -0.5396515902944004
+          ],
+          [
+            -0.0073264327711773485,
+            -0.5745106894778722
+          ],
+          [
+            -0.18421419217919013,
+            -0.4831528090137126
+          ]
+        ],
+        "maximum_recovered_control_error_m": 2.220446049250313e-16,
+        "maximum_recovered_ring_center_error_m": 1.1102230246251565e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.37212949553444424,
+          "rms_vector_norm_m": 0.1442811180016413,
+          "rms_coordinate_m": 0.10202215693613703
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.02099364648135131,
+            "span_smoothness": 0.07514734548467362
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.020993646481351318,
+            "span_smoothness": 0.07514734548467364
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.012837684883211856,
+            "span_smoothness": 0.019309761429772587
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.015293271173170354,
+            "span_smoothness": 0.01721709493043196
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015463370590484887,
+            "span_smoothness": 0.016760758313909115
+          }
+        },
+        "max_regularization_pullback_error": 1.3877787807814457e-17
+      }
+    },
+    {
+      "halfwidth_amplitude_m": 0.005,
+      "control1_chord_log_increment": 0.0038449072331558573,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.190039394799409
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0009989923904619876,
+          -0.004141093787016849
+        ],
+        [
+          -3.023583339059458e-05,
+          -0.00015531565204779109
+        ],
+        [
+          4.7962627491324976e-06,
+          8.757066229917334e-05
+        ],
+        [
+          -1.6948151983817314e-06,
+          -6.532530864987855e-05
+        ],
+        [
+          5.137248732693289e-07,
+          3.53534202482384e-05
+        ],
+        [
+          -6.652215969057717e-08,
+          -7.311799007417971e-06
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.08460131668346303,
+          -1.809960605200591
+        ],
+        [
+          -0.4491817815964063,
+          -0.30357180620685736
+        ],
+        [
+          0.07648430573559611,
+          -0.6763169055034723
+        ],
+        [
+          -0.0626467352676787,
+          -0.3987408862598828
+        ],
+        [
+          0.09707710855443259,
+          -0.6255634348411654
+        ],
+        [
+          -0.1842143157754327,
+          -0.47124592492766953
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.0025817809506485977,
+        "rms_vector_norm_m": 0.0010032216692662547,
+        "rms_coordinate_m": 0.0007093848453714565
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.000111307685207462,
+        "rms_vector_norm_m": 4.0470442752196245e-05,
+        "rms_coordinate_m": 2.8616924507699927e-05
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.00011130768973790862,
+        "rms_vector_norm_m": 7.165983313833274e-05,
+        "rms_coordinate_m": 5.067115395081156e-05
+      },
+      "target_residual_xy_m": [
+        -2.8194291121227217e-05,
+        7.217110996186405e-05
+      ],
+      "target_residual_norm_m": 7.748281851453252e-05,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.040340479070588534,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.021168781433577217,
+        "span_smoothness": 0.0745517044966244
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.3561942436445342,
+            -0.012932855982050295
+          ],
+          [
+            -0.4996806252603827,
+            0.4185726757667787
+          ],
+          [
+            -0.13783810935979873,
+            0.3345165871078487
+          ],
+          [
+            -0.029294242784937752,
+            0.16599306331892127
+          ],
+          [
+            -0.012884812458433158,
+            -0.06611491080859905
+          ],
+          [
+            -0.1842143157754327,
+            -0.2831674771081203
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.12763781857224976,
+            -0.9791919040978737
+          ],
+          [
+            -0.2767960488803206,
+            -0.7100357531858457
+          ],
+          [
+            -0.031051793596507893,
+            -0.5963784869900081
+          ],
+          [
+            0.0021655629715840036,
+            -0.5396810295091151
+          ],
+          [
+            -0.007326294954508403,
+            -0.5744912819912351
+          ],
+          [
+            -0.1842143157754327,
+            -0.48316748008835253
+          ]
+        ],
+        "maximum_recovered_control_error_m": 3.3306690738754696e-16,
+        "maximum_recovered_ring_center_error_m": 2.220446049250313e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.37219388056814295,
+          "rms_vector_norm_m": 0.14426826322667546,
+          "rms_coordinate_m": 0.10201306723758805
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.021168781433577217,
+            "span_smoothness": 0.0745517044966244
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.021168781433577217,
+            "span_smoothness": 0.07455170449662439
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.012928182625298122,
+            "span_smoothness": 0.018158141943799524
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.015384450091596863,
+            "span_smoothness": 0.016064902602987638
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015590542684058663,
+            "span_smoothness": 0.015687948507753645
+          }
+        },
+        "max_regularization_pullback_error": 1.3877787807814457e-17
+      }
+    },
+    {
+      "halfwidth_amplitude_m": 0.01,
+      "control1_chord_log_increment": 0.0076815830354617295,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.185898120540916
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0019979944983428374,
+          -0.00828236804551026
+        ],
+        [
+          -6.080523525972041e-05,
+          -0.00030884759723425625
+        ],
+        [
+          9.72453654989808e-06,
+          0.00017446404658541596
+        ],
+        [
+          -3.479075487814742e-06,
+          -0.00013019734388160158
+        ],
+        [
+          1.073913985104463e-06,
+          7.047269268704323e-05
+        ],
+        [
+          -1.424625718205344e-07,
+          -1.4576271059834247e-05
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.08360231457558218,
+          -1.8141018794590844
+        ],
+        [
+          -0.44921235099827544,
+          -0.30372533815204383
+        ],
+        [
+          0.07648923400939689,
+          -0.6762300121191861
+        ],
+        [
+          -0.06264851952796813,
+          -0.3988057582951145
+        ],
+        [
+          0.09707766874354443,
+          -0.6255283155687266
+        ],
+        [
+          -0.18421439171584483,
+          -0.47125318939972194
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.005163916425300917,
+        "rms_vector_norm_m": 0.002006210466515873,
+        "rms_coordinate_m": 0.0014186050253608008
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.0002228414073608363,
+        "rms_vector_norm_m": 8.101389915359929e-05,
+        "rms_coordinate_m": 5.728547746187316e-05
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.00022284141650755906,
+        "rms_vector_norm_m": 0.00014345726951829404,
+        "rms_coordinate_m": 0.00010143960808689189
+      },
+      "target_residual_xy_m": [
+        -5.649248794458361e-05,
+        0.00014482716257791396
+      ],
+      "target_residual_norm_m": 0.00015545516464414568,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.0403815554278778,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.02126268457822299,
+        "span_smoothness": 0.07430126827476263
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.3561747727930087,
+            -0.01300562552467599
+          ],
+          [
+            -0.49966788525038675,
+            0.4185762797969612
+          ],
+          [
+            -0.13784021612095798,
+            0.33453811536730305
+          ],
+          [
+            -0.029294322177195166,
+            0.16597848334719345
+          ],
+          [
+            -0.01288472493472002,
+            -0.06610530054071989
+          ],
+          [
+            -0.18421439171584483,
+            -0.28317474158017275
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.12761834772072422,
+            -0.9792646736404994
+          ],
+          [
+            -0.27678330887032465,
+            -0.7100321491556632
+          ],
+          [
+            -0.03105390035766714,
+            -0.5963569587305537
+          ],
+          [
+            0.0021654835793265895,
+            -0.5396956094808429
+          ],
+          [
+            -0.007326207430795265,
+            -0.5744816717233558
+          ],
+          [
+            -0.18421439171584483,
+            -0.483174744560405
+          ]
+        ],
+        "maximum_recovered_control_error_m": 2.220446049250313e-16,
+        "maximum_recovered_ring_center_error_m": 2.220446049250313e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.3722258635545315,
+          "rms_vector_norm_m": 0.14426194939985787,
+          "rms_coordinate_m": 0.10200860268783007
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.02126268457822299,
+            "span_smoothness": 0.07430126827476263
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.02126268457822299,
+            "span_smoothness": 0.07430126827476262
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.012979606290567144,
+            "span_smoothness": 0.017628422221106995
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.01543621732752094,
+            "span_smoothness": 0.015534901943435448
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015660360613639908,
+            "span_smoothness": 0.015197852876084567
+          }
+        },
+        "max_regularization_pullback_error": 1.3877787807814457e-17
+      }
+    },
+    {
+      "halfwidth_amplitude_m": 0.02,
+      "control1_chord_log_increment": 0.015330380800605392,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.177615034411406
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.003996027468193335,
+          -0.016565454175019843
+        ],
+        [
+          -0.0001229401667385044,
+          -0.0006105850653674747
+        ],
+        [
+          1.997540350882234e-05,
+          0.0003462278034352343
+        ],
+        [
+          -7.314791391909388e-06,
+          -0.0002585873755370836
+        ],
+        [
+          2.333097764584597e-06,
+          0.0001400117513582404
+        ],
+        [
+          -3.2247965071728885e-07,
+          -2.896382900503889e-05
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.08160428160573169,
+          -1.822384965588594
+        ],
+        [
+          -0.4492744859297543,
+          -0.30402707562017706
+        ],
+        [
+          0.07649948487635581,
+          -0.6760582483623363
+        ],
+        [
+          -0.06265235524387222,
+          -0.39893414832677
+        ],
+        [
+          0.09707892792732391,
+          -0.6254587765100553
+        ],
+        [
+          -0.18421457173292372,
+          -0.47126757695766713
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.01032924811094466,
+        "rms_vector_norm_m": 0.004011492915096156,
+        "rms_coordinate_m": 0.002836553842946283
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.00044658287286714656,
+        "rms_vector_norm_m": 0.00016232482018083393,
+        "rms_coordinate_m": 0.00011478098110475462
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.00044658289150183237,
+        "rms_vector_norm_m": 0.00028747144649783623,
+        "rms_coordinate_m": 0.00020327300921612576
+      },
+      "target_residual_xy_m": [
+        -0.00011339931700008821,
+        0.000291588088006502
+      ],
+      "target_residual_norm_m": 0.00031286261867371443,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.040464940015217,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.02146302948516633,
+        "span_smoothness": 0.07389419567913615
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.35613598695875337,
+            -0.013150594842111119
+          ],
+          [
+            -0.4996421356301657,
+            0.4185821850324265
+          ],
+          [
+            -0.1378443773175492,
+            0.3345809366219049
+          ],
+          [
+            -0.02929453640436786,
+            0.16594960121953728
+          ],
+          [
+            -0.012884512851565348,
+            -0.06608626597798334
+          ],
+          [
+            -0.18421457173292372,
+            -0.2831891291381179
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.1275795618864689,
+            -0.9794096429579345
+          ],
+          [
+            -0.2767575592501036,
+            -0.7100262439201979
+          ],
+          [
+            -0.03105806155425836,
+            -0.5963141374759519
+          ],
+          [
+            0.0021652693521538938,
+            -0.5397244916084991
+          ],
+          [
+            -0.0073259953476405935,
+            -0.5744626371606194
+          ],
+          [
+            -0.18421457173292372,
+            -0.48318913211835013
+          ]
+        ],
+        "maximum_recovered_control_error_m": 2.220446049250313e-16,
+        "maximum_recovered_ring_center_error_m": 2.220446049250313e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.37228941221136747,
+          "rms_vector_norm_m": 0.14424954835256829,
+          "rms_coordinate_m": 0.10199983382319781
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.02146302948516633,
+            "span_smoothness": 0.07389419567913615
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.021463029485166325,
+            "span_smoothness": 0.07389419567913612
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.013094670524934092,
+            "span_smoothness": 0.016660193188952857
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.01555197463220442,
+            "span_smoothness": 0.014566121951163745
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.015812327485738117,
+            "span_smoothness": 0.01430931030031935
+          }
+        },
+        "max_regularization_pullback_error": 2.7755575615628914e-17
+      }
+    },
+    {
+      "halfwidth_amplitude_m": 0.05,
+      "control1_chord_log_increment": 0.03808283152880912,
+      "chord_control_min_bound_margin": 0.16031687557697294,
+      "center_projection": {
+        "rank": 6,
+        "singular_values": [
+          2.1559718104430816,
+          1.6153736378631212,
+          1.3102502630172428,
+          1.0761162639815134,
+          0.736971658636123,
+          0.4657591618229152
+        ],
+        "box_bounds_active": false,
+        "minimum_center_bound_margin_m": 3.1527615423822013
+      },
+      "center_control_deltas_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.009990349388730276,
+          -0.04141894620422418
+        ],
+        [
+          -0.00031723273425195565,
+          -0.0014736244323909358
+        ],
+        [
+          5.385212647995895e-05,
+          0.0008454916418759182
+        ],
+        [
+          -2.0939255735557914e-05,
+          -0.0006330278433790836
+        ],
+        [
+          7.210664533120001e-06,
+          0.0003430855652505087
+        ],
+        [
+          -1.085516020697132e-06,
+          -7.1005977491808e-05
+        ]
+      ],
+      "projected_center_controls_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.07560995968519474,
+          -1.8472384576177985
+        ],
+        [
+          -0.4494687784972677,
+          -0.30489011498720053
+        ],
+        [
+          0.07653336159932694,
+          -0.6755589845238955
+        ],
+        [
+          -0.06266597970821587,
+          -0.399308588794612
+        ],
+        [
+          0.09708380549409244,
+          -0.625255702696163
+        ],
+        [
+          -0.18421533476929372,
+          -0.47130961910615393
+        ]
+      ],
+      "required_compensation_metrics": {
+        "max_vector_norm_m": 0.025833678539668233,
+        "rms_vector_norm_m": 0.010021840673343973,
+        "rms_coordinate_m": 0.007086511500092679
+      },
+      "all_ring_residual": {
+        "max_vector_norm_m": 0.0011231269033162342,
+        "rms_vector_norm_m": 0.0004081363776943015,
+        "rms_coordinate_m": 0.0002885960003165546
+      },
+      "root_band_continuous_residual": {
+        "max_vector_norm_m": 0.0011231269524461921,
+        "rms_vector_norm_m": 0.0007229818952556469,
+        "rms_coordinate_m": 0.00051122540081037
+      },
+      "target_residual_xy_m": [
+        -0.00028658051403385697,
+        0.0007433546840222537
+      ],
+      "target_residual_norm_m": 0.0007966834862614728,
+      "maximum_residual_ring_z_m": 10.25,
+      "relative_projection_residual_l2": 0.040724692299275916,
+      "exact_in_original_ring_space_at_float64_tolerance": false,
+      "original_regularization": {
+        "relative_parameter_change": 0.021079093150092643,
+        "span_smoothness": 0.07483366514668267
+      },
+      "projected_original_family_regularization": {
+        "relative_parameter_change": 0.022162502711824496,
+        "span_smoothness": 0.07340972275695502
+      },
+      "projected_greville_audit": {
+        "basis_rank": 7,
+        "basis_condition_number_2": 3.599085408648297,
+        "greville_basis": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.2962962962962963,
+            0.5648148148148149,
+            0.13271604938271603,
+            0.006172839506172839,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.25,
+            0.5833333333333333,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.6666666666666666,
+            0.16666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.5833333333333333,
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.006172839506172839,
+            0.13271604938271603,
+            0.5648148148148149,
+            0.2962962962962963
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "geometric_centers_at_greville_m": [
+          [
+            -0.24640249431693922,
+            1.0417061762177595
+          ],
+          [
+            -0.3560208676493115,
+            -0.01358097286630544
+          ],
+          [
+            -0.4995627506702051,
+            0.41858957561637966
+          ],
+          [
+            -0.1378564456742113,
+            0.33470753254172114
+          ],
+          [
+            -0.029295618496381005,
+            0.16586515670650925
+          ],
+          [
+            -0.012883583083953353,
+            -0.06603063619635613
+          ],
+          [
+            -0.18421533476929372,
+            -0.2832311712866047
+          ]
+        ],
+        "template_relative_centers_at_greville_m": [
+          [
+            -0.04257312269756916,
+            0.17998472368502105
+          ],
+          [
+            -0.12746444257702705,
+            -0.9798400209821289
+          ],
+          [
+            -0.276678174290143,
+            -0.7100188533362447
+          ],
+          [
+            -0.031070129910920452,
+            -0.5961875415561356
+          ],
+          [
+            0.0021641872601407507,
+            -0.5398089361215271
+          ],
+          [
+            -0.0073250655800285985,
+            -0.5744070073789922
+          ],
+          [
+            -0.18421533476929372,
+            -0.4832311742668369
+          ]
+        ],
+        "maximum_recovered_control_error_m": 2.220446049250313e-16,
+        "maximum_recovered_ring_center_error_m": 1.1102230246251565e-16,
+        "naive_interpolated_geometric_center_error": {
+          "max_vector_norm_m": 0.3724767444877737,
+          "rms_vector_norm_m": 0.144214151130256,
+          "rms_coordinate_m": 0.10197480420726564
+        },
+        "root_reference_axis_anchor_m": [
+          0.0,
+          0.0
+        ],
+        "root_geometric_center_m": [
+          -0.24640249431693922,
+          1.0417061762177595
+        ],
+        "root_template_relative_geometric_center_m": [
+          -0.04257312269756916,
+          0.17998472368502105
+        ],
+        "regularization": {
+          "original_control_coefficients": {
+            "relative_parameter_change": 0.022162502711824496,
+            "span_smoothness": 0.07340972275695502
+          },
+          "pullback_from_geometric_greville_coordinates": {
+            "relative_parameter_change": 0.022162502711824496,
+            "span_smoothness": 0.07340972275695501
+          },
+          "naive_absolute_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.013535728507080267,
+            "span_smoothness": 0.014471521958151457
+          },
+          "naive_template_relative_geometric_samples_as_controls": {
+            "relative_parameter_change": 0.01599515874730085,
+            "span_smoothness": 0.012375884379589775
+          },
+          "naive_reference_axis_samples_as_controls": {
+            "relative_parameter_change": 0.016365005284881565,
+            "span_smoothness": 0.012363201409612652
+          }
+        },
+        "max_regularization_pullback_error": 1.3877787807814457e-17
+      }
+    }
+  ],
+  "conclusions": {
+    "center_preserving_ring_chord_direction_is_exact_original_family": false,
+    "original_family_has_invertible_greville_coordinate_map": true,
+    "greville_map_preserves_objective_only_with_inverse_map_and_inherited_constraints": true,
+    "independent_bspline_geometric_centers_or_naive_penalties_change_shape_prior": true,
+    "root_reference_anchor_is_not_root_geometric_anchor": true,
+    "new_fit_executed": false
+  },
+  "protocol_sha256": "d9af4d684108bf17b08001afd6650996f8b4db355a215e419c01e0ea3050a96c",
+  "input_hashes_before": {
+    "wfrl/nrel_reconstruction/model.py": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+    "outputs/nrel-video-single-blade/20261002-second/reconstruction/model_state.json": "777f37387c6cfa098b1af3aec3e4e0de5a892f491a7716daeea20141c1f4d8d5",
+    "outputs/nrel-video-single-blade/20261003-diagnostics/parameters/parameter_semantics.json": "6da3de19b5bc69a64a1b1f8a4a06887394d57f1187db9d3897543c48c03f8e62",
+    "outputs/nrel-video-single-blade/20261003-diagnostics/parameters/README.md": "b35d7c7ab1c74996d8f6de81f6ab8261d425f1bee60c6bea10850389508e0bf7"
+  },
+  "input_hashes_after": {
+    "wfrl/nrel_reconstruction/model.py": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+    "outputs/nrel-video-single-blade/20261002-second/reconstruction/model_state.json": "777f37387c6cfa098b1af3aec3e4e0de5a892f491a7716daeea20141c1f4d8d5",
+    "outputs/nrel-video-single-blade/20261003-diagnostics/parameters/parameter_semantics.json": "6da3de19b5bc69a64a1b1f8a4a06887394d57f1187db9d3897543c48c03f8e62",
+    "outputs/nrel-video-single-blade/20261003-diagnostics/parameters/README.md": "b35d7c7ab1c74996d8f6de81f6ab8261d425f1bee60c6bea10850389508e0bf7"
+  },
+  "inputs_unchanged": true
+}

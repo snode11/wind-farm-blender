@@ -1,0 +1,18 @@
+{
+  "decision": "NUMERICAL_INCONCLUSIVE",
+  "scope": "P2b-0 numerical entry gate",
+  "original_matrix_status": "NUMERICAL_INCONCLUSIVE",
+  "correction01_geometry_subcriterion": "CORRECTION01_GEOMETRY_MEAN_STABLE",
+  "correction01_accepted_as_fix": false,
+  "correction01_failure": "near-zero bounded increment origin yields tiny initial TRF radius; nearly no state updates despite ftol success and large optimality",
+  "recommend_main_P2b_continue": false,
+  "no_second_correction_or_parameter_scan": true,
+  "status": "COMPLETED_REVIEW_ONLY",
+  "evidence": [
+    "comparison_summary.json",
+    "correction01/comparison_summary.json",
+    "correction01/trust_region_degeneracy.json",
+    "correction01/postprocess_checks.json",
+    "correction01/visibility_diagnostics.json"
+  ]
+}

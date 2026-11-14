@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--background",
+    "--factory-startup",
+    "--addons",
+    "bl_ext.user_default.wfrl_blender",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/installed-model-check.py"
+  ],
+  "returncode": 0,
+  "log": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/logs/installed-model.log",
+  "required_markers": [
+    "INSTALLED_MODEL_CHECK_PASS"
+  ],
+  "error_markers": [],
+  "warnings": [],
+  "elapsed_s": 1.764776625088416,
+  "status": "PASS"
+}

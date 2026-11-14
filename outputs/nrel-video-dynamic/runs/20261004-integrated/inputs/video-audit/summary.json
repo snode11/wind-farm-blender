@@ -1,0 +1,49 @@
+{
+  "schema": "nrel-dynamic-video-audit.v1",
+  "status": "DECODE_VERIFIED_REVIEW_PENDING",
+  "camera_frame_rows": 300,
+  "target_time_count": 100,
+  "videos": {
+    "C1": {
+      "decoded_frames": 100,
+      "elapsed_s": 1.476404083892703,
+      "all_pts_verified": true,
+      "native_images": 7
+    },
+    "C2": {
+      "decoded_frames": 100,
+      "elapsed_s": 1.4826115419855341,
+      "all_pts_verified": true,
+      "native_images": 7
+    },
+    "C3": {
+      "decoded_frames": 100,
+      "elapsed_s": 1.6718310000142083,
+      "all_pts_verified": true,
+      "native_images": 7
+    }
+  },
+  "rgb_decode_passes_per_camera": 1,
+  "contact_sheet_count": 12,
+  "thumbnail_count": 300,
+  "native_png_count": 21,
+  "identity_reviewed_frames": 0,
+  "structural_tip_constraints_established": 0,
+  "d_outputs": 0,
+  "projection_run": false,
+  "fitting_run": false,
+  "native_selection_basis": "parent request 40..46 for RGB review; not metric fit selection",
+  "historical_use": {
+    "42_43": "static v2 fitting",
+    "44_45": "historically inspected nonblind validation",
+    "all_other_frames": "scouting and development; no new blind-test claim"
+  },
+  "elapsed_worker_s": 5.066303915926255,
+  "input_unchanged_after_run": true,
+  "limitations": [
+    "Thumbnails and full decoding do not establish B1 identity or visibility",
+    "All review fields remain unreviewed; no automatic trusted masks",
+    "Visible surface tip is distinct from structural point",
+    "No plane, structural-tip mapping, d or new blind-test claim"
+  ]
+}

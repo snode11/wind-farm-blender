@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "package_path": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender",
+  "verified_files": 181,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ],
+  "version": "0.3.25",
+  "archive": "PROJECT_ROOT/outputs/rootkink-installation/validation/package/wfrl_blender-0.3.25.zip",
+  "archive_sha256": "7eb4bb91ff5b66b1b055a2a8ab85d4aaf120b61c67876ae0543a2ea6617c695c",
+  "source_camera_files_preserved": true,
+  "startup_scene_preserved": true,
+  "backup": "PROJECT_ROOT/outputs/rootkink-installation/backup"
+}

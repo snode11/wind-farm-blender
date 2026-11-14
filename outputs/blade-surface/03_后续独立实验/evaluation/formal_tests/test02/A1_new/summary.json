@@ -1,0 +1,165 @@
+{
+  "status": "EVALUATED_REVIEW_ONLY",
+  "source_label": "formal_test02",
+  "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A1_new/recon.json",
+  "sha256": "02b748a5ed5f452749007c9b1fa887853ebf27ad4ab6ad454aa238971f4787b1",
+  "density": 512,
+  "frames": 8,
+  "planned_frames": [
+    315,
+    316,
+    317,
+    318,
+    319,
+    320,
+    321,
+    322
+  ],
+  "planned_cameras": [
+    "WideInput",
+    "WideEval"
+  ],
+  "surfaces": {
+    "inner": {
+      "mean_m": 0.2406822044697529,
+      "mixed_p95_m": 0.548471673160401,
+      "times_equal_weight": true
+    },
+    "middle": {
+      "mean_m": 0.06686133648017406,
+      "mixed_p95_m": 0.17976117671821842,
+      "times_equal_weight": true
+    },
+    "outer": {
+      "mean_m": 0.14037865944664446,
+      "mixed_p95_m": 0.29239505939582655,
+      "times_equal_weight": true
+    },
+    "global": {
+      "mean_m": 0.15382351205755374,
+      "mixed_p95_m": 0.38571237923646573,
+      "times_equal_weight": true
+    }
+  },
+  "q_eval": {
+    "WideInput_first_frame": {
+      "planned": 12,
+      "evaluated": 12,
+      "failed": 0,
+      "camera_reference_missing": 0,
+      "prediction_out_of_frame": 0,
+      "pixel_valid_predictions_only": {
+        "count": 12,
+        "mean": 0.5716224083727074,
+        "median": 0.210007982824387,
+        "p95": 2.2377404266535996,
+        "max": 4.591176041988889
+      },
+      "pixel_all_finite_diagnostic_only": {
+        "count": 12,
+        "mean": 0.5716224083727074,
+        "median": 0.210007982824387,
+        "p95": 2.2377404266535996,
+        "max": 4.591176041988889
+      },
+      "distance3d_m": {
+        "count": 12,
+        "mean": 0.15816903540268984,
+        "median": 0.13886757151786533,
+        "p95": 0.3242573295486469,
+        "max": 0.3314918369882803
+      },
+      "failed_queries_prevent_success_only_ranking": true
+    },
+    "WideInput_subsequent_7_frames": {
+      "planned": 84,
+      "evaluated": 84,
+      "failed": 0,
+      "camera_reference_missing": 0,
+      "prediction_out_of_frame": 0,
+      "pixel_valid_predictions_only": {
+        "count": 84,
+        "mean": 1.573977009527611,
+        "median": 0.9272514387555107,
+        "p95": 5.32941025380477,
+        "max": 5.973190940736113
+      },
+      "pixel_all_finite_diagnostic_only": {
+        "count": 84,
+        "mean": 1.573977009527611,
+        "median": 0.9272514387555107,
+        "p95": 5.32941025380477,
+        "max": 5.973190940736113
+      },
+      "distance3d_m": {
+        "count": 84,
+        "mean": 0.17314087407317333,
+        "median": 0.1539439813169299,
+        "p95": 0.3164776795334838,
+        "max": 0.32151684290362725
+      },
+      "failed_queries_prevent_success_only_ranking": true
+    },
+    "WideEval_first_frame": {
+      "planned": 12,
+      "evaluated": 12,
+      "failed": 0,
+      "camera_reference_missing": 0,
+      "prediction_out_of_frame": 0,
+      "pixel_valid_predictions_only": {
+        "count": 12,
+        "mean": 0.9453075584994125,
+        "median": 0.5662269268165708,
+        "p95": 2.6904741292627423,
+        "max": 3.7643869815019246
+      },
+      "pixel_all_finite_diagnostic_only": {
+        "count": 12,
+        "mean": 0.9453075584994125,
+        "median": 0.5662269268165708,
+        "p95": 2.6904741292627423,
+        "max": 3.7643869815019246
+      },
+      "distance3d_m": {
+        "count": 12,
+        "mean": 0.15816903540268984,
+        "median": 0.13886757151786533,
+        "p95": 0.3242573295486469,
+        "max": 0.3314918369882803
+      },
+      "failed_queries_prevent_success_only_ranking": true
+    },
+    "WideEval_subsequent_7_frames": {
+      "planned": 84,
+      "evaluated": 84,
+      "failed": 0,
+      "camera_reference_missing": 0,
+      "prediction_out_of_frame": 0,
+      "pixel_valid_predictions_only": {
+        "count": 84,
+        "mean": 1.762203431090514,
+        "median": 1.320274640456698,
+        "p95": 4.366618564598867,
+        "max": 4.9597805405221305
+      },
+      "pixel_all_finite_diagnostic_only": {
+        "count": 84,
+        "mean": 1.762203431090514,
+        "median": 1.320274640456698,
+        "p95": 4.366618564598867,
+        "max": 4.9597805405221305
+      },
+      "distance3d_m": {
+        "count": 84,
+        "mean": 0.17314087407317333,
+        "median": 0.1539439813169299,
+        "p95": 0.3164776795334838,
+        "max": 0.32151684290362725
+      },
+      "failed_queries_prevent_success_only_ranking": true
+    }
+  },
+  "no_registration": true,
+  "wall_s": 2.826170124928467,
+  "not_engineering_accuracy": true
+}

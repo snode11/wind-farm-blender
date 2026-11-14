@@ -530,7 +530,7 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
             message(layout, '正在结束记录，等待写盘完成', 'TIME', context=context)
         if active:
             message(layout, '正在记录到：' + str(session.fanout.recorder.path), 'NONE', context=context)
-        state = session.fanout.recorder.state if active else scene.get('wfrl_x100_record_state')
+        state = session.recording_state() if active else scene.get('wfrl_x100_record_state')
         if state:
             message(layout, ('记录：' if active else '上次记录：') + state, context=context)
         if scene.get('wfrl_x100_record_error'):

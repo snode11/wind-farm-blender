@@ -1,0 +1,23 @@
+{
+  "schema": "blade-stage4-locked-holdout.v1",
+  "planned_observations": 8,
+  "frames": [
+    42,
+    43,
+    45,
+    47
+  ],
+  "offset_camera_xyz_m": [
+    0.3,
+    -0.15,
+    0
+  ],
+  "samples": 128,
+  "boundary_p95_original_px_max": 1.0,
+  "visibility_min": 0.9,
+  "binding_coverage_min": 0.9,
+  "accepted_fraction_min": 0.9,
+  "role": "independent evaluation only; excluded from initialization/tracker/solver/fusion",
+  "scope": "new camera condition in recorded MAPPO Blender replay; old heldout failures retained",
+  "camera_design": "fixed translation relative to existing calibration; no source feature position"
+}

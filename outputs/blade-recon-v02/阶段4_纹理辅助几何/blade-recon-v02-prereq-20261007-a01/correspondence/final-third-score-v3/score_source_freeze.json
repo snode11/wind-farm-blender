@@ -1,0 +1,9 @@
+{
+  "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/observe_and_score.py": "5c7a5ce59b72b65b3575a531382292f0e2530204af541d1da2ee6921a11d6d7d",
+  "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/source_observation_v3.py": "a4ad2e72fb5bc879073a0b782c5c6c44c69c113da1e7c9000bfb2a33cd3d2058",
+  "REPOSITORY_ROOT/blade_recon0.2/model.py": "3b0bb519fa6543783165523631945b8564adc0387fe62e0be787a013a64a1bfe",
+  "REPOSITORY_ROOT/blade_recon0.2/camera.py": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+  "REPOSITORY_ROOT/blade_recon0.2/atlas.py": "3c5a944fe26ea56b7a02d358baf642119655883fc77f0b62cf1724eb15568b63",
+  "REPOSITORY_ROOT/blade_recon0.2/raster.py": "329fa72599cc19ccaef1b44ead6feed2cca481f6278737ad725ed25d65329f38",
+  "REPOSITORY_ROOT/blade_recon0.2/surface_observations.py": "f869359c0ef99c18e98d07506cb9f5b01fc770e62e91d8c1fab2e6f0bc1273f1"
+}

@@ -1,0 +1,94 @@
+{
+  "status": "COMPLETED_WITH_NEGATIVE_OR_GATED_RESEARCH_RESULTS",
+  "acceptance": "REVIEW_ONLY",
+  "run_id": "blade-surface-20261006-exec-a01",
+  "stages": [
+    {
+      "stage": "共同数值前置门槛",
+      "execution": "COMPLETED",
+      "result": "NUMERICAL_GATE_PASSED_REVIEW_ONLY",
+      "artifact": "numerics/REPORT.md"
+    },
+    {
+      "stage": "P2b开发/60配对扰动/负对照",
+      "execution": "COMPLETED",
+      "result": "COMPLETED_REVIEW_ONLY",
+      "artifact": "p2b/development/REPORT.md"
+    },
+    {
+      "stage": "P2b三固定盲窗 × 四组",
+      "execution": "COMPLETED_12_SOLVES_AND_12_EVALUATIONS",
+      "result": "FAILED_GATE",
+      "artifact": "evaluation/blind_test_decision/decision.json"
+    },
+    {
+      "stage": "独立自动跟踪/重启",
+      "execution": "COMPLETED_FOUR_INFERENCES",
+      "result": "LONG_IDENTITY_CONTINUATION_FAILED",
+      "artifact": "tracking/REPORT.md"
+    },
+    {
+      "stage": "自动轨迹同8帧几何对照",
+      "execution": "COMPLETED",
+      "result": "COMPLETED_DESCRIPTIVE_REVIEW_ONLY",
+      "artifact": "evaluation/automatic8_comparison/REPORT.md"
+    },
+    {
+      "stage": "固定32帧联合几何",
+      "execution": "COMPLETED_FINITE_FOUR_SOLVES_AND_EVALUATION",
+      "result": "NUMERICAL_INCONCLUSIVE",
+      "artifact": "evaluation/long32_comparison/REPORT.md"
+    },
+    {
+      "stage": "健康/颜色/凹坑局部对照",
+      "execution": "COMPLETED_CONTROLLED_CAPTURES_AND_GATE",
+      "result": "OBSERVATION_GATE_FAILED",
+      "artifact": "local_defect/REPORT.md"
+    },
+    {
+      "stage": "局部形状估计",
+      "execution": "NOT_RUN_OBSERVATION_GATE_FAILED",
+      "result": "FAILED_GATE; depth=null",
+      "artifact": "local_defect/decision.json"
+    },
+    {
+      "stage": "外观/实际Blender展示",
+      "execution": "COMPLETED",
+      "result": "COMPLETED_SOFTWARE_APPEARANCE_AND_DISPLAY",
+      "artifact": "appearance/REPORT.md"
+    },
+    {
+      "stage": "旧正式证据/源码/dirty保护",
+      "execution": "COMPLETED",
+      "result": "PASS",
+      "artifact": "provenance/preservation_end.json"
+    }
+  ],
+  "P2b_blind_decision": "FAILED_GATE",
+  "controlled_geometric_gain_established": false,
+  "long32_numerical_gate": "NUMERICAL_INCONCLUSIVE",
+  "automatic_long_identity_continuation": "FAILED",
+  "local_depth_recovery": "NOT_RUN_OBSERVATION_GATE_FAILED",
+  "valid_recovered_depth_m": null,
+  "field_accuracy_or_health_acceptance": false,
+  "source_truth_forbidden_to_solver_initializer_texture": true,
+  "source_and_old_formal_preservation": "PASS",
+  "formal_test_window_count": 3,
+  "formal_test_group_count": 12,
+  "paired_actual_optimizer_runs": 60,
+  "paired_A1_baselines_reused_no_new_optimizer": 20,
+  "RGB_capture_formal_P2b": 64,
+  "RGB_capture_other_scout_long_duplicate_input": 97,
+  "RGB_capture_local_defect": 36,
+  "actual_RGB_total": 197,
+  "no_replay_training_rerun_commit_push_release_or_RGB_upload": true,
+  "decision_artifacts": [
+    "experiment_protocol.json",
+    "evaluation/blind_test_decision/decision.json",
+    "evaluation/long32_comparison/decision.json",
+    "tracking/decision.json",
+    "local_defect/decision.json",
+    "appearance/decision.json",
+    "provenance/preservation_end.json"
+  ]
+}

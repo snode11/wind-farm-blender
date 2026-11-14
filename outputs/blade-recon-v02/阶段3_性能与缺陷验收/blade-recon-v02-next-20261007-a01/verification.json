@@ -1,0 +1,193 @@
+{
+  "preservation": {
+    "status": "PASS",
+    "checked_files": 897,
+    "changed_files": [],
+    "HEAD_unchanged": true,
+    "root_README_CHANGELOG_and_historical_outputs_unchanged": true
+  },
+  "final_source": {
+    "recon.py": {
+      "sha256": "c3cfe4fe9ec249edcb5f2a4614cf7bb3d62a333d8d5874adc48302261a70a17b",
+      "bytes": 31159
+    },
+    "texture.py": {
+      "sha256": "c27261fba0bdd8b43a9fae2b5850524e489db2d517bb6bb0397630ef6b1aaa5e",
+      "bytes": 26924
+    },
+    "input_adapter.py": {
+      "sha256": "6fcb9dba6932a8fdf63b66d17a19424487e592ba5b61ff9b42ee94465c426dd9",
+      "bytes": 18786
+    },
+    "raster.py": {
+      "sha256": "e4d9087b326eb9a9ca6d95ecd64a43c0f995e1e48e6d744778f49429ef3a3a13",
+      "bytes": 10722
+    },
+    "model.py": {
+      "sha256": "3b0bb519fa6543783165523631945b8564adc0387fe62e0be787a013a64a1bfe",
+      "bytes": 10153
+    },
+    "camera.py": {
+      "sha256": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+      "bytes": 3894
+    }
+  },
+  "cases": {
+    "synthetic_baseline": {
+      "quality": "FAILED_GATE",
+      "recon_frames": 12,
+      "successful_solver_frames": [
+        2,
+        11,
+        14
+      ],
+      "texture_checked_frame_ids": [
+        2,
+        4,
+        6,
+        8,
+        11,
+        14,
+        17,
+        20,
+        23,
+        26,
+        29,
+        32
+      ],
+      "texture_gate_eligible_frame_ids": [
+        2,
+        11,
+        14
+      ],
+      "frame_count_boundary": "checked/read frames differ from gate-eligible frames; eligibility alone does not guarantee texel contribution",
+      "truth_or_heldout_accessed": false,
+      "recon_sha256": "5ccbdeba212d5de96b91c6578a89af6c644ee81483bf74170c5c11d596d9be17",
+      "texture_data_sha256": "2180673bc385b325e6042693e69217a9677819a2994769b8104d46e1c4da0de4"
+    },
+    "synthetic_capture2": {
+      "quality": "FAILED_GATE",
+      "recon_frames": 4,
+      "successful_solver_frames": [
+        2
+      ],
+      "texture_checked_frame_ids": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "texture_gate_eligible_frame_ids": [
+        2
+      ],
+      "frame_count_boundary": "checked/read frames differ from gate-eligible frames; eligibility alone does not guarantee texel contribution",
+      "truth_or_heldout_accessed": false,
+      "recon_sha256": "9ac45aa1b669f8a0b68af82b5b533256ee2050509fd51d58bb67a803a0d40b98",
+      "texture_data_sha256": "62d7e9aa213055d8a9d4bf0f17f6884185dae528ba89d7b98cde3123eceb4070",
+      "native_persistence": "PASS",
+      "native_blend": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2-blender/独立纹理重建.blend",
+      "native_reopen_checked_sample_order": [
+        1,
+        2,
+        3,
+        4,
+        3,
+        2,
+        1
+      ],
+      "native_max_display_error_m": 7.619713471740397e-06
+    },
+    "recorded_MAPPO": {
+      "quality": "FAILED_GATE",
+      "recon_frames": 4,
+      "successful_solver_frames": [
+        42,
+        43
+      ],
+      "texture_checked_frame_ids": [
+        42,
+        43,
+        45,
+        47
+      ],
+      "texture_gate_eligible_frame_ids": [
+        42,
+        43
+      ],
+      "frame_count_boundary": "checked/read frames differ from gate-eligible frames; eligibility alone does not guarantee texel contribution",
+      "truth_or_heldout_accessed": false,
+      "recon_sha256": "5e9ec4a64de2e8386030bf2340908fff11fa5dfea20370d239dce46098627129",
+      "texture_data_sha256": "31c4dd3103c03ca0690ba87f5ffa95aa9afec364cac7b82cb7fcff534d7d3d77",
+      "native_persistence": "PASS",
+      "native_blend": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/blender/独立纹理重建.blend",
+      "native_reopen_checked_sample_order": [
+        1,
+        2,
+        3,
+        4,
+        3,
+        2,
+        1
+      ],
+      "native_max_display_error_m": 7.595035441454456e-06
+    }
+  },
+  "tests": {
+    "final-tests.log": {
+      "run": 32,
+      "passed": 32,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "final-frontend-tests.log": {
+      "run": 23,
+      "passed": 22,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "report_file_links": {
+    "outputs/blade-recon-v02-next-20261007-a01/执行与验收报告.md": {
+      "targets_checked": 16,
+      "missing": []
+    },
+    "blade_recon0.2/docs/阶段3性能与缺陷验收.md": {
+      "targets_checked": 5,
+      "missing": []
+    }
+  },
+  "performance_quality_equivalence": {
+    "full-best": "EXACT",
+    "old32": "EXACT",
+    "new-sparse": "EXACT",
+    "mean": "EXACT",
+    "register": "EXACT"
+  },
+  "final_hardened_source_equivalence": "EXACT",
+  "actual_optimized_texture_equivalence": "EXACT",
+  "same_location_blender_panels": {
+    "count": 7,
+    "defects": 4,
+    "normal_controls": 3
+  },
+  "RGB_instance_mask_rescue": {
+    "status": "FAILED_INPUT_INSTANCE_GATE",
+    "selected_for_solver": [],
+    "no_new_solver_or_texture": true
+  },
+  "scope": {
+    "startup_fix": "PASS",
+    "full_defect_acceptance": "FAILED_GATE",
+    "native_display_persistence": "PASS",
+    "geometry_precision": "NOT_ACCEPTED",
+    "field_defect_accuracy": "NOT_EVALUATED",
+    "texture_assisted_geometry": "DEFERRED"
+  },
+  "git_actions": {
+    "commit": false,
+    "push": false
+  },
+  "Blender_scope": "new independent background processes only; no current user window interaction"
+}

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "archive_sha256": "b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda",
+  "source_payload_files": 180,
+  "source_payload_mismatches": [],
+  "daily_installed_files": 181,
+  "changed_modules_ast": "PASS",
+  "native_regressions_ast": "PASS"
+}

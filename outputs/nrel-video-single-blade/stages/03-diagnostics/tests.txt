@@ -1,0 +1,3 @@
+Command: /opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_area_audit.py tests/test_nrel_surface_audit.py tests/test_nrel_parameter_audit.py
+............................                                             [100%]
+28 passed in 1.68s

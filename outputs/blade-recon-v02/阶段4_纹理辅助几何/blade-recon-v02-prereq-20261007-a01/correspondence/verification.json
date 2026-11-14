@@ -1,0 +1,84 @@
+{
+  "artifact_scope": "texture triangle-coordinate repair + RGB-only candidate correspondence audit; no geometry objective feature residual",
+  "timestamp_UTC": "2026-10-07T06:03:47.262086+00:00",
+  "tests": {
+    "surface_observations": 5,
+    "texture_correctness": 11,
+    "texture_performance_contract": 8,
+    "artifact_observation_v3": 2,
+    "all_passed": true,
+    "production_subpixel_v3": 2
+  },
+  "source_hashes": {
+    "blade_recon0.2/texture.py": "e82e46f83b729086d079782b7c1a60523e5496678343ff335abafb68a50c7a1a",
+    "blade_recon0.2/raster.py": "329fa72599cc19ccaef1b44ead6feed2cca481f6278737ad725ed25d65329f38",
+    "blade_recon0.2/surface_observations.py": "f869359c0ef99c18e98d07506cb9f5b01fc770e62e91d8c1fab2e6f0bc1273f1",
+    "blade_recon0.2/tests/test_surface_observations.py": "755462324f581fe0b743914bce3ec8da477c0ce6da3d310ae9a347aa0c87163a",
+    "outputs/blade-recon-v02-prereq-20261007-a01/correspondence/source_observation_v3.py": "a4ad2e72fb5bc879073a0b782c5c6c44c69c113da1e7c9000bfb2a33cd3d2058",
+    "outputs/blade-recon-v02-prereq-20261007-a01/correspondence/observe_and_score.py": "5c7a5ce59b72b65b3575a531382292f0e2530204af541d1da2ee6921a11d6d7d",
+    "outputs/blade-recon-v02-prereq-20261007-a01/correspondence/protocol-v3.json": "ee84b20e2507968dbdeafbafd229b685d6816ec0717c2a0c43cb08c4d7d1777b",
+    "outputs/blade-recon-v02-prereq-20261007-a01/correspondence/observation-v3-final-freeze.json": "97ff41dc0a92f9d3b1cc9045bc9770fd48a932c8960cbeebb8ef6ed67902020f",
+    "blade_recon0.2/surface_observations_subpixel.py": "95d0f1d8e279cd6e1f17e664b95bd73ca2b7331aab2f23a4773a1c188400a367",
+    "blade_recon0.2/tests/test_surface_observations_subpixel.py": "8f70fe87cd946d6aec80207c05562214c493da7b9c0bf0fecba0190071772ac7"
+  },
+  "data_versions": [
+    "v1 global RGB median",
+    "v2 missing-only local RGB median",
+    "v3 local RGB background/half-contrast subpixel contour"
+  ],
+  "production_algebra_freeze_preserved": true,
+  "fresh_controlled_RGB_observations": {
+    "planned": 16,
+    "all_RGB_observed": true,
+    "all_subpixel_refined": true,
+    "sidecar": "actual-controlled-pixels-v3/observations.json"
+  },
+  "gates": "P95<=1 originalpx, coverage/visibility>=.9, planned acceptance>=.9, non-anchor time and heldout per ID mandatory",
+  "old_synthetic_Check_scope": "development-regression after v3 diagnosis; cannot claim unseen final algorithm evaluation",
+  "new_actual_score_status": "FINAL e626 source: Patch0/7 Crack0/7 FAILED, prior parent retained",
+  "fourth_item": "PAUSED; final original main/capture2/new actual correspondence failed; no texture geometry residual",
+  "synthetic_third_view_score_status": "PASS;20/20 on new fixed health-hub-side view condition; developmental regression",
+  "native_saved_face_bary_uv": "PASS_DISPLAY_COORDINATE_CONTRACT_ONLY;16 native traces",
+  "unknown_domain_scope": "fit declared input unknown contract audited; heldout no contour domain declared => null fractions/full RGB denominator retained",
+  "numerical_origin_fix_scope": "final real four groups independently rescored, actual states differ from parent",
+  "final_four_case_correspondence": {
+    "main": "FAILED_CORRESPONDENCE_GATE",
+    "capture2": "FAILED_CORRESPONDENCE_GATE",
+    "actual": "FAILED_CORRESPONDENCE_GATE",
+    "third": "PASS"
+  },
+  "final_actual_solver_frame43": {
+    "success": true,
+    "status": 2,
+    "message": "`ftol` termination condition is satisfied.",
+    "optimality": 0.009282810645185473,
+    "gradient_inf_norm": 0.42426223898481824,
+    "parameterization": "frame_local_increments_with_constant_origin",
+    "coordinate_reference": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "jacobian_absolute_step": 1e-06,
+    "cost": 191.94280409722109,
+    "nfev": 17
+  },
+  "final_saved_native_coordinate_audit": {
+    "status": "PASS_DISPLAY_COORDINATE_CONTRACT_ONLY",
+    "out": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-final-same-position-evidence",
+    "native_audit_sha256": "7960f97902d6f30f20429b1d0af88eba0d51e517ae5038255b0fdf312a09508c",
+    "evidence_manifest_sha256": "2172aca1c29c54a700f17de0774357667618ec64eaa2d8a5addc5565030773c7",
+    "actual_correspondence_acceptance": "FAILED_CORRESPONDENCE_GATE"
+  },
+  "subtask_complete": true
+}

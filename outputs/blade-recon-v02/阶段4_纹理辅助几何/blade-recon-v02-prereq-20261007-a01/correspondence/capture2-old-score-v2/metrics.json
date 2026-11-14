@@ -1,0 +1,424 @@
+{
+  "classification": "SYNTHETIC_IDEAL_INSPECTION",
+  "tracks": [
+    {
+      "track_id": "D1",
+      "anchor_frame": 2,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 1,
+      "accepted_observations": 1,
+      "accepted_fraction": 1.0,
+      "status": "PASS",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "D2",
+      "anchor_frame": null,
+      "anchor_binding_coverage": null,
+      "planned_independent_observations": 2,
+      "accepted_observations": 0,
+      "accepted_fraction": 0.0,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "D3",
+      "anchor_frame": null,
+      "anchor_binding_coverage": null,
+      "planned_independent_observations": 2,
+      "accepted_observations": 0,
+      "accepted_fraction": 0.0,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "D6",
+      "anchor_frame": null,
+      "anchor_binding_coverage": null,
+      "planned_independent_observations": 2,
+      "accepted_observations": 0,
+      "accepted_fraction": 0.0,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    }
+  ],
+  "observations": [
+    {
+      "track_id": "D1",
+      "frame": 2,
+      "t": 0.2,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "933227bd6334836f06bafb70e6bd9816231003297a6d0b7f68336852c5293a43",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.0014470093875245673,
+      "centroid_shift_px": 5.926089685454898e-05,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/capture2-old-score-v2/D1_Inspection_2_independent_reprojection.png"
+    },
+    {
+      "track_id": "D1",
+      "frame": 2,
+      "t": 0.2,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "f53f3a05e268499ef70a99741486dd591495cc39b0f053c37d73cff3e1b132c0",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.4667372144128152,
+      "centroid_shift_px": 1.0775870992168601,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/capture2-old-score-v2/D1_Check_2_independent_reprojection.png"
+    },
+    {
+      "track_id": "D2",
+      "frame": 4,
+      "t": 0.4,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "ff6329486e54aeae19be48e2a321a4346bf9227d12cac62f277056878361db0c",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false
+    },
+    {
+      "track_id": "D2",
+      "frame": 4,
+      "t": 0.4,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "bd66767f9e8a1ce674e43a3fae5c7d54e07331951bcfac4422e71c2d1951b4e0",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false
+    },
+    {
+      "track_id": "D3",
+      "frame": 6,
+      "t": 0.6,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "dab6cc916361d65d4dca5a6b50c703457e80ae517cdcb6d328c617ade780ba64",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false
+    },
+    {
+      "track_id": "D3",
+      "frame": 6,
+      "t": 0.6,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "0f502f22b9ef17ef73f67d69b7da4f27e3c0a8f881f02778b0c68d7fc5419f27",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false
+    },
+    {
+      "track_id": "D6",
+      "frame": 8,
+      "t": 0.8,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "afa6c829efd0d824068dfceed7f1ae5cf9343c8bafb180b3947258ec0e3dd23a",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false
+    },
+    {
+      "track_id": "D6",
+      "frame": 8,
+      "t": 0.8,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "e26c377bc7bb923803d9c3a2c963d7c8bb8a507e8f740c4160fa1eaec60e142b",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false
+    }
+  ],
+  "overall": "FAILED_CORRESPONDENCE_GATE",
+  "primary_metric": "independent RGB region boundary reprojection with fixed anchor triangles, in original pixels",
+  "limitations": [
+    "Known capture target names are region identities, not automatic defect classification",
+    "Bindings are candidate surface regions; pixel boundary threshold is not a pointwise texture descriptor",
+    "No field data, geometry objective changes, source-point nearest search or local-plane 3D error conversion"
+  ],
+  "recon_input_access_log": [
+    {
+      "path": "input_bundle.json",
+      "role": "input_manifest",
+      "sha256": "45a13d6c0ee443a68c21b025a8983a0e3c208032ace2a7c4ae8953a25682ada6",
+      "bytes": 9585
+    },
+    {
+      "path": "rgb/Global/000002.png",
+      "role": "RGB",
+      "sha256": "555fa35a846ee81599d525b1f8911cf86f470001fd6ec1a3130602b51a7c96b9",
+      "bytes": 493427
+    },
+    {
+      "path": "masks/Global/000002.png",
+      "role": "RGB_derived_mask",
+      "sha256": "20d8c84922088bd446105d33b8a59528597f1e70fc272434ad2c5ea971e6ef84",
+      "bytes": 3873
+    },
+    {
+      "path": "rgb/Inspection/000002.png",
+      "role": "RGB",
+      "sha256": "933227bd6334836f06bafb70e6bd9816231003297a6d0b7f68336852c5293a43",
+      "bytes": 736519
+    },
+    {
+      "path": "masks/Inspection/000002.png",
+      "role": "RGB_derived_mask",
+      "sha256": "ca198e1dcb6de04fc68a3155b28a27653118fe5fe1c65e700a88af60614b8b6b",
+      "bytes": 3550
+    },
+    {
+      "path": "rgb/Global/000004.png",
+      "role": "RGB",
+      "sha256": "81d0cd8e13ebfb88903d070c9820146878a402e7438d6252015ef39520fef15e",
+      "bytes": 492348
+    },
+    {
+      "path": "masks/Global/000004.png",
+      "role": "RGB_derived_mask",
+      "sha256": "3d66acd3d7005872eaf9b421101f1adbe146e1edda2166fadf0e5d7843a5ea0a",
+      "bytes": 3690
+    },
+    {
+      "path": "rgb/Inspection/000004.png",
+      "role": "RGB",
+      "sha256": "ff6329486e54aeae19be48e2a321a4346bf9227d12cac62f277056878361db0c",
+      "bytes": 740533
+    },
+    {
+      "path": "masks/Inspection/000004.png",
+      "role": "RGB_derived_mask",
+      "sha256": "50752b22039974f2360f9fb08c9dc02706f2c7e17c12ac58340d050f202b053a",
+      "bytes": 3317
+    },
+    {
+      "path": "rgb/Global/000006.png",
+      "role": "RGB",
+      "sha256": "27a09b6c6e79fcbd0079214c06990c2eac7716cd492a10e6c9c580c6cf73138a",
+      "bytes": 493210
+    },
+    {
+      "path": "masks/Global/000006.png",
+      "role": "RGB_derived_mask",
+      "sha256": "dcd311a7c2891a817911ab3598a8c76719b423167fc3a200720f0199b9681642",
+      "bytes": 3839
+    },
+    {
+      "path": "rgb/Inspection/000006.png",
+      "role": "RGB",
+      "sha256": "dab6cc916361d65d4dca5a6b50c703457e80ae517cdcb6d328c617ade780ba64",
+      "bytes": 745614
+    },
+    {
+      "path": "masks/Inspection/000006.png",
+      "role": "RGB_derived_mask",
+      "sha256": "646b90e97979b7afe925f19a6b4abb06c64020576c443e63193ba8432665d85b",
+      "bytes": 4030
+    },
+    {
+      "path": "rgb/Global/000008.png",
+      "role": "RGB",
+      "sha256": "40126b522d8197002ef4296d7f024b076aba4dbd9222c09603e457d177125906",
+      "bytes": 493554
+    },
+    {
+      "path": "masks/Global/000008.png",
+      "role": "RGB_derived_mask",
+      "sha256": "38bc795f2f1d6604fbd0846977dde7459d074fd4e5b020e7e34e75dd65a4a3d8",
+      "bytes": 3822
+    },
+    {
+      "path": "rgb/Inspection/000008.png",
+      "role": "RGB",
+      "sha256": "afa6c829efd0d824068dfceed7f1ae5cf9343c8bafb180b3947258ec0e3dd23a",
+      "bytes": 737287
+    },
+    {
+      "path": "masks/Inspection/000008.png",
+      "role": "RGB_derived_mask",
+      "sha256": "76fa89dfbb22bf978535331273581d94b24ca8d136aa2df3c6514a1f4db6b6f3",
+      "bytes": 3633
+    }
+  ],
+  "RGB_detection_access_log": [
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/capture2-catalog.json",
+      "role": "calibrated_RGB_observation_catalog",
+      "sha256": "460f293ba61b9491dde409d36de99392bc0f6325c13a35a8475de6cff5f22e34"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/input/rgb/Inspection/000002.png",
+      "role": "original_RGB_only",
+      "sha256": "933227bd6334836f06bafb70e6bd9816231003297a6d0b7f68336852c5293a43"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/input/rgb/Inspection/000004.png",
+      "role": "original_RGB_only",
+      "sha256": "ff6329486e54aeae19be48e2a321a4346bf9227d12cac62f277056878361db0c"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/input/rgb/Inspection/000006.png",
+      "role": "original_RGB_only",
+      "sha256": "dab6cc916361d65d4dca5a6b50c703457e80ae517cdcb6d328c617ade780ba64"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/input/rgb/Inspection/000008.png",
+      "role": "original_RGB_only",
+      "sha256": "afa6c829efd0d824068dfceed7f1ae5cf9343c8bafb180b3947258ec0e3dd23a"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/evaluation/rgb/Check/000002.png",
+      "role": "original_RGB_only",
+      "sha256": "f53f3a05e268499ef70a99741486dd591495cc39b0f053c37d73cff3e1b132c0"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/evaluation/rgb/Check/000004.png",
+      "role": "original_RGB_only",
+      "sha256": "bd66767f9e8a1ce674e43a3fae5c7d54e07331951bcfac4422e71c2d1951b4e0"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/evaluation/rgb/Check/000006.png",
+      "role": "original_RGB_only",
+      "sha256": "0f502f22b9ef17ef73f67d69b7da4f27e3c0a8f881f02778b0c68d7fc5419f27"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/capture2/evaluation/rgb/Check/000008.png",
+      "role": "original_RGB_only",
+      "sha256": "e26c377bc7bb923803d9c3a2c963d7c8bb8a507e8f740c4160fa1eaec60e142b"
+    }
+  ],
+  "source_truth_or_texture_read": false
+}

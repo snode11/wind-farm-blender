@@ -1,0 +1,108 @@
+{
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "open": [
+    "FINISHED"
+  ],
+  "before": [
+    {
+      "slot": 1,
+      "local": true,
+      "camera": "T1.Native.C1",
+      "proxy": "T1.Native.C1",
+      "view_key": "((525359902728, 'CameraParameters(location=(0.9514378905296326, -2.006845474243164, 2.1252524852752686), yaw=201.26373889942798, pitch=-25.41219506756278, roll=-150.71209493640782, fov=75.01850604764957, vfov=46.70606820408862, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 540, 938)"
+    },
+    {
+      "slot": 2,
+      "local": true,
+      "camera": "T1.Native.C2",
+      "proxy": "T1.Native.C2",
+      "view_key": "((525359972360, 'CameraParameters(location=(0.9520048499107361, -2.0058634281158447, 2.205244541168213), yaw=241.00991638490532, pitch=-37.33743247283004, roll=-166.05588308120852, fov=31.727083869688006, vfov=18.163284287455227, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 540, 938)"
+    },
+    {
+      "slot": 3,
+      "local": true,
+      "camera": "T1.Native.C3",
+      "proxy": "T1.Native.C3",
+      "view_key": "((525359975432, 'CameraParameters(location=(0.9525718092918396, -2.0048813819885254, 2.285236358642578), yaw=253.93283103050499, pitch=-39.754031721777736, roll=-173.57430988876632, fov=10.889976365785442, vfov=6.13824158673221, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 538, 938)"
+    }
+  ],
+  "enumerated_native_slots": [
+    1,
+    2,
+    3
+  ],
+  "switch": [
+    "FINISHED"
+  ],
+  "immediate": [
+    {
+      "slot": 1,
+      "local": false,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "proxy": "T1.Native.C1",
+      "view_key": "((525359902728, 'CameraParameters(location=(0.9514378905296326, -2.006845474243164, 2.1252524852752686), yaw=201.26373889942798, pitch=-25.41219506756278, roll=-150.71209493640782, fov=75.01850604764957, vfov=46.70606820408862, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 540, 938)"
+    },
+    {
+      "slot": 2,
+      "local": false,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "proxy": "T1.Native.C2",
+      "view_key": "((525359972360, 'CameraParameters(location=(0.9520048499107361, -2.0058634281158447, 2.205244541168213), yaw=241.00991638490532, pitch=-37.33743247283004, roll=-166.05588308120852, fov=31.727083869688006, vfov=18.163284287455227, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 540, 938)"
+    },
+    {
+      "slot": 3,
+      "local": false,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "proxy": "T1.Native.C3",
+      "view_key": "((525359975432, 'CameraParameters(location=(0.9525718092918396, -2.0048813819885254, 2.285236358642578), yaw=253.93283103050499, pitch=-39.754031721777736, roll=-173.57430988876632, fov=10.889976365785442, vfov=6.13824158673221, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 538, 938)"
+    }
+  ],
+  "after_watch": [
+    {
+      "slot": 1,
+      "local": false,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "proxy": "T1.Native.C1",
+      "view_key": "((525359902728, 'CameraParameters(location=(0.9514378905296326, -2.006845474243164, 2.1252524852752686), yaw=201.26373889942798, pitch=-25.41219506756278, roll=-150.71209493640782, fov=75.01850604764957, vfov=46.70606820408862, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 540, 938)"
+    },
+    {
+      "slot": 2,
+      "local": false,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "proxy": "T1.Native.C2",
+      "view_key": "((525359972360, 'CameraParameters(location=(0.9520048499107361, -2.0058634281158447, 2.205244541168213), yaw=241.00991638490532, pitch=-37.33743247283004, roll=-166.05588308120852, fov=31.727083869688006, vfov=18.163284287455227, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 540, 938)"
+    },
+    {
+      "slot": 3,
+      "local": false,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "proxy": "T1.Native.C3",
+      "view_key": "((525359975432, 'CameraParameters(location=(0.9525718092918396, -2.0048813819885254, 2.285236358642578), yaw=253.93283103050499, pitch=-39.754031721777736, roll=-173.57430988876632, fov=10.889976365785442, vfov=6.13824158673221, focal_length_mm_record=None, output_long_edge_px=1920, clip_near_m=0.005, clip_far_m=30000.0)', 1.7777777777777777), 538, 938)"
+    }
+  ],
+  "scene_camera": "WFRL.Camera.T1.Gimbal",
+  "confirmed": true,
+  "method": "独立可见进程的脚本操作及 RNA 状态断言；不宣称真实鼠标交互或完整性能验收",
+  "reproduction_steps": [
+    "在独立 Blender 5.2.1 LTS 可见进程，以 --factory-startup 加载实际日常安装扩展并调用 addon.load_demo_scene()。",
+    "由主窗口打开 native_camera_view(mode=TRIPLE, layout=STRIP)，等待三个 entry 就绪。",
+    "由主窗口执行 farm_flex_view(turbine=T1, angle=DOWN)，记录立即及 1 秒后 camera/local/proxy。"
+  ],
+  "source_files": {
+    "cameras.py": {
+      "installed_sha256": "e8eba973e949be12da60f3810a0af94d8c0514ece39f802e2c80d87e5e27ff2a",
+      "workspace_sha256": "e8eba973e949be12da60f3810a0af94d8c0514ece39f802e2c80d87e5e27ff2a"
+    },
+    "panels/farm_replay.py": {
+      "installed_sha256": "e8c8012060176b37e7f4499ac19d05345f389d786a632eb47257459a915571b0",
+      "workspace_sha256": "e8c8012060176b37e7f4499ac19d05345f389d786a632eb47257459a915571b0"
+    },
+    "native_camera_views.py": {
+      "installed_sha256": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19",
+      "workspace_sha256": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19"
+    }
+  },
+  "finding_status": "CONFIRMED",
+  "temporary_blend_retained": false
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "command": [
+    "PYTHON_ENV_ROOT/bin/python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "blender_frontend/tests/test_camera_projection.py",
+    "blender_frontend/tests/test_nacelle_camera.py",
+    "blender_frontend/tests/test_presentation_controls.py",
+    "-q"
+  ],
+  "returncode": 0,
+  "log": "outputs/frontend-stability/camera-host.log"
+}

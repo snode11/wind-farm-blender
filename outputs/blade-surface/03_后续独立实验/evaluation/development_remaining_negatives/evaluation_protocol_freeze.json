@@ -1,0 +1,47 @@
+{
+  "status": "ALL_JOB_GEOMETRIES_AND_Q_FROZEN_BEFORE_ANY_BATCH_TRUTH_READ",
+  "job_file_sha256": "03b3a1df96474a34249cdb4af6f8105466dfed2ef4ceaa96a3f69c4201e2706f",
+  "metric_protocol_sha256": "9211aef5bf13c02e6e614c33af4f90bfb985cbd77e1bf9a8a4050b71778b3b33",
+  "evaluation_code_sha256": "c10784e1c38c0278d5bc50f979a6a5ff4853f84643b5b8306d54b7d71be0e0b3",
+  "sampler_module_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+  "parallel_processes": 2,
+  "BLAS_threads": 1,
+  "jobs": [
+    {
+      "id": "negatives/wrong_blade",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/negatives/wrong_blade/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/negatives/wrong_blade/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "negatives/wrong_side",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/negatives/wrong_side/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/negatives/wrong_side/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "nrel-dynamic-preflight.v1",
+  "run_id": "20261004-a01",
+  "status": "FROZEN_PREFLIGHT_SCOPE",
+  "target": "NREL5MW/T1/B1",
+  "authorization": "user 2026-10-04 says 开始 referring to v0.1; defaults chosen for this research run, not owner acceptance of engineering metrics",
+  "route": "A_three_original_MP4_offline",
+  "scope": "DY0 and DY1 prerequisite audit; DY2 only after supported target/time/coordinate definitions",
+  "input_root": "REPOSITORY_ROOT/outputs/nrel-video-single-blade/stages/01-first-run/formal/algorithm-input",
+  "historical_video_use": {
+    "42_43": "static v2 fitting",
+    "44_45": "historically inspected nonblind validation",
+    "all_other_frames": "scouting and development; no new blind-test claim"
+  },
+  "preflight_budget": {
+    "decode": "all 300 RGB frames streaming once, retain thumbnails only",
+    "projection": "100 times x 3 cameras using independent/declared static initialization, only candidate visibility",
+    "contact_sheets": "all frames, 25 per page per camera",
+    "sensitivity": "only after plane and structural-tip mapping supported; budget frozen separately before calculations"
+  },
+  "initial_reference": "formal v2 allowed as image-derived loaded static initialization; not ground truth or unloaded reference",
+  "forbidden_estimator_inputs": [
+    "exact flexible geometry",
+    "source tip coordinates",
+    "truth meshes",
+    "truth masks",
+    "evaluation-only files",
+    "network"
+  ],
+  "plane_status": "PENDING_SOURCE_AUDIT; do not substitute root x axis",
+  "structural_tip_status": "PENDING_MATERIAL_MAPPING; do not use last PLY point or decorative apex",
+  "engineering_acceptance": "PENDING_USE_CASE_TARGETS",
+  "realtime_claim": false,
+  "new_capture": false,
+  "new_physics_solve": false,
+  "formal_baseline_modified": false
+}

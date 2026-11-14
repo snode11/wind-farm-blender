@@ -1,0 +1,8 @@
+{
+  "blender_frontend/wfrl_blender/playback.py": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29",
+  "blender_frontend/wfrl_blender/clearance_replay.py": "f651917c3f300f5713ab9f2efb6821b4b7b686ae5c903e92e9c12e6f84a73e0c",
+  "blender_frontend/wfrl_blender/native_camera_views.py": "5ff5c2d8475d709c2b1a90678c379856196ef69e2ed56fb884bbf2d2f439f0b2",
+  "blender_frontend/tests/test_scene_playback_lifecycle.py": "c47cab82a5d572c9febad31e9d95d51b67b3ad595854a7a47f8d36efcbeb9b01",
+  "blender_frontend/tests/test_native_camera_playback.py": "6afd58c372dd294561e3be939bba847bfb43e9bde60cf166487a2d9a997afd92",
+  "blender_frontend/tests/blender/native_camera_reopen_regression.py": "2eb3ad3c4bb050d6fd925055da989ff4688e2294bd2b66684ad7eb7326a88a50"
+}

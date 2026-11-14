@@ -87,3 +87,64 @@ def test_mutated_frame_cannot_create_unreadable_complete_recording(tmp_path):
     assert (sink.path / 'INCOMPLETE').exists()
     with pytest.raises(ValueError, match='incomplete'):
         recording.Replay(sink.path)
+
+
+@pytest.mark.parametrize('step', ['manifest', 'marker'])
+@pytest.mark.parametrize('outcome', ['delay', 'failure'])
+def test_close_reports_complete_only_after_manifest_and_marker_are_durable(tmp_path, monkeypatch, step, outcome):
+    import threading
+    sink = recording.Recorder(tmp_path / f'{step}-{outcome}')
+    sink.append(observation(1), 0.)
+    entered, release = threading.Event(), threading.Event()
+    marker = sink.path / 'INCOMPLETE'
+    unlink, manifest = Path.unlink, sink._manifest
+
+    def hold():
+        entered.set()
+        assert release.wait(15)
+        if outcome == 'failure':
+            raise OSError(f'injected {step} failure')
+
+    def held_manifest(state=None):
+        if step == 'manifest' and state == 'COMPLETE':
+            hold()
+        return manifest(state)
+
+    def held_unlink(path, *args, **kwargs):
+        if step == 'marker' and path == marker:
+            hold()
+        return unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(sink, '_manifest', held_manifest)
+    monkeypatch.setattr(Path, 'unlink', held_unlink)
+    errors = []
+
+    def close():
+        try:
+            sink.close()
+        except OSError as exc:
+            errors.append(exc)
+
+    writer = threading.Thread(target=close)
+    writer.start()
+    try:
+        assert entered.wait(15)
+        assert sink.state == 'FINALIZING'
+        assert marker.exists()
+        with pytest.raises(ValueError, match='incomplete'):
+            recording.Replay(sink.path)
+        with pytest.raises(RuntimeError, match='not recording'):
+            sink.append(observation(2), 1.)
+    finally:
+        release.set()
+        writer.join(15)
+    assert not writer.is_alive()
+    saved = json.loads((sink.path / 'manifest.json').read_bytes())
+    if outcome == 'delay':
+        assert not errors and sink.state == 'COMPLETE' and saved['state'] == 'COMPLETE'
+        assert not marker.exists() and recording.Replay(sink.path).frame(0).points['x'][0] == 1
+    else:
+        assert len(errors) == 1 and sink.state == 'FAILED' and saved['state'] == 'FAILED'
+        assert 'injected' in saved['error'] and marker.exists()
+        with pytest.raises(ValueError, match='incomplete'):
+            recording.Replay(sink.path)

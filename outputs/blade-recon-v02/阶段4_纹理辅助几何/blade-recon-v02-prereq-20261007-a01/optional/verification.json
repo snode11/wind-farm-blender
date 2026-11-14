@@ -1,0 +1,239 @@
+[
+  {
+    "mode": "sparse-best",
+    "status": "PASS",
+    "arrays": {
+      "val": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "raw": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "has": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "bool"
+      },
+      "res_s": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "res_c": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "wmax": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "nview": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "uint16"
+      }
+    },
+    "frames": [
+      2,
+      32
+    ],
+    "source_indices": [
+      0,
+      11
+    ],
+    "frame_clocks_and_camera_identity": "preserved by original full regression+manifest output",
+    "RGB_read_files": [
+      "rgb/Global/000002.png",
+      "rgb/Inspection/000002.png",
+      "rgb/Global/000032.png",
+      "rgb/Inspection/000032.png"
+    ],
+    "finite_valid_texels": 337084,
+    "no_claim_best_equals_mean": true
+  },
+  {
+    "mode": "sparse-mean",
+    "status": "PASS",
+    "arrays": {
+      "val": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "raw": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "has": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "bool"
+      },
+      "res_s": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "res_c": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "wmax": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "nview": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "uint16"
+      }
+    },
+    "frames": [
+      2,
+      32
+    ],
+    "source_indices": [
+      0,
+      11
+    ],
+    "frame_clocks_and_camera_identity": "preserved by original full regression+manifest output",
+    "RGB_read_files": [
+      "rgb/Global/000002.png",
+      "rgb/Inspection/000002.png",
+      "rgb/Global/000032.png",
+      "rgb/Inspection/000032.png"
+    ],
+    "finite_valid_texels": 337084,
+    "no_claim_best_equals_mean": true
+  },
+  {
+    "mode": "sparse-register",
+    "status": "PASS",
+    "arrays": {
+      "val": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "raw": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "has": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "bool"
+      },
+      "res_s": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "res_c": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "wmax": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "float16"
+      },
+      "nview": {
+        "shape": [
+          3,
+          1538,
+          192
+        ],
+        "dtype": "uint16"
+      }
+    },
+    "frames": [
+      2,
+      32
+    ],
+    "source_indices": [
+      0,
+      11
+    ],
+    "frame_clocks_and_camera_identity": "preserved by original full regression+manifest output",
+    "RGB_read_files": [
+      "rgb/Global/000002.png",
+      "rgb/Inspection/000002.png",
+      "rgb/Global/000032.png",
+      "rgb/Inspection/000032.png"
+    ],
+    "finite_valid_texels": 337084,
+    "no_claim_best_equals_mean": true
+  }
+]

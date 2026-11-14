@@ -1,0 +1,60 @@
+{
+  "utc": "2026-10-03T02:34:04.705667+00:00",
+  "status": "PASS",
+  "checks": {
+    "history": {
+      "count": 554,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "fit_outputs": {
+      "count": 37,
+      "changed": []
+    },
+    "fit_entry_inputs": {
+      "count": 111,
+      "changed": []
+    },
+    "fit_code": {
+      "count": 24,
+      "changed": []
+    },
+    "tested_source_and_tests": {
+      "count": 30,
+      "changed": []
+    },
+    "snapshot": {
+      "count": 32,
+      "changed": []
+    },
+    "evaluated_files": {
+      "count": 162,
+      "changed": []
+    }
+  },
+  "baseline_ply_byte_equal": {
+    "initial_template.ply": true,
+    "prior_only.ply": true,
+    "T1_B1.ply": true
+  },
+  "budgets": {
+    "original_raw": {
+      "steps": 100,
+      "image_forward_backward_evaluations": 600
+    },
+    "revised_boundary": {
+      "steps": 100,
+      "image_forward_backward_evaluations": 600
+    }
+  },
+  "tests_passed": 92,
+  "evaluation_status": "COMPLETE_SIGNATURES_UNCHANGED",
+  "missing_local_links": [],
+  "final_candidate_adopted": false,
+  "formal_result_retained": "20261002-second/reconstruction",
+  "experiment_complete": true,
+  "geometry_acceptance": "NOT_YET_ESTABLISHED",
+  "engineering_acceptance": "PENDING_USE_CASE_TARGETS",
+  "further_experiments_scheduled": false
+}

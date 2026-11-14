@@ -1,0 +1,37 @@
+{
+  "schema": "local-relief-observation-gate.v1",
+  "state": "FROZEN_BEFORE_CAPTURE",
+  "conditions": [
+    "healthy",
+    "pure_color_paint",
+    "interior_dent"
+  ],
+  "development_time_s": 144.0,
+  "heldout_times_s": [
+    144.4,
+    146.0
+  ],
+  "input_camera": "WideInput",
+  "heldout_camera": "WideEval",
+  "source_scene_use": "capture/evaluation only",
+  "raw_dimensions": [
+    3840,
+    2160
+  ],
+  "same_saved_motion": true,
+  "same_global_geometry": true,
+  "dent_is_only_local_geometric_change": true,
+  "same_appearance_healthy_and_dent": true,
+  "paint_is_only_material_change": true,
+  "profile": "Workbench FLAT MATERIAL; Standard; no shadow/cavity/specular",
+  "depth_m_capture_private": 0.05,
+  "gates": {
+    "signal": "compare decoded RGB healthy vs dent and healthy vs paint; all views/times count; no infer depth from source mesh",
+    "shape_identification": "when healthy and dent input RGB identical, local depth likelihood cannot distinguish; stop OBSERVATION_GATE_FAILED",
+    "holdout": "preselected unused time and WideEval; independent post-capture image comparison",
+    "acceptance": "no accuracy or defect-depth claim; keep REVIEW_ONLY"
+  },
+  "source_fields_for_solver": false,
+  "driver_sha256": "6e22abe374ec13dfd72b00856170f216c8e5c905dc9495eae42f287949eb5a3e",
+  "amendment": "Only output path and numpy.float32 metadata conversion repaired after actual capture serialisation failure; condition geometry/settings/times unchanged; failed original outputs/log retained."
+}

@@ -1,0 +1,45 @@
+{
+  "status": "CAPTURE2_PREDECLARED_BEFORE_NEW_CAPTURE_AND_SCORE",
+  "scope": "synthetic calibrated inspection RGB to contour reconstruction to appearance fusion; no detector or depth recovery",
+  "source": "blade_recon0.2 model and synth.make_textures; new PNG RGB generation",
+  "frame_ids": [
+    2,
+    4,
+    6,
+    8
+  ],
+  "times_s": [
+    0.2,
+    0.4,
+    0.6,
+    0.8
+  ],
+  "fit_cameras": [
+    "Global",
+    "Inspection"
+  ],
+  "heldout": "Check viewpoint at every fit time: excluded from solver manifest and texture fusion; used only for scoring after result freeze",
+  "capture_conditions": "same Global unchanged; lossless PNG Inspection/Check nominal field width reduced 5m to3m, 1024x768; all other source settings equal",
+  "defects": [
+    "D1 60x1.5cm chordwise crack",
+    "D2 60x1.5cm spanwise crack",
+    "D3 40x30cm bright repair",
+    "D6 50x40cm dark repair"
+  ],
+  "normal_controls": "each defect same-blade adjacent region r+0.75m, same c; defined before scoring and scored wherever covered",
+  "observability_gate": "projected narrow feature width at least 2 input pixels plus raw RGB defect/background absolute contrast >=12/255; ideal projection does not alone prove image visibility",
+  "acceptance": {
+    "core_coverage_min": 0.9,
+    "contrast_keep_min": 0.5,
+    "patch_boundary_mean_error_m_max": 0.1,
+    "crack_boundary_mean_error_m_max": 0.05,
+    "patch_centroid_error_m_max": 0.1,
+    "crack_centroid_error_m_max": 0.05,
+    "normal_false_anomaly_area_fraction_max": 0.05,
+    "normal_anomaly_threshold_relative_local_background": 0.15
+  },
+  "score_definitions": "coverage is fused valid core fraction; contrast is normalized local-background response divided by independently resampled source albedo response; boundary is mean symmetric physical point-to-boundary distance at 50% of source local contrast; these are appearance metrics, never detector precision/recall",
+  "truth_isolation": "solver receives only explicit input_bundle.json healthy template, RGB, RGB-derived masks and per-frame K/T/frame/t. Ground truth states, texture, defect labels and heldout RGB live in sibling evaluation directory. Hash access audit verifies solver/fusion opened declared files only.",
+  "classification": "SYNTHETIC_IDEAL_INSPECTION; distinct from actual MAPPO Blender scenes and field measurement",
+  "reason": "baseline D2 lost contrast and D3 close views excluded due real max-evaluation failure; retain baseline unchanged"
+}

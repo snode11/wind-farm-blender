@@ -1,0 +1,24 @@
+{
+  "A_window": 515295416728,
+  "closed": true,
+  "events": [
+    {
+      "type": "SPACE",
+      "value": "PRESS",
+      "window": 515295416728,
+      "scene": "Scene",
+      "wall_s": 336774.753034875,
+      "A_frame": 156,
+      "B_frame": 489
+    },
+    {
+      "type": "SPACE",
+      "value": "RELEASE",
+      "window": 515295416728,
+      "scene": "Scene",
+      "wall_s": 336774.909680666,
+      "A_frame": 156,
+      "B_frame": 493
+    }
+  ]
+}

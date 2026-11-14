@@ -1,0 +1,371 @@
+{
+  "status": "ALL_JOB_GEOMETRIES_AND_Q_FROZEN_BEFORE_ANY_BATCH_TRUTH_READ",
+  "job_file_sha256": "6f31afeae72868599ab829acd2d52c7753fd21c31980098293d5a0aa9544be5c",
+  "metric_protocol_sha256": "9211aef5bf13c02e6e614c33af4f90bfb985cbd77e1bf9a8a4050b71778b3b33",
+  "evaluation_code_sha256": "c10784e1c38c0278d5bc50f979a6a5ff4853f84643b5b8306d54b7d71be0e0b3",
+  "sampler_module_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+  "parallel_processes": 2,
+  "BLAS_threads": 1,
+  "jobs": [
+    {
+      "id": "perturbations/p00/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p00/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p00/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p01/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p01/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p01/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p02/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p02/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p02/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p03/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p03/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p03/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p04/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p04/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p04/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p05/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p05/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p05/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p06/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p06/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p06/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p07/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p07/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p07/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p08/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p08/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p08/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p09/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p09/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p09/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p10/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p10/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p10/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p11/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p11/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p11/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p12/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p12/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p12/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p13/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p13/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p13/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p14/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p14/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p14/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p15/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p15/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p15/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p16/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p16/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p16/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p17/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p17/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p17/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p18/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p18/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p18/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    },
+    {
+      "id": "perturbations/p19/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p19/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/paired/A3_D12/p19/A3_D12/q_eval.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    }
+  ]
+}

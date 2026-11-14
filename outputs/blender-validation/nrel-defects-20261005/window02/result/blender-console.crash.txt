@@ -1,0 +1,121 @@
+# Blender 5.2.1, Commit date: 2026-08-24 16:50, Hash 9e2066aef7ef
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=7.5, radius2=7.5, depth=1.15, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=7.5, radius2=7.5, depth=1.15, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.79, radius2=1.771, depth=0.18, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1, depth=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=7.5, radius2=7.5, depth=1.15, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(-100, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(0, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(100, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(200, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(300, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(400, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(600, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(700, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(800, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(900, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(1000, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(1100, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(1200, 30, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, -200, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, -100, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, 0, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, 100, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, 200, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(500, 300, 0.06), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(60, -72, 1), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=1, radius2=0.78, depth=2, enter_editmode=False, align='WORLD', location=(102, -72, 1), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(60, 30, 1), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=1, radius2=0.78, depth=2, enter_editmode=False, align='WORLD', location=(102, 30, 1), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(60, 132, 1), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=1, radius2=0.78, depth=2, enter_editmode=False, align='WORLD', location=(102, 132, 1), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(245, 0, 90), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(749, 0, 90), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(1253, 0, 90), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(-72, -7, 3.96256), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(-72, 0, 3.96256), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(-72, 7, 3.96256), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(250, 170, 2), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(330, 170, 2), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(enter_editmode=False, align='WORLD', location=(410, 170, 2), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect D7604d702a862422baa65f61e53292753")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect Daa9fd52172a048f59d4c95ca8988cb29")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect Dca392a124fa04dac99b2803044891923")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect Dd3ae8a57d2d44b978ee9fc722b53f9e1")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect D7604d702a862422baa65f61e53292753")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect Daa9fd52172a048f59d4c95ca8988cb29")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect Dca392a124fa04dac99b2803044891923")  # Operator
+bpy.ops.object.modifier_apply(modifier="Defect Dd3ae8a57d2d44b978ee9fc722b53f9e1")  # Operator
+
+# backtrace
+0   Blender                             0x0000000103728878 _ZN7blender33BLI_system_backtrace_with_os_infoEP7__sFILEPKv + 56
+1   Blender                             0x0000000102e27170 _ZNSt3__117__call_once_proxyB8ne200100INS_5tupleIJRZN7blenderL19sig_handle_crash_fnEiE3$_0EEEEEvPv + 376
+2   libc++.1.dylib                      0x00000001976c245c _ZNSt3__111__call_onceERVmPvPFvS2_E + 196
+3   Blender                             0x0000000102e26f6c _ZN7blenderL19sig_handle_crash_fnEi + 84
+4   libsystem_platform.dylib            0x00000001977c0144 _sigtramp + 56
+5   Blender                             0x0000000105599114 _ZN7blenderL31console_textview_main__internalEPNS_12SpaceConsoleEPKNS_7ARegionEbPKiPPvPi + 372
+6   Blender                             0x000000010559928c _ZN7blender17console_char_pickEPNS_12SpaceConsoleEPKNS_7ARegionEPKi + 40
+7   Blender                             0x000000010559c638 _ZN7blenderL26console_modal_select_applyEPNS_8bContextEPNS_10wmOperatorEPKNS_7wmEventE + 88
+8   Blender                             0x000000010559c010 _ZN7blenderL25console_select_set_invokeEPNS_8bContextEPNS_10wmOperatorEPKNS_7wmEventE + 216
+9   Blender                             0x0000000103c08fdc _ZN7blenderL18wm_operator_invokeEPNS_8bContextEPNS_14wmOperatorTypeEPKNS_7wmEventEPNS_10PointerRNAEPNS_10ReportListEbb + 856
+10  Blender                             0x0000000103c09d60 _ZN7blenderL24wm_handler_operator_callEPNS_8bContextEPNS_9ListBaseTINS_14wmEventHandlerEEEPS3_PNS_7wmEventEPNS_10PointerRNAEPKc + 1228
+11  Blender                             0x0000000103c0a908 _ZN7blenderL21wm_handlers_do_internEPNS_8bContextEPNS_8wmWindowEPNS_7wmEventEPNS_9ListBaseTINS_14wmEventHandlerEEE + 1880
+12  Blender                             0x0000000103c03c90 _ZN7blenderL14wm_handlers_doEPNS_8bContextEPNS_7wmEventEPNS_9ListBaseTINS_14wmEventHandlerEEE + 72
+13  Blender                             0x0000000103c034b8 _ZN7blender20wm_event_do_handlersEPNS_8bContextE + 3148
+14  Blender                             0x0000000103bf6ce0 _ZN7blender7WM_mainEPNS_8bContextE + 36
+15  Blender                             0x0000000102e217c4 main + 1060
+16  dyld                                0x00000001973dfe80 start + 6688
+
+# Python backtrace

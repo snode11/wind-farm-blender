@@ -1,0 +1,72 @@
+{
+  "schema": "nrel-single-blade-video.v1",
+  "target": "T1/B1",
+  "model": "NREL 5MW",
+  "units": {
+    "length": "m",
+    "time": "s",
+    "image": "px"
+  },
+  "videos": {
+    "C1": "C1.mp4",
+    "C2": "C2.mp4",
+    "C3": "C3.mp4"
+  },
+  "files": {
+    "C1.mp4": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad",
+    "C2.mp4": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c",
+    "C3.mp4": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4",
+    "frame_map.csv": "d079ce0a9e2f3313b1bf296ae466365fa0f22fc5bd1bf0f61939356fc0bd2629",
+    "camera_calibration.jsonl": "641f610d8ee58dfd79158800dcfd9abe52c16bece58f3dc549a90d5c115ae489",
+    "motion_observations.csv": "313074d9388eadd34abe31f5e84dd6b310ea5e8799b80e735e258940bf64c550"
+  },
+  "sampling": {
+    "start_s": 120,
+    "end_s_exclusive": 125,
+    "fps": 20,
+    "frame_count_per_camera": 100,
+    "simulation_time": "start+(n+.5)/fps",
+    "pts": "n/fps"
+  },
+  "input_policy": {
+    "calibration": "simulation ideal pinhole",
+    "rigid_motion": "simulation ideal B1 blade-root rigid pose",
+    "exact_flexible_deformation": false,
+    "truth_surface": false,
+    "truth_masks_or_correspondences": false,
+    "decoded_rgb": "delivered MP4 only"
+  },
+  "reference_state": {
+    "t_ref_sim_time_s": 122.175,
+    "frame_id": 43,
+    "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+    "fit_frame_ids": [
+      42,
+      43
+    ],
+    "heldout_frame_ids": [
+      44,
+      45
+    ]
+  },
+  "imaging": {
+    "scene_world": false,
+    "shading": "MATERIAL",
+    "studio_light": "forest.exr",
+    "image_encoding": "RGBA8 display-transformed once; top-left rows; PNG sRGB",
+    "studio_background_blur": 0.5,
+    "studio_rotation": 0.0,
+    "color_management": {
+      "use_curve_mapping": false,
+      "gamma": 1.0,
+      "look": "AgX - Medium High Contrast",
+      "exposure": 0.3499999940395355,
+      "view_transform": "AgX"
+    },
+    "studio_background_alpha": 1.0,
+    "display_device": "sRGB",
+    "studio_view_rotation": false,
+    "scene_lights": false,
+    "studio_intensity": 1.0
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "status": "COMPLETED",
+  "planned": 2,
+  "completed": 2,
+  "failed": 0,
+  "jobs": [
+    {
+      "id": "negatives/wrong_blade",
+      "exit_code": 0,
+      "wall_s": 1.9029806669568643,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_remaining_negatives/negatives/wrong_blade"
+    },
+    {
+      "id": "negatives/wrong_side",
+      "exit_code": 0,
+      "wall_s": 1.9103736249962822,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_remaining_negatives/negatives/wrong_side"
+    }
+  ],
+  "wall_s": 1.914489374961704
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "tracking-decision.v1",
+  "status": "REVIEW_ONLY",
+  "old_short_automatic_inference": "COMPLETED",
+  "new_distributed_short_automatic_inference": "COMPLETED",
+  "long_window_inference": "COMPLETED",
+  "long_window_identity_continuation": "FAILED",
+  "rgb_keyframe_restart8": "COMPLETED",
+  "automatic_global_reidentification": "NOT_ESTABLISHED",
+  "true_occlusion_and_full_cycle": "NOT_VERIFIED",
+  "geometry_comparison": "NOT_RUN_ROOT_NUMERICAL_GATE_DEPENDENT",
+  "source_material_identity_truth": "NOT_READ",
+  "field_health_capability": "NOT_ESTABLISHED",
+  "resource_result_table": "evaluation/resource_and_result_summary.json",
+  "primary_pair": "evaluation/paired_short_long.json",
+  "restart_comparison": "evaluation/keyframe_restart_comparison.json",
+  "complete_denominators": {
+    "old_short": 32,
+    "new_short": 96,
+    "new_long32": 384,
+    "restart8": 96
+  },
+  "long_reference_nonquery": 322,
+  "long_auto_visible_on_observed": 237,
+  "long_reappearance_visible_by_point": {
+    "M08": 0,
+    "M09": 0,
+    "M10": 0,
+    "M11": 0
+  },
+  "all_no_prohibited_reads": true,
+  "system_sandbox_denial_probes_passed": true,
+  "all_api_and_pair_invariants_passed": true,
+  "limitation": "Codex reviewed RGB reference, not human/source geometric truth. No reconstruction geometry or field health benefit claimed.",
+  "geometry_comparison_root_artifact": "evaluation/automatic8_comparison",
+  "geometry_comparison_execution": "COMPLETED_BY_ROOT_SAME8_ONLY",
+  "geometry_comparison_root_scope": "root independent same8 only; this tracking package did not execute geometry evaluation; actual root scores not read here"
+}
