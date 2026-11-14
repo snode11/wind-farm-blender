@@ -287,7 +287,8 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
     bound = inspect.signature(train).bind(env_id, iters, n_steps, **kwargs)
     bound.apply_defaults()
     config = dict(bound.arguments)
-    from wfrl.physics_options import validate_physics, PHYSICS_KEYS
+    from wfrl.physics_options import (validate_physics, PHYSICS_KEYS,
+                                    BLADE_TORSION_FIDELITY_KEY, BLADE_TORSION_DEFAULT_FIDELITY)
     overrides = validate_physics({} if config['physics'] is None else config['physics'])
     for key in ("purge", "tag_extra", "save_interval", "resume_from", "training_progress", "run_id"):
         config.pop(key)
@@ -313,6 +314,24 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
     elif head == "preset" and windcond.PRESETS.get(argument, {}).get("turb") is not None:
         raise ValueError("BTS 预设不能通过 --wind-sched 加载；"
                          "请使用 --scene 并在场景的 inflow.turbulence 中指定 BTS 文件")
+    # The official UA parameter set is implicit in training identities.
+    if overrides.get('dynamic_stall_parameters') == 'official':
+        overrides.pop('dynamic_stall_parameters')
+    if config['scene'] is not None:
+        scene_physics = config['scene'].get('physics', {})
+        if scene_physics.get('dynamic_stall_parameters') == 'official':
+            scene_physics.pop('dynamic_stall_parameters')
+        if not any(scene_physics.values()):
+            config['scene'].pop('physics', None)
+    # The default BeamDyn profile is implicit in both direct and scene identities.
+    if overrides.get(BLADE_TORSION_FIDELITY_KEY) == BLADE_TORSION_DEFAULT_FIDELITY:
+        overrides.pop(BLADE_TORSION_FIDELITY_KEY)
+    if config['scene'] is not None:
+        scene_physics = config['scene'].get('physics', {})
+        if scene_physics.get(BLADE_TORSION_FIDELITY_KEY) == BLADE_TORSION_DEFAULT_FIDELITY:
+            scene_physics.pop(BLADE_TORSION_FIDELITY_KEY)
+        if not any(scene_physics.values()):
+            config['scene'].pop('physics', None)
     config.pop('physics')
     physics = overrides
     if config['scene'] is not None:
@@ -325,6 +344,14 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
         baseline = ('tower_flex', 'dynamic_stall', 'tower_shadow')
         config['physics'] = {key: physics.get(key, False) for key in PHYSICS_KEYS
                              if key in baseline or physics.get(key, False)}
+    if physics.get('dynamic_stall_parameters') == 'polar_consistent':
+        if not physics.get('dynamic_stall', False):
+            raise ValueError('polar_consistent requires dynamic_stall=True')
+        config['physics']['dynamic_stall_parameters'] = 'polar_consistent'
+    if BLADE_TORSION_FIDELITY_KEY in physics:
+        if not physics.get('blade_torsion', False):
+            raise ValueError('reference fidelity requires blade_torsion=True')
+        config['physics'][BLADE_TORSION_FIDELITY_KEY] = physics[BLADE_TORSION_FIDELITY_KEY]
     for key in ("iters", "n_steps", "n_epochs", "mb_steps"):
         if config[key] <= 0:
             raise ValueError(f"{key} must be positive")

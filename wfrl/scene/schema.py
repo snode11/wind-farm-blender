@@ -39,7 +39,7 @@ import stat
 import tempfile
 from dataclasses import dataclass, field
 from numbers import Real
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -143,7 +143,8 @@ class Scene:
     sensors: List[SensorSpec] = field(default_factory=list)
     terrain: Optional[str] = None          # 渲染装饰，见 TERRAINS；不进物理
     source_path: Optional[str] = None
-    physics: Dict[str, bool] = field(default_factory=dict)
+    # Boolean switches plus enumerated parameter-set choices (e.g. dynamic_stall_parameters).
+    physics: Dict[str, Union[bool, str]] = field(default_factory=dict)
     substructure: Optional[Dict[str, Any]] = None
 
     # ---- 派生量 ----------------------------------------------------------

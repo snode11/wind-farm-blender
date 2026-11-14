@@ -7,12 +7,13 @@
 ```yaml
 physics:
   blade_torsion: true
+  blade_torsion_fidelity: fast
   tower_flex: true
   dynamic_stall: true
   tower_shadow: true
 ```
 
-四个选项独立选择。场景、`FastFarmDriver(physics={"blade_torsion": True})`、低层 `create_ff_case()` 使用同一布尔配置。CLI、Bridge 与 Blender 启动器接受 `--blade-torsion` / `--no-blade-torsion`；未传参数保留场景值，运行中不能切换模型。具体入口见 [物理选项](FASTFarm物理选项.md)。
+四个布尔选项独立选择。`blade_torsion_fidelity` 为 `fast|reference`，省略时采用 `fast`；`reference` 要求同时开启 `blade_torsion`。场景、`FastFarmDriver(physics={"blade_torsion": True})`、低层 `create_ff_case()` 使用相同的物理配置。CLI、Bridge 与 Blender 启动器接受 `--blade-torsion` / `--no-blade-torsion`；未传参数保留场景值，`--blade-torsion-fidelity reference` 可显式选择精细配置；运行中不能切换模型。具体入口见 [物理选项](FASTFarm物理选项.md)。
 
 ## 模型与来源
 
@@ -29,7 +30,16 @@ physics:
 
 开启时设置 `CompElast=2`，三项 `BDBldFile` 指向同一 BeamDyn 输入。保留官方 `QuasiStaticInit=True`、`rhoinf=0`、`quadrature=2`、`refine=DEFAULT`（1）、`order_elem=5`、`DTBeam=DEFAULT` 以及 Newton 迭代设置。结构自由度由一个五阶单元的六个有限元节点描述；输出网格为 49 个梯形积分点，不能把六个输出站位误认为六个等间距有限元节点。
 
-[官方陆上 BeamDyn 算例](https://raw.githubusercontent.com/OpenFAST/r-test/v3.5.3/glue-codes/openfast/5MW_Land_BD_DLL_WTurb/5MW_Land_BD_DLL_WTurb.fst) 使用 `DT=0.0015 s`。本项目选用更小的 `0.00125 s`，使其整除现有 `DT_High=0.1 s` 和控制步 `DT_Low=3 s`；不改变风场网格和耦合步长。不满足整除关系的生成输入拒绝。关闭时保持 `DT=0.00625 s`。时间积分细化属于 BeamDyn 模型对比条件的一部分，短算例不能隔离纯扭转自由度的因果影响，也不构成步长收敛验证。
+[官方陆上 BeamDyn 算例](https://raw.githubusercontent.com/OpenFAST/r-test/v3.5.3/glue-codes/openfast/5MW_Land_BD_DLL_WTurb/5MW_Land_BD_DLL_WTurb.fst) 使用 `DT=0.0015 s`。项目的数值配置定义在 [BeamDyn_profiles.json](../../wfcrl-env/wfcrl/simulators/fastfarm/inputs/template/BeamDyn_profiles.json)，其中记录官方来源和整除推导。它只选择新生成 OpenFAST 主文件的 `DT`，不改写官方 BeamDyn 主文件、截面或气动输入。
+
+| 配置 | OpenFAST DT / s | 每个 0.1 s 高分辨率耦合步的子步数 | 每个 0.25 s 输出间隔的子步数 |
+| --- | ---: | ---: | ---: |
+| `reference` | 0.00125 | 80 | 200 |
+| `fast`（默认） | 1/460 ≈ 0.002173913043478261 | 46 | 115 |
+
+两者都保留 `InterpOrder=2`、`NumCrctn=0`、`DTBeam=DEFAULT`、五阶单元、梯形积分、`refine=1`、`rhoinf=0`、`NRMax=10`、`stop_tol=1e-5`、`n_fact=5`、`load_retries=20` 和完整站位输出。未启用扭转时保持 `DT=0.00625 s` 与默认生成字节；`blade_torsion_fidelity: fast` 不会隐式开启扭转。两种 BeamDyn 步长都必须整除实际 `DT_High` 和 `DT_Low`，否则生成输入拒绝。风场网格、控制周期、气动模型和结构属性不随数值配置改变。
+
+`fast` 是已测试且同时满足 8/12 m/s 判据的最快候选；其速度与精度证据见下文。默认选择它的依据是保留物理模型和输出合同，同时通过指定的 60 s 对照。`reference` 用于需要精细步长的对照及尚未覆盖的工况；短程通过不证明任意载荷、长时湍流或极端工况的稳定性。
 
 `NNodeOuts=6`，`OutNd=1,10,19,28,37,49`。每片叶片请求六站位的 `NβRDxr/NβRDyr/NβRDzr` 完整向量；OpenFAST 合并输出名例如 `B1N6RDxr`。`β` 是输出序号，实际节点由 `OutNd` 映射。
 
@@ -68,44 +78,143 @@ theta = 2*atan2(qv.z, qw) * 180/pi
 
 BeamDyn 下 ElastoDyn 的原生叶片位移及截面载荷列可为 `INVALID`，前端相应通道保留 unsupported，不改标签冒充 BeamDyn 坐标。叶根两向弯矩仍由既有 ServoDyn/MPI 路径传递。对比脚本从 BeamDyn 的根部力矩和叶尖位移向量进行桨距坐标旋转，得到共同的 coned `c` 坐标后比较；转换与 [OpenFAST SrvD_InputSolve](https://github.com/OpenFAST/openfast/blob/v3.5.3/modules/openfast-library/src/FAST_Solver.f90) 的根弯矩公式一致。
 
-全关闭时训练配置身份保持兼容。当前 `scripts/train/train_fastfarm.py` 会给已有非空三项物理配置增加 `blade_torsion: false`，可能使旧 checkpoint 的配置身份不匹配；该脚本的兼容规范化及对应既有测试需由归属任务处理，不能把不匹配直接当作同一训练条件恢复。BeamDyn 开启的训练本来就属于不同物理模型，必须保留独立身份。
+训练配置在直接参数和场景两条路径中，都只为非默认 `reference` 序列化 `blade_torsion_fidelity`；显式 `fast` 与省略字段具有相同身份。全关闭及原有三项布尔配置不增加新字段。算例物理记录分别保存实际 DT、fidelity、配置定义摘要及输入摘要。旧 checkpoint 的配置身份保持兼容，不等于数值步长相同：已开启 BeamDyn、按 0.00125 s 生成的 checkpoint 不能仅因训练配置 hash 匹配就视作 `fast` 的同一积分条件；严格续训需核对原始算例身份，并由负责人决定 reference 配置身份的迁移方式。
 
-## 验证入口
+## 数值配置的精度与性能
 
-从外层仓库根目录执行；每个输出目录须不存在。单机 8 / 12 m/s 各运行一次 60 s；三机坐标与 `scenes/turb3_row.yaml` 的 0/504/1008 m 一致；全开组合可用 12 s 检查。示例：
+本节对象为 Apple M5 Pro（18 核）、macOS 27.2.1 arm64、FAST.Farm 内嵌 OpenFAST v3.5.3-dirty、GCC 12.3.0、单精度。求解器 SHA-256 为 `bed9651e19daf8ee6402100ff22b90867b756d96b72495ef9ee90df677a88d3f`。单机输入为零偏航指令、稳态 8/12 m/s、模板 `PLExp=0.2`、其余三项物理开关关闭，保留模板初始转速及控制器。全部 `.out` 均在正常结束标记出现且本算例原生进程退出后读取。
+
+以下门槛由本任务明确指定，只用于 fast 对 reference 的数值配置比较；[FAST.Farm 物理选项](FASTFarm物理选项.md) 中的其他精度标准仍为“建议，待确认”，不在这里改成正式要求。功率，以及三片叶片各自的 coned 坐标叶根挥舞/摆振弯矩、叶尖挥舞位移，分别要求均值相对差 ≤1%、总体标准差相对差 ≤5%；三片叶尖弹性扭角分别要求均值绝对差 ≤0.05°、总体标准差相对差 ≤10%。均值分母取 reference 均值的绝对值；零标准差不使用任意容差豁免。所有通道必须同时满足。
+
+单机各运行 60 s，丢弃前 30 s；统计包含 30 s 和 60 s，间隔 0.25 s，共 121 个样本。下表展示 B1，单位依列名；后面的判据表覆盖全部三片叶片。数值为均值 ± 总体标准差。
+
+| 风速 / (m/s) | 配置 | 功率 / kW | 根部 My / (kN·m) | 根部 Mx / (kN·m) | 叶尖挥舞 / m | 叶尖弹性扭转 / ° |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 8 | reference | 1709.411 ± 0.271 | 5525.187 ± 334.536 | 377.203 ± 2403.695 | 3.100491 ± 0.261786 | -0.126867 ± 0.166882 |
+| 8 | fast | 1710.265 ± 0.276 | 5528.021 ± 334.782 | 377.765 ± 2403.755 | 3.102585 ± 0.262028 | -0.126589 ± 0.166883 |
+| 12 | reference | 4999.845 ± 3.677 | 8493.229 ± 673.466 | 1314.505 ± 2459.836 | 4.437425 ± 0.450127 | -0.501794 ± 0.266453 |
+| 12 | fast | 4999.867 ± 3.655 | 8486.897 ± 673.576 | 1314.663 ± 2460.102 | 4.434203 ± 0.450393 | -0.503145 ± 0.266110 |
+
+| 风速 / (m/s) | 主要指标最大均值差 / % | 主要指标最大标准差差 / % | 扭角最大均值差 / ° | 扭角最大标准差差 / % | 判读 |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| 8 | 0.160337 | 1.831673 | 0.000336 | 0.021375 | 全部通过 |
+| 12 | 0.075260 | 0.603666 | 0.001351 | 0.130783 | 全部通过 |
+
+### 候选配置的筛选结果
+
+下列单机 12 m/s 结果使用完整 60 s / 30–60 s 窗口。各行只改变列明参数；Gauss 行同时采用必要的根部/叶尖通道，避免沿用梯形积分点号。`fast` 保留完整六站位输出。表内候选墙钟为各组一次测量，不把不足 1% 的时间波动当作确定收益。
+
+| 候选（其余为 reference） | 60 s 墙钟 / s | 判读 |
+| --- | ---: | --- |
+| reference | 129.449 | 参考 |
+| DT=0.0015625 | 107.084 | 通过 |
+| DT=1/600 | 97.086 | 通过 |
+| DT=1/560 | 91.112 | 通过 |
+| DT=0.002 | 84.603 | 通过 |
+| DT=1/480 | 78.401 | 8/12 m/s 均通过 |
+| DT=1/460 | 76.023 | 8/12 m/s 均通过；采用为 fast |
+| 三阶单元 | 82.811 | 不通过；B1 扭角均值差 0.418°、标准差差 140.7% |
+| 四阶单元 | 106.500 | 不通过；B1 扭角标准差差 36.6% |
+| 三阶单元、DT=0.0025 | 44.304 | 不通过；空间离散偏差仍超标 |
+| Gauss、五阶单元 | 34.806 | 不通过；B1 挥舞位移均值差 1.76%、功率标准差差 40.83% |
+| Gauss、七阶单元 | 47.899 | 不通过；B1 挥舞位移均值差 2.05%、功率标准差差 16.14% |
+
+DT=1/440≈0.00227273、0.0025、0.005、0.01 s 在 8/12 m/s 均出现 BeamDyn Newton 不收敛并中止；12 m/s 下的 0.003125、0.00625 s 也中止。四阶单元配合 0.0025/0.005 s、三阶单元配合 0.005 s、Gauss 五/七阶配合 0.0025 s 均未得到可采用结果。0.0025 s 增大 `NRMax` 到 20、设置 `n_fact=1`，或改用线性 `InterpOrder=1` 仍不收敛；线性插值的 0.005/0.01 s 也中止。`NumCrctn=1` 配合 0.0025/0.005/0.00625/0.01/0.0125 s，以及 `NumCrctn=2, DT=0.01 s` 均中止。失败输出不用于统计，也不通过修改气动参数来接受这些候选。
+
+以下是独立的 12 m/s、12 s 短程筛选，统计窗口 6–12 s（25 个样本）。它用于检查运行性和明显的性能变化，不替代上面的 60 s 精度判据；没有依据此短程统计采用新的容差、阻尼、输出方式或积分点细化。
+
+| 设置 | 12 s 墙钟 / s | 结果与选择 |
+| --- | ---: | --- |
+| `reference`：`{}` | 26.179 | 短程参考 |
+| `refine2`：`{"refine": 2}` | 51.524 | 可运行，约慢一倍；保留 refine=1 |
+| `tol1e4`：`{"stop_tol": 0.0001}` | 26.139 | 可运行，无明显提速；保留 1e-5 |
+| `tol1e3`：`{"stop_tol": 0.001}` | 26.117 | 可运行，无明显提速；保留 1e-5 |
+| `nr5`：`{"NRMax": 5}` | 26.085 | 可运行，限制上限未显示加速；保留 10 |
+| `nr20`：`{"NRMax": 20}` | 26.599 | 可运行，无提速；保留 10 |
+| `rho05`：`{"rhoinf": 0.5}` | 26.080 | 可运行，无明显提速；保留 0 |
+| `rho1`：`{"rhoinf": 1.0}` | 26.639 | 可运行，无提速；保留 0 |
+| `retry1`：`{"load_retries": 1}` | 26.200 | 可运行，无明显提速；保留 20 |
+| `nfact1`：`{"n_fact": 1}` | 43.425 | 可运行，明显更慢；保留 5 |
+| `nfact10`：`{"n_fact": 10}` | 26.170 | 可运行，无明显提速；保留 5 |
+| `interp1`：`{"InterpOrder": 1}` | 25.990 | 可运行，时间差不足 1%；保留二阶 |
+| `omp2`：`{"threads": 2}` | 26.099 | 单机无明显提速 |
+| `omp3`：`{"threads": 3}` | 26.111 | 单机无明显提速 |
+| `omp6`：`{"threads": 6}` | 26.109 | 单机无明显提速 |
+| `minimal`：`{"minimal": true}` | 26.325 | 只保留必要根部/叶尖通道无明显提速；保留完整输出 |
+
+`DTBeam=0.00125` 配合主步长 0.0025/0.005 s，以及 `DTBeam=0.0025` 配合主步长 0.00125 s，实际运行均不收敛。根据 [BeamDyn v3.5.3 输入说明](https://openfast.readthedocs.io/en/v3.5.3/source/user/beamdyn/input_files.html)，`load_retries` 用于静态求解；改变它不能直接减少正常动态步的工作量。`NRMax` 是上限，不是每步固定迭代次数。`n_fact` 控制切线矩阵分解频率。这里保留官方参考值，不用更松容差换取未经证明的收益。
+
+### 生产入口计时与实时性
+
+总墙钟从 MPI 求解启动计至所属原生进程退出；不含算例生成、Python 导入及结果解析。控制步列是逐次 `update_command` 的墙钟，初始化及最终退出另计。单机每组 60 s、20 个控制步。三机采用 `turb3_row` 的 0/504/1008 m 布局、8 m/s，每组 15 s、5 个控制步；这一短程测量只评价吞吐，不代表充分发展的尾流。各组一次，CPU 调度及并行任务会带来墙钟波动。
+
+| 对象 | OMP 线程 | 仿真时长 / s | 总墙钟 / s | 每 3 s 控制步平均 / s | 最慢控制步 / s |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 单机 8 m/s reference | 1 | 60 | 128.550 | 6.364 | 6.539 |
+| 单机 8 m/s fast | 1 | 60 | 76.439 | 3.781 | 3.863 |
+| 单机 12 m/s reference | 1 | 60 | 129.449 | 6.436 | 6.561 |
+| 单机 12 m/s fast | 1 | 60 | 75.982 | 3.763 | 3.865 |
+| 三机 reference | 1 | 15 | 97.395 | 19.151 | 19.255 |
+| 三机 fast | 1 | 15 | 56.937 | 11.104 | 11.232 |
+| 三机 reference | 3 | 15 | 35.535 | 6.887 | 6.935 |
+| 三机 fast | 3 | 15 | 21.495 | 4.047 | 4.092 |
+| 三机 fast | 6 | 15 | 21.435 | 4.037 | 4.069 |
+
+相同单线程下，单机 8/12 m/s 分别加速 1.68/1.70 倍，三机控制步平均加速 1.72 倍。三机已测最快为 OMP=6，平均每步 4.037 s、最慢 4.069 s。3 与 6 线程均约 4.04 s/步，单次测量差约 0.01 s，不支持确定性排序；3 线程已接近已测最高吞吐。**不能实时**：最佳三机和单机 fast 的平均控制步墙钟仍超过 3 s。配置选择不会修改进程的 OpenMP 环境；线程数由启动环境显式指定，不影响关闭扭转时的行为。不同 CPU、长时湍流、偏航变化、极端载荷以及充分发展尾流的精度与稳定性没有由这些结果证明；这些工况需另行验收。
+
+### 测量对象摘要
+
+以下摘要对应上面的单机 reference 与生产入口 fast；SHA-256 识别原始对象，不表示跨来源数值相同。
+
+| 对象 | 输入 identity | Case.T1.out SHA-256 |
+| --- | --- | --- |
+| 单机 8 m/s reference | `499415a740ce41db05b3d916fc739e3a26ac88c237459ad25490e68e9c328ab6` | `cd5ead1d794c67a52b8dddefcf511f99a3ff9f31226826ae290a182c3d784809` |
+| 单机 8 m/s fast | `d5c1d3c89da249cdca755fa89c2baf957fec71ffe40fad27493b30d67a19e53e` | `301085121aff7f6a5db6d374138c38c2247b1370d364ba2f896db320f5cf39b2` |
+| 单机 12 m/s reference | `71499f5804f7dec8bb436da04bfddba06127c00d58a57b4e83667cca9bfba919` | `f9ca9f9fb1e0790d104b12ab78a27db947a9a914c48bb89ec9fa837c27ca7c00` |
+| 单机 12 m/s fast | `4d6ed90ca81849ac83cfcd3dae92d79ec8e11d99f0079369fb137c7443d88c2e` | `1a8913b3b3a8a38665f198e79d421253780d30618b7d347804b316c6d690e873` |
+
+## 验证入口与适用范围
+
+[benchmark_beamdyn.py](../../scripts/experiments/benchmark_beamdyn.py) 为每个候选建立独立算例，记录参数、完整输入摘要、输出摘要、逐控制步墙钟和各叶片统计。实验参数写入新生成的 `DW_BeamDyn.dat`；官方模板不就地修改。生产入口候选直接调用配置选项，不手工补写 DT。实验参数修改后不用修改前的 `.physics.json` 声明身份，改用实际输入集合摘要；生产算例保留正式物理记录。
+
+脚本会等待原生求解器退出再读 `.out`。超时或异常只终止该 worker 的进程组和已捕获子进程，不终止其他算例。正常完成后也检查所属子进程的清理结果。输出路径必须是 `/private/tmp` 下的新目录。候选失败会记为 `failed` 并继续扫描，命令正常返回不表示所有候选通过；采用设置须同时检查 `status=completed` 和对应 60 s 的 `accuracy.passed=true`。参数、线程数、统计窗口和对象摘要都应与结论一起保存。
+
+从外层仓库根目录执行，使用指定 Python。两档风速的生产配置对照：
 
 ```bash
-DT_TMP=$(mktemp -d /private/tmp/wfrl-dt.XXXXXX)
+DW_TMP=$(mktemp -d /private/tmp/wfrl-beamdyn.XXXXXX)
 export PYTHONDONTWRITEBYTECODE=1
-export PYTHONPATH="$PWD/wfcrl-env:$PWD:$PWD/blender_frontend"
-export MPLCONFIGDIR="$DT_TMP/mpl" TMPDIR="$DT_TMP" OMP_NUM_THREADS=1
-DT_PY=/opt/anaconda3/envs/wfrl-mac/bin/python
-"$DT_PY" -m scripts.experiments.compare_fastfarm_physics \
-  --output "$DT_TMP/single8" --seconds 60 --wind-speed 8 \
-  --variants off blade_torsion --timeout 900 \
-  --fastfarm /opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm
+export PYTHONPATH="$PWD/blender_frontend:$PWD:$PWD/wfcrl-env"
+export MPLCONFIGDIR="$DW_TMP/mpl" TMPDIR="$DW_TMP"
+DW_PY=/opt/anaconda3/envs/wfrl-mac/bin/python
+"$DW_PY" -m scripts.experiments.benchmark_beamdyn \
+  --output "$DW_TMP/single" --seconds 60 --discard 30 --winds 8 12 \
+  --variants production_reference production_fast
+"$DW_PY" -m scripts.experiments.benchmark_beamdyn \
+  --output "$DW_TMP/farm" --seconds 15 --discard 6 --winds 8 --turbines 3 \
+  --variants production_reference production_fast reference_omp3 fast_omp3 fast_omp6
 ```
 
-12 m/s 使用 `--wind-speed 12`；三机使用 `--turbines 3`；全开使用 `--seconds 12 --variants off all_on`。脚本确认正常结束标记并等待所属 FAST.Farm 原生进程退出后才读取 `.out`，不把 MPI Finalize 或断连等同于写盘完成。报告记录总墙钟、各个 3 s 控制交换的墙钟、末半段的均值／总体标准差／极值、输入身份、原生单位及坐标转换口径。`all` 表示三项塔架／气动组合，`all_on` 表示四项全开。
+稳定性、空间离散及迭代参数候选名称见脚本 `CANDIDATES`。例如 `--variants reference dt0025 dt005 gauss5 gauss7 order3 order4 dt0021739` 使用完整 60 s 对照；`--seconds 12 --discard 6 --variants reference refine2 tol1e4 tol1e3 nr5 nr20 rho05 rho1 retry1 nfact1 nfact10 substep substep005 coarse_beam interp1 omp2 omp3 omp6 minimal` 对应短程筛选。`--settings` 可读取命名设置的 JSON 对象，`--reference-report` 可复用相同求解器、时长、统计窗口及机组数量的参考报告；复用时仍须核对输入来源和来流条件，不能仅按相同风速认定模型相同。
 
-针对性软件检查：
+软件检查按 `PYTHONPATH=blender_frontend:.` 执行，143 项通过。范围包括默认算例完整字节、fidelity 严格校验、场景/CLI/训练身份、reference 步长保留、inspect 不写入、所有三片叶片的判据、完整旋转向量、原生进程完成约束、Driver 输入及已有遥测通道。
 
 ```bash
-"$DT_PY" -m pytest tests/test_dt_blade_torsion.py tests/test_solver_outputs.py \
-  tests/test_dq_solver_completion.py -q -x -p no:cacheprovider --basetemp="$DT_TMP/test"
-"$DT_PY" -m pytest blender_frontend/tests/test_dt_torsion_telemetry.py \
-  blender_frontend/tests/test_dq_tower_telemetry.py \
-  blender_frontend/tests/test_solver_telemetry.py \
-  blender_frontend/tests/test_live_telemetry_panel.py \
-  --ignore=blender_frontend/tests/blender -q -x -p no:cacheprovider \
-  --basetemp="$DT_TMP/frontend"
+PYTHONPATH=blender_frontend:. "$DW_PY" -m pytest \
+  tests/test_dw_beamdyn_performance.py tests/test_dt_blade_torsion.py \
+  tests/test_dq_physics_options.py tests/test_solver_outputs.py \
+  tests/test_dq_solver_completion.py tests/test_fastfarm_driver_inputs.py \
+  -q -x -p no:cacheprovider --basetemp="$DW_TMP/tests"
 ```
 
-测试覆盖完整默认算例字节、开关与来源约束、组合输入、初始化参数、输出节点、幂等性、拒绝时不写入、有限旋转分解、无效值、源时钟、协议、曲线及导出。算例与临时输出放在 `/private/tmp`，提取证据后删除。
+四项布尔物理选项全开、使用 `fast`、12 m/s 单机的 12 s 组合算例正常完成，末半段平均功率 4857.025625 kW、塔顶前后位移 0.380813 m、B1 叶尖扭角 -0.271527°。这只证明该组合短程可运行，不替代两种配置在全开工况下的 60 s 精度或长时稳定性对照。其 physics identity 为 `e814e9512a55ae892ad5460cbe1ef68be119165e7117ecf7b890190ff7114f28`。
 
-## 主机真实求解证据
+本功能未达到三机实时目标。长时湍流、变化偏航、充分发展尾流及其他机型/主机仍需独立验收；不为达到实时目标放宽本节门槛。严格恢复既有 BeamDyn checkpoint 的数值身份迁移需要单独决定，默认配置身份兼容不授权忽略积分条件差异。
 
-对象为 Apple M5 Pro、macOS 27.2.1 arm64、FAST.Farm/OpenFAST v3.5.3-dirty（GCC 12.3.0，单精度）、OMP_NUM_THREADS=1。求解器 SHA-256 为 `bed9651e19daf8ee6402100ff22b90867b756d96b72495ef9ee90df677a88d3f`。所有下列算例均到达要求的末时刻、正常终止，统计只在对应原生进程退出后读取。每组一次，墙钟是本机短算例观测，不代表跨平台性能保证。
+## Reference 与 ElastoDyn 的固定输入对比
+
+
+对象为 Apple M5 Pro、macOS 27.2.1 arm64、FAST.Farm/OpenFAST v3.5.3-dirty（GCC 12.3.0，单精度）、OMP_NUM_THREADS=1。求解器 SHA-256 为 `bed9651e19daf8ee6402100ff22b90867b756d96b72495ef9ee90df677a88d3f`。本节所有 BeamDyn 对象均为 `reference`（DT=0.00125 s，包含全开组合）；输入身份和原始数值独立保留，不与 fast 的计时合并。所有下列算例均到达要求的末时刻、正常终止，统计只在对应原生进程退出后读取。每组一次，墙钟是本机短算例观测，不代表跨平台性能保证。
 
 60 s 算例统计窗口为 30–60 s、间隔 0.25 s、121 个样本；12 s 全开组合窗口为 6–12 s、25 个样本。来流为稳态 8/12 m/s，保留模板剪切及初始转速／控制器，偏航指令为零。比较使用相同 coned 坐标的 B1 叶根弯矩和叶尖 x 向位移。均值 ± 总体标准差如下，ElastoDyn 扭转记为未建模。
 
@@ -127,7 +236,7 @@ DT_PY=/opt/anaconda3/envs/wfrl-mac/bin/python
 | 1 机 12 m/s off | 12 | 2.281 | 0.296 | 0.311 |
 | 1 机 12 m/s all_on | 12 | 26.977 | 6.582 | 6.623 |
 
-三机 `turb3_row` BeamDyn 的控制交换远超过 3 s，因此此主机的实测配置不能实时交互，适合离线运行。三机的 60 s 窗口短于相邻机组按自由来流估算的 63 s 输运时间，不能据此评价充分发展的尾流。单机的两种风速下也不满足实时要求；其他线程数、GPU、其他主机及长时稳定性能尚未验证。
+三机 `turb3_row` BeamDyn 的控制交换远超过 3 s，因此此主机的实测配置不能实时交互，适合离线运行。三机的 60 s 窗口短于相邻机组按自由来流估算的 63 s 输运时间，不能据此评价充分发展的尾流。单机的两种风速下也不满足实时要求；本节计时只对应单线程 reference；fast 与线程对照见上文。GPU、其他主机及长时稳定性能尚未验证。
 
 B1 沿展向扭角统计（均值 ± 总体标准差；括号为最小值至最大值，单位 °）：
 
@@ -160,23 +269,3 @@ BeamDyn 模型下原有 ElastoDyn 叶片列的 INVALID、模板可选 nodal-outp
 | three8/blade_torsion | `cf38d1f233778b560b81ee971ba9f47d7bcd221c7f9076b6deb1f42787555dd9` | `c4c79cdc95c00742f6914358d61702a2ff59f897dfb0423dea325f7f4a39eebc` |
 | all_on/off | `aa7b7f1dcbff38ae898269564dd46cdc42cce74b4b4367c43f49da31e9a8370c` | `75d4e7ae35c5f8efd6a417e4259ee4717a17bf7ef6d8be0c34545de72b0a9df7` |
 | all_on/all_on | `957d0038b48b829da10dba6e3180db6cb01361d18e2ea1380cc768b6b2c7f7e6` | `fe5c41e3845c522112306334fc86b876009f9c75c790624dea8dd942cad8246a` |
-
-软件验收：宿主相关文件 199 项通过，前端及文本／名称守卫 94 项通过。`test_training_identity_preserves_defaults_and_separates_physics` 在相关测试集合中失败，原因是非空旧配置增加关闭字段；为继续检查其余功能，以下宿主命令显式排除该已知失败，不代表全绿。该问题的边界见“接口与当前限制”。
-
-```bash
-"$DT_PY" -m pytest tests/test_dt_blade_torsion.py tests/test_dq_physics_options.py \
-  tests/test_dq_solver_completion.py tests/test_solver_outputs.py \
-  tests/test_fastfarm_driver_inputs.py tests/test_fastfarm_driver_bn_contract.py \
-  tests/test_fastfarm_driver_exceptions.py tests/blender_bridge/test_workflow.py \
-  -k "not training_identity_preserves_defaults_and_separates_physics" \
-  -q -x -p no:cacheprovider --basetemp="$DT_TMP/host"
-"$DT_PY" -m pytest blender_frontend/tests/test_dt_torsion_telemetry.py \
-  blender_frontend/tests/test_dq_tower_telemetry.py \
-  blender_frontend/tests/test_solver_telemetry.py \
-  blender_frontend/tests/test_live_telemetry_panel.py \
-  blender_frontend/tests/test_text_encoding_guard.py \
-  blender_frontend/tests/test_text_io_encoding.py \
-  blender_frontend/tests/test_static_names.py \
-  --ignore=blender_frontend/tests/blender -q -x -p no:cacheprovider \
-  --basetemp="$DT_TMP/frontend"
-```
