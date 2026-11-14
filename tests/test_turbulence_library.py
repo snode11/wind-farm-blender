@@ -131,3 +131,16 @@ def test_storage_directory_is_git_ignored():
     result = subprocess.run(["git", "check-ignore", "data/turbulence/example.bts"], cwd=root,
                             capture_output=True, text=True, encoding="utf-8", check=True)
     assert result.stdout.strip() == "data/turbulence/example.bts"
+
+
+def test_file_sha256_reuses_digest_until_the_file_changes(tmp_path):
+    import os
+    from wfrl import inflow
+    path = tmp_path / "box.bts"
+    path.write_bytes(b"first")
+    first = inflow.file_sha256(path)
+    assert inflow.file_sha256(path) == first
+    stat = path.stat()
+    path.write_bytes(b"other")
+    os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1_000_000))
+    assert inflow.file_sha256(path) != first

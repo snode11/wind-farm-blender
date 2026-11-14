@@ -56,12 +56,28 @@ def turbulence_name(wind_speed, ti, seed):
     return f"ts_u{number(speed)}_{intensity}_s{seed}"
 
 
+_SHA256_CACHE = {}
+
+
 def file_sha256(path):
+    """SHA-256 of a file, reused while its path, inode, size and mtime are unchanged.
+
+    Each reset re-checks a selected ~40 MB box against its manifest; replacing or
+    rewriting the file changes the stat key and forces a fresh digest.
+    """
+    path = Path(path).resolve()
+    stat = path.stat()
+    key = (str(path), stat.st_ino, stat.st_size, stat.st_mtime_ns)
+    cached = _SHA256_CACHE.get(key)
+    if cached is not None:
+        return cached
     digest = hashlib.sha256()
     with open(path, "rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
-    return digest.hexdigest()
+    result = digest.hexdigest()
+    _SHA256_CACHE[key] = result
+    return result
 
 
 def load_turbulence_manifest(directory=None):
