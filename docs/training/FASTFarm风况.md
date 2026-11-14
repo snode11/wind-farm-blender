@@ -25,7 +25,7 @@
 - `create_ff_case({... , "direction": 300.}, output_dir=...)` 为直接算例生成接口。省略 `direction` 或给270°及其等价值时，使用原有生成路径，不写方向 sidecar，生成文件字节保持一致。
 - 场景 YAML 范围为 `[0, 360)`；接口接受有限实数并模360°规范化，与270°相差不超过 `1e-8°` 时按270°处理。
 
-`application.wind_direction` 保存实际方向与来源（`reset_request` / `case_direction`）；非270°算例还保存 `<主输入名>.direction.json`。该文件包含原始世界机位、求解机位、旋转矩阵、平移、偏航显示偏移、域覆盖和270°参考网格，重新加载或多次 reset 不累计旋转。保留该 sidecar 才能重新加载非270°算例的世界坐标身份。运行记录的 `loaded_inputs.direction_identity` 保存其摘要；`coordinates.transform` 保存相同坐标合同。FAST.Farm 主输入中的机位始终是实际求解坐标。
+`application.wind_direction` 保存实际方向与来源（`reset_request` / `case_direction`）；非270°算例还保存 `<主输入名>.direction.json`。该文件包含原始世界机位、求解机位、旋转矩阵、平移、偏航显示偏移、域覆盖和270°参考网格，重新加载或多次 reset 不累计旋转。保留该 sidecar 才能重新加载非270°算例的世界坐标身份。运行记录的 `loaded_inputs.direction_identity` 保存其摘要；`coordinates.transform` 保存相同坐标合同。FAST.Farm 主输入中的机位始终是实际求解坐标。旋转算例与270°算例使用同一套环境风场网格构造（模板 `dY_Low`／`dZ_Low`／`NY_Low`／`NZ_Low`、`DT_High/10` 采样、高分辨率域 `extent_YZ=1.2D`），因此方向改变只改变机位和低分辨率域长度，不改变网格分辨率；横向宽度在需要时按旋转后机位跨度加 2.4D 余量扩展。
 
 **上层标记：**`SceneRuntime.reset()` 把场景方向记为 `upstream_request.scene.wind_direction_role=case_generation`，表示方向在生成算例时以布局旋转应用。应以 `application`、`coordinates.transform` 和回读输入判定生效方向。未显式请求时 `requested.wind_direction=None` 表示使用算例默认值，不表示忽略 YAML。BTS 的标量场景风速仍为 `overridden_by_bts`。
 

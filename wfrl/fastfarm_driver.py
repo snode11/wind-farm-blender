@@ -253,8 +253,10 @@ class FastFarmDriver:
         仍由 wind_speed、wind_direction 和 wind_parameters 逐项验证。
         """
         from wfcrl.interface import FastFarmInterface, WindRequestError, _wind_json
+        from wfcrl.fastfarm_direction import normalize_direction
         if ((getattr(self, 'physics_record', None) or {}).get('substructure') is not None
-                and wind_direction is not None and wind_direction != 270.):
+                and wind_direction is not None
+                and normalize_direction(wind_direction) != 270.):
             raise ValueError('OC3 monopile currently requires wind_direction=270')
         itf = getattr(self.env.mdp, "interface", None)
         if getattr(self, "cleanup_error", None) is not None:

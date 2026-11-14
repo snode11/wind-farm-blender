@@ -229,3 +229,24 @@ def test_aligned_direction_conversion_keeps_exact_floating_point_values(mpi_case
     itf._comm.Recv = receive
     itf.update_command()
     np.testing.assert_array_equal(itf.get_measure('wind_direction'), (np.degrees(raw)-90.) % 360.)
+
+
+@pytest.mark.parametrize('selection', [None, 'ts_u8_ti8_s42'])
+def test_rotated_cases_keep_the_aligned_grid_resolution(tmp_path, selection):
+    """A direction just off 270 must change positions only, not the grid spacing."""
+    if selection is not None:
+        from wfrl.inflow import resolve_bts
+        try:
+            resolve_bts(selection)
+        except (FileNotFoundError, ValueError):
+            pytest.skip('generated TurbSim library box is not present')
+    keys = ('DT_High', 'dX_Low', 'dY_Low', 'dZ_Low', 'NY_Low', 'NZ_Low', 'Y0_Low', 'NY_High', 'NZ_High')
+    grids = {}
+    for direction in (270., 270.001, 300.):
+        args = case_args(direction=direction)
+        if selection is not None:
+            args.update(wind_time_series=selection, speed=None)
+        farm = simul_utils.FASTInputFile(simul_utils.create_ff_case(args, str(tmp_path / str(direction)) + '/'))
+        grids[direction] = [float(farm[key]) for key in keys]
+    for direction in (270.001, 300.):
+        np.testing.assert_allclose(grids[direction], grids[270.], rtol=1e-4, atol=1e-6)
