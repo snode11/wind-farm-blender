@@ -29,7 +29,7 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 | 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
 | NREL 公开安装包 | **0.5.1** | [wfrl_blender-0.5.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl_blender-0.5.1.zip)；245 个文件；[交付身份](publication/blender-0.5.1.json) |
-| 开发机日常安装 | **0.5.0.0.1** | 独立载荷，按安装记录核对；239 个文件、149 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
+| 开发机日常安装 | **0.5.1** | 与公开包同一载荷；245 个文件、155 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
 <!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。

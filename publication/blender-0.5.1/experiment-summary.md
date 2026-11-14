@@ -13,7 +13,7 @@
 | [后端依赖源码](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz) | `wfcrl-env` 提交 `eec42a7e1fab8464088fcb375338d451d75ae3f2`，包含物理选项、BeamDyn、OC3 与一致化翼型参数的配套实现 |
 | [交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json) | 固定源码提交、附件名称、大小与 SHA-256 |
 
-四份 CSV 作为独立 Release 附件提供，来自本地保存 JSON 的逐样本展开与汇总，不插值、不补值。每行保留算例与记录 ID；单位依据原始报告与 Driver 输出合同。完整原始实验归档、原始 JSON、日志及对应旧依赖仅在本地保留，未作为 0.5.1 附件提供。源码使用 GitHub 的 v0.5.1 标签归档。
+四份 CSV 作为独立 Release 附件提供，来自本地保存 JSON 的逐样本展开与汇总，不插值、不补值。每行保留算例与记录 ID；单位依据原始报告与 Driver 输出合同。原始 JSON、日志及对应旧依赖仅在本地保留，未作为 0.5.1 附件提供；完整压缩归档不作为保留产物。源码使用 GitHub 的 v0.5.1 标签归档。
 
 ## 风向与尾流对照
 

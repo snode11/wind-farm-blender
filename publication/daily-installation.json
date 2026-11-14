@@ -1,17 +1,17 @@
 {
   "schema": "wfrl.daily-installation.v1",
   "status": "PASS",
-  "version": "0.5.0.0.1",
-  "extension_version": "0.5.0+0.1",
+  "version": "0.5.1",
+  "extension_version": "0.5.1",
   "installation_kind": "PUBLIC_RELEASE_ARCHIVE",
   "module": "bl_ext.user_default.wfrl_blender",
   "module_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
   "blender": "5.2.1 LTS",
   "platform": "macOS",
-  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.5.0.0.1/package/wfrl_blender-0.5.0+0.1.zip",
-  "archive_sha256": "37a79a7ad3d861386313dd4920d5d553de4e51667788afbb5201961a4e8928f9",
-  "installed_files_checked": 239,
-  "loaded_module_files_checked": 149,
+  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.5.1/package/wfrl_blender-0.5.1.zip",
+  "archive_sha256": "f4bdf1bec98c3bb6502ba1f88ea21109bb92a5658950c7376e8fbd72923df478",
+  "installed_files_checked": 245,
+  "loaded_module_files_checked": 155,
   "file_mismatches": 0,
   "enablement_persisted": true,
   "startup_file_preserved": true,
@@ -25,12 +25,12 @@
   "native_window_status": "NOT_RUN",
   "physical_input_status": "NOT_RUN",
   "evidence": {
-    "installation": "publication/blender-0.5.0.0.1/installation.json"
+    "installation": "publication/blender-0.5.1/installation.json"
   },
   "backups": {
-    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.5.0.0.1.s_g7vv1x"
+    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.5.1.giy5idxl"
   },
-  "limits": "The installed files match the 0.5.0.0.1 release ZIP. A fresh Blender background process verified saved enablement and module origins. All six configuration files and eleven WFRL preference values matched their pre-installation state.",
+  "limits": "Installed files match the locally retained 0.5.1 release ZIP. A fresh Blender background process verified saved enablement and module origins. Six configuration files and twelve WFRL preference values were preserved. Functional, window/GPU, performance and scientific checks were not run.",
   "artifact_availability": {
     "final_archive": true,
     "result_records": true,
@@ -45,5 +45,6 @@
   "existing_processes_preserved": [],
   "restart_required_for_existing_processes": false,
   "local_source_archive_available": true,
-  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip"
+  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl_blender-0.5.1.zip",
+  "preference_fields_preserved": 12
 }

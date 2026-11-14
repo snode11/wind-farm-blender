@@ -8,8 +8,10 @@
     "sha256": "af21b9295df65464b919fd3f0e70e4c0500761b54c97f8de4e7d61a1e82dd7ab",
     "file_count": 1394,
     "source_bytes": 1266704270,
-    "scope": "Full original experiment archive retained locally; not published as a 0.5.1 attachment. Public experiment material consists of the summary and four independent CSV files.",
-    "status": "LOCAL_ONLY_NOT_PUBLISHED"
+    "scope": "Full original experiment archive is not published or retained as a compressed file. Original evidence directories remain local. Public material consists of the summary and four CSV files.",
+    "status": "NOT_PUBLISHED_ARCHIVE_NOT_RETAINED",
+    "archive_retained": false,
+    "raw_sources_retained": true
   },
   "inflow": {
     "name": "wind-farm-inflow-0.5.1.zip",
