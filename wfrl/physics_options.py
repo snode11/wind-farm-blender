@@ -1,7 +1,7 @@
 """Scene and command-line options for FAST.Farm physics."""
 import argparse
 
-PHYSICS_KEYS = ('tower_flex', 'dynamic_stall', 'tower_shadow')
+PHYSICS_KEYS = ('tower_flex', 'dynamic_stall', 'tower_shadow', 'blade_torsion')
 
 
 def validate_physics(value):

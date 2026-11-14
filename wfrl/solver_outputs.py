@@ -8,7 +8,8 @@ import shutil
 
 import numpy as np
 
-from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS, TOWER_OUTPUT_CHANNELS
+from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS, TOWER_OUTPUT_CHANNELS, TORSION_OUTPUT_CHANNELS
+from wfrl.blade_torsion import elastic_twist_degrees, TORSION_DEFINITION
 
 
 def _time_value(value, name, *, positive=False):
@@ -59,6 +60,8 @@ def prepare_case(farm_path, physics=None, *, tower_outputs=False):
                      if elastic == 1 or spec['blade'] is None]
         if tower_outputs:
             requested += [spec['native'] for spec in TOWER_OUTPUT_CHANNELS.values()]
+        if physics['blade_torsion']:
+            requested += [f'BlPitch{blade}' for blade in (1, 2, 3)]
         existing = {word.strip('"').upper() for line in ed['OutList']
                     for word in line.replace(',', ' ').split()}
         ed['OutList'] = list(ed['OutList']) + [name for name in requested if name.upper() not in existing]
@@ -77,6 +80,8 @@ def prepare_case(farm_path, physics=None, *, tower_outputs=False):
                                 output_interval_seconds=float(primary['DT_Out'])))
         if tower_outputs:
             definitions[-1]['tower_outputs'] = True
+        if physics['blade_torsion']:
+            definitions[-1]['blade_torsion'] = True
     if any(physics.values()):
         write_physics_record(farm_path, configure_physics(farm_path, physics))
     return definitions
@@ -205,6 +210,8 @@ class SolverOutputs:
         catalog = dict(SOLVER_OUTPUT_CHANNELS)
         if any(definition.get('tower_outputs') for definition in self.definitions):
             catalog.update(TOWER_OUTPUT_CHANNELS)
+        if any(definition.get('blade_torsion') for definition in self.definitions):
+            catalog.update(TORSION_OUTPUT_CHANNELS)
         values = {key: np.full(len(self.readers), np.nan) for key in catalog}
         # Latest rows feed display; the interval peak feeds overspeed checks between control steps.
         values.update({key: np.full(len(self.readers), np.nan) for key in
@@ -227,6 +234,11 @@ class SolverOutputs:
                     provenance['gage_index'] = spec['gauge']
                     if definition['gauge_nodes']:
                         provenance['elastodyn_node'] = definition['gauge_nodes'][spec['gauge'] - 1]
+                if key in TORSION_OUTPUT_CHANNELS:
+                    provenance.update(channels=spec['components'], derivation=TORSION_DEFINITION,
+                                      channel=', '.join(spec['components']), value_kind='DERIVED',
+                                      beamdyn_node=49, span_fraction=1., radius_from_root_m=61.5)
+                    provenance.pop('scale')
                 record = dict(value=None, unit=spec['unit'], validity='waiting',
                               error='No complete native output sample at or before the solver time',
                               fidelity='DIRECT', provenance=provenance,
@@ -238,9 +250,11 @@ class SolverOutputs:
                     record['timestamp'] = dict(value=time, timebase='simulation_seconds', source='openfast_output')
                     provenance['simulation_lag_seconds'] = max(0., solver_time - time)
                     index = columns.get(spec['native'])
-                    if index is None or reader.units[index] == 'INVALID':
+                    components = spec.get('components', [spec['native']])
+                    indices = [columns.get(name) for name in components]
+                    if any(j is None or reader.units[j] == 'INVALID' for j in indices):
                         record.update(validity='unsupported', error='Native channel unavailable in this structural model')
-                    elif reader.units[index] != spec['native_unit']:
+                    elif any(reader.units[j] != spec['native_unit'] for j in indices):
                         record.update(validity='invalid', error='Native output unit disagrees with the channel contract')
                     elif time > solver_time + 1e-9:
                         record.update(validity='waiting', error='Printed native time is later than the solver frame')
@@ -248,7 +262,10 @@ class SolverOutputs:
                         record.update(validity='waiting', error='Native output has not reached the current coupling interval')
                     else:
                         try:
-                            value = float(words[index].replace('D', 'E')) * spec['scale']
+                            if key in TORSION_OUTPUT_CHANNELS:
+                                value = float(elastic_twist_degrees([float(words[j].replace('D', 'E')) for j in indices]))
+                            else:
+                                value = float(words[index].replace('D', 'E')) * spec['scale']
                             if not math.isfinite(value):
                                 raise ValueError('Non-finite native measurement')
                             record.update(value=value, validity='valid', error=None)

@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | 雷达观测 | [simulation.py](../../../wfrl/radar_x100/simulation.py)、[detection.py](../../../wfrl/radar_x100/detection.py)、[sampling.py](../../../wfrl/radar_x100/sampling.py)、[schema.py](../../../wfrl/radar_x100/schema.py) | `simulate()` 提供几何对照；`simulate_detections()` 使用带参考面积权重的非相干工程检测模型，输出独立模型诊断；前端可选GEOMETRY／DETECTIONS，检测与净空核心纳入构建清单 | 默认 UNCALIBRATED；实际发布／安装验证按载荷记录；实机标定、厂家字段映射、波形／chirp处理待实现 |
 | 安装与评价 | [scene.py](../../../blender_frontend/wfrl_blender/radar_x100/scene.py)、[installation.py](../../../wfrl/radar_x100/installation.py)、[optimize_mount.py](../../../scripts/radar_x100/optimize_mount.py)、[coverage.py](../../../scripts/radar_x100/coverage.py) | 有限位姿候选、机械与离散运动筛选；以完整叶片经过期间的检测为主排序，几何覆盖为辅；严格导入 v2 报告 | 厂家支架／开孔／线缆 CAD、相位中心、连续运动净空及实机安装验证待实现或取得依据 |
-| 风况 | [fastfarm_driver.py](../../../wfrl/fastfarm_driver.py)、[interface.py](../../../wfcrl-env/wfcrl/interface.py) | 场景显示上下文与实际求解请求分开保存；请求、实际输入、统计三层记录；训练风向传到底层；BTS 内容／时长核对与固定方向匹配 | 任意风向旋转与独立场内入流探针待实现 |
+| 风况 | [fastfarm_driver.py](../../../wfrl/fastfarm_driver.py)、[interface.py](../../../wfcrl-env/wfcrl/interface.py) | 场景／训练请求、实际输入与统计三层记录；按回合平地旋转；BTS 内容、域覆盖与时长核对 | 平地按回合风向旋转已接入；独立场内入流探针与运行中途风向变化待实现 |
 | 叶片响应 | [export_blade_response.py](../../../scripts/analysis/export_blade_response.py)、[imbalance.py](../../../blender_frontend/wfrl_blender/imbalance.py)、[farm_replay.py](../../../blender_frontend/wfrl_blender/panels/farm_replay.py) | 三叶位移、根部力／力矩的相位对齐统计；r 系标签；无效通道拒绝；明确不提供弹性扭转数值 | 弹性扭转分离、展向内力、材料应力和认证级疲劳评价待实现；已有研究用根部弯矩 DEL，不能由显示截面补造结构通道 |
 
 ## 雷达工程观测
@@ -59,13 +59,13 @@
 
 `FastFarmDriver.reset()` 与后续测量返回 `wind_conditions` 深拷贝，分别记录 requested、loaded_inputs、statistics；驱动在仓库 `results/runs/` 下按需创建 `wind_conditions` 子目录保存记录 ID 对应的 JSON，实际位置为 `record_path`。算例清理保留记录，异常也携带记录。输入路径／摘要核对不等于求解器回传了文件哈希，也不等于测到了独立场内来流。
 
-`WindRequestError` 在求解前拒绝未支持的方向、TI、剪切、阵风、种子、输入模式／坐标及无效／不一致输入；稳态仅接受有限正标量风速，BTS 不接受标量覆盖。270°及其模360°等价值只标为 `MATCHES_FIXED_COORDINATES`，布局、风向量均不旋转。BTS 时长不足写入警告和 `exceeds_bts_duration`，当前仍允许交给 InflowWind 处理，不能写成已拒绝或已保证周期回绕安全。
+`WindRequestError` 在求解前拒绝无效方向或旋转域覆盖不足、TI、剪切、阵风、种子、输入模式／坐标及无效／不一致输入；稳态仅接受有限正标量风速，BTS 不接受标量覆盖。270°及其模360°等价值只标为 `MATCHES_FIXED_COORDINATES`，布局、风向量均不旋转。BTS 时长不足写入警告和 `exceeds_bts_duration`，当前仍允许交给 InflowWind 处理，不能写成已拒绝或已保证周期回绕安全。
 
-训练的非场景采样器拒绝 BTS 与标量调度并用；无场景的 `--wind-sched preset:turb` 报错，BTS 通过场景 `inflow.turbulence` 配置。探针的风速／BTS 参数互斥。场景的 `upstream_request.scene` 保存显示风向，`requested` 保存实际交给求解器的请求；场景显示风向不自动变成求解请求。训练 `--wind-direction` 经配置、调度和采样器完整传到底层，支持的270°记匹配固定坐标，其他未支持方向明确拒绝。具体入口和条件见[FAST.Farm 风况](../../training/FASTFarm风况.md)。
+训练的非场景采样器拒绝 BTS 与标量调度并用；无场景的 `--wind-sched preset:turb` 报错，BTS 通过场景 `inflow.turbulence` 配置。探针的风速／BTS 参数互斥。场景的 `upstream_request.scene` 保存显示风向，`requested` 保存实际交给求解器的请求；YAML方向通过算例生效；上层 `display_only` 标记仍需同步，以底层 `application` 为准。训练 `--wind-direction` 经配置、调度和采样器完整传到底层，270°保持固定坐标，其他有限方向按平地布局旋转，超出BTS域覆盖时拒绝。具体入口和条件见[FAST.Farm 风况](../../training/FASTFarm风况.md)。
 
 背景与阵风叠加统计只依赖明确标识的文件，不按文件名或 TI 反推来源。BTS 统计为完整文件时域中逐横向点的轮毂高度纵向风速统计；MPI 轮毂统计含尾流与瞬态，下游机组统计也不能单独分离尾流。`statistics.farm_inflow` 当前为 `unavailable`。
 
-**待实现：**一致的风场／布局／机舱／控制／结果风向旋转，独立场内入流探针，以及全部入口的原始请求保留与一致拒绝。时间、空间、结构离散与尾流启动影响须按用途验证；控制周期、结构步长和保存频率不能互相替代，回放频率不代表雷达 chirp 频率。
+**待实现：**运行中途风向变化、独立场内入流探针，以及全部入口的原始请求保留与一致拒绝。时间、空间、结构离散与尾流启动影响须按用途验证；控制周期、结构步长和保存频率不能互相替代，回放频率不代表雷达 chirp 频率。
 
 ## 叶片载荷与旋转参数
 

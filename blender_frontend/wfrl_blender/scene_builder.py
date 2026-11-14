@@ -326,6 +326,7 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
     _link(collection, yaw)
     yaw.parent = root
     yaw.location = (0, 0, scalars["TowerHt"])
+    yaw.rotation_euler.z = math.radians(270. - float(collection.get("wind_direction_deg", 270.)))
     hub_x, _, hub_z = hub_position()
     # Shell dimensions are explicit local YAML dimensions (8.03 x 3.30 x 3.30 m).
     # Elliptical longitudinal sections keep the source envelope while avoiding a boxy body.
@@ -773,9 +774,13 @@ def build_scene(scene: SceneDTO, collection_name: str = COLLECTION_NAME):
         _make_ground_grid(collection)
         # A restrained set of arrows makes the inflow direction legible without implying a measured field.
         for index, y in enumerate((-72.0, 30.0, 132.0), start=1):
-            _primitive(collection, "cube", f"WFRL.Inflow.Arrow{index}.Shaft", (60.0, y, 1.0), (38.0, 0.8, 0.8), get_material("accent"))
+            angle = math.radians(270. - scene.wind_direction_deg)
+            shaft = _primitive(collection, "cube", f"WFRL.Inflow.Arrow{index}.Shaft", (60.0, y, 1.0), (38.0, 0.8, 0.8), get_material("accent"))
+            shaft.rotation_euler[2] = angle
             arrow = _primitive(collection, "cone", f"WFRL.Inflow.Arrow{index}.Head", (102.0, y, 1.0), (4.0, 3.2, 2.2), get_material("accent"))
             arrow.rotation_euler[1] = math.radians(90.0)
+            arrow.rotation_euler[2] = angle
+            arrow.location = (60.0 + 42.0 * math.cos(angle), y + 42.0 * math.sin(angle), 1.0)
         _make_wake(collection, scene)
         _make_sensor_fixtures(collection, scene)
         for obj in collection.objects:

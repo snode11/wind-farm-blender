@@ -1,14 +1,15 @@
-# FAST.Farm 塔架与气动物理选项
+# FAST.Farm 结构与气动物理选项
 
-场景、`FastFarmDriver`、训练命令和 Blender 启动器支持三个独立、默认关闭的布尔选项。选项在生成算例、启动求解器之前应用；运行中不切换物理模型。只修改生成目录中的输入，不修改模板、控制器或已有训练结果。
+场景、`FastFarmDriver`、训练命令和 Blender 启动器支持四个独立、默认关闭的布尔选项。选项在生成算例、启动求解器之前应用；运行中不切换物理模型。只修改生成目录中的输入，不修改模板、控制器或已有训练结果。
 
 | `physics` 字段 | 开启后的输入 | 保持的限制 |
 | --- | --- | --- |
-| `tower_flex` | ElastoDyn 的 `TwFADOF1`、`TwFADOF2`、`TwSSDOF1`、`TwSSDOF2` 均为 `True` | 要求 `CompElast=1`，保留模板塔架结构与模态系数 |
+| `tower_flex` | ElastoDyn 的 `TwFADOF1`、`TwFADOF2`、`TwSSDOF1`、`TwSSDOF2` 均为 `True` | 使用 ElastoDyn 的塔架模型，可与 `blade_torsion` 组合；保留模板塔架结构与模态系数 |
 | `dynamic_stall` | AeroDyn `AFAeroMod=2` | 要求模板 `UAMod=3`、`FLookup=True`、`CavitCheck=False`；不生成或修改 UA 系数 |
 | `tower_shadow` | `TwrPotent=1`、`TwrShadow=1` | 标准势流与 Powles 塔影一起开启；`TwrAero` 保持模板值 `False`，不额外开启塔架气动阻力载荷 |
+| `blade_torsion` | `CompElast=2`、三叶片 BeamDyn、`DT=0.00125 s` | 只支持已核对的 NREL 5MW 直叶片输入；[来源、扭角定义与性能](BeamDyn叶片弹性扭转.md) |
 
-三项可以分别开启，也可以组合。这里只支持当前 NREL 5MW 的 ElastoDyn / AeroDyn v15 输入。`UAMod=3` 对应 Beddoes–Leishman 的 Minnema/Pierce 扩展；势流扰动与下游塔影可叠加。[OpenFAST AeroDyn 输入说明](https://openfast.readthedocs.io/en/v3.5.3/source/user/aerodyn/input.html)
+四项可以分别开启，也可以组合。这里只支持当前 NREL 5MW 的 ElastoDyn / BeamDyn / AeroDyn v15 输入。`UAMod=3` 对应 Beddoes–Leishman 的 Minnema/Pierce 扩展；势流扰动与下游塔影可叠加。[OpenFAST AeroDyn 输入说明](https://openfast.readthedocs.io/en/v3.5.3/source/user/aerodyn/input.html)
 
 ## 场景与启动
 
@@ -19,11 +20,12 @@ physics:
   tower_flex: true
   dynamic_stall: false
   tower_shadow: true
+  blade_torsion: false
 ```
 
 只接受上述键和 YAML 布尔值。未知键、`null`、字符串 `"true"`、数字 `0/1` 都拒绝；FLORIS 场景拒绝开启这些选项。省略字段代表关闭。全关闭的场景序列化省略 `physics`，保留默认训练配置身份的兼容性。
 
-以下入口接受 `--tower-flex`、`--dynamic-stall`、`--tower-shadow`，以及相应的 `--no-*`。未提供的命令行选项保留场景值；显式选项覆盖对应字段，不影响其余字段。
+以下入口接受 `--tower-flex`、`--dynamic-stall`、`--tower-shadow`、`--blade-torsion`，以及相应的 `--no-*`。未提供的命令行选项保留场景值；显式选项覆盖对应字段，不影响其余字段。
 
 - `python -m scripts.train.train_fastfarm --scene <场景.yaml> --tower-flex --dynamic-stall`
 - `python -m wfrl.blender_bridge --scene <场景.yaml> --tower-flex --tower-shadow`
@@ -47,12 +49,12 @@ Bridge 的场景重载保留启动参数；正式训练使用带有效选项的�
 
 启用任意选项的生成算例带 `FarmInputs/Case.physics.json`，包含：
 
-- `requested`：三个归一化布尔请求；`turbines[].actual`：每台机组实际 DOF、AeroDyn 开关及 `TwrAero`。
+- `requested`：四个归一化布尔请求；`turbines[].actual`：每台机组实际 DOF、AeroDyn 开关及 `TwrAero`。
 - `turbines[].checks`：所启用功能检查过的翼型或塔架节点信息。
 - `inputs_sha256`：实际读取的主输入、ElastoDyn、AeroDyn 及所启用选项的依赖输入摘要。范围按清单列出，不代表完整交付包摘要。
 - `identity`：上述相对路径、请求、实际设置和摘要的内容身份，不包含时间或输出目录绝对路径。
 
-Driver 的 `physics_record` 和测量 `physics` 保留此记录；每回合的持久 `wind_conditions` 也含 `physics`，包括全关闭时的实际参数。原生遥测 `provenance.physics_identity` 关联该身份。训练有效配置和 checkpoint 身份包含已启用选项，配置不匹配的恢复不能当作同一训练条件。低层算例附属记录应在任何手工修改输入之后重新生成，不能用旧摘要声明修改后输入的身份。
+Driver 的 `physics_record` 和测量 `physics` 保留此记录；每回合的持久 `wind_conditions` 也含 `physics`，包括全关闭时的实际参数。原生遥测 `provenance.physics_identity` 关联该身份。训练有效配置和 checkpoint 身份包含已启用选项，配置不匹配的恢复不能当作同一训练条件。`blade_torsion` 的关闭字段会进入非空物理配置的训练身份；已有三项物理选项的 checkpoint 兼容处理待实现，见 [BeamDyn 限制](BeamDyn叶片弹性扭转.md#接口与当前限制)。低层算例附属记录应在任何手工修改输入之后重新生成，不能用旧摘要声明修改后输入的身份。
 
 全关闭时不改物理输入、不增加算例附属文件，也不增加塔顶输出列。默认算例和默认遥测准备的字节合同由 `tests/test_dq_physics_options.py` 及 `tests/fixtures/dq/default_case_sha256.json` 检查；它同时比较省略选项与显式全关闭时的完整生成目录。模板、控制律、观测维数和奖励公式不随选项自动改变。
 
@@ -85,9 +87,9 @@ MPLCONFIGDIR="$DQ_RUN/mpl" TMPDIR="$DQ_RUN" OMP_NUM_THREADS=1 \
   --output "$DQ_RUN/results"
 ```
 
-`--seconds` 支持 30、45、60；`--turbines` 支持 1、3；`--variants off all` 可只比较关闭与全开，所选组必须含 `off` 且不能重复；`--prepare-only` 只生成并检查输入，不初始化 MPI。每组子进程有超时和进程组清理。每组原始输出、日志和元数据都在指定目录；提取所需证据后清理该临时目录。
+`--seconds` 支持 6、12、30、45、60；`--turbines` 支持 1、3；`--wind-speed` 支持 8、12 m/s，默认 8；`blade_torsion` 组只开叶片弹性，`all_on` 组开四项，`all` 组保留三项塔架／气动组合；`--variants off all` 可只比较关闭与全开，所选组必须含 `off` 且不能重复；`--prepare-only` 只生成并检查输入，不初始化 MPI。每组子进程有超时和进程组清理。每组原始输出、日志和元数据都在指定目录；提取所需证据后清理该临时目录。
 
-`comparison.json` 记录求解器摘要、MPI spawn 至确认原生正常终止的墙钟时间（`wall_seconds`，不含建例）、MPI 交换结束时间（`mpi_wall_seconds`）、等待原生收尾的时间（`completion_wait_seconds`）及相对关闭组的耗时变化。MPI 断连不代表输出已经写完；只有日志出现 `FAST.Farm terminated normally.` 后才读取输出。当前 45 s 算例的输出间隔为 0.25 s，末行应为 45.0000 s；末行 44.5 或 44.75 s 均拒绝，终止时刻误差只容许时间列四位小数的打印精度。未换行的残缺行和超出终止时刻的数据也拒绝。
+`comparison.json` 记录求解器摘要、MPI spawn 至确认原生进程退出的墙钟时间（`wall_seconds`，不含建例）、MPI 交换结束时间（`mpi_wall_seconds`）、等待原生收尾的时间（`completion_wait_seconds`）及相对关闭组的耗时变化。MPI 断连不代表输出已经写完；只有日志出现 `FAST.Farm terminated normally.` 且已识别的本次 FAST.Farm 原生进程退出后才读取输出。当前 45 s 算例的输出间隔为 0.25 s，末行应为 45.0000 s；末行 44.5 或 44.75 s 均拒绝，终止时刻误差只容许时间列四位小数的打印精度。未换行的残缺行和超出终止时刻的数据也拒绝。
 
 统计包含每台机组末半段仿真窗口的功率、B1 叶根两向弯矩、塔底两向弯矩、塔顶两向位移的均值、总体标准差、极值、绝对峰值和相对关闭组的差值。功率单位 kW，弯矩 kN·m，位移 m。短窗口包含启动瞬态，不能据此认定稳态性能、疲劳寿命或物理精度；单次墙钟结果也不能当作稳定性能基准。缺失通道、无效单位、非有限数或未到达终止时刻的输出会拒绝汇总。
 
@@ -197,6 +199,24 @@ WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm \
 | 3 机 off | `30a87f4670e94559750b87d19b56fa3911fe1e9b21df0527d0a0e7b5eb003bc2` |
 | 3 机 all | `f3455d91f484b61b5223971af02d28331a986da02bfe0c9a07044eef85478dc6` |
 | 在线 tower_flex | `b2fe0c030b08070e2df45fe3688f198b554ecffe24e2017621acc17ef6956f05` |
+
+## 精度验收标准（建议，待确认）
+
+以下标准是供确认的建议，尚未被项目负责人采纳；采纳或修改后再改为正式要求。目前短算例只证明各选项可运行，不满足下列任何一条的精度验收。
+
+**适用对象**：`dynamic_stall`、`tower_flex`、`tower_shadow` 及其组合，NREL 5MW 陆上模板，FAST.Farm v3.5.3。
+
+| 编号 | 检查 | 建议门槛 | 说明 |
+| --- | --- | --- | --- |
+| A1 | 与官方算例一致 | 用同一输入复现 OpenFAST r-test v3.5.3 中开启 `AFAeroMod=2` 的 5MW 算例，功率、叶根弯矩、塔底弯矩的均值相对差 ≤1%，标准差相对差 ≤5% | 证明本机求解器与模板接入正确，是其余各条的前提 |
+| A2 | 稳态附着流下动态失速的均值影响 | 均匀稳态风 8 / 12 m/s、零偏航，丢弃前 ≥60 s 启动段，统计窗口 ≥10 个转子转动周期：`dynamic_stall` 相对 `off` 的平均功率差 ≤2%，平均叶根挥舞弯矩差 ≤3% | 附着流中 B-L 模型主要引入相位滞后，均值不应大幅偏离稳态极曲线；超过门槛须找出原因再使用 |
+| A3 | 时间步收敛 | 结构／气动求解步长减半，功率、叶根和塔底弯矩均值变化 ≤1%（以参考 RMS 归一化），RMS、标准差、峰值、DEL 相对变化 ≤5% | 与已有离线筛查门槛一致 |
+| A4 | 湍流来流 | 同一湍流盒（如 `ts_u8_ti8_s42`），≥300 s：平均功率差 ≤3%；DEL 与标准差差异只报告、不设门槛 | 动态失速主要影响载荷波动，载荷精度须对照外部基准，不由本条判定 |
+| A5 | 塔架弯曲 | `tower_flex` 关闭时塔顶位移严格为 0；开启后塔顶前后位移均值与静力估算（推力 × 塔架柔度）相对差 ≤10%，一阶塔架频率与 5MW 定义报告值（约 0.32 Hz）相对差 ≤5% | 检查模态与刚度接入正确 |
+| A6 | 塔影 | 叶片经过塔架时叶根弯矩出现每转一次的周期性下降；平均功率变化 ≤1% | 塔影只应带来局部周期扰动 |
+| A7 | 运行状态 | 全部算例正常结束；无 UA cutout 或翼型表越界警告；输出无 INVALID、NaN | 任一项失败即不通过 |
+
+**当前已知结果与本标准的差距**：45 s 短算例（统计窗口 22.5–45 s，未丢弃 60 s 启动段）中，`dynamic_stall` 使 8 m/s 平均功率下降 5.2%、叶根挥舞弯矩下降 3.9%，超过 A2 建议门槛，原因尚未查明（可能包括 UA 状态初始化瞬态和窗口过短）。A1、A3–A6 尚未执行。
 
 ## 软件验证入口
 

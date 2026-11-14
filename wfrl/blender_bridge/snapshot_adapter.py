@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 from wfrl.scene.power import farm_power_total
-from .messages import BLADE_COMPONENTS, SOLVER_OUTPUT_CHANNELS, ALL_SOLVER_OUTPUT_CHANNELS
+from .messages import BLADE_COMPONENTS, SOLVER_OUTPUT_CHANNELS, ALL_SOLVER_OUTPUT_CHANNELS, SOLVER_OUTPUT_CATALOGS
 
 UNITS = dict(yaw='deg', yaw_command='deg', yaw_measured='deg', pitch='deg', rotor_speed='rpm', power='MW', load='',
              torque='N m', pitch_command='deg', pitch_measured='deg', wind_speed='m/s', wind_direction='deg', reward='',
@@ -76,6 +76,10 @@ class SnapshotAdapter:
         self.backend_demo = bool(snapshot.ctx.get('backend_demo'))
         self.channel_sources = snapshot.ctx.get('channel_sources', {})
         m = dict(snapshot.measure)
+        wind_record = m.get('wind_conditions') or {}
+        coordinates = wind_record.get('coordinates', {})
+        direction = (wind_record.get('application', {}).get('wind_direction') or {})
+        transform = coordinates.get('transform') or {}
         if 'yaw_measured' in m:
             m['yaw'] = m['yaw_measured']
         elif getattr(self.scene, 'backend', None) == 'fastfarm' and self.mode != 'demo':
@@ -120,6 +124,9 @@ class SnapshotAdapter:
                     record['provenance'].update(channel=source_key, blade_index=component + 1)
                 if key in ('yaw', 'yaw_measured', 'yaw_command'):
                     record['provenance']['role'] = 'command' if key == 'yaw_command' else 'measurement'
+                    if transform:
+                        record['provenance'].update(frame='wind_aligned_solver',
+                            world_yaw_offset_deg=transform['world_yaw_offset_deg'])
                     if key == 'yaw' and 'yaw_measured' in m:
                         record['provenance']['channel'] = 'yaw_measured'
                 if clock:
@@ -134,7 +141,7 @@ class SnapshotAdapter:
                 channels[key] = record
             if native is not None:
                 if (not isinstance(native[i], dict) or
-                        set(native[i]) not in (set(SOLVER_OUTPUT_CHANNELS), set(ALL_SOLVER_OUTPUT_CHANNELS))):
+                        frozenset(native[i]) not in SOLVER_OUTPUT_CATALOGS):
                     raise ValueError('Native output records must match the channel catalog')
                 for key, record in native[i].items():
                     channels[key] = json_value(record)
@@ -156,6 +163,10 @@ class SnapshotAdapter:
                     farm={'power': farm_power,
                           'reward': self.channel(snapshot.reward, 'reward')})
         if hasattr(self.scene, 'to_dict'): payload['scene'] = self.scene.to_dict()
+        if direction.get('status') in ('applied', 'MATCHES_FIXED_COORDINATES', 'input_file') and 'scene' in payload:
+            payload['scene']['inflow']['direction'] = direction['value']
+            if transform:
+                payload['wind_coordinates'] = json_value(transform)
         return payload
 
     def safety_events(self, snapshot):

@@ -320,7 +320,11 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
     elif 'floris' in env_id.lower() and any(physics.values()):
         raise ValueError('physics options require the FAST.Farm backend')
     if any(physics.values()):
-        config['physics'] = {key: physics.get(key, False) for key in PHYSICS_KEYS}
+        # The first three keys are always serialized, as in existing checkpoints;
+        # options added later appear only when enabled so old identities still match.
+        baseline = ('tower_flex', 'dynamic_stall', 'tower_shadow')
+        config['physics'] = {key: physics.get(key, False) for key in PHYSICS_KEYS
+                             if key in baseline or physics.get(key, False)}
     for key in ("iters", "n_steps", "n_epochs", "mb_steps"):
         if config[key] <= 0:
             raise ValueError(f"{key} must be positive")
@@ -860,8 +864,8 @@ def main():
                          "做后端/网络对照时**必须**给，否则比的是两次风况抽签"
                          "(功率 ~ u^3，实测单后端内部即可有 2.4x 跨度)")
     ap.add_argument("--wind-direction", type=float, default=None,
-                    help="请求求解器来流方向(°)，独立于场景显示方向。FAST.Farm 仅接受"
-                         "与固定坐标一致的 270°（模 360），不旋转；其他方向记录为未应用并拒绝")
+                    help="请求求解器来流方向(°，气象风向，270°=西风)。FAST.Farm 以平地布局绕场中心旋转实现，"
+                         "每个回合固定；运行中途改变风向会被拒绝。湍流盒须覆盖旋转后的布局")
 
     # ---- 回合结构 ----
     ap.add_argument("--episode-steps", type=int, default=128,

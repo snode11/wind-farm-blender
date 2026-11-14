@@ -96,6 +96,8 @@ class KinematicState:
             pitch = channels.get('pitch')
             yaw_value = yaw['value'] if yaw and self.validity(yaw, connected) == 'valid' else None
             pitch_value = pitch['value'] if pitch and self.validity(pitch, connected) == 'valid' else None
+            if yaw_value is not None:
+                yaw_value += float(yaw.get('provenance', {}).get('world_yaw_offset_deg', 0.))
             apply_pose(objects, turbine['turbine_id'], yaw_value, pitch_value, connected=connected)
             rotor = objects.get(prefix + '.Rotor')
             if rotor is not None:

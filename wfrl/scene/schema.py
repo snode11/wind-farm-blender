@@ -278,16 +278,22 @@ class Scene:
             class PhysicsCase(FastFarmCase):
                 @property
                 def simul_params(case_self):
-                    return {**super().simul_params, 'physics': dict(case_self.physics)}
-            case_type = PhysicsCase if any(self.physics.values()) else FastFarmCase
+                    params = dict(super().simul_params)
+                    if any(case_self.physics.values()):
+                        params['physics'] = dict(case_self.physics)
+                    if case_self.direction != 270.:
+                        params['direction'] = case_self.direction
+                    return params
+            case_type = PhysicsCase if any(self.physics.values()) or self.wind_direction != 270. else FastFarmCase
             case = case_type(
                 num_turbines=self.n, xcoords=self.xcoords, ycoords=self.ycoords,
                 dt=int(self.dt), buffer_window=1, t_init=100, max_iter=max_iter,
                 set_wind_direction=True,
             )
             case.wind_time_series = self.turbulence
-            if any(self.physics.values()):
+            if case_type is PhysicsCase:
                 case.physics = dict(self.physics)
+                case.direction = self.wind_direction
             return case
         case = FlorisCase(
             num_turbines=self.n, xcoords=self.xcoords, ycoords=self.ycoords,

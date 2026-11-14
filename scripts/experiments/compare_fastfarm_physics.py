@@ -15,7 +15,9 @@ from wfrl.mpi_runtime import configure_local_mpi
 
 VARIANTS = {'off': {}, 'tower_flex': {'tower_flex': True},
             'dynamic_stall': {'dynamic_stall': True}, 'tower_shadow': {'tower_shadow': True},
-            'all': dict(tower_flex=True, dynamic_stall=True, tower_shadow=True)}
+            'all': dict(tower_flex=True, dynamic_stall=True, tower_shadow=True),
+            'blade_torsion': {'blade_torsion': True},
+            'all_on': dict(tower_flex=True, dynamic_stall=True, tower_shadow=True, blade_torsion=True)}
 
 
 def wait_for_normal_termination(log, timeout):
@@ -36,7 +38,7 @@ def wait_for_normal_termination(log, timeout):
         time.sleep(min(.025, remaining))
 
 
-def summarize(path, seconds):
+def summarize(path, seconds, *, blade_torsion=False):
     from wfrl.solver_outputs import OutputReader
     reader = OutputReader(path)
     reader.advance(seconds + 1.)
@@ -50,6 +52,12 @@ def summarize(path, seconds):
         raise RuntimeError(f'Incomplete native output: last complete time {data[-1, 0]}, expected {seconds}')
     window = data[(data[:, 0] >= seconds / 2) & (data[:, 0] <= seconds)]
     result = dict(window_seconds=[seconds / 2, seconds], samples=len(window), channels={})
+    if blade_torsion:
+        channels.pop('RootMyc1')
+        channels.pop('RootMxc1')
+        channels.update(B1RootMyr='N-m', B1RootMxr='N-m', B1TipTDxr='m', BlPitch1='deg')
+    elif 'OoPDefl1' in reader.names:
+        channels['OoPDefl1'] = 'm'
     for channel, unit in channels.items():
         index = reader.names.index(channel)
         values = window[:, index]
@@ -58,28 +66,102 @@ def summarize(path, seconds):
         result['channels'][channel] = dict(unit=unit, mean=float(values.mean()),
                                           std=float(values.std()), min=float(values.min()),
                                           max=float(values.max()), peak_abs=float(np.abs(values).max()))
+    def series(name, unit):
+        index = reader.names.index(name)
+        if reader.units[index] != unit or not np.isfinite(window[:, index]).all():
+            raise RuntimeError(f'{path}: invalid {name} or units')
+        return window[:, index]
+
+    common = {'power': ('kW', series('GenPwr', 'kW'))}
+    if blade_torsion:
+        # OpenFAST v3.5.3 FAST_Solver.f90: SrvD_InputSolve, root r -> coned c.
+        pitch = np.radians(series('BlPitch1', 'deg'))
+        mx, my = series('B1RootMxr', 'N-m'), series('B1RootMyr', 'N-m')
+        dx, dy = series('B1TipTDxr', 'm'), series('B1TipTDyr', 'm')
+        common.update(root_edge=('kN-m', (mx * np.cos(pitch) + my * np.sin(pitch)) / 1000.),
+                      root_flap=('kN-m', (-mx * np.sin(pitch) + my * np.cos(pitch)) / 1000.),
+                      tip_flap_coned=('m', dx * np.cos(pitch) + dy * np.sin(pitch)))
+    else:
+        common.update(root_edge=('kN-m', series('RootMxc1', 'kN-m')),
+                      root_flap=('kN-m', series('RootMyc1', 'kN-m')))
+        if 'TipDxc1' in reader.names:
+            common['tip_flap_coned'] = ('m', series('TipDxc1', 'm'))
+    result['common_frame'] = 'ElastoDyn coned blade frame c; B1, positive x flap displacement'
+    result['common_channels'] = {key: dict(unit=unit, mean=float(v.mean()), std=float(v.std()),
+                                          min=float(v.min()), max=float(v.max()), peak_abs=float(np.abs(v).max()))
+                                 for key, (unit, v) in common.items()}
+    if blade_torsion:
+        from wfrl.blade_torsion import elastic_twist_degrees, rotation_channels, TORSION_DEFINITION
+        from wfcrl.fastfarm_physics import BEAMDYN_NODES
+        import csv
+        result['torsion_definition'] = TORSION_DEFINITION
+        result['torsion'] = {}
+        derived = {'Time': data[:, 0]}
+        for blade in (1, 2, 3):
+            for gauge, node in enumerate(BEAMDYN_NODES, 1):
+                names = rotation_channels(blade, gauge)
+                indices = [reader.names.index(name) for name in names]
+                if any(reader.units[index] != '-' for index in indices):
+                    raise RuntimeError('BeamDyn rotation parameters must be dimensionless')
+                angles = elastic_twist_degrees(data[:, indices])
+                key = f'B{blade}Node{node}Twist'
+                derived[key] = angles
+                values = angles[(data[:, 0] >= seconds / 2) & (data[:, 0] <= seconds)]
+                result['torsion'][key] = dict(unit='deg', mean=float(values.mean()),
+                    std=float(values.std()), min=float(values.min()), max=float(values.max()),
+                    peak_abs=float(np.abs(values).max()))
+        with Path(path).with_suffix('.torsion.csv').open('w', encoding='utf-8', newline='') as stream:
+            writer = csv.writer(stream)
+            writer.writerow(derived)
+            writer.writerow(['s', *(['deg'] * (len(derived) - 1))])
+            writer.writerows(zip(*derived.values()))
     return result
 
 
-def run_case(farm, seconds, turbines, executable, completion_timeout=60.):
+def owned_solver_processes(farm, executable):
+    """Capture only this case's live solver, while MPI holds it at a control boundary."""
+    import psutil
+    found = []
+    for process in psutil.process_iter(['pid', 'exe', 'cmdline']):
+        try:
+            args = process.info['cmdline'] or []
+            if str(Path(farm).resolve()) in args and process.info['exe'] and Path(process.info['exe']).resolve() == Path(executable).resolve():
+                found.append(process)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    if not found:
+        raise RuntimeError('Cannot identify the owned FAST.Farm process; output must not be read')
+    return found
+
+
+def run_case(farm, seconds, turbines, executable, completion_timeout=60., wind_speed=8.):
     """Worker process owns its MPI lifetime; the parent bounds its wall time."""
     configure_local_mpi()
     from wfcrl import environments  # noqa: F401
     from wfcrl.interface import FastFarmInterface
     itf = FastFarmInterface(turbines, farm, max_iter=seconds // 3,
                            fast_farm_executable=executable, default_avg_window=1)
-    itf.set_wind_request_context(dict(wind_speed=8., wind_direction=None),
+    itf.set_wind_request_context(dict(wind_speed=wind_speed, wind_direction=None),
                                 record_dir=Path(farm).parent / 'wind_conditions')
     start = time.perf_counter()
-    itf.init(wind_speed=8.)
+    itf.init(wind_speed=wind_speed)
+    processes = owned_solver_processes(farm, executable)
+    steps = []
     for _ in range(seconds // 3):
+        boundary = time.perf_counter()
         itf.update_command(yaw=np.zeros(turbines))
+        steps.append(time.perf_counter() - boundary)
     mpi_wall = time.perf_counter() - start
     wait_for_normal_termination(Path(farm).with_suffix('.solver.log'), completion_timeout)
+    for process in processes:
+        process.wait(timeout=completion_timeout)
     wall = time.perf_counter() - start
+    from wfcrl.simul_utils import FASTInputFile
+    blade_torsion = int(FASTInputFile(str(Path(farm).with_name('FFTest_WT1.fst')))['CompElast']) == 2
     result = dict(wall_seconds=wall, mpi_wall_seconds=mpi_wall,
-                  completion_wait_seconds=wall - mpi_wall, completion='FAST.Farm terminated normally.',
-                  turbine_outputs=[summarize(Path(farm).with_name(f'Case.T{i + 1}.out'), seconds)
+                  completion_wait_seconds=wall - mpi_wall, completion='FAST.Farm terminated normally; owned native processes exited',
+                  control_step_wall_seconds=steps, solver_pids=[p.pid for p in processes],
+                  turbine_outputs=[summarize(Path(farm).with_name(f'Case.T{i + 1}.out'), seconds, blade_torsion=blade_torsion)
                                    for i in range(turbines)])
     Path(farm).with_suffix('.comparison.json').write_text(
         json.dumps(result, indent=2, allow_nan=False) + '\n', encoding='utf-8')
@@ -88,8 +170,8 @@ def run_case(farm, seconds, turbines, executable, completion_timeout=60.):
 def execute_case(farm, args, executable):
     command = [sys.executable, '-c',
                'import sys; from scripts.experiments.compare_fastfarm_physics import run_case; '
-               'run_case(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], float(sys.argv[5]))',
-               farm, str(args.seconds), str(args.turbines), str(executable), str(args.timeout)]
+               'run_case(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], float(sys.argv[5]), float(sys.argv[6]))',
+               farm, str(args.seconds), str(args.turbines), str(executable), str(args.timeout), str(args.wind_speed)]
     log = Path(farm).with_suffix('.solver.log')
     with log.open('wb') as stream:
         process = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True,
@@ -112,10 +194,11 @@ def execute_case(farm, args, executable):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True, help='new directory for all inputs and results')
-    parser.add_argument('--seconds', type=int, choices=(30, 45, 60), default=45)
+    parser.add_argument('--seconds', type=int, choices=(6, 12, 30, 45, 60), default=45)
     parser.add_argument('--turbines', type=int, choices=(1, 3), default=1)
+    parser.add_argument('--wind-speed', type=float, choices=(8., 12.), default=8.)
     parser.add_argument('--repeats', type=int, default=1)
-    parser.add_argument('--variants', nargs='+', choices=tuple(VARIANTS), default=list(VARIANTS),
+    parser.add_argument('--variants', nargs='+', choices=tuple(VARIANTS), default=['off', 'tower_flex', 'dynamic_stall', 'tower_shadow', 'all'],
                         help='selected comparisons; must include off as the reference')
     parser.add_argument('--timeout', type=float, default=600., help='maximum worker wall seconds per case (POSIX)')
     parser.add_argument('--fastfarm', required=True, type=Path)
@@ -136,9 +219,9 @@ def main():
     from wfcrl.simul_utils import create_ff_case
     from wfcrl.fastfarm_physics import configure_physics, write_physics_record
     from wfrl.solver_outputs import prepare_case
-    report = dict(seconds=args.seconds, turbines=args.turbines, wind_speed_m_s=8.,
+    report = dict(seconds=args.seconds, turbines=args.turbines, wind_speed_m_s=args.wind_speed,
                   solver=str(executable), solver_sha256=hashlib.sha256(executable.read_bytes()).hexdigest(),
-                  wall_time_scope='MPI spawn through native normal-termination confirmation; excludes case generation',
+                  wall_time_scope='MPI spawn through native process exit; excludes case generation',
                   results=[])
     jobs = []
     for repeat in range(args.repeats):
@@ -147,7 +230,7 @@ def main():
             case_dir = output / f'{name}-{repeat + 1}'
             farm = create_ff_case(dict(num_turbines=args.turbines,
                 xcoords=[504. * i for i in range(args.turbines)], ycoords=[0.] * args.turbines,
-                max_iter=args.seconds // 3, dt=3, speed=8., wind_time_series=None, physics=physics),
+                max_iter=args.seconds // 3, dt=3, speed=args.wind_speed, wind_time_series=None, physics=physics),
                 output_dir=str(case_dir))
             prepare_case(farm, physics, tower_outputs=True)
             identity = configure_physics(farm, physics)
@@ -183,7 +266,12 @@ def main():
         result['change_vs_off'] = [
             {channel: {metric: values[metric] - base['channels'][channel][metric]
                        for metric in ('mean', 'std', 'peak_abs')}
-             for channel, values in current['channels'].items()}
+             for channel, values in current['channels'].items() if channel in base['channels']}
+            for current, base in zip(result['turbine_outputs'], reference['turbine_outputs'])]
+        result['common_change_vs_off'] = [
+            {channel: {metric: values[metric] - base['common_channels'][channel][metric]
+                       for metric in ('mean', 'std', 'peak_abs')}
+             for channel, values in current['common_channels'].items() if channel in base['common_channels']}
             for current, base in zip(result['turbine_outputs'], reference['turbine_outputs'])]
     save()
     print(target, flush=True)

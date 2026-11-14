@@ -72,7 +72,18 @@ TOWER_OUTPUT_CHANNELS = {
                               gauge=None, group='tower_top_displacement')
     for axis, native, label in (('fa', 'TTDspFA', 'fore-aft'), ('ss', 'TTDspSS', 'side-to-side'))
 }
-ALL_SOLVER_OUTPUT_CHANNELS = {**SOLVER_OUTPUT_CHANNELS, **TOWER_OUTPUT_CHANNELS}
+TORSION_OUTPUT_CHANNELS = {
+    f'tip_torsion_{blade}': dict(native=f'B{blade}N6RDzr', unit='deg', native_unit='-', scale=1.,
+                                label=f'B{blade} elastic tip torsion',
+                                frame='BeamDyn section twist about the deformed span axis',
+                                blade=blade, gauge=None, group='tip_torsion',
+                                components=[f'B{blade}N6RD{axis}r' for axis in 'xyz'])
+    for blade in (1, 2, 3)
+}
+ALL_SOLVER_OUTPUT_CHANNELS = {**SOLVER_OUTPUT_CHANNELS, **TOWER_OUTPUT_CHANNELS, **TORSION_OUTPUT_CHANNELS}
+SOLVER_OUTPUT_CATALOGS = tuple(frozenset({**SOLVER_OUTPUT_CHANNELS, **tower, **torsion})
+                              for tower in ({}, TOWER_OUTPUT_CHANNELS)
+                              for torsion in ({}, TORSION_OUTPUT_CHANNELS))
 SOLVER_OUTPUT_GROUPS = {}
 for _key, _definition in SOLVER_OUTPUT_CHANNELS.items():
     if _definition['group']:

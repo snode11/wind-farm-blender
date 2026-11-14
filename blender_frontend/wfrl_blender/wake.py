@@ -334,6 +334,8 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
     if collection is None:
         raise WakePayloadError(f"missing Blender collection: {collection_name}")
     vertices, faces = grid_mesh(frame)
+    from .wind_coordinates import world_vertices
+    vertices = world_vertices(vertices, scene)
     shape = list(frame.shape)
     obj = scene.objects.get("WFRL.WakeDisXY")
     if obj is None and bpy.data.objects.get("WFRL.WakeDisXY") is not None:

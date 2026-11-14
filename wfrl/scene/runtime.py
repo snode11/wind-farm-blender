@@ -67,7 +67,7 @@ class SceneRuntime:
     def reset(self, *, wind_direction=None, upstream_request=None) -> Dict[str, Any]:
         """确认旧 driver 关闭后重建传感器；失败时清理新 driver 并撤回读数。
 
-        场景风向仅用于显示；wind_direction 是独立的显式求解请求。
+        场景风向在生成算例时以布局旋转应用（case_generation）；wind_direction 是回合重置时独立的显式求解请求。
         """
         from wfrl.fastfarm_driver import FastFarmDriver
         if self.scene.backend != "fastfarm":
@@ -92,7 +92,7 @@ class SceneRuntime:
                 "wind_direction": self.scene.wind_direction,
                 "wind_time_series": self.scene.turbulence,
                 "wind_speed_role": "overridden_by_bts" if self.scene.turbulence else "solver_request",
-                "wind_direction_role": "display_only",
+                "wind_direction_role": "case_generation",
             }
             m = self.driver.reset(
                 wind_speed=None if self.scene.turbulence else self.scene.wind_speed,
