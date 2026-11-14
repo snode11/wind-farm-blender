@@ -56,4 +56,6 @@ Windows 以 `CREATE_NEW_PROCESS_GROUP` 启动正式进程，使用 `CTRL_BREAK_E
 
 ## 测量与安全事件的边界
 
+海上场景保留 `scene.substructure` 请求；快照 `hydrodynamics` 区分 `not_computed`、`requested`、`configured` 与 `computed`。只有真实模式下各机七个海上通道均有效且物理身份一致，才声明 `computed`；视觉单桩、场景请求或输入文件本身不能代替该状态。泥线载荷、过渡段运动和波面通道的单位、来源与主机验证范围见 [OC3 海上遥测合同](OC3海上单桩与波浪.md#输出与-blender-主机合同)。
+
 Driver 的缺测、角度单位、MPI 交换预算与算例保留见 [FastFarmDriver 测量与交换预算](../training/MAPPO_SETUP.md#fastfarmdriver-测量与交换预算)。`SafetyLimiter.monitor()` 的超速事件只进入快照和事件记录；`block` 严重级别不触发训练停止，也不改变动作或奖励。正式 CLI 采样不调用该监测，峰值读取也不按控制窗时间下界过滤，详见[安全监测的范围](../training/MAPPO_SETUP.md#安全监测的范围)。

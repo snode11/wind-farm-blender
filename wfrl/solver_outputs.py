@@ -8,7 +8,7 @@ import shutil
 
 import numpy as np
 
-from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS, TOWER_OUTPUT_CHANNELS, TORSION_OUTPUT_CHANNELS
+from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS, TOWER_OUTPUT_CHANNELS, TORSION_OUTPUT_CHANNELS, OFFSHORE_OUTPUT_CHANNELS
 from wfrl.blade_torsion import elastic_twist_degrees, TORSION_DEFINITION
 
 
@@ -24,13 +24,13 @@ def _time_value(value, name, *, positive=False):
     return value
 
 
-def prepare_case(farm_path, physics=None, *, tower_outputs=False):
+def prepare_case(farm_path, physics=None, *, tower_outputs=False, substructure=None):
     """Configure output channels in an owned generated case before solver startup."""
     from wfcrl.simul_utils import FASTInputFile
     from wfcrl.fastfarm_physics import normalize_physics, configure_physics, write_physics_record
     physics = normalize_physics(physics)
-    if any(physics.values()):
-        configure_physics(farm_path, physics, apply=True)
+    if any(physics.values()) or substructure is not None:
+        configure_physics(farm_path, physics, substructure=substructure, apply=True)
     tower_outputs = tower_outputs or physics['tower_flex']
     farm_path = Path(farm_path).resolve()
     farm = FASTInputFile(str(farm_path))
@@ -60,6 +60,9 @@ def prepare_case(farm_path, physics=None, *, tower_outputs=False):
                      if elastic == 1 or spec['blade'] is None]
         if tower_outputs:
             requested += [spec['native'] for spec in TOWER_OUTPUT_CHANNELS.values()]
+        if substructure is not None:
+            from wfcrl.fastfarm_substructure import PLATFORM_OUTPUTS
+            requested += list(PLATFORM_OUTPUTS)
         if physics['blade_torsion']:
             requested += [f'BlPitch{blade}' for blade in (1, 2, 3)]
         existing = {word.strip('"').upper() for line in ed['OutList']
@@ -82,8 +85,10 @@ def prepare_case(farm_path, physics=None, *, tower_outputs=False):
             definitions[-1]['tower_outputs'] = True
         if physics['blade_torsion']:
             definitions[-1]['blade_torsion'] = True
-    if any(physics.values()):
-        write_physics_record(farm_path, configure_physics(farm_path, physics))
+        if substructure is not None:
+            definitions[-1]['offshore_outputs'] = True
+    if any(physics.values()) or substructure is not None:
+        write_physics_record(farm_path, configure_physics(farm_path, physics, substructure=substructure))
     return definitions
 
 
@@ -191,8 +196,8 @@ class OutputReader:
 
 class SolverOutputs:
     """Per-run files supply direct measurements with their own source timestamps."""
-    def __init__(self, farm_path, physics=None):
-        self.definitions = prepare_case(farm_path, physics)
+    def __init__(self, farm_path, physics=None, *, substructure=None):
+        self.definitions = prepare_case(farm_path, physics, substructure=substructure)
         self.readers = []
         self.farm_path = None
 
@@ -212,6 +217,8 @@ class SolverOutputs:
             catalog.update(TOWER_OUTPUT_CHANNELS)
         if any(definition.get('blade_torsion') for definition in self.definitions):
             catalog.update(TORSION_OUTPUT_CHANNELS)
+        if any(definition.get('offshore_outputs') for definition in self.definitions):
+            catalog.update(OFFSHORE_OUTPUT_CHANNELS)
         values = {key: np.full(len(self.readers), np.nan) for key in catalog}
         # Latest rows feed display; the interval peak feeds overspeed checks between control steps.
         values.update({key: np.full(len(self.readers), np.nan) for key in

@@ -38,20 +38,31 @@ def wait_for_normal_termination(log, timeout):
         time.sleep(min(.025, remaining))
 
 
-def summarize(path, seconds, *, blade_torsion=False):
+def summarize(path, seconds, *, blade_torsion=False, discard=None):
     from wfrl.solver_outputs import OutputReader
     reader = OutputReader(path)
-    reader.advance(seconds + 1.)
-    if reader.error or not reader.interval:
+    rows = []
+    size = Path(path).stat().st_size
+    while reader.offset < size and not reader.error:
+        reader.advance(seconds + 1.)
+        rows.extend(reader.interval)
+    if reader.error or not rows:
         raise RuntimeError(f'{path}: {reader.error or "no native samples"}')
     channels = {'GenPwr': 'kW', 'RootMyc1': 'kN-m', 'RootMxc1': 'kN-m',
                 'TwrBsMxt': 'kN-m', 'TwrBsMyt': 'kN-m', 'TTDspFA': 'm', 'TTDspSS': 'm'}
     data = np.array([[float(value.replace('D', 'E')) for value in row]
-                     for _, row in reader.interval])
+                     for _, row in rows])
+    if not np.isfinite(data).all():
+        raise RuntimeError(f'{path}: nonfinite native output')
     if reader.partial or reader.future or abs(data[-1, 0] - seconds) > 5.1e-5:
         raise RuntimeError(f'Incomplete native output: last complete time {data[-1, 0]}, expected {seconds}')
-    window = data[(data[:, 0] >= seconds / 2) & (data[:, 0] <= seconds)]
-    result = dict(window_seconds=[seconds / 2, seconds], samples=len(window), channels={})
+    start = seconds / 2 if discard is None else discard
+    if not np.isfinite(start) or not 0 <= start < seconds:
+        raise ValueError('discard must be finite and in [0, seconds)')
+    window = data[(data[:, 0] >= start) & (data[:, 0] <= seconds)]
+    if not len(window):
+        raise RuntimeError('No samples in the requested statistics window')
+    result = dict(window_seconds=[start, seconds], samples=len(window), channels={})
     if blade_torsion:
         channels.pop('RootMyc1')
         channels.pop('RootMxc1')
@@ -106,7 +117,7 @@ def summarize(path, seconds, *, blade_torsion=False):
                 angles = elastic_twist_degrees(data[:, indices])
                 key = f'B{blade}Node{node}Twist'
                 derived[key] = angles
-                values = angles[(data[:, 0] >= seconds / 2) & (data[:, 0] <= seconds)]
+                values = angles[(data[:, 0] >= start) & (data[:, 0] <= seconds)]
                 result['torsion'][key] = dict(unit='deg', mean=float(values.mean()),
                     std=float(values.std()), min=float(values.min()), max=float(values.max()),
                     peak_abs=float(np.abs(values).max()))
@@ -134,17 +145,21 @@ def owned_solver_processes(farm, executable):
     return found
 
 
-def run_case(farm, seconds, turbines, executable, completion_timeout=60., wind_speed=8.):
+def run_case(farm, seconds, turbines, executable, completion_timeout=60., wind_speed=8., discard=None):
     """Worker process owns its MPI lifetime; the parent bounds its wall time."""
     configure_local_mpi()
     from wfcrl import environments  # noqa: F401
     from wfcrl.interface import FastFarmInterface
+    from wfcrl.simul_utils import FASTInputFile
+    ff = FASTInputFile(str(farm))
+    inflow = FASTInputFile(str(Path(farm).parent / ff['InflowFile'].strip('"')))
+    requested_speed = wind_speed if int(inflow['WindType']) == 1 else None
     itf = FastFarmInterface(turbines, farm, max_iter=seconds // 3,
                            fast_farm_executable=executable, default_avg_window=1)
-    itf.set_wind_request_context(dict(wind_speed=wind_speed, wind_direction=None),
+    itf.set_wind_request_context(dict(wind_speed=requested_speed, wind_direction=None),
                                 record_dir=Path(farm).parent / 'wind_conditions')
     start = time.perf_counter()
-    itf.init(wind_speed=wind_speed)
+    itf.init(wind_speed=requested_speed)
     processes = owned_solver_processes(farm, executable)
     steps = []
     for _ in range(seconds // 3):
@@ -156,12 +171,11 @@ def run_case(farm, seconds, turbines, executable, completion_timeout=60., wind_s
     for process in processes:
         process.wait(timeout=completion_timeout)
     wall = time.perf_counter() - start
-    from wfcrl.simul_utils import FASTInputFile
     blade_torsion = int(FASTInputFile(str(Path(farm).with_name('FFTest_WT1.fst')))['CompElast']) == 2
     result = dict(wall_seconds=wall, mpi_wall_seconds=mpi_wall,
                   completion_wait_seconds=wall - mpi_wall, completion='FAST.Farm terminated normally; owned native processes exited',
                   control_step_wall_seconds=steps, solver_pids=[p.pid for p in processes],
-                  turbine_outputs=[summarize(Path(farm).with_name(f'Case.T{i + 1}.out'), seconds, blade_torsion=blade_torsion)
+                  turbine_outputs=[summarize(Path(farm).with_name(f'Case.T{i + 1}.out'), seconds, blade_torsion=blade_torsion, discard=discard)
                                    for i in range(turbines)])
     Path(farm).with_suffix('.comparison.json').write_text(
         json.dumps(result, indent=2, allow_nan=False) + '\n', encoding='utf-8')
@@ -170,8 +184,10 @@ def run_case(farm, seconds, turbines, executable, completion_timeout=60., wind_s
 def execute_case(farm, args, executable):
     command = [sys.executable, '-c',
                'import sys; from scripts.experiments.compare_fastfarm_physics import run_case; '
-               'run_case(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], float(sys.argv[5]), float(sys.argv[6]))',
-               farm, str(args.seconds), str(args.turbines), str(executable), str(args.timeout), str(args.wind_speed)]
+               'run_case(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], float(sys.argv[5]), float(sys.argv[6]), '
+               'None if sys.argv[7] == "None" else float(sys.argv[7]))',
+               farm, str(args.seconds), str(args.turbines), str(executable), str(args.timeout), str(args.wind_speed),
+               str(getattr(args, 'discard', None))]
     log = Path(farm).with_suffix('.solver.log')
     with log.open('wb') as stream:
         process = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True,
@@ -194,7 +210,13 @@ def execute_case(farm, args, executable):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True, help='new directory for all inputs and results')
-    parser.add_argument('--seconds', type=int, choices=(6, 12, 30, 45, 60), default=45)
+    parser.add_argument('--seconds', type=int, default=45, help='positive multiple of the 3 s control interval')
+    parser.add_argument('--discard', type=float, help='discard seconds; default is the first half')
+    parser.add_argument('--uniform-wind', action='store_true', help='explicitly set steady-wind PLExp=0')
+    parser.add_argument('--step-scale', type=float, choices=(1., .5), default=1.)
+    parser.add_argument('--output-dt', type=float, help='native output interval in seconds')
+    parser.add_argument('--aero-nodes', action='store_true', help='output all B1 AeroDyn stations')
+    parser.add_argument('--wind-box', type=Path, help='explicit TurbSim BTS file')
     parser.add_argument('--turbines', type=int, choices=(1, 3), default=1)
     parser.add_argument('--wind-speed', type=float, choices=(8., 12.), default=8.)
     parser.add_argument('--repeats', type=int, default=1)
@@ -204,6 +226,16 @@ def main():
     parser.add_argument('--fastfarm', required=True, type=Path)
     parser.add_argument('--prepare-only', action='store_true')
     args = parser.parse_args()
+    if args.seconds <= 0 or args.seconds % 3:
+        parser.error('--seconds must be a positive multiple of 3')
+    if args.discard is not None and (not np.isfinite(args.discard) or not 0 <= args.discard < args.seconds):
+        parser.error('--discard must be finite and in [0, seconds)')
+    if args.output_dt is not None and (not np.isfinite(args.output_dt) or args.output_dt <= 0):
+        parser.error('--output-dt must be finite and positive')
+    if args.uniform_wind and args.wind_box:
+        parser.error('--uniform-wind and --wind-box are mutually exclusive')
+    if args.wind_box:
+        args.wind_box = args.wind_box.resolve(strict=True)
     if args.repeats < 1:
         parser.error('--repeats must be positive')
     if 'off' not in args.variants or len(set(args.variants)) != len(args.variants):
@@ -220,6 +252,8 @@ def main():
     from wfcrl.fastfarm_physics import configure_physics, write_physics_record
     from wfrl.solver_outputs import prepare_case
     report = dict(seconds=args.seconds, turbines=args.turbines, wind_speed_m_s=args.wind_speed,
+                  discard_seconds=args.discard, wind_box=(dict(file=str(args.wind_box),
+                  sha256=hashlib.sha256(args.wind_box.read_bytes()).hexdigest()) if args.wind_box else None),
                   solver=str(executable), solver_sha256=hashlib.sha256(executable.read_bytes()).hexdigest(),
                   wall_time_scope='MPI spawn through native process exit; excludes case generation',
                   results=[])
@@ -230,13 +264,17 @@ def main():
             case_dir = output / f'{name}-{repeat + 1}'
             farm = create_ff_case(dict(num_turbines=args.turbines,
                 xcoords=[504. * i for i in range(args.turbines)], ycoords=[0.] * args.turbines,
-                max_iter=args.seconds // 3, dt=3, speed=args.wind_speed, wind_time_series=None, physics=physics),
+                max_iter=args.seconds // 3, dt=3, speed=args.wind_speed,
+                wind_time_series=str(args.wind_box) if args.wind_box else None, physics=physics),
                 output_dir=str(case_dir))
             prepare_case(farm, physics, tower_outputs=True)
+            from scripts.experiments.audit_fastfarm_physics import prepare_diagnostics
+            diagnostic = prepare_diagnostics(farm, uniform_wind=args.uniform_wind,
+                step_scale=args.step_scale, output_dt=args.output_dt, aero_nodes=args.aero_nodes)
             identity = configure_physics(farm, physics)
             write_physics_record(farm, identity)
             result = dict(variant=name, repeat=repeat + 1, physics=identity, status='prepared',
-                          farm_file=str(farm))
+                          farm_file=str(farm), diagnostics=diagnostic)
             report['results'].append(result)
             jobs.append((farm, result))
     target = output / 'comparison.json'

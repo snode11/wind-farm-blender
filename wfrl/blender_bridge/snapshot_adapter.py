@@ -163,6 +163,23 @@ class SnapshotAdapter:
                     farm={'power': farm_power,
                           'reward': self.channel(snapshot.reward, 'reward')})
         if hasattr(self.scene, 'to_dict'): payload['scene'] = self.scene.to_dict()
+        physics = m.get('physics', {})
+        marine = physics.get('substructure') if isinstance(physics, dict) else None
+        if marine is not None:
+            from .messages import OFFSHORE_OUTPUT_CHANNELS
+            computed = self.mode != 'demo' and bool(physics.get('identity')) and all(
+                t['channels'].get(key, {}).get('validity') == 'valid'
+                and t['channels'][key].get('fidelity') == 'DIRECT'
+                and t['channels'][key].get('provenance', {}).get('physics_identity') == physics['identity']
+                for t in turbines for key in OFFSHORE_OUTPUT_CHANNELS)
+            payload['hydrodynamics'] = dict(
+                status='computed' if computed else 'configured', model='oc3_monopile',
+                physics_identity=physics.get('identity'), wave_field=marine['wave_field'],
+                requested=json_value(marine['requested']))
+        elif getattr(self.scene, 'substructure', None) is not None:
+            payload['hydrodynamics'] = dict(status='requested', model='oc3_monopile')
+        else:
+            payload['hydrodynamics'] = dict(status='not_computed', model=None)
         if direction.get('status') in ('applied', 'MATCHES_FIXED_COORDINATES', 'input_file') and 'scene' in payload:
             payload['scene']['inflow']['direction'] = direction['value']
             if transform:

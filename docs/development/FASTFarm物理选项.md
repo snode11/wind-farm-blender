@@ -4,12 +4,12 @@
 
 | `physics` 字段 | 开启后的输入 | 保持的限制 |
 | --- | --- | --- |
-| `tower_flex` | ElastoDyn 的 `TwFADOF1`、`TwFADOF2`、`TwSSDOF1`、`TwSSDOF2` 均为 `True` | 使用 ElastoDyn 的塔架模型，可与 `blade_torsion` 组合；保留模板塔架结构与模态系数 |
+| `tower_flex` | ElastoDyn 的 `TwFADOF1`、`TwFADOF2`、`TwSSDOF1`、`TwSSDOF2` 均为 `True` | 使用选定结构模型的 ElastoDyn 塔架；陆上模型可与 `blade_torsion` 组合，海上 OC3 必须显式开启 |
 | `dynamic_stall` | AeroDyn `AFAeroMod=2` | 要求模板 `UAMod=3`、`FLookup=True`、`CavitCheck=False`；不生成或修改 UA 系数 |
 | `tower_shadow` | `TwrPotent=1`、`TwrShadow=1` | 标准势流与 Powles 塔影一起开启；`TwrAero` 保持模板值 `False`，不额外开启塔架气动阻力载荷 |
 | `blade_torsion` | `CompElast=2`、三叶片 BeamDyn、`DT=0.00125 s` | 只支持已核对的 NREL 5MW 直叶片输入；[来源、扭角定义与性能](BeamDyn叶片弹性扭转.md) |
 
-四项可以分别开启，也可以组合。这里只支持当前 NREL 5MW 的 ElastoDyn / BeamDyn / AeroDyn v15 输入。`UAMod=3` 对应 Beddoes–Leishman 的 Minnema/Pierce 扩展；势流扰动与下游塔影可叠加。[OpenFAST AeroDyn 输入说明](https://openfast.readthedocs.io/en/v3.5.3/source/user/aerodyn/input.html)
+陆上模型的四项可以分别开启，也可以组合。这里只支持当前 NREL 5MW 的 ElastoDyn / BeamDyn / AeroDyn v15 输入。独立 `substructure` 字段可选择 [OC3 海上单桩与波浪](OC3海上单桩与波浪.md)；其完整结构、必需的塔架柔性以及拒绝的 BeamDyn 组合按该模型合同执行。`UAMod=3` 对应 Beddoes–Leishman 的 Minnema/Pierce 扩展；势流扰动与下游塔影可叠加。[OpenFAST AeroDyn 输入说明](https://openfast.readthedocs.io/en/v3.5.3/source/user/aerodyn/input.html)
 
 ## 场景与启动
 
@@ -56,7 +56,7 @@ Bridge 的场景重载保留启动参数；正式训练使用带有效选项的�
 
 Driver 的 `physics_record` 和测量 `physics` 保留此记录；每回合的持久 `wind_conditions` 也含 `physics`，包括全关闭时的实际参数。原生遥测 `provenance.physics_identity` 关联该身份。训练有效配置和 checkpoint 身份包含已启用选项，配置不匹配的恢复不能当作同一训练条件。`blade_torsion` 的关闭字段会进入非空物理配置的训练身份；已有三项物理选项的 checkpoint 兼容处理待实现，见 [BeamDyn 限制](BeamDyn叶片弹性扭转.md#接口与当前限制)。低层算例附属记录应在任何手工修改输入之后重新生成，不能用旧摘要声明修改后输入的身份。
 
-全关闭时不改物理输入、不增加算例附属文件，也不增加塔顶输出列。默认算例和默认遥测准备的字节合同由 `tests/test_dq_physics_options.py` 及 `tests/fixtures/dq/default_case_sha256.json` 检查；它同时比较省略选项与显式全关闭时的完整生成目录。模板、控制律、观测维数和奖励公式不随选项自动改变。
+未配置 `substructure` 且 physics 全关闭时不改物理输入、不增加算例附属文件，也不增加塔顶输出列。默认算例和默认遥测准备的字节合同由 `tests/test_dq_physics_options.py` 及 `tests/fixtures/dq/default_case_sha256.json` 检查；它同时比较省略选项与显式全关闭时的完整生成目录。模板、控制律、观测维数和奖励公式不随选项自动改变。
 
 ## 塔顶位移遥测
 
@@ -202,7 +202,7 @@ WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm \
 
 ## 精度验收标准（建议，待确认）
 
-以下标准是供确认的建议，尚未被项目负责人采纳；采纳或修改后再改为正式要求。目前短算例只证明各选项可运行，不满足下列任何一条的精度验收。
+以下标准是供确认的建议，尚未被项目负责人采纳；采纳或修改后再改为正式要求。各项的当前测量、判读与限制见下方“当前已知结果”，通过建议门槛不等于门槛已被采纳。
 
 **适用对象**：`dynamic_stall`、`tower_flex`、`tower_shadow` 及其组合，NREL 5MW 陆上模板，FAST.Farm v3.5.3。
 
@@ -216,7 +216,181 @@ WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm \
 | A6 | 塔影 | 叶片经过塔架时叶根弯矩出现每转一次的周期性下降；平均功率变化 ≤1% | 塔影只应带来局部周期扰动 |
 | A7 | 运行状态 | 全部算例正常结束；无 UA cutout 或翼型表越界警告；输出无 INVALID、NaN | 任一项失败即不通过 |
 
-**当前已知结果与本标准的差距**：45 s 短算例（统计窗口 22.5–45 s，未丢弃 60 s 启动段）中，`dynamic_stall` 使 8 m/s 平均功率下降 5.2%、叶根挥舞弯矩下降 3.9%，超过 A2 建议门槛，原因尚未查明（可能包括 UA 状态初始化瞬态和窗口过短）。A1、A3–A6 尚未执行。
+**当前已知结果**：下列结论只按上述建议门槛判读，门槛仍为**建议，待确认**。A1、A5、A6、A7 在列明对象与范围内通过；A2、A3、A4 不通过，不能据此宣称这组物理选项已通过整体精度验收。未调整 UA 参数或物理开关以满足门槛。
+
+### 验证对象与统计口径
+
+单机 NREL 5MW 陆上模型、零偏航指令、macOS arm64、单精度、OpenMP 单线程。FAST.Farm v3.5.3-dirty 的 SHA-256 为 `bed9651e19daf8ee6402100ff22b90867b756d96b72495ef9ee90df677a88d3f`；OpenFAST v3.5.3-dirty 为 `95a286bcff9326973da53523268bd4f90624d4489c0f852567197259e6fe753a`。这里不覆盖 BeamDyn、海上单桩、多机充分发展尾流或实测验证。
+
+除 A1 与无气动自由衰减外，结构步长为 0.00625 s，AeroDyn 使用同一步长，输出间隔为 0.025 s；FAST.Farm 高／低分辨率耦合步长保持 0.1 / 3 s。A3 只把结构与气动步长减半为 0.003125 s，输出与耦合步长不变。稳态比较运行 180 s，统计 60–180 s，共 4801 点；湍流比较运行 360 s，统计 60–360 s，共 12001 点。先确认原生进程退出，再读取 `.out`；均检查末行时刻、完整行和全部通道有限值。
+
+均值与总体标准差按窗口内等间隔样本计算；RMS 含均值，峰值为绝对峰值。DEL 使用未分箱 ASTM rainflow、半循环权重 0.5、1 Hz 等效循环数、无均值修正；叶根弯矩用 Wöhler 指数 10，塔底弯矩用 4。功率的同形式指标只用于数值比较，不是结构疲劳寿命。近零分母不添加人为下限，无法定义的相对差保留为空。
+
+| 编号 | 数值证据 | 按建议门槛判读 |
+| --- | --- | --- |
+| A1 | 官方 60 s 算例，9601 点；7 个功率／叶根／塔底通道的均值最大绝对相对差 0.01774%，标准差最大差 0.10993% | 通过；只证明所复现官方算例的数值一致性 |
+| A2 | 8 m/s：功率 −5.36474%，叶根挥舞弯矩 −4.21053%；12 m/s：功率 +0.00108%，叶根挥舞弯矩 +4.24316% | 不通过；两种风速均有越限项 |
+| A3 | 五组的均值差／参考 RMS 最大 0.02374%，RMS 最大变化 0.02637%，峰值最大变化 0.48084%；标准差最大变化 19.77161%，DEL 最大变化 23.96668% | 不通过；部分小波动的相对统计量超过 5% |
+| A4 | 相同湍流盒：`dynamic_stall` 平均功率 −5.00702%，三项 `all` −5.17707%；仅塔架柔性 −0.12383%，仅塔影 −0.14293% | 动态失速与组合不通过；两个单独塔架选项通过功率门槛 |
+| A5 | 关闭塔架自由度两轴全时序严格为 0；开启后前后均值 0.197373 m，简化静力估算 0.209537 m，差 −5.80550%；一阶前后／侧向频率 0.324356 / 0.315328 Hz | 通过该简化筛查；不是完整静力或模态认证 |
+| A6 | 5° 方位角分箱的 B1 叶根挥舞差值在 192.5° 达到 −217.513 kN·m，每转一次；平均功率 −0.21065% | 通过 |
+| A7 | 21 组物理对比均正常结束；UA cutout、翼型表越界、INVALID／NaN 均为 0；官方复现与独立自由衰减也正常结束 | 通过列明运行矩阵；非升力圆柱段的 UA 关闭提示单列，不等于 cutout |
+
+### 动态失速功率差的来源
+
+保留模板 `PLExp=0.2` 时，22.5–45 s 的平均功率为 off 1706.062 kW、UA 1617.441 kW（−5.19446%）；60–120 s 为 1707.002 / 1617.223 kW（−5.25945%），120–180 s 为 1707.005 / 1617.222 kW（−5.25969%）。丢弃启动段后差异没有消失，两个后续窗口仅差 0.00024 个百分点，不能归因于 UA 初始化瞬态。
+
+A2 使用 `PLExp=0` 的均匀风，与保留模板剪切的诊断分开：
+
+| 风速 | off / UA 平均功率（kW） | off / UA 平均 RootMyc1（kN·m） | 统计窗口内 off / UA 转数 |
+| --- | ---: | ---: | ---: |
+| 8 m/s | 1755.747 / 1661.556 | 5682.059 / 5442.814 | 18.259 / 17.940 |
+| 12 m/s | 4999.974 / 5000.028 | 8352.724 / 8707.144 | 24.200 / 24.197 |
+
+两个窗口均超过 10 转。12 m/s 已进入额定功率控制区，约 5 MW 的均值一致不代表气动或载荷一致。8 m/s 的 DU40 内侧升力截面平均攻角约 13.7°，整片叶片并非全部处于附着区；但造成主要差异的中段 DU25／DU21 攻角只有约 3.7–4.4°，因此不能用叶根失速解释主要功率损失。
+
+官方 [r-test v3.5.3 的 5MW_Land_DLL_WTurb AeroDyn 输入](https://github.com/OpenFAST/r-test/blob/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Land_DLL_WTurb/NRELOffshrBsline5MW_Onshore_AeroDyn15.dat) 同样采用 `AFAeroMod=2`、`UAMod=3`、`FLookup=True`。项目 8 个翼型文件与该版本的 UA 参数及极曲线相同；5 个文件逐字节一致，Cylinder1、Cylinder2、DU30 只相差末尾空行。未发现项目开关写入错误或翼型数值版本不匹配。
+
+以下将 `Cn = Cl cos(alpha) + (Cd-Cd0) sin(alpha)` 在 −2° 到 5° 内按 0.1° 等距采样拟合，作为附着区一致性诊断；拟合值没有写回输入。零升力角由极曲线零交叉插值，不能与区间线性拟合的截距混用。
+
+| 翼型 | alpha0 / 极曲线零升力角（°） | C_nalpha / 拟合斜率（rad⁻¹） | alpha1 / alpha2（°） | Cn1 / Cn2 | 极曲线 Cn(alpha1) / Cn(alpha2) | Cd0 / Cd(alpha0) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| DU40 | −3.200 / −3.075 | 7.4888 / 7.5198 | 9 / −9 | 1.3519 / −0.3226 | 1.2708 / −0.2660 | .03000 / .03190 |
+| DU35 | −1.200 / −1.366 | 7.1838 / 7.8813 | 11.5 / −11.5 | 1.6717 / −0.3075 | 1.5788 / −0.5101 | .01200 / .01256 |
+| DU30 | −2.200 / −2.125 | 7.3326 / 7.5658 | 9 / −9 | 1.4490 / −0.6138 | 1.3741 / −0.7646 | .00800 / .00880 |
+| DU25 | −3.200 / −3.366 | 6.4462 / 7.2742 | 8.5 / −8.5 | 1.4336 / −0.6873 | 1.3555 / −0.6900 | .00600 / .00684 |
+| DU21 | −4.200 / −4.125 | 6.2047 / 6.8345 | 8 / −8 | 1.4144 / −0.5324 | 1.3460 / −0.5152 | .00600 / .00638 |
+| NACA64 | −4.432 / −3.838 | 6.0031 / 6.5045 | 9 / −9 | 1.4073 / −0.7945 | 1.3108 / −0.5882 | .00650 / .00750 |
+
+`alpha1/alpha2`、`Cn1/Cn2` 和 `Cd0` 并不处处与当前静态曲线直接插值相等；这些是官方输入继承的参数关系，不能自动视为项目缺陷。`FLookup=True` 使用极曲线求分离函数，`Cn1/Cn2` 仍参与失速触发等计算。[5MW 定义报告第 3 节](https://docs.nlr.gov/docs/fy09osti/38060.pdf) 说明极曲线经过旋转失速延迟等修正并估计了动态失速参数；这不保证某一 UA 参数组精确重现修正后的整个附着区。
+
+[OpenFAST v3.5.3 的 Get_f_from_Lookup 与 ComputeKelvinChain](https://github.com/OpenFAST/openfast/blob/v3.5.3/modules/aerodyn/src/UnsteadyAero.f90) 给出了这里的直接机制：设 `L = C_nalpha / sqrt(1-M²) × (alpha-alpha0)`，正升力分支计算 `f = (2 sqrt(Cn_static/L)-1)²` 并将上限裁为 1。当极曲线的 `Cn_static > L`，`f` 饱和，`cn_fs=0`；稳态的 UA 法向系数趋向这条较低的线，而非原静态极曲线。这里只用该稳态极限解释观测，完整 UA 仍含非环量、状态滞后和涡项。
+
+19 个 AeroDyn B1 节点输出 `AB1NxxxAlpha/Cl/Cd/Cn/Ct/Fx/Fy/Vrel/Phi`。下表用实际 `Alpha/Cl/Cd` 重建扣除 `Cd0` 的翼型法向系数，**不是**直接把 rotor-normal 输出 `AB1NxxxCn` 当作翼型法向系数。数值取模板剪切、60–180 s：
+
+| 节点 / 半径 | 翼型 | UA 平均攻角（°） | 同攻角极曲线 Cn | 实际 UA Cn | 压缩性修正直线 L | 同攻角 Cl 差 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 9 / 28.15 m | DU25 | 4.428 | .9962 | .8609 | .8611 | −13.59% |
+| 10 / 32.25 m | DU25 | 4.065 | .9558 | .8209 | .8209 | −14.12% |
+| 11 / 36.35 m | DU21 | 3.713 | .9633 | .8615 | .8616 | −10.59% |
+| 12 / 40.45 m | DU21 | 3.723 | .9642 | .8637 | .8638 | −10.45% |
+
+上述四段的正分支查表在窗口内均处于 `f=1` 裁剪条件。节点 6–7 的 DU35 也存在约 5.2–8.4% 的同攻角升力差。按未变形半径对 B1 平均切向分布力差作 `∫r ΔFy dr` 梯形积分，节点 9–12 占总负扭矩差代理量的 84.88%；它仅用于定位截面，不是含叶片变形、转速反馈和发电效率的精确功率分解。节点 1–4 为圆柱常值极曲线，UA 自动关闭且 Cl 始终为 0，其对应扭矩差代理量很小且为正，不是主要损失来源。
+
+**结论边界**：这是一组可由官方模型／参数组合解释并复现的稳态差异，不是已经发现的项目接入错误；也不能把“官方输入同样如此”当作实测精度证明。需要负责人决定是否接受该模型差异、开展独立 UA 标定或修订建议门槛；本结果不授权重写翼型参数、改变默认训练条件或放宽门槛。
+
+### 各项检查的证据范围
+
+**A1 官方复现。** 使用 r-test v3.5.3 提交 `548bf2143633a7066f4582167fdf4180951fd7f6` 的 `5MW_Land_DLL_WTurb`，保留官方 12 m/s 湍流输入、全部模型参数与 60 s 时长。控制器从该提交的官方 `5MW_Baseline/ServoData/DISCON/DISCON.F90` 在临时目录编译；没有使用或修改项目 MPI 控制器源文件。参考二进制输出 SHA-256 为 `4efa7e987502038a4e1b846e3f3ddf9298e7a19bb3c28ac06192658a8fa18c73`。全时序同采样点比较，不插值：
+
+| 通道 | 参考 / 本机均值 | 均值相对差 | 标准差相对差 |
+| --- | ---: | ---: | ---: |
+| GenPwr（kW） | 4866.268822 / 4866.151672 | −0.00241% | +0.08521% |
+| RootMxb1（kN·m） | 859.525561 / 859.493546 | −0.00372% | +0.00045% |
+| RootMyb1（kN·m） | 8127.171343 / 8126.969586 | −0.00248% | −0.02875% |
+| RootMzb1（kN·m） | −4.779563 / −4.778715 | +0.01774% | +0.00368% |
+| TwrBsMxt（kN·m） | 5068.697680 / 5068.530393 | −0.00330% | +0.10993% |
+| TwrBsMyt（kN·m） | 54441.839280 / 54440.592278 | −0.00229% | −0.10284% |
+| TwrBsMzt（kN·m） | −330.078532 / −330.043534 | +0.01060% | +0.00532% |
+
+A1 叶根通道按官方输出的 `b` 坐标系逐列比较；A2–A4 使用项目 `c` 坐标系通道，不混用二者。A1 的通过不意味着项目默认塔架 DOF、控制器和 FAST.Farm 耦合与官方单机输入相同，也不证明 5% 均值差具有实测依据。
+
+**A3 时间步。** 下表为每组在功率、两向 B1 叶根弯矩、两向塔底弯矩中的最大绝对百分比差；均值以参考 RMS 归一化，其余以自身参考统计量归一化。
+
+| 组 | 均值 / RMS | RMS | 标准差 | 绝对峰值 | DEL | 判读 |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| off | .00283% | .00283% | 19.77161% | .00647% | 21.05414% | 不通过 |
+| tower_flex | .00307% | .00590% | .39341% | .02238% | .28085% | 通过 |
+| dynamic_stall | .02373% | .02636% | 7.44050% | .48084% | 23.96668% | 不通过 |
+| tower_shadow | .00173% | .00164% | .22772% | .00240% | .30661% | 通过 |
+| all | .02167% | .00873% | .28885% | .04825% | .26506% | 通过 |
+
+例如 off 功率标准差由 .006657 变为 .005341 kW，UA 功率 DEL 由 .013551 变为 .016798 kW；绝对值很小但仍违反字面的相对门槛。即使不把功率 DEL 当作验收项，off 的 `TwrBsMyt` DEL 也由 17.6165 变为 16.2240 kN·m（−7.90471%），所以 A3 仍不通过。是否为近零波动设置独立绝对容差须确认，不能由报告自行豁免。
+
+**A4 湍流。** `ts_u8_ti8_s42` 使用同一 660 s、0.1 s、10 m 网格的 TurbSim 盒，统计库轮毂层均值 8.0000 m/s、TI 8.051%；种子 42，`ScaleIEC=1`。BTS SHA-256 为 `19e1c0e32f5fa353fe9c193e409ff93b1c12275c91f608f6b29e684738947590`。每组算例完整覆盖 360 s，统计 300 s；命令中的名义风速不会覆盖 BTS 样本。
+
+| 组 | 平均功率（kW） | 相对 off |
+| --- | ---: | ---: |
+| off | 1818.899794 | 0% |
+| tower_flex | 1816.647373 | −0.12383% |
+| dynamic_stall | 1727.827118 | −5.00702% |
+| tower_shadow | 1816.300039 | −0.14293% |
+| all | 1724.733998 | −5.17707% |
+
+波动与 DEL 只报告，不据此判定物理精度。下面每格按“标准差 / DEL”排列；off 给出原单位（功率 kW、弯矩 kN·m），其余给出相对 off 的变化。
+
+| 通道 | off | tower_flex | dynamic_stall | tower_shadow | all |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| GenPwr | 212.325 / 199.280 | −0.346% / +0.123% | −2.738% / −3.769% | −0.230% / −0.103% | −2.963% / −3.914% |
+| RootMyc1 | 567.441 / 1573.247 | −0.795% / −0.258% | −3.603% / +1.290% | +1.701% / +3.370% | −2.122% / +4.028% |
+| RootMxc1 | 2543.687 / 5996.936 | −0.035% / −0.071% | +0.735% / +0.884% | +0.025% / −0.323% | +0.673% / +0.438% |
+| TwrBsMyt | 2967.930 / 3680.102 | +7.266% / +26.607% | −4.526% / −5.777% | +0.035% / +0.792% | +3.430% / +25.428% |
+| TwrBsMxt | 345.045 / 739.062 | +59.251% / +69.804% | +13.250% / +29.267% | +10.625% / +24.094% | +138.241% / +151.652% |
+
+**A5 塔架。** 采用 AeroDyn `RtAeroFxh` 的气动推力均值 379279.444 N，不将含结构作用的轴向总载荷 `RotThrust`（476617.911 N）冒充气动推力。由模板塔架前后刚度表线性插值，在 87.6 m 长度上积分 `C = ∫(L-z)²/EI(z) dz = 5.5246155e-7 m/N`，得到顶端集中力近似 `F C = 0.209537 m`；与位移 0.197373 m 差 −5.80550%。该近似忽略轴倾角投影、轮毂高度偏置、重力弯矩和几何刚度，不作为精确静力解。
+
+一阶频率采用独立 OpenFAST 无气动、无 ServoDyn、锁定转速／传动链的自由衰减：保留塔架与叶片弹性自由度，初始塔顶前后／侧向位移各 0.1 m，运行 630 s。10–100 s 的前后 29 个正峰和侧向 28 个正峰分别得到 0.324356 / 0.315328 Hz。相对定义报告表 9-1 的 0.3240 / 0.3120 Hz，差 +0.110% / +1.067%；相对建议中的约 0.32 Hz 也在 5% 内。FAST.Farm 要求 AeroDyn 开启，不能用 `CompAero=0` 直接进行同一无气动自由衰减；因此该频率项使用单机 OpenFAST，不称作 FAST.Farm 无气动求解。
+
+**A6 塔影。** 对 60–180 s 按实际方位角分箱后相减，避免两组略有不同的转速造成时间对齐偏差。差值在叶片经过塔架附近（180°）开始明显下降，最低在 192.5°（−217.513 kN·m），结构响应存在相位滞后。平均功率由 1755.747 降至 1752.049 kW。该开关同时启用势流和 Powles 塔影，结论针对组合开关，不把整个差异单独归给下游塔影公式。
+
+**A7 运行范围。** 21 组包括模板剪切 8 m/s 两组、均匀 8 m/s 五组、均匀 12 m/s 两组、半步长五组、湍流五组和塔架气动推力复核两组。所有 `.out` 到达规定末时刻；所有列完整且有限。启用 UA 的每组有 12 条“constant data”关闭提示，仅对应三片叶片的节点 1–4；没有升力截面 UA cutout 或翼型表越界。长算例有尾流面离开低分辨率域的提示，不能将这里的单机证据扩展为下游尾流域收敛证明。
+
+### 诊断脚本用法
+
+对比脚本的显式诊断选项如下；全部省略时保持原有生成输入字节与半程统计窗口。默认字节合同仍由固定输入摘要测试覆盖，诊断默认值另由 `tests/test_dv_physics_accuracy.py` 对完整生成目录逐字节检查。
+
+| 参数 | 行为 |
+| --- | --- |
+| `--seconds N` | 接受正的 3 s 整数倍，支持 180 / 360 s 等长算例；默认 45 |
+| `--discard S` | 统计窗口起点，要求 `0 <= S < seconds`；默认仍取后半程 |
+| `--uniform-wind` | 显式设置稳态风 `PLExp=0`，不能与 BTS 同用 |
+| `--step-scale 0.5` | 结构 DT 与 DTAero 减半，不改 FAST.Farm 耦合或输出间隔 |
+| `--output-dt 0.025` | 指定输出间隔，必须是结构步长的整数倍 |
+| `--aero-nodes` | 第一片叶片全部 19 节点的气动诊断输出 |
+| `--wind-box /absolute/path/file.bts` | 显式使用同一湍流盒，不请求用 HWindSpeed 改写 BTS 风速 |
+
+启用诊断配置时还请求 `Azimuth/RotSpeed/RotThrust/RtAeroFxh/RtAeroPwr` 等分析通道；`comparison.json` 的 `diagnostics.inputs_sha256` 与 `wind_box.sha256` 标识其修改范围。统计程序支持超过 16 MiB 的完整输出，不把一次在线读取预算误当作文件结束。
+
+```bash
+DV_RUN=$(mktemp -d /private/tmp/wfrl-dv-XXXXXX)
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH="$PWD/wfcrl-env:$PWD"
+export MPLCONFIGDIR="$DV_RUN/mpl" TMPDIR="$DV_RUN" OMP_NUM_THREADS=1
+DV_PY=/opt/anaconda3/envs/wfrl-mac/bin/python
+DV_FF=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm
+
+"$DV_PY" -m scripts.experiments.compare_fastfarm_physics \
+  --seconds 180 --discard 60 --uniform-wind --output-dt .025 --aero-nodes \
+  --fastfarm "$DV_FF" --output "$DV_RUN/uniform8"
+"$DV_PY" -m scripts.experiments.audit_fastfarm_physics \
+  "$DV_RUN/uniform8/comparison.json" --discard 60 --output "$DV_RUN/uniform8-audit.json"
+```
+
+`--wind-speed 12 --variants off dynamic_stall` 对应 A2 的 12 m/s 组；省略 `--uniform-wind`、选择同样两组对应模板剪切诊断；`--step-scale .5` 对应 A3，均使用各自的新输出目录。A3 可用 `audit_fastfarm_physics.compare_metrics()` 比较相同通道的统计，A6 使用 `phase_binned_difference()` 按方位角比较；`airfoil_audit()` 输出 UA／极曲线参数关系，审计 JSON 中的 `nodes` 输出逐截面的同攻角比较。
+
+```bash
+"$DV_PY" -m scripts.inflow.generate_turbsim \
+  --wind-speeds 8 --ti 8 --seeds 42 --duration 660 --simulation-seconds 360 \
+  --threads 1 --scratch-root "$DV_RUN" --output-dir "$DV_RUN/turbulence"
+"$DV_PY" -m scripts.experiments.compare_fastfarm_physics \
+  --seconds 360 --discard 60 --output-dt .025 --aero-nodes \
+  --wind-box "$DV_RUN/turbulence/ts_u8_ti8_s42.bts" \
+  --fastfarm "$DV_FF" --output "$DV_RUN/turb8"
+"$DV_PY" -m scripts.experiments.check_tower_decay \
+  --openfast /opt/anaconda3/envs/wfrl-mac/bin/openfast --seconds 630 \
+  --output "$DV_RUN/decay"
+```
+
+A1 从上方固定 r-test 提交取得 `5MW_Land_DLL_WTurb` 及其引用的 `5MW_Baseline` 输入、风文件和官方控制器源码。运行前把官方 `.outb` 另存为不可被求解器覆盖的参考文件；原始 `.fst` 不变。官方控制器在临时目录用 `gfortran -shared -fPIC -ffree-line-length-none -fdefault-real-8 -DIMPLICIT_DLLEXPORT` 编译至输入引用的 `5MW_Baseline/ServoData/DISCON.dll`，再用本机 `openfast` 运行该 `.fst`。进程退出后：
+
+```bash
+"$DV_PY" -m scripts.experiments.check_openfast_reference \
+  --reference "$DV_RUN/reference.outb" \
+  --actual "$DV_RUN/r-test/glue-codes/openfast/5MW_Land_DLL_WTurb/5MW_Land_DLL_WTurb.outb" \
+  --output "$DV_RUN/A1.json"
+```
+
+所有脚本的输出目录应位于独立临时目录；提取数值证据、确认本次求解器与 MPI 进程退出后删除 `$DV_RUN`。不将原始求解输出、临时参考仓库、编译模块或日志存入项目。
 
 ## 软件验证入口
 

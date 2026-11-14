@@ -124,10 +124,11 @@ class FastFarmDriver:
                  controls=("yaw",), load_coef=1.0, reward_shaper=None,
                  wake_vtk=False, wake_vtk_z=90.0, wind_time_series=None,
                  yaw_duty_sliding=True, yaw_duty_window=YAW_DUTY_WINDOW,
-                 yaw_duty_limit=YAW_DUTY_LIMIT, physics=None):
-        from wfrl.physics_options import validate_physics
+                 yaw_duty_limit=YAW_DUTY_LIMIT, physics=None, substructure=None):
+        from wfrl.physics_options import validate_physics, validate_substructure
         self.physics = validate_physics({} if physics is None else physics)
-        if 'floris' in env_id.lower() and any(self.physics.values()):
+        self.substructure = validate_substructure(substructure, self.physics)
+        if 'floris' in env_id.lower() and (any(self.physics.values()) or self.substructure is not None):
             raise ValueError('physics options require the FAST.Farm backend')
         # 只有 FAST.Farm 后端需要 MPI_Comm_spawn；FLORIS 是纯 Python 稳态解，
         # 不经 MPI，直接 python 就能跑（D5 的奖励/观测设计正靠它秒级迭代）。
@@ -228,8 +229,10 @@ class FastFarmDriver:
             from wfcrl.fastfarm_physics import configure_physics
             farm_path = self.env.mdp.interface._simul_file
             physics = getattr(self, 'physics', {})
-            self._solver_outputs = SolverOutputs(farm_path, physics=physics)
-            self.physics_record = configure_physics(farm_path, physics)
+            case = getattr(self.env.mdp, 'farm_case', None)
+            substructure = getattr(self, 'substructure', getattr(case, 'substructure', None))
+            self._solver_outputs = SolverOutputs(farm_path, physics=physics, substructure=substructure)
+            self.physics_record = configure_physics(farm_path, physics, substructure=substructure)
 
     # ------------------------------------------------------------------
     def reset(self, wind_speed=None, wind_direction=None, *, background_bts=None,
@@ -250,6 +253,9 @@ class FastFarmDriver:
         仍由 wind_speed、wind_direction 和 wind_parameters 逐项验证。
         """
         from wfcrl.interface import FastFarmInterface, WindRequestError, _wind_json
+        if ((getattr(self, 'physics_record', None) or {}).get('substructure') is not None
+                and wind_direction is not None and wind_direction != 270.):
+            raise ValueError('OC3 monopile currently requires wind_direction=270')
         itf = getattr(self.env.mdp, "interface", None)
         if getattr(self, "cleanup_error", None) is not None:
             raise RuntimeError("FAST.Farm cleanup is unconfirmed") from self.cleanup_error

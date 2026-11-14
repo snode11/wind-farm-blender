@@ -6,7 +6,7 @@ from pathlib import Path
 def configured_scene(scene, overrides):
     if not isinstance(overrides, dict):
         raise ValueError('scene_overrides must be an object')
-    allowed = {'backend', 'inflow', 'terrain', 'controls', 'physics'}
+    allowed = {'backend', 'inflow', 'terrain', 'controls', 'physics', 'substructure'}
     if set(overrides) - allowed:
         raise ValueError('Unsupported scene overrides: ' + ', '.join(sorted(set(overrides) - allowed)))
     from wfrl.scene.schema import from_dict

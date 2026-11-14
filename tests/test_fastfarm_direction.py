@@ -29,6 +29,8 @@ def aligned_reference():
     source = inspect.getsource(simul_utils.create_ff_case)
     source = source.replace('    from .fastfarm_direction import normalize_direction, prepare_direction, write_direction\n', '')
     source = source.replace('    direction = normalize_direction(case.get("direction", 270.))\n', '')
+    # Offshore combination checks take the direction only to reject non-270 inflow.
+    source = source.replace(', direction=case.get("direction", 270.))', ')')
     source = source.replace('''    if direction != 270.:
         direction_farm, direction_identity = prepare_direction(outputFSTF, direction)
         write_direction(outputFSTF, direction_farm, direction_identity)

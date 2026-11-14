@@ -4,6 +4,16 @@ import argparse
 PHYSICS_KEYS = ('tower_flex', 'dynamic_stall', 'tower_shadow', 'blade_torsion')
 
 
+def validate_substructure(value, physics, *, direction=270.):
+    """Validate the optional complete offshore model and its supported combinations."""
+    if value is None:
+        return None
+    from wfcrl.fastfarm_substructure import normalize_substructure, validate_combination
+    result = normalize_substructure(value)
+    validate_combination(result, physics, direction=direction)
+    return result
+
+
 def validate_physics(value):
     if not isinstance(value, dict):
         raise ValueError('physics must be a mapping')

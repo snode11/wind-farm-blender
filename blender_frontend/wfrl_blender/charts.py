@@ -24,12 +24,16 @@ GROUPS = {axis: [f'{axis}_{blade}' for blade in (1, 2, 3)] for axis in ('m_flap'
 GROUPS.update(SOLVER_OUTPUT_GROUPS)
 GROUPS['tower_top_displacement'] = ['tower_top_fa', 'tower_top_ss']
 GROUPS['tip_torsion'] = [f'tip_torsion_{blade}' for blade in (1, 2, 3)]
+GROUPS['mudline_shear'] = ['mudline_shear_x', 'mudline_shear_y']
+GROUPS['mudline_moment'] = ['mudline_moment_x', 'mudline_moment_y']
 for _group, _channels in SOLVER_OUTPUT_GROUPS.items():
     _spec = SOLVER_OUTPUT_CHANNELS[_channels[0]]
     LABELS[_group] = (_spec['label'].removeprefix('B1 ') + ' (blades 1–3)' if _spec['blade'] else
                       _group.replace('_', ' ').capitalize() + ' (x/y/z)')
 LABELS['tower_top_displacement'] = 'Tower top displacement (fore-aft / side-to-side)'
 LABELS['tip_torsion'] = 'Elastic tip torsion (blades 1–3)'
+LABELS['mudline_shear'] = 'Mudline shear (x / y)'
+LABELS['mudline_moment'] = 'Mudline moment (x / y)'
 
 
 def selected_channels(channel):

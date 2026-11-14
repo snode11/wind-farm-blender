@@ -80,10 +80,24 @@ TORSION_OUTPUT_CHANNELS = {
                                 components=[f'B{blade}N6RD{axis}r' for axis in 'xyz'])
     for blade in (1, 2, 3)
 }
-ALL_SOLVER_OUTPUT_CHANNELS = {**SOLVER_OUTPUT_CHANNELS, **TOWER_OUTPUT_CHANNELS, **TORSION_OUTPUT_CHANNELS}
-SOLVER_OUTPUT_CATALOGS = tuple(frozenset({**SOLVER_OUTPUT_CHANNELS, **tower, **torsion})
+OFFSHORE_OUTPUT_CHANNELS = {
+    key: dict(native=native, unit=unit, native_unit=native_unit, scale=1., label=label,
+              frame=frame, blade=None, gauge=None, group=group)
+    for key, native, unit, native_unit, label, frame, group in (
+        ('mudline_shear_x', '-ReactFXss', 'N', 'N', 'Mudline shear x', 'SubDyn global SS; negative base reaction', 'mudline_shear'),
+        ('mudline_shear_y', '-ReactFYss', 'N', 'N', 'Mudline shear y', 'SubDyn global SS; negative base reaction', 'mudline_shear'),
+        ('mudline_moment_x', '-ReactMXss', 'N m', 'N*m', 'Mudline moment x', 'SubDyn global SS; negative base reaction', 'mudline_moment'),
+        ('mudline_moment_y', '-ReactMYss', 'N m', 'N*m', 'Mudline moment y', 'SubDyn global SS; negative base reaction', 'mudline_moment'),
+        ('platform_surge', 'PtfmSurge', 'm', 'm', 'Transition piece surge', 'ElastoDyn platform reference at MSL +10 m', None),
+        ('platform_pitch', 'PtfmPitch', 'deg', 'deg', 'Transition piece pitch', 'ElastoDyn platform reference at MSL +10 m', None),
+        ('wave_elevation', 'Wave1Elev', 'm', 'm', 'Incident wave elevation', 'HydroDyn local wave probe (0, 0)', None),
+    )
+}
+ALL_SOLVER_OUTPUT_CHANNELS = {**SOLVER_OUTPUT_CHANNELS, **TOWER_OUTPUT_CHANNELS, **TORSION_OUTPUT_CHANNELS, **OFFSHORE_OUTPUT_CHANNELS}
+SOLVER_OUTPUT_CATALOGS = tuple(frozenset({**SOLVER_OUTPUT_CHANNELS, **tower, **torsion, **offshore})
                               for tower in ({}, TOWER_OUTPUT_CHANNELS)
-                              for torsion in ({}, TORSION_OUTPUT_CHANNELS))
+                              for torsion in ({}, TORSION_OUTPUT_CHANNELS)
+                              for offshore in ({}, OFFSHORE_OUTPUT_CHANNELS))
 SOLVER_OUTPUT_GROUPS = {}
 for _key, _definition in SOLVER_OUTPUT_CHANNELS.items():
     if _definition['group']:

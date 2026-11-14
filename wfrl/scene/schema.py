@@ -144,6 +144,7 @@ class Scene:
     terrain: Optional[str] = None          # 渲染装饰，见 TERRAINS；不进物理
     source_path: Optional[str] = None
     physics: Dict[str, bool] = field(default_factory=dict)
+    substructure: Optional[Dict[str, Any]] = None
 
     # ---- 派生量 ----------------------------------------------------------
     @property
@@ -177,17 +178,23 @@ class Scene:
             out.append(f"来流由湍流盒 {self.turbulence} 决定，speed 字段被忽略")
         if len(TURBINES) == 1:
             out.append("模板只含 NREL 5MW 一种机型，不支持混排")
+        if self.substructure is None:
+            out.append("单桩与海面外观不代表已计算水动力；海上求解须显式配置 substructure")
+        else:
+            out.append("OC3 海上模型配置包含 HydroDyn/SubDyn；是否已有有效求解读数以遥测 hydrodynamics 状态为准")
         return out
 
     # ---- 校验 ------------------------------------------------------------
     def validate(self) -> "Scene":
-        from wfrl.physics_options import validate_physics
+        from wfrl.physics_options import validate_physics, validate_substructure
         try:
             validate_physics(self.physics)
+            self.substructure = validate_substructure(self.substructure, self.physics,
+                                                     direction=self.wind_direction)
         except ValueError as exc:
             raise SceneError(str(exc)) from exc
-        if self.backend != 'fastfarm' and any(self.physics.values()):
-            raise SceneError('physics options require backend fastfarm')
+        if self.backend != 'fastfarm' and (any(self.physics.values()) or self.substructure is not None):
+            raise SceneError('physics and substructure options require backend fastfarm')
         _text(self.name, "name")
         _text(self.backend, "backend")
         _text(self.turbine, "turbine")
@@ -281,10 +288,12 @@ class Scene:
                     params = dict(super().simul_params)
                     if any(case_self.physics.values()):
                         params['physics'] = dict(case_self.physics)
+                    if case_self.substructure is not None:
+                        params['substructure'] = dict(case_self.substructure)
                     if case_self.direction != 270.:
                         params['direction'] = case_self.direction
                     return params
-            case_type = PhysicsCase if any(self.physics.values()) or self.wind_direction != 270. else FastFarmCase
+            case_type = PhysicsCase if any(self.physics.values()) or self.substructure is not None or self.wind_direction != 270. else FastFarmCase
             case = case_type(
                 num_turbines=self.n, xcoords=self.xcoords, ycoords=self.ycoords,
                 dt=int(self.dt), buffer_window=1, t_init=100, max_iter=max_iter,
@@ -293,6 +302,7 @@ class Scene:
             case.wind_time_series = self.turbulence
             if case_type is PhysicsCase:
                 case.physics = dict(self.physics)
+                case.substructure = None if self.substructure is None else dict(self.substructure)
                 case.direction = self.wind_direction
             return case
         case = FlorisCase(
@@ -326,6 +336,7 @@ class Scene:
     def to_dict(self) -> Dict[str, Any]:
         return {
             **({'physics': dict(self.physics)} if any(self.physics.values()) else {}),
+            **({'substructure': dict(self.substructure)} if self.substructure is not None else {}),
             "name": self.name,
             "backend": self.backend,
             "turbine": self.turbine,
@@ -347,7 +358,7 @@ def from_dict(d: Dict[str, Any], source_path: str = None) -> Scene:
     if not isinstance(d, dict):
         raise SceneError("场景文件顶层必须是映射（YAML 字典）")
     _mapping(d, "scene", {"name", "backend", "turbine", "dt", "layout", "inflow",
-                          "controls", "sensors", "terrain", "physics"})
+                          "controls", "sensors", "terrain", "physics", "substructure"})
     layout = _list(d.get("layout", []), "layout")
     turbines = []
     for k, item in enumerate(layout):
@@ -399,6 +410,7 @@ def from_dict(d: Dict[str, Any], source_path: str = None) -> Scene:
         terrain=(_text(d["terrain"], "terrain").lower() if d.get("terrain") is not None else None),
         source_path=source_path,
         physics=d.get('physics', {}),
+        substructure=d.get('substructure'),
     )
     return sc.validate()
 
