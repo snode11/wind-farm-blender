@@ -98,7 +98,11 @@ class _EventBuffer:
 
 class BackendSession:
     def __init__(self, scene=None, trainer_factory=None, scene_loader=None,
-                 max_events=2048, kill_grace_seconds=5.0, mpi_launcher=None):
+                 max_events=2048, kill_grace_seconds=5.0, mpi_launcher=None, physics=None):
+        from wfrl.physics_options import validate_physics, apply_scene_physics
+        self.physics = validate_physics({} if physics is None else physics)
+        if scene is not None and self.physics:
+            scene = apply_scene_physics(deepcopy(scene), self.physics)
         if type(max_events) is not int or max_events < 1:
             raise ValueError('max_events must be a positive integer')
         self.session_id = uuid.uuid4().hex
@@ -363,10 +367,13 @@ class BackendSession:
             return result
 
     def _load(self, path):
+        from wfrl.physics_options import apply_scene_physics
         if self.scene_loader is None:
             from wfrl.scene.schema import load_scene
-            return load_scene(path)
-        return self.scene_loader(path)
+            scene = load_scene(path)
+        else:
+            scene = self.scene_loader(path)
+        return apply_scene_physics(deepcopy(scene), self.physics) if self.physics else scene
 
     def _formal_command(self, scene_path, options):
         unsupported = set(options) - FORMAL_VALUE_OPTIONS - FORMAL_FLAG_OPTIONS
@@ -425,7 +432,7 @@ class BackendSession:
                     if not path: raise ValueError('Formal training requires options.scene path')
                     if self.scene.backend != 'fastfarm':
                         raise ValueError('Formal training requires FAST.Farm')
-                    if overrides:
+                    if overrides or self.physics:
                         from wfrl.scene.schema import dump_scene
                         self._formal_scene_dir = tempfile.TemporaryDirectory(prefix='wfrl-bridge-scene-')
                         path = dump_scene(self.scene, str(Path(self._formal_scene_dir.name) / 'scene.yaml'))

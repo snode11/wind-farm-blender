@@ -4,13 +4,13 @@ import math
 import numpy as np
 
 from wfrl.scene.power import farm_power_total
-from .messages import BLADE_COMPONENTS, SOLVER_OUTPUT_CHANNELS
+from .messages import BLADE_COMPONENTS, SOLVER_OUTPUT_CHANNELS, ALL_SOLVER_OUTPUT_CHANNELS
 
 UNITS = dict(yaw='deg', yaw_command='deg', yaw_measured='deg', pitch='deg', rotor_speed='rpm', power='MW', load='',
              torque='N m', pitch_command='deg', pitch_measured='deg', wind_speed='m/s', wind_direction='deg', reward='',
              m_flap='N m', m_edge='N m')
 UNITS.update({name: 'N m' for name in BLADE_COMPONENTS})
-UNITS.update({name: spec['unit'] for name, spec in SOLVER_OUTPUT_CHANNELS.items()})
+UNITS.update({name: spec['unit'] for name, spec in ALL_SOLVER_OUTPUT_CHANNELS.items()})
 
 
 def json_value(value):
@@ -133,7 +133,8 @@ class SnapshotAdapter:
                     record['timestamp'] = dict(value=sample_time, timebase='simulation_seconds', source=source)
                 channels[key] = record
             if native is not None:
-                if not isinstance(native[i], dict) or set(native[i]) != set(SOLVER_OUTPUT_CHANNELS):
+                if (not isinstance(native[i], dict) or
+                        set(native[i]) not in (set(SOLVER_OUTPUT_CHANNELS), set(ALL_SOLVER_OUTPUT_CHANNELS))):
                     raise ValueError('Native output records must match the channel catalog')
                 for key, record in native[i].items():
                     channels[key] = json_value(record)

@@ -194,6 +194,10 @@ def stop_owned(process: subprocess.Popen | None, label: str, timeout: float = 18
 
 
 def common(parser: argparse.ArgumentParser) -> None:
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from wfrl.physics_options import add_physics_arguments
+    add_physics_arguments(parser)
     parser.add_argument("--blender", default=os.environ.get("WFRL_BLENDER", "blender"))
     parser.add_argument("--python", default=os.environ.get("WFRL_PYTHON", sys.executable))
     parser.add_argument("--scene", default=str(ROOT / "scenes" / "turb3_demo.yaml"))
@@ -305,6 +309,8 @@ def launch(args: argparse.Namespace) -> int:
     state_api.atomic_write(session_file, owner)
     bridge_args = [str(report["python"]), "-m", "wfrl.blender_bridge", "--host", "127.0.0.1",
                    "--port", str(args.port), "--scene", str(report["scene"])]
+    from wfrl.physics_options import physics_cli_arguments
+    bridge_args.extend(physics_cli_arguments(args))
     if args.fake:
         bridge_args.append("--fake")
     result = 1

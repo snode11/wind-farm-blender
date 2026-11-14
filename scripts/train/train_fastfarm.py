@@ -93,7 +93,9 @@ class FastFarmSampler:
                  obs_keys=OBS_KEYS, load_coef=1.0, reward_shaper=None,
                  wind_schedule=None, wind_time_series=None, purge=True,
                  obs_duty=False, duty_penalty=0.0, scene_path=None, progress=None,
-                 start_episode=0, upstream_request=None):
+                 start_episode=0, upstream_request=None, physics=None):
+        from wfrl.physics_options import validate_physics
+        self.physics = validate_physics({} if physics is None else physics)
         if scene_path is None and wind_time_series is not None and wind_schedule is not None:
             raise ValueError("BTS 来流由 wind_time_series 文件决定；请移除 wind_schedule，"
                              "BTS 模式不接受标量风速调度")
@@ -163,6 +165,8 @@ class FastFarmSampler:
         reset_options = ({"upstream_request": self.upstream_request}
                          if self.upstream_request is not None else {})
         kw = {}
+        if self.physics:
+            kw['physics'] = self.physics
         if self.wind_time_series is not None:
             kw["wind_time_series"] = self.wind_time_series
         if self.scene_path is not None:
@@ -172,6 +176,8 @@ class FastFarmSampler:
             from wfrl.scene.schema import load_scene
             from wfrl.scene.runtime import SceneRuntime
             sc = load_scene(self.scene_path)
+            from wfrl.physics_options import apply_scene_physics
+            apply_scene_physics(sc, self.physics)
             self._rt = SceneRuntime(sc, max_steps=self.budget,
                                     warmup_steps=self.warmup,
                                     load_coef=self.load_coef,
@@ -281,6 +287,8 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
     bound = inspect.signature(train).bind(env_id, iters, n_steps, **kwargs)
     bound.apply_defaults()
     config = dict(bound.arguments)
+    from wfrl.physics_options import validate_physics, PHYSICS_KEYS
+    overrides = validate_physics({} if config['physics'] is None else config['physics'])
     for key in ("purge", "tag_extra", "save_interval", "resume_from", "training_progress", "run_id"):
         config.pop(key)
     speed = config.pop("wind_speed")
@@ -299,11 +307,20 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
         config["wind_sched"] = head + (":" + argument if argument else "")
     if config["scene"] is not None:
         from wfrl.scene.schema import load_scene
-        config["scene"] = load_scene(config["scene"]).to_dict()
+        from wfrl.physics_options import apply_scene_physics
+        config["scene"] = apply_scene_physics(load_scene(config["scene"]), overrides).to_dict()
         config["wind_sched"] = "scene"
     elif head == "preset" and windcond.PRESETS.get(argument, {}).get("turb") is not None:
         raise ValueError("BTS 预设不能通过 --wind-sched 加载；"
                          "请使用 --scene 并在场景的 inflow.turbulence 中指定 BTS 文件")
+    config.pop('physics')
+    physics = overrides
+    if config['scene'] is not None:
+        physics = config['scene'].get('physics', {})
+    elif 'floris' in env_id.lower() and any(physics.values()):
+        raise ValueError('physics options require the FAST.Farm backend')
+    if any(physics.values()):
+        config['physics'] = {key: physics.get(key, False) for key in PHYSICS_KEYS}
     for key in ("iters", "n_steps", "n_epochs", "mb_steps"):
         if config[key] <= 0:
             raise ValueError(f"{key} must be positive")
@@ -400,7 +417,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
           reward="level", reward_ref=None, reward_alpha=0.01,
           load_coef=1.0, policy="learn", purge=True, tag_extra="",
           obs_duty=False, duty_penalty=0.0, scene=None,
-          save_interval=0, resume_from=None, training_progress=None, run_id=None):
+          save_interval=0, resume_from=None, training_progress=None, run_id=None, physics=None):
     config = experiment_config(**{key: value for key, value in locals().items()})
     upstream_request = {"training": {
         "wind_speed": wind_speed, "wind_direction": wind_direction, "wind_sched": wind_sched,
@@ -414,6 +431,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
     if scene is not None:
         from wfrl.scene.schema import load_scene
         policy_scene = load_scene(scene)
+        from wfrl.physics_options import apply_scene_physics
+        apply_scene_physics(policy_scene, physics or {})
         if list(policy_scene.controls) != ["yaw"]:
             raise ValueError("train_fastfarm requires scene controls ['yaw']; use Studio for other controls")
     source_identity = source_input_identity(scene)
@@ -477,6 +496,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
     try:
         cancellation.install()
         smp = FastFarmSampler(env_id, episode_steps=episode_steps,
+                              physics=physics,
                               warmup_steps=warmup_steps,
                               total_steps=(iters - ckpt["iteration"]) * n_steps if ckpt else total_steps,
                               load_coef=load_coef, reward_shaper=shaper,
@@ -823,6 +843,8 @@ DEFAULT_ENV = {"fastfarm": "Dec_Turb3_Row1_Fastfarm",
 
 def main():
     ap = argparse.ArgumentParser()
+    from wfrl.physics_options import add_physics_arguments, physics_arguments
+    add_physics_arguments(ap)
     ap.add_argument("--backend", default="fastfarm",
                     choices=["fastfarm", "floris"],
                     help="fastfarm=动态气弹(需 mpiexec)；floris=静态稳态(无需 MPI)")
@@ -896,6 +918,7 @@ def main():
     args = ap.parse_args()
     env_id = args.env or DEFAULT_ENV[args.backend]
     train(env_id, args.iters, args.n_steps,
+          physics=physics_arguments(args),
           scene=args.scene,
           recurrent=args.recurrent, seed=args.seed,
           wind_speed=args.wind_speed, wind_direction=args.wind_direction,

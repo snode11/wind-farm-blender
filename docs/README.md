@@ -18,6 +18,7 @@
 | 待实施要求与验收 | [前端更新计划](../前端更新计划.md) |
 | 叶片重建算法 | [Blade Recon 0.2](../blade_recon0.2/README.md)、[材料点对应研究](../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md) |
 | 叶片响应与载荷研究 | [九项响应、弹性扭转输出要求及研究用DEL](development/叶片响应与研究DEL.md) |
+| FAST.Farm 物理选项 | [塔架柔性、动态失速、塔影与短算例对比](development/FASTFarm物理选项.md) |
 | 表面与动态研究 | [表面研究入口](../research/blade-surface/README.md)、[动态研究模块](../wfrl/nrel_reconstruction/README.md) |
 | 雷达合同与计算 | [数据合同](../wfrl/lidar/REPLAY_FORMAT.md)、[雷达算法](../wfrl/lidar/README.md)、[TLS 研究](lidar/双束TLS候选实施与验证总报告.md) |
 | 训练与环境 | [算法与训练入口](training/MAPPO_SETUP.md)、[检查点保存](training/MAPPO_SETUP.md#检查点写入与产物选择)、[正式 CLI 中断与恢复](training/MAPPO_SETUP.md#正式-cli-的中断与恢复)、[参数共享 IPPO](training/IPPO_TRAINING_EXPLAINED.md)、[单智能体 PPO](training/PPO_算法执行细节.md)、[环境设置](setup/setup_local.md) |

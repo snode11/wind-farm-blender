@@ -65,6 +65,14 @@ def _solver_output_catalog():
 
 
 SOLVER_OUTPUT_CHANNELS = _solver_output_catalog()
+TOWER_OUTPUT_CHANNELS = {
+    f'tower_top_{axis}': dict(native=native, unit='m', native_unit='m', scale=1.,
+                              label=f'Tower top {label} displacement',
+                              frame='ElastoDyn tower-base frame t', blade=None,
+                              gauge=None, group='tower_top_displacement')
+    for axis, native, label in (('fa', 'TTDspFA', 'fore-aft'), ('ss', 'TTDspSS', 'side-to-side'))
+}
+ALL_SOLVER_OUTPUT_CHANNELS = {**SOLVER_OUTPUT_CHANNELS, **TOWER_OUTPUT_CHANNELS}
 SOLVER_OUTPUT_GROUPS = {}
 for _key, _definition in SOLVER_OUTPUT_CHANNELS.items():
     if _definition['group']:
@@ -72,12 +80,12 @@ for _key, _definition in SOLVER_OUTPUT_CHANNELS.items():
 
 SCALAR_NUMERIC_CHANNELS = frozenset(('rotor_speed', 'power', 'yaw', 'yaw_command', 'yaw_measured',
                                     'pitch', 'pitch_command', 'pitch_measured', 'wind_speed',
-                                    'wind_direction', 'torque', 'reward', *BLADE_COMPONENTS, *SOLVER_OUTPUT_CHANNELS))
+                                    'wind_direction', 'torque', 'reward', *BLADE_COMPONENTS, *ALL_SOLVER_OUTPUT_CHANNELS))
 DISPLAY_CHANNEL_UNITS = {'rotor_speed': 'rpm', 'yaw': 'deg', 'yaw_command': 'deg',
                          'yaw_measured': 'deg', 'pitch': 'deg', 'pitch_command': 'deg',
                          'pitch_measured': 'deg', 'power': 'MW', 'm_flap': 'N m', 'm_edge': 'N m',
                          **{name: 'N m' for name in BLADE_COMPONENTS},
-                         **{name: spec['unit'] for name, spec in SOLVER_OUTPUT_CHANNELS.items()}}
+                         **{name: spec['unit'] for name, spec in ALL_SOLVER_OUTPUT_CHANNELS.items()}}
 MODES = frozenset(('demo', 'interactive_training', 'formal_training', 'replay'))
 RUN_STATUSES = frozenset(('READY', 'STARTING', 'RUNNING', 'PAUSED', 'DRAINING', 'STOPPED', 'FAILED'))
 MESSAGE_TYPES = frozenset(('hello', 'hello_ack', 'command', 'lifecycle', 'snapshot', 'safety_event', 'curve', 'wake', 'error', 'training_stats'))

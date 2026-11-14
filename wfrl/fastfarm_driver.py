@@ -124,7 +124,11 @@ class FastFarmDriver:
                  controls=("yaw",), load_coef=1.0, reward_shaper=None,
                  wake_vtk=False, wake_vtk_z=90.0, wind_time_series=None,
                  yaw_duty_sliding=True, yaw_duty_window=YAW_DUTY_WINDOW,
-                 yaw_duty_limit=YAW_DUTY_LIMIT):
+                 yaw_duty_limit=YAW_DUTY_LIMIT, physics=None):
+        from wfrl.physics_options import validate_physics
+        self.physics = validate_physics({} if physics is None else physics)
+        if 'floris' in env_id.lower() and any(self.physics.values()):
+            raise ValueError('physics options require the FAST.Farm backend')
         # 只有 FAST.Farm 后端需要 MPI_Comm_spawn；FLORIS 是纯 Python 稳态解，
         # 不经 MPI，直接 python 就能跑（D5 的奖励/观测设计正靠它秒级迭代）。
         if "floris" not in env_id.lower():
@@ -217,10 +221,15 @@ class FastFarmDriver:
 
     def _prepare_solver_outputs(self):
         self._solver_outputs = None
+        self.physics_record = None
         from wfcrl.interface import FastFarmInterface
         if isinstance(self.env.mdp.interface, FastFarmInterface):
             from wfrl.solver_outputs import SolverOutputs
-            self._solver_outputs = SolverOutputs(self.env.mdp.interface._simul_file)
+            from wfcrl.fastfarm_physics import configure_physics
+            farm_path = self.env.mdp.interface._simul_file
+            physics = getattr(self, 'physics', {})
+            self._solver_outputs = SolverOutputs(farm_path, physics=physics)
+            self.physics_record = configure_physics(farm_path, physics)
 
     # ------------------------------------------------------------------
     def reset(self, wind_speed=None, wind_direction=None, *, background_bts=None,
@@ -296,10 +305,14 @@ class FastFarmDriver:
             # Spawn can succeed before env.reset or its metadata writes fail.
             self._solver_owned = self._has_solver()
             record = getattr(itf, "wind_record", None)
-            if (isinstance(itf, FastFarmInterface) and upstream_request is not None
+            if (isinstance(itf, FastFarmInterface)
                     and record is not None and record is not previous_record):
-                record["upstream_request"] = upstream_request
-                itf._save_wind_record()
+                if upstream_request is not None:
+                    record["upstream_request"] = upstream_request
+                if getattr(self, 'physics_record', None) is not None:
+                    record['physics'] = copy.deepcopy(self.physics_record)
+                if upstream_request is not None or getattr(self, 'physics_record', None) is not None:
+                    itf._save_wind_record()
                 if reset_error is not None:
                     reset_error.record = copy.deepcopy(record)
         if isinstance(itf, FastFarmInterface):
@@ -501,6 +514,11 @@ class FastFarmDriver:
             values, records = self._solver_outputs.sample(clock['value'], clock['interval_seconds'])
             measurement.update(values)
             measurement['output_channels'] = records
+        if getattr(self, 'physics_record', None) is not None:
+            measurement['physics'] = copy.deepcopy(self.physics_record)
+            for turbine in measurement.get('output_channels', ()):
+                for record in turbine.values():
+                    record['provenance']['physics_identity'] = self.physics_record['identity']
         return measurement
 
     def _solver_clock(self):

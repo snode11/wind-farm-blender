@@ -11,7 +11,7 @@ import sys
 import uuid
 from .history import HistoryWindow, ExportJob
 from .training import STAT_LABELS
-from .protocol import BLADE_COMPONENTS, SOLVER_OUTPUT_CHANNELS, SOLVER_OUTPUT_GROUPS
+from .protocol import BLADE_COMPONENTS, ALL_SOLVER_OUTPUT_CHANNELS as SOLVER_OUTPUT_CHANNELS, SOLVER_OUTPUT_GROUPS
 
 CHANNELS = tuple(dict.fromkeys(('power', 'reward', 'yaw', 'yaw_command', 'pitch', 'pitch_command', 'torque', 'rotor_speed', 'load', *BLADE_COMPONENTS, *SOLVER_OUTPUT_CHANNELS)))
 LABELS = dict(power='Power', reward='Reward', yaw='Yaw measured', yaw_command='Yaw command', pitch='Pitch measured',
@@ -22,10 +22,12 @@ LABELS.update(m_flap='Blade root flap moments (1–3)', m_edge='Blade root edge 
 LABELS.update({name: spec['label'] for name, spec in SOLVER_OUTPUT_CHANNELS.items()})
 GROUPS = {axis: [f'{axis}_{blade}' for blade in (1, 2, 3)] for axis in ('m_flap', 'm_edge')}
 GROUPS.update(SOLVER_OUTPUT_GROUPS)
+GROUPS['tower_top_displacement'] = ['tower_top_fa', 'tower_top_ss']
 for _group, _channels in SOLVER_OUTPUT_GROUPS.items():
     _spec = SOLVER_OUTPUT_CHANNELS[_channels[0]]
     LABELS[_group] = (_spec['label'].removeprefix('B1 ') + ' (blades 1–3)' if _spec['blade'] else
                       _group.replace('_', ' ').capitalize() + ' (x/y/z)')
+LABELS['tower_top_displacement'] = 'Tower top displacement (fore-aft / side-to-side)'
 
 
 def selected_channels(channel):

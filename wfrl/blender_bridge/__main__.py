@@ -9,12 +9,17 @@ from .launcher_state import SessionBinding
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    from wfrl.physics_options import add_physics_arguments, physics_arguments
+    add_physics_arguments(parser)
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--scene')
     parser.add_argument('--fake', action='store_true', help='SYNTH protocol fixture; demo mode only')
     args = parser.parse_args()
-    session = BackendSession()
+    overrides = physics_arguments(args)
+    if overrides and (not args.scene or args.fake):
+        parser.error('physics overrides require --scene and a real FAST.Farm backend')
+    session = BackendSession(physics=overrides) if overrides else BackendSession()
     if args.fake:
         from .fake_backend import FakeTrainer
         session.trainer_factory = FakeTrainer

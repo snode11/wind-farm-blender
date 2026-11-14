@@ -8,7 +8,7 @@ import shutil
 
 import numpy as np
 
-from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS
+from wfrl.blender_bridge.messages import SOLVER_OUTPUT_CHANNELS, TOWER_OUTPUT_CHANNELS
 
 
 def _time_value(value, name, *, positive=False):
@@ -23,9 +23,14 @@ def _time_value(value, name, *, positive=False):
     return value
 
 
-def prepare_case(farm_path):
+def prepare_case(farm_path, physics=None, *, tower_outputs=False):
     """Configure output channels in an owned generated case before solver startup."""
     from wfcrl.simul_utils import FASTInputFile
+    from wfcrl.fastfarm_physics import normalize_physics, configure_physics, write_physics_record
+    physics = normalize_physics(physics)
+    if any(physics.values()):
+        configure_physics(farm_path, physics, apply=True)
+    tower_outputs = tower_outputs or physics['tower_flex']
     farm_path = Path(farm_path).resolve()
     farm = FASTInputFile(str(farm_path))
     inflow_path = (farm_path.parent / str(farm['InflowFile']).strip('"')).resolve()
@@ -52,6 +57,8 @@ def prepare_case(farm_path):
             ed['NBlGages'], ed['BldGagNd'] = 3, ', '.join(map(str, gauges))
         requested = [spec['native'] for spec in SOLVER_OUTPUT_CHANNELS.values()
                      if elastic == 1 or spec['blade'] is None]
+        if tower_outputs:
+            requested += [spec['native'] for spec in TOWER_OUTPUT_CHANNELS.values()]
         existing = {word.strip('"').upper() for line in ed['OutList']
                     for word in line.replace(',', ' ').split()}
         ed['OutList'] = list(ed['OutList']) + [name for name in requested if name.upper() not in existing]
@@ -68,6 +75,10 @@ def prepare_case(farm_path):
         primary.write(str(primary_path))
         definitions.append(dict(gauge_nodes=gauges, comp_elast=elastic,
                                 output_interval_seconds=float(primary['DT_Out'])))
+        if tower_outputs:
+            definitions[-1]['tower_outputs'] = True
+    if any(physics.values()):
+        write_physics_record(farm_path, configure_physics(farm_path, physics))
     return definitions
 
 
@@ -175,8 +186,8 @@ class OutputReader:
 
 class SolverOutputs:
     """Per-run files supply direct measurements with their own source timestamps."""
-    def __init__(self, farm_path):
-        self.definitions = prepare_case(farm_path)
+    def __init__(self, farm_path, physics=None):
+        self.definitions = prepare_case(farm_path, physics)
         self.readers = []
         self.farm_path = None
 
@@ -191,7 +202,10 @@ class SolverOutputs:
         if len(self.readers) != len(self.definitions):
             raise RuntimeError('Native output readers require a started solver run')
         records = []
-        values = {key: np.full(len(self.readers), np.nan) for key in SOLVER_OUTPUT_CHANNELS}
+        catalog = dict(SOLVER_OUTPUT_CHANNELS)
+        if any(definition.get('tower_outputs') for definition in self.definitions):
+            catalog.update(TOWER_OUTPUT_CHANNELS)
+        values = {key: np.full(len(self.readers), np.nan) for key in catalog}
         # Latest rows feed display; the interval peak feeds overspeed checks between control steps.
         values.update({key: np.full(len(self.readers), np.nan) for key in
                        ('rotor_speed_interval_max', 'rotor_speed_interval_max_time')})
@@ -202,7 +216,7 @@ class SolverOutputs:
             units_ready = (reader.units is not None and reader.names is not None
                            and len(reader.units) == len(reader.names))
             turbine = {}
-            for key, spec in SOLVER_OUTPUT_CHANNELS.items():
+            for key, spec in catalog.items():
                 provenance = dict(source='OpenFAST native text output', channel=spec['native'],
                                   file=str(reader.path), farm_file=str(self.farm_path),
                                   native_unit=spec['native_unit'], scale=spec['scale'],

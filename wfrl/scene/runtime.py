@@ -125,6 +125,7 @@ class SceneRuntime:
         d.max_steps = self.max_steps
         d.controls = list(self.scene.controls)
         d.wind_time_series = self.scene.turbulence
+        d.physics = dict(self.scene.physics)
         d.env = self.scene.make_env(
             max_iter=self.max_steps, load_coef=self.load_coef,
             reward_shaper=self.reward_shaper or DoNothingReward())
@@ -204,6 +205,8 @@ class SceneRuntime:
         frame["_meta"] = {"t": self._t, "u_inf": self.u_inf,
                           "reward": m.get("reward"), "done": self.done,
                           "farm_power": farm_power_total(m.get("power"), self.scene.n)}
+        if m.get('physics') is not None:
+            frame['_meta']['physics'] = m['physics']
         self._last_frame = frame
         return frame
 

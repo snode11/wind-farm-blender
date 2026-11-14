@@ -6,7 +6,7 @@ from pathlib import Path
 def configured_scene(scene, overrides):
     if not isinstance(overrides, dict):
         raise ValueError('scene_overrides must be an object')
-    allowed = {'backend', 'inflow', 'terrain', 'controls'}
+    allowed = {'backend', 'inflow', 'terrain', 'controls', 'physics'}
     if set(overrides) - allowed:
         raise ValueError('Unsupported scene overrides: ' + ', '.join(sorted(set(overrides) - allowed)))
     from wfrl.scene.schema import from_dict
@@ -16,6 +16,9 @@ def configured_scene(scene, overrides):
             if not isinstance(value, dict) or set(value) - {'speed', 'direction', 'turbulence'}:
                 raise ValueError('inflow supports speed, direction and turbulence only')
             data['inflow'].update(value)
+        elif key == 'physics':
+            from wfrl.physics_options import validate_physics
+            data['physics'] = {**data.get('physics', {}), **validate_physics(value)}
         else:
             data[key] = value
     return from_dict(data, source_path=scene.source_path)
