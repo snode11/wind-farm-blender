@@ -1,0 +1,51 @@
+{
+  "schema": "wfrl.experiment-delivery.v1",
+  "version": "0.5.1",
+  "snapshot_date": "2026-11-14",
+  "experiment": {
+    "name": "wind-farm-experiments-0.5.1.zip",
+    "bytes": 1030209587,
+    "sha256": "af21b9295df65464b919fd3f0e70e4c0500761b54c97f8de4e7d61a1e82dd7ab",
+    "file_count": 1394,
+    "source_bytes": 1266704270,
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-experiments-0.5.1.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-experiments-0.5.1.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-experiments-0.5.1.zip.sha256",
+    "scope": "Preserved simulation evidence; 2026-11-13 yaw/high-wind trajectories and 2026-11-11 telemetry/reference runs. Latest physics comparisons are retained tables, identities and scripts; their full temporary outputs are not included."
+  },
+  "inflow": {
+    "name": "wind-farm-inflow-0.5.1.zip",
+    "bytes": 185211251,
+    "sha256": "ba159376d0f8440ae507f7be616be8c4bdd4368d40f89e08431d7b4c23c21168",
+    "file_count": 14,
+    "source_bytes": 190485308,
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-inflow-0.5.1.zip.sha256",
+    "scope": "Four TurbSim boxes at 8/12 m/s and TI 8/16%, seed 42, with inputs and manifest; preserved random-gust.bts used by the high-wind data."
+  },
+  "dependency": {
+    "name": "wfcrl-dependency-0.5.1.tar.gz",
+    "commit": "eec42a7e1fab8464088fcb375338d451d75ae3f2",
+    "bytes": 29978162,
+    "sha256": "26490ae4af9abaa65d594eb51a99a6101f9a909b9c984540a23936adbf07b156",
+    "file_count": 111,
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz.sha256",
+    "archive_prefix": "wfcrl-env/",
+    "excluded_suffixes": [
+      ".dll",
+      ".so",
+      ".dylib",
+      ".exe",
+      ".pyc",
+      ".pyo"
+    ],
+    "scope": "Tracked dependency sources and inputs; compile controllers on the target platform."
+  },
+  "csv_rows": {
+    "yaw_timeseries": 1280,
+    "high_wind_timeseries": 300
+  },
+  "latest_physics_full_raw_outputs": "NOT_RETAINED; see retained tables and identities in the topic documents"
+}

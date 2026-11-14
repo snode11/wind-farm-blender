@@ -1,0 +1,23 @@
+{
+  "schema": "wfrl.release-verification.v1",
+  "version": "0.5.1",
+  "extension_version": "0.5.1",
+  "archive_sha256": "f4bdf1bec98c3bb6502ba1f88ea21109bb92a5658950c7376e8fbd72923df478",
+  "build": {
+    "status": "PASS",
+    "environment": "Darwin / Python 3.15.2",
+    "build_count": 1,
+    "archive": "publication/blender-0.5.1/package/wfrl_blender-0.5.1.zip",
+    "file_count": 245,
+    "bytes": 93044245,
+    "inventory": "publication/blender-0.5.1/package/wfrl_blender-0.5.1.inventory.json",
+    "checksum": "publication/blender-0.5.1/package/wfrl_blender-0.5.1.zip.sha256"
+  },
+  "daily_installation": "publication/daily-installation.json",
+  "scope": "Ordinary release: content/version consistency and one local extension build. Retained experiment evidence is attached without rerunning simulations.",
+  "tests": "NOT_RUN",
+  "isolated_installation": "NOT_RUN",
+  "window_gpu": "NOT_RUN",
+  "performance": "NOT_RUN",
+  "scientific_accuracy": "NOT_RUN"
+}

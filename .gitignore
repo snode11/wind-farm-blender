@@ -85,3 +85,6 @@ example*.png
 /docs/proposal/**/*.docx
 /docs/proposal/**/*.pdf
 ~$*
+
+/publication/blender-0.5.1/package/*.zip
+/publication/blender-0.5.1/delivery/

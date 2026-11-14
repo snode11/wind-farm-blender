@@ -4,7 +4,7 @@
 #   conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi "mpi4py>=3.1.5,<5" \
 #     openfast=3.5.3 "cmake<4" c-compiler cxx-compiler fortran-compiler ffmpeg
 #   conda activate wfrl-full
-# 源码资源：从 project-resources-v1 解压 wfcrl-dependency-01.tar.gz 到仓库根目录，提供 wfcrl-env/。
+# 源码资源：从 v0.5.1 Release 解压 wfcrl-dependency-0.5.1.tar.gz 到仓库根目录，提供 wfcrl-env/。
 # 安装：python -m pip install -r requirements.txt
 # 检查：python -m pip check
 # openfast=3.5.3 提供原生 FAST.Farm/OpenFAST；supercontroller 与机组控制器须本机编译。

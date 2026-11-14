@@ -14,7 +14,7 @@
 
 从实际 Git 根目录 `wind farm RL` 工作。根项目支持普通安装 `python -m pip install .`；修改源码时使用 editable 安装 `python -m pip install -e .`。两种安装均提供 `wfrl` 模块和内置机型定义 `wfrl/turbines/*.yaml`、`*.yml`；直接构建的 wheel 及从 sdist 构建的 wheel 也包含这些机型资源，`load_turbine_spec("nrel5mw")` 从实际安装包读取定义。
 
-[requirements.txt](../../requirements.txt) 提供简要安装提示与 Python 依赖；[pyproject.toml](../../pyproject.toml) 保留普通包安装的核心与功能分组声明。先安装 [Miniforge](https://conda-forge.org/download/)（M 系列 Mac 选 **arm64**，Intel 选 **x86_64**），执行 `xcode-select --install` 并等待完成，重新打开终端。从[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)下载 `wfcrl-dependency-01.tar.gz` 到下载目录，然后执行：
+[requirements.txt](../../requirements.txt) 提供简要安装提示与 Python 依赖；[pyproject.toml](../../pyproject.toml) 保留普通包安装的核心与功能分组声明。先安装 [Miniforge](https://conda-forge.org/download/)（M 系列 Mac 选 **arm64**，Intel 选 **x86_64**），执行 `xcode-select --install` 并等待完成，重新打开终端。从[0.5.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.1)下载 `wfcrl-dependency-0.5.1.tar.gz` 到下载目录，然后执行：
 
 ```bash
 conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi "mpi4py>=3.1.5,<5" \
@@ -22,7 +22,7 @@ conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi "mpi4py>=3.
 conda activate wfrl-full
 git clone --branch main https://github.com/snode11/wind-farm-blender.git
 cd wind-farm-blender
-tar -xzf ~/Downloads/wfcrl-dependency-01.tar.gz
+tar -xzf ~/Downloads/wfcrl-dependency-0.5.1.tar.gz
 python -m pip install -r requirements.txt
 python -m pip check
 ```

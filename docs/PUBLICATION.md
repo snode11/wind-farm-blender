@@ -1,6 +1,6 @@
 # 源码与项目资源
 
-发布版本为 **0.5.0.0.1**（GitHub 标签 `v0.5.0.0.1`，Blender manifest 为 `0.5.0+0.1`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
+发布版本为 **0.5.1**（GitHub 标签 `v0.5.1`，Blender manifest 为 `0.5.1`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
 项目入口为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)，当前源码分支为 [`main`](https://github.com/snode11/wind-farm-blender/tree/main)。[项目资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供大型保存数据、研究证据、便携依赖源码与演示材料；它不是新版 Blender 扩展。现有公开扩展 ZIP、日常安装和源码的身份见[发布状态与验证范围](blender/发布状态与验证范围.md)。
 
@@ -14,22 +14,26 @@
 | normal/close 独立净空演示 | [交付清单](../dist/lidar-delivery.json)与 `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 是专用启动入口的正式运行输入，须一同保留；与扩展内置柔性 MAPPO 数据分别使用，操作见[独立演示](blender/用户使用手册.md#12-独立激光净空雷达正常较小净空片段) |
 | 后端 Replay 示例权重 | `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` 随 Git 提供；保存权重不代表训练已重现 |
 | NREL 几何导出输入 | `projects/nrel5mw-reference/template/` 保存正式资产实际读取的 19 份模板输入；导出器默认使用此位置 |
-| WFCRL 源码与完整模板 | `wfcrl-dependency` 资源包恢复到 `wfcrl-env/`，保留 Apache-2.0 许可证；不包含嵌套 `.git`、环境或编译 DLL |
+| WFCRL 源码与完整模板 | [0.5.1 配套依赖源码](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfcrl-dependency-0.5.1.tar.gz)恢复到 `wfcrl-env/`，固定提交 `eec42a7e1fab8464088fcb375338d451d75ae3f2`；保留上游许可证，不包含嵌套 `.git`、环境或编译 DLL |
 | GW184 几何、运动、相机与来源 | `projects/gw184-single/` 随 Git 提供，包含两份 DTU 原始参考输入；官方来源与固定摘要见[来源说明](../projects/gw184-single/sources/README.md) |
 | 单叶片视频与动态研究 | `nrel-video`、`nrel-dynamic` 资源包含保存输入、数值结果、评分及独立查看器；`runtime-inputs` 提供试片与编码适配器读取的原始 PNG 采集输入 |
 | 三相机重建与同源纹理 | `blade-reconstruction`、`same-source` 资源包含合成输入、保存重建及纹理再生成所需数据；扩展日常运行直接使用正式载荷 |
 | 表面材料点与雷达研究 | `blade-surface`、`lidar-research` 资源包保留正负结果、原始观测、数值数组与独立评分；合成真值与求解输入保持各自角色 |
 | 相机视频运行输入 | `camera-video` 提供演示视频与保存清单；`runtime-inputs` 提供帧映射、相机几何数组与 MediaMTX 配置；完整包的输入限制见下文 |
-| 0.5.0.0.1 扩展与源码 | [v0.5.0.0.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.0.0.1) 提供 [wfrl_blender-0.5.0+0.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl_blender-0.5.0%2B0.1.zip)、inventory、SHA-256、标签源码归档及交付清单；大小、文件数及归档摘要见[交付身份](../publication/blender-0.5.0.0.1.json)。本版完成一次本地构建，回归、隔离安装与窗口检查未运行，范围见[发布验证记录](../publication/blender-0.5.0.0.1/verification.json)；真实输入、完整媒体、FPS 和科学精度分别验证。日常安装按其独立身份使用 |
+| 0.5.1 扩展与源码 | [v0.5.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.5.1) 提供 [wfrl_blender-0.5.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl_blender-0.5.1.zip)、inventory、SHA-256、标签源码归档及交付清单；大小、文件数及归档摘要见[交付身份](../publication/blender-0.5.1.json)。本版完成一次本地构建，回归、隔离安装与窗口检查未运行，范围见[发布验证记录](../publication/blender-0.5.1/verification.json)；真实输入、完整媒体、FPS 和科学精度分别验证。日常安装按其独立身份使用 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
 本机 X100 使用安装记录所列的 0.5.0.0.1 载荷，归档路径及摘要由[日常安装记录](../publication/daily-installation.json)标识；本地保留正式扩展 ZIP、inventory 和 SHA-256。安装记录保留文件身份、新进程后台注册、六项配置的核对结果与恢复备份位置。该安装载荷的功能回归、窗口／GPU、性能和科学精度检查未运行。
 
-公开 0.5.0.0.1 扩展包含 X100 机舱 XZ、同帧侧壁距离和零载荷参考。离线覆盖与安装搜索工具通过源码归档提供。当前本地证据保留在[outputs/x100-analysis](../outputs/x100-analysis/)，关键源码摘要、几何基准、当前GPU／RGB、窗口合同／生命周期、场景历史和覆盖报告的适用范围见[源码验证](blender/发布状态与验证范围.md#x100-工作区源码验证)。该目录按本地输出规则忽略，不能据本地存在推定已进入Git或资源Release；临时测试场景、探针、重复报告和可再生缓存不属于运行依赖。
+公开 0.5.1 扩展包含 X100 机舱 XZ、同帧侧壁距离和零载荷参考。离线覆盖与安装搜索工具通过源码归档提供。当前本地证据保留在[outputs/x100-analysis](../outputs/x100-analysis/)，关键源码摘要、几何基准、当前GPU／RGB、窗口合同／生命周期、场景历史和覆盖报告的适用范围见[源码验证](blender/发布状态与验证范围.md#x100-工作区源码验证)。该目录按本地输出规则忽略，不能据本地存在推定已进入Git或资源Release；临时测试场景、探针、重复报告和可再生缓存不属于运行依赖。
 
-0.5.0.0.1 扩展包含 X100 面积材料采样、安装搜索报告导入和叶片关联／连续估计。有限候选安装搜索通过配套源码运行。用法见[观测研究](blender/X100观测研究.md)，对应的安装搜索、预算对照、独立误差评价、后台及画布证据保留在[outputs/x100-observation-research](../outputs/x100-observation-research/)。该目录同样由 Git 忽略，本地保留不代表已上传到资源 Release。报告、日志、源码摘要与最终图像属于验证依据，临时场景、合成输入及隔离配置不作为分发或复验依赖。
+0.5.1 扩展包含 X100 面积材料采样、安装搜索报告导入和叶片关联／连续估计。有限候选安装搜索通过配套源码运行。用法见[观测研究](blender/X100观测研究.md)，对应的安装搜索、预算对照、独立误差评价、后台及画布证据保留在[outputs/x100-observation-research](../outputs/x100-observation-research/)。该目录同样由 Git 忽略，本地保留不代表已上传到资源 Release。报告、日志、源码摘要与最终图像属于验证依据，临时场景、合成输入及隔离配置不作为分发或复验依赖。
 
-公开完整源码归档为 [wind-farm-blender-source-0.5.0.0.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wind-farm-blender-source-0.5.0.0.1.zip)，对应 [`v0.5.0.0.1` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.5.0.0.1)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0.0.1/wfrl-delivery-0.5.0.0.1.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；扩展从固定源码构建的摘要与源码归档身份见[交付身份](../publication/blender-0.5.0.0.1.json)。归档保留 v0.5.0.0.1 标签内的文档快照；公开附件与安装验证的当前状态以 main 分支的说明及交付身份为准。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
+公开完整源码归档为 [wind-farm-blender-source-0.5.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wind-farm-blender-source-0.5.1.zip)，对应 [`v0.5.1` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.5.1)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.5.1/wfrl-delivery-0.5.1.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；扩展从固定源码构建的摘要与源码归档身份见[交付身份](../publication/blender-0.5.1.json)。归档保留 v0.5.1 标签内的文档快照；公开附件与安装验证的当前状态以 main 分支的说明及交付身份为准。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
+
+## 实验资料
+
+0.5.1 的[实验摘要](../publication/blender-0.5.1/experiment-summary.md)索引保存的遥测／偏航／高风速数据、最新物理专项数值表与复现入口。`wind-farm-experiments-0.5.1.zip` 保留所选原始目录和派生 CSV；`wind-farm-inflow-0.5.1.zip` 保留四个湍流盒及阵风输入。各包的 inventory 与 SHA-256 随 Release 提供，数据范围和缺失的完整临时时序见摘要。后端依赖使用同一 Release 的 `wfcrl-dependency-0.5.1.tar.gz`；配套源码提交和附件身份见交付清单。
 
 ## 恢复与使用
 
@@ -41,7 +45,7 @@ cd wind-farm-blender
 tar -xzf /path/to/resource-part.tar.gz
 ```
 
-解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。恢复 `wfcrl-dependency-01.tar.gz` 后，完整 Python 环境统一执行 `python -m pip install -r requirements.txt`，同时安装 WFCRL、根项目、训练、桌面 GUI 与相机/重建依赖。macOS 的 Python 3.11、OpenMPI、编译工具和应用程序准备方式见[本地配置](setup/setup_local.md#2-macos-完整-python-环境)。根项目的最小包安装仍可使用 `python -m pip install .`，源码开发使用 `python -m pip install -e .`；两者以及构建的 wheel 均提供内置机型 YAML，最小安装仅包含声明的核心依赖。
+解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。恢复本版 `wfcrl-dependency-0.5.1.tar.gz` 后，完整 Python 环境统一执行 `python -m pip install -r requirements.txt`，同时安装 WFCRL、根项目、训练、桌面 GUI 与相机/重建依赖。macOS 的 Python 3.11、OpenMPI、编译工具和应用程序准备方式见[本地配置](setup/setup_local.md#2-macos-完整-python-环境)。根项目的最小包安装仍可使用 `python -m pip install .`，源码开发使用 `python -m pip install -e .`；两者以及构建的 wheel 均提供内置机型 YAML，最小安装仅包含声明的核心依赖。
 
 macOS 通过 conda-forge 安装 OpenFAST 3.5.3（含 FAST.Farm）与 OpenMPI，并从恢复的 WFCRL 资源源码编译机组控制器和 supercontroller；简要命令见根目录 [requirements.txt](../requirements.txt)，完整步骤见[本地配置](setup/setup_local.md#3-fastfarm-动态后端与实时-bridge)。pip 只安装 Python 依赖，生成新来流另需可用的 TurbSim。求解脚本接受 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE`，否则在 `PATH` 中寻找可执行文件。Python 包安装和后端源码变更不更新公开扩展附件或本机已安装扩展；Interactive、Formal Training 与 SB3 的入口及统计定义见[算法配置](training/MAPPO_SETUP.md)。
 
@@ -57,7 +61,7 @@ macOS 通过 conda-forge 安装 OpenFAST 3.5.3（含 FAST.Farm）与 OpenMPI，�
 
 普通离线结果包不含原始 FAST.Farm VTP，Bridge 的原始叶尖几何回放仍需完整原始运行目录；缺失时明确拒绝，不能使用示意几何代替。材料点 F/G 实验的原始输入、冻结脚本及完整运行产物不在当前工作区和本资源分发中；当前报告不能支持其完整精确复现。CoTracker 的第三方源码和权重不随资源包分发，相关固定来源与许可见研究 provenance。研究精确重跑还需要匹配的外部依赖、求解器及实际输入；本资源分发不声明已经重跑。
 
-几何／纹理与材料点研究保持 `NOT_ACCEPTED / FAILED_GATE`；叶尖显示精度的源码全时间轴、本地 0.3.36 安装抽样和当前 0.5.0.0.1 未重复精度验收的范围分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)。雷达保持 `REVIEW_ONLY / PENDING_ACCEPTANCE`，动态研究保持 `DY1 NOT PASSED`。软件测试和保存场景不能替代物理精度、实物相机、长期运行或 Windows/Linux 验收。
+几何／纹理与材料点研究保持 `NOT_ACCEPTED / FAILED_GATE`；叶尖显示精度的源码全时间轴、本地 0.3.36 安装抽样和当前 0.5.1 未重复精度验收的范围分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)。雷达保持 `REVIEW_ONLY / PENDING_ACCEPTANCE`，动态研究保持 `DY1 NOT PASSED`。软件测试和保存场景不能替代物理精度、实物相机、长期运行或 Windows/Linux 验收。
 
 ## 不分发的本地内容
 
