@@ -431,6 +431,7 @@ ZIP 中 `assets/examples/mappo_reconstruction_split.blend` 提供左侧 MAPPO、
 - 检查机组布局、来流、控制配置和运行需求。
 - 显示请求值与实际生效配置，保留不支持或被覆盖的提示。
 - 使前端场景与后端确认的配置对应。
+- 工作区源码的场景可选择 FAST.Farm 物理选项（塔架柔性、动态失速及其参数集、塔影、BeamDyn 叶片弹性扭转）、`inflow.direction` 风向、`inflow.turbulence` TurbSim 湍流盒和 OC3 单桩 `substructure`，均默认关闭；见[物理选项](../development/FASTFarm物理选项.md)、[风况](../training/FASTFarm风况.md)、[湍流盒](../training/TurbSim湍流盒.md)与[海上单桩](../development/OC3海上单桩与波浪.md)。
 
 **边界：** 地形显示不自动进入物理求解；FAST.Farm 请求风向的支持和湍流文件覆盖风速等情况必须看实际生效信息。
 

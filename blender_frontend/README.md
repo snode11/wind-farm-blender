@@ -533,6 +533,8 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 工作区规范协议对 snapshot 和 curve 的 `rotor_speed`、`yaw`／`pitch`、`power` 分别要求 `rpm`、`deg`、`MW`，有效或无效记录的单位不匹配均直接拒绝，不原值换标签。尾流保留源年龄与单调接收时间，按协议的 5 秒阈值判定过期；无效、等待、过期、断连及任务切换撤销旧 DisXY 有效显示，携带不匹配 `run_id` 的迟到尾流不覆盖当前数据，无 run 标识的兼容消息不能据此区分旧运行。DisXY `shape` 的每一维须为正整数（接受整数值浮点数），小数、字符串与布尔值直接拒绝，不截断换算；各维乘积须等于 `values` 数量。新有效样本恢复显示时保留用户可见性设置，包括过期期间的 DisXY 显示开关选择及各 View Layer 的原有隐藏状态；切换其他图层开关不改写这些设置，场景侧栏也不能重新显示无效结果。首次创建 DisXY 网格时尾流材质加载失败不阻断显示：网格照常创建并随后续样本更新，错误写入运行状态的 `error`，连接与尾流有效性不变；同一异常类型与消息只打印一次 traceback。
 
+非 270° 风向的 FAST.Farm 算例在求解器内使用风向对齐坐标。后端快照在方向已应用时携带 `wind_coordinates`（XY 刚体变换）并在偏航读数的 provenance 中标出 `frame=wind_aligned_solver` 与 `world_yaw_offset_deg`。[backend_inflow.py](wfrl_blender/backend_inflow.py) 把方向和变换写入场景属性 `wfrl_wind_direction_deg`、`wfrl_wind_coordinates`，旋转来流箭头，并把偏航读数加上偏移换回世界坐标；[wind_coordinates.py](wfrl_blender/wind_coordinates.py) 的 `world_vertices()` 对 DisXY 尾流顶点做逆变换，只改 XY，不改高度和标量。变换缺失时按 270° 固定坐标显示，矩阵或平移非有限时拒绝。[scene_builder.py](wfrl_blender/scene_builder.py) 建场时按场景风向设置来流箭头与机舱初始朝向。
+
 同一 Blender 进程打开其他 `.blend` 时，已认领的后端会话保留客户端、会话身份及协议序号，连接标为断开且未确认；旧场景的姿态缓存和待确认命令清空。保存的离线回放可以独立恢复几何、读数和位置，不据此认定后端已停止。显式重连使用保留的会话恢复握手，确认前禁用后端运行和配置操作。这些恢复凭据只在当前 Blender 进程内保留，不写入 `.blend`，不保证退出 Blender 后恢复活动后端。
 
 工作区源码的 **连接新后端身份…** 仅在已断开且保留旧身份时可用。用户须在确认框勾选放弃旧连接；此操作只清除本地恢复身份，不停止旧后端或将其状态标为已停止。最近的旧会话、作业与最后状态保存在诊断中，仍标为未确认。普通 Connect / Reconnect 继续恢复原身份；`UNKNOWN_SESSION`／`RESUME_REQUIRED` 握手拒绝不会自动认领新会话。

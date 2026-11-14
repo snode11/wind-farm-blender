@@ -11,6 +11,8 @@
 | `lidar/` | 雷达结果包、数值诊断与来源检查；[计算入口](lidar/README.md) |
 | `reconstruction/`、`nrel_*.py` | 叶片重建与独立动态研究；[研究对象与状态](../research/README.md) |
 | `experiments/` | 明确对象的物理实验、数值检查与约束探针；MPI 和输入由各脚本声明 |
+| `experiments/` 物理选项检查 | `compare_fastfarm_physics.py`、`audit_fastfarm_physics.py`、`check_openfast_reference.py`、`check_tower_decay.py`、`compare_dynamic_stall.py`、`run_dynamic_stall_reference.py`、`derive_polar_consistent_ua.py`、`smoke_physics_telemetry.py` 对照塔架柔性、动态失速与塔影；[物理选项与精度检查](../docs/development/FASTFarm物理选项.md)。`benchmark_beamdyn.py` 测量叶片弹性扭转耗时，见[BeamDyn 叶片弹性扭转](../docs/development/BeamDyn叶片弹性扭转.md)；`compare_fastfarm_offshore.py` 对照 OC3 单桩，见[海上单桩与波浪](../docs/development/OC3海上单桩与波浪.md)；`compare_fastfarm_directions.py` 对照风向算例，见[FAST.Farm 风况](../docs/training/FASTFarm风况.md) |
+| `inflow/` | `generate_turbsim.py` 按风速、湍流强度和随机种子生成 TurbSim 湍流盒，`smoke_turbulence.py` 用真实求解器读取检查；[TurbSim 湍流盒](../docs/training/TurbSim湍流盒.md) |
 | `camera_video.py` | 已有相机视频包的检查、播放与服务入口；[视频包合同实现](../wfrl/camera_video/package.py) |
 | `ci/` | 发布身份摘要检查；[自动检查](../docs/development/自动检查.md) |
 | `figures/` | 研究图表生成，使用各脚本指定的数据源 |

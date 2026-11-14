@@ -16,6 +16,7 @@
 | 机舱相机 | `nrel-nacelle-camera/`（本地证据目录，使用入口见[机舱相机](../docs/blender/NREL机舱相机.md)）：相机取景、原始渲染、诊断、对照页面与隔离安装包 |
 | GW184 试片 | `gw184-single/review/index.html`（本地查看页，来源及使用见[项目说明](../projects/gw184-single/README.md)）：试片、参数、参考帧与几何检查；下载入口使用 `delivery/GW184-trials.zip` |
 | 前端验证 | [`frontend-reliability-20261011-a01/`](frontend-reliability-20261011-a01/)、`reconstruction-*`、`blender-validation/`、`release-*` 等：按包身份解释的软件检查、截图和日志 |
+| 求解器与世界模型验证 | `validation/`（本地证据目录，Git 忽略）：FAST.Farm 求解器遥测、MPI 链路、扩展遥测、wfcrl 依赖及世界模型仿真器验证的原始输出与报告；能力现状见 `validation/world-model-validation-79d6iyba/验证结论.md` |
 | 当前公开扩展 | [安装与下载](../docs/blender/INSTALL.md)、[发布身份与验证范围](../docs/blender/发布状态与验证范围.md)；使用对应版本的专用 ZIP、inventory 和 SHA-256 |
 | 日常安装 | [安装核对](../publication/daily-installation.json)；0.5.0.0.1 安装载荷的文件身份、启用和后台注册按安装记录核对，正式归档由 `source_archive` 标识；恢复备份按安装记录保留，临时配置及检查脚本不作为运行依赖 |
 

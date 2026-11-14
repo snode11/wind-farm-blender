@@ -61,7 +61,7 @@
 
 `WindRequestError` 在求解前拒绝无效方向或旋转域覆盖不足、TI、剪切、阵风、种子、输入模式／坐标及无效／不一致输入；稳态仅接受有限正标量风速，BTS 不接受标量覆盖。270°及其模360°等价值只标为 `MATCHES_FIXED_COORDINATES`，布局、风向量均不旋转。BTS 时长不足写入警告和 `exceeds_bts_duration`，当前仍允许交给 InflowWind 处理，不能写成已拒绝或已保证周期回绕安全。
 
-训练的非场景采样器拒绝 BTS 与标量调度并用；无场景的 `--wind-sched preset:turb` 报错，BTS 通过场景 `inflow.turbulence` 配置。探针的风速／BTS 参数互斥。场景的 `upstream_request.scene` 保存显示风向，`requested` 保存实际交给求解器的请求；YAML方向通过算例生效；上层 `display_only` 标记仍需同步，以底层 `application` 为准。训练 `--wind-direction` 经配置、调度和采样器完整传到底层，270°保持固定坐标，其他有限方向按平地布局旋转，超出BTS域覆盖时拒绝。具体入口和条件见[FAST.Farm 风况](../../training/FASTFarm风况.md)。
+训练的非场景采样器拒绝 BTS 与标量调度并用；无场景的 `--wind-sched preset:turb` 报错，BTS 通过场景 `inflow.turbulence` 配置。探针的风速／BTS 参数互斥。场景的 `upstream_request.scene` 保存场景风向并标记 `wind_direction_role=case_generation`（方向在生成算例时以布局旋转应用），`requested` 保存实际交给求解器的请求；生效方向以底层 `application` 为准。训练 `--wind-direction` 经配置、调度和采样器完整传到底层，270°保持固定坐标，其他有限方向按平地布局旋转，超出BTS域覆盖时拒绝。具体入口和条件见[FAST.Farm 风况](../../training/FASTFarm风况.md)。
 
 背景与阵风叠加统计只依赖明确标识的文件，不按文件名或 TI 反推来源。BTS 统计为完整文件时域中逐横向点的轮毂高度纵向风速统计；MPI 轮毂统计含尾流与瞬态，下游机组统计也不能单独分离尾流。`statistics.farm_inflow` 当前为 `unavailable`。
 

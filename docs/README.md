@@ -23,7 +23,7 @@
 | 雷达合同与计算 | [数据合同](../wfrl/lidar/REPLAY_FORMAT.md)、[雷达算法](../wfrl/lidar/README.md)、[TLS 研究](lidar/双束TLS候选实施与验证总报告.md) |
 | 训练与环境 | [算法与训练入口](training/MAPPO_SETUP.md)、[检查点保存](training/MAPPO_SETUP.md#检查点写入与产物选择)、[正式 CLI 中断与恢复](training/MAPPO_SETUP.md#正式-cli-的中断与恢复)、[参数共享 IPPO](training/IPPO_TRAINING_EXPLAINED.md)、[单智能体 PPO](training/PPO_算法执行细节.md)、[环境设置](setup/setup_local.md) |
 | Bridge 与正式进程 | [消息队列、fatal、等待年龄与停止清理](development/BlenderBridge协议.md)；工作区合同，Windows 实机尚未验证 |
-| Driver 与奖励限制 | [缺测、单位、交换预算与算例保留](training/MAPPO_SETUP.md#fastfarmdriver-测量与交换预算)、[超速监测范围](training/MAPPO_SETUP.md#安全监测的范围)、[reward 同步要求与实现偏差](training/MAPPO_SETUP.md#奖励归一化要求与实际状态)、[FAST.Farm 风况请求、输入与统计](training/FASTFarm风况.md) |
+| Driver 与奖励限制 | [缺测、单位、交换预算与算例保留](training/MAPPO_SETUP.md#fastfarmdriver-测量与交换预算)、[超速监测范围](training/MAPPO_SETUP.md#安全监测的范围)、[reward 同步要求与实现偏差](training/MAPPO_SETUP.md#奖励归一化要求与实际状态)、[FAST.Farm 风况请求、输入与统计](training/FASTFarm风况.md)、[TurbSim 湍流盒生成与选择](training/TurbSim湍流盒.md) |
 | 网页实验室 | [预览、异步计算与结果接口分工](proposal/platform/风场网页实验室_第一版方案与分工汇总.md)；待实现与目标 Ubuntu 环境验证 |
 | 研究要求 | [研究方案分类](proposal/README.md) |
 

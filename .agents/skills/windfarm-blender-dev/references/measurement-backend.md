@@ -101,7 +101,7 @@
 
 ## FAST.Farm 风况
 
-仓库 `wfrl/fastfarm_driver.py` 与 `wfcrl-env/wfcrl/interface.py` 保存请求、实际输入和采样统计三层 `wind_conditions`。270°为固定坐标匹配，不作旋转；BTS拒绝标量风速，其他未支持请求到达接口时抛 `WindRequestError`。BTS时长不足只记录警告，场内独立入流统计为 unavailable。`upstream_request.scene` 保留显示方向（display_only）及BTS覆盖的场景风速，与实际求解 `requested` 分开；训练 `--wind-direction` 经配置、调度、采样器及场景入口完整传到底层，成功与拒绝都保存上层上下文。具体见[风况合同](../../../../docs/training/FASTFarm风况.md)；不能把文件统计或受尾流影响的轮毂统计写成自由入流验证。
+仓库 `wfrl/fastfarm_driver.py` 与 `wfcrl-env/wfcrl/interface.py` 保存请求、实际输入和采样统计三层 `wind_conditions`。270°为固定坐标匹配，不作旋转；BTS拒绝标量风速，其他未支持请求到达接口时抛 `WindRequestError`。BTS时长不足只记录警告，场内独立入流统计为 unavailable。`upstream_request.scene` 保留场景方向（`wind_direction_role=case_generation`，生成算例时按布局旋转应用）及BTS覆盖的场景风速，与实际求解 `requested` 分开；训练 `--wind-direction` 经配置、调度、采样器及场景入口完整传到底层，成功与拒绝都保存上层上下文。具体见[风况合同](../../../../docs/training/FASTFarm风况.md)；不能把文件统计或受尾流影响的轮毂统计写成自由入流验证。
 
 Replay、Interactive 与 Formal Training 的环境、动作及验收分别按[训练合同](../../../../docs/training/MAPPO_SETUP.md)选择；Bridge 模拟或 socketpair 检查不证明真实训练、停止监管或控制收益。
 
